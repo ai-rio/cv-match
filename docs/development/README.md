@@ -1,286 +1,169 @@
 # Development Documentation
 
-Welcome to the CV-Match development documentation. This section contains comprehensive guides for implementing and extending the Resume-Matcher functionality integrated into our platform.
+**Quick Start**: See [ROADMAP.md](./ROADMAP.md) for prioritized implementation plan.
 
-## 📚 Available Documentation
+## 📍 Current Status
 
-### Core Integration Guides
+**Phase**: Migration from Resume-Matcher to cv-match
+**Timeline**: 4-week sprint to production launch
+**Next Action**: P0 backend services migration (Week 1)
 
-1. **[Resume-Matcher Integration Strategy](./resume-matcher-integration.md)**
-   - Complete analysis of Resume-Matcher codebase
-   - 4-week launch strategy
-   - Risk assessment and competitive advantages
-   - Time savings breakdown (90% reduction)
+## 🗂️ Documentation Index
 
-2. **[Implementation Guide](./implementation-guide.md)**
-   - Step-by-step integration instructions
-   - Database migration scripts
-   - Frontend component migration
-   - Testing and troubleshooting
+### 🎯 Planning & Strategy
+- **[ROADMAP.md](./ROADMAP.md)** - Prioritized implementation plan (P0/P1/P2 tiers)
+  - 4-week timeline with weekly milestones
+  - Gap analysis: Resume-Matcher vs cv-match
+  - Success metrics and risk mitigation
 
-3. **[Architecture Overview](./architecture-overview.md)**
-   - System architecture diagrams
-   - Data flow documentation
-   - Technology stack details
-   - Security and scalability considerations
+- **[Business Model Analysis](./business-model-analysis.md)** - Monetization strategy
+  - Credit-based vs subscription comparison
+  - Brazilian market pricing (R$ 49.90/month, R$ 297 lifetime)
+  - Financial projections (R$ 20M+ valuation by Year 3)
 
-4. **[Next-Intl Integration](./next-intl-integration.md)**
-   - Brazilian market internationalization setup
-   - Complete translation infrastructure
-   - Cultural adaptations for Brazilian Portuguese
-   - Payment integration with BRL currency
+### 🔧 Integration Guides
+- **[Resume-Matcher Integration Strategy](./resume-matcher-integration.md)**
+  - Complete codebase analysis
+  - Time savings breakdown (90% reduction)
+  - Component inventory
 
-5. **[Stripe Integration Analysis](./stripe-integration-analysis.md)**
-   - Production-ready Stripe payment infrastructure for Brazil
-   - BRL currency configuration and Brazilian pricing strategy
-   - Complete webhook processing with security and idempotency
-   - Enterprise-grade payment flows ready for immediate deployment
+- **[Implementation Guide](./implementation-guide.md)**
+  - Step-by-step migration instructions
+  - Database migration scripts
+  - Testing procedures
 
-6. **[Business Model Analysis](./business-model-analysis.md)**
-   - Credit-based vs subscription model comparison
-   - Hybrid "Flex & Flow" monetization strategy (recommended)
-   - Brazilian market pricing psychology and tactics
-   - Financial projections and valuation models (R$ 20M+ by Year 3)
-   - Go-to-market strategy and KPI tracking
+- **[Architecture Overview](./architecture-overview.md)**
+  - System architecture diagrams
+  - Technology stack details
+  - Security and scalability
 
-## 🚀 Quick Start
+### 🌎 Brazilian Market
+- **[Next-Intl Integration](./next-intl-integration.md)**
+  - PT-BR internationalization setup
+  - Translation infrastructure
+  - Cultural adaptations
 
-### Prerequisites
-- Access to Resume-Matcher codebase at `/home/carlos/projects/Resume-Matcher`
-- CV-Match project fully set up and running
-- Supabase CLI configured
-- Development environment ready
+- **[Stripe Integration Analysis](./stripe-integration-analysis.md)**
+  - BRL payment configuration
+  - Webhook security and idempotency
+  - Brazilian payment methods (PIX, Boleto)
 
-### Integration Timeline
+## 🚀 Quick Commands
+
+### Development
+```bash
+# Start full stack
+make dev
+
+# Backend only
+make dev-backend
+
+# Frontend only
+make dev-frontend
+
+# Install dependencies
+make install-frontend  # Uses Bun
+make install-backend   # Uses uv
 ```
-Week 1: Backend Services Integration (80% effort reduction)
-Week 2: Frontend Integration (60% effort reduction)
-Week 3: SaaS Features Implementation
-Week 4: Testing & Deployment
+
+### Database
+```bash
+# Create migration
+make db-migration-new name=description
+
+# Apply migrations
+supabase db push
+
+# Check status
+make db-status
 ```
 
-### Key Benefits
-- **90% Development Time Reduction**: Launch in weeks instead of months
-- **Production-Ready Code**: Battle-tested with real users
-- **Complete SaaS Infrastructure**: Billing, usage tracking, multi-tenancy
-- **$200K+ R&D Value**: Years of development already completed
-- **Brazilian Market Ready**: Complete PT-BR internationalization for 220M+ Portuguese speakers
-- **Payment Infrastructure**: Enterprise-grade Stripe system with BRL currency ready for Brazil
+### Testing
+```bash
+# Backend tests
+cd backend && python -m pytest
 
-## 🏗️ Core Components Available
+# Frontend dev server
+cd frontend && bun dev
+```
 
-### Backend Services (From Resume-Matcher)
-- ✅ **ScoreImprovementService**: Advanced cosine similarity matching
-- ✅ **ResumeService**: PDF/DOCX parsing and structuring
-- ✅ **JobService**: Job description processing
-- ✅ **AgentManager**: Multi-provider LLM abstraction
-- ✅ **UsageLimitService**: Credit-based usage tracking
+## 📊 Progress Tracking
 
-### Frontend Components (From Resume-Matcher)
-- ✅ **FileUpload**: Advanced drag-drop upload component
-- ✅ **ResumeAnalysis**: Interactive score display
-- ✅ **Dashboard Components**: Complete UI for job management
-- ✅ **Usage Components**: Credit tracking interface
-- ✅ **Payment Components**: Stripe billing integration
+### Week 1: Backend Foundation (P0)
+- [ ] Copy resume processing services
+- [ ] Copy agent system
+- [ ] Apply database migrations
+- [ ] Create API endpoints
 
-### SaaS Infrastructure (From Resume-Matcher)
-- ✅ **Authentication**: Complete user management
-- ✅ **Subscription Management**: Multi-tier pricing
-- ✅ **Payment Processing**: Stripe webhooks and billing
-- ✅ **Multi-tenancy**: User data isolation
-- ✅ **Background Processing**: Async with streaming
+### Week 2: Frontend & i18n (P0)
+- [ ] Copy optimization pages
+- [ ] Copy UI components
+- [ ] Install next-intl
+- [ ] Copy PT-BR translations
 
-### Internationalization (From Resume-Matcher)
-- ✅ **Next-Intl Setup**: Complete i18n infrastructure v4.3.6
-- ✅ **Brazilian Portuguese**: Full PT-BR localization with cultural adaptations
-- ✅ **Multi-locale Support**: English + Brazilian Portuguese routing
-- ✅ **Currency Formatting**: BRL currency with proper locale settings
-- ✅ **Cultural Adaptations**: Brazilian market-specific terminology and payment methods
+### Week 3: Payments (P1)
+- [ ] Copy Stripe services
+- [ ] Copy payment pages
+- [ ] Set up webhooks
+- [ ] Integrate usage tracking
 
-### Payment Infrastructure (From Resume-Matcher)
-- ✅ **StripeService**: Complete payment processing with BRL support
-- ✅ **PaymentVerificationService**: Advanced verification with AI trigger
-- ✅ **Webhook Processing**: Robust webhook handling with idempotency
-- ✅ **Brazilian Currency**: Full BRL currency configuration
-- ✅ **Enterprise Security**: Signature verification, audit trails, fraud protection
-- ✅ **Proven Pricing**: Market-tested Brazilian pricing tiers (R$ 297 lifetime, R$ 49.90/month)
+### Week 4: Polish & Launch (P1)
+- [ ] Bug fixes
+- [ ] Performance optimization
+- [ ] Production deployment
+- [ ] Beta user launch
 
-## 📋 Development Checklist
+## 🎓 Learning Resources
 
-### Immediate Actions (Week 1)
-- [ ] Copy core services to `/backend/app/services/`
-- [ ] Copy agent system to `/backend/app/agent/`
-- [ ] Create database migrations
-- [ ] Test resume upload functionality
-- [ ] Set up next-intl infrastructure for Brazilian market
-- [ ] Copy Stripe payment services for BRL processing
-
-### High Priority (Week 2)
-- [ ] Integrate ScoreImprovementService
-- [ ] Copy frontend components
-- [ ] Set up usage tracking
-- [ ] Configure Brazilian Portuguese translations
-- [ ] Test complete user workflows in both languages
-- [ ] Integrate Stripe payment flows with BRL currency
-
-### Launch Ready (Weeks 3-4)
-- [ ] Configure payment processing (BRL currency)
-- [ ] Test subscription tiers with Brazilian pricing
-- [ ] Deploy to staging with i18n testing
-- [ ] Final testing and bug fixes
-- [ ] Validate Brazilian market-specific features
-- [ ] Test webhook processing and payment verification
-
-## 🛠️ Development Environment
-
-### Required Tools
-- **Python 3.12+**: Backend development
-- **Node.js 18+**: Frontend development
-- **Supabase CLI**: Database management
-- **Git**: Version control
-- **Docker**: Containerization
+### Source Code
+- **Resume-Matcher**: `/home/carlos/projects/Resume-Matcher/apps/`
+  - Backend: `backend/app/services/` (13 services, ~3,264 LOC)
+  - Frontend: `frontend/app/` (30+ pages)
+  - i18n: `frontend/locales/` (PT-BR + EN)
 
 ### Environment Setup
+- **Backend**: Python 3.12+, FastAPI, Supabase
+- **Frontend**: Node 18+, Next.js 15, Bun, next-intl v4.3.6
+- **Database**: Local Supabase with RLS
+
+### Key Dependencies
 ```bash
 # Backend
-cd /home/carlos/projects/cv-match/backend
-pip install -r requirements.txt
+openai>=1.0.0
+anthropic>=0.21.0
+stripe>=5.0.0
+supabase>=2.0.0
 
 # Frontend
-cd /home/carlos/projects/cv-match/frontend
-bun install
-
-# Database
-supabase db push
+next-intl@4.3.6
+@stripe/stripe-js
+@supabase/supabase-js
 ```
 
-## 🧪 Testing
+## 🔗 External Resources
 
-### Backend Testing
-```bash
-cd /home/carlos/projects/cv-match/backend
-python test_resume_integration.py
-```
+- **Supabase Docs**: https://supabase.com/docs
+- **Next-Intl Docs**: https://next-intl-docs.vercel.app
+- **Stripe Docs**: https://stripe.com/docs
+- **OpenRouter Docs**: https://openrouter.ai/docs
 
-### Frontend Testing
-```bash
-cd /home/carlos/projects/cv-match/frontend
-bunx dev
-# Navigate to http://localhost:3000/test-resume
-```
+## 📞 Support
 
-## 🔧 Configuration
-
-### Environment Variables
-```bash
-# Backend (.env)
-RESUME_MATCHER_LLM_PROVIDER=openrouter
-RESUME_MATCHER_LLM_MODEL=anthropic/claude-3.5-sonnet
-RESUME_MATCHER_EMBEDDING_PROVIDER=openai
-RESUME_MATCHER_EMBEDDING_MODEL=text-embedding-3-small
-
-# Stripe Configuration (Brazilian Market)
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PUBLISHABLE_KEY=pk_test_...
-
-# Frontend (.env.local)
-NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_DEFAULT_LOCALE=pt-br
-NEXT_PUBLIC_SUPPORTED_LOCALES=en,pt-br
-NEXT_PUBLIC_MARKET=brasil
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
-NEXT_PUBLIC_DEFAULT_CURRENCY=brl
-NEXT_PUBLIC_DEFAULT_COUNTRY=BR
-```
-
-### Database Schema
-See `implementation-guide.md` for complete migration scripts.
-
-## 🚨 Common Issues
-
-### Import Errors
-- Ensure all copied files have correct import paths
-- Update Python path if needed
-- Check for missing dependencies
-
-### Database Errors
-- Verify migrations were applied correctly
-- Check Supabase connection
-- Validate RLS policies
-
-### Authentication Issues
-- Ensure Supabase auth is configured
-- Check JWT token handling
-- Verify user permissions
-
-### Internationalization Issues
-- Verify next-intl configuration in next.config.ts
-- Check locale routing in middleware.ts
-- Validate translation files are correctly loaded
-- Test Brazilian Portuguese (pt-br) locale functionality
-- Check BRL currency formatting is working
-
-### Payment Processing Issues
-- Verify Stripe API keys are correctly configured
-- Check webhook endpoint is accessible and secure
-- Test BRL currency formatting in payment flows
-- Validate webhook signature verification is working
-- Check payment status updates are triggering correctly
-- Test Portuguese error messages and success notifications
-
-## 📞 Support Resources
-
-### Code References
-- **Resume-Matcher Source**: `/home/carlos/projects/Resume-Matcher`
-- **Documentation**: `/home/carlos/projects/Resume-Matcher/docs/digest/`
-- **Examples**: Use existing patterns for integration
+### Common Issues
+- **Import Errors**: Check Python path and dependencies
+- **Database Errors**: Verify Supabase connection and migrations
+- **Auth Issues**: Check Supabase auth configuration
+- **i18n Issues**: Verify next-intl middleware setup
+- **Payment Issues**: Check Stripe webhook configuration
 
 ### Debug Mode
 ```bash
-# Enable debug logging
 LOG_LEVEL=DEBUG
 RESUME_MATCHER_DEBUG=true
 ```
 
-## 🎯 Success Metrics
-
-### Technical Metrics
-- ✅ Resume upload success rate > 95%
-- ✅ Matching algorithm response time < 30 seconds
-- ✅ System uptime > 99.9%
-- ✅ Zero data loss incidents
-
-### Business Metrics
-- ✅ Free to paid conversion > 5%
-- ✅ User engagement > 70% monthly active
-- ✅ Customer satisfaction > 4.5/5
-- ✅ Revenue growth > 20% monthly
-- ✅ Brazilian market adoption > 15% of total users (target)
-- ✅ Portuguese language engagement > 90% in Brazil (target)
-- ✅ Payment success rate > 95% (Brazilian BRL transactions)
-- ✅ Average transaction value > R$ 49.90 (Pro tier)
-
-## 🔄 Continuous Improvement
-
-### Regular Updates
-- Weekly code reviews
-- Monthly security audits
-- Quarterly performance optimization
-- Annual architecture review
-
-### Feature Roadmap
-- Advanced AI matching algorithms
-- Industry-specific templates
-- Multi-language support (✅ Brazilian Portuguese complete)
-- Enterprise features
-- Brazilian market payment integrations (PIX, boleto)
-- Regional content optimization
-- Latin American expansion
-- Advanced payment analytics and reporting
-- Subscription management automation
-- Multi-currency support for global expansion
-
 ---
 
-**Note**: This documentation is maintained by the CV-Match development team. For questions or contributions, please create an issue or submit a pull request.
+**Last Updated**: 2025-10-07
+**Status**: Active Development
+**Next Review**: After Week 1 completion

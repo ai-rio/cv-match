@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@config "../tailwind.config.js";
 
 @layer base {
   :root {
@@ -13,20 +12,18 @@
   }
 }
 
-@layer components {
-  .btn {
-    @apply px-4 py-2 rounded-md font-medium transition-colors;
-  }
+@utility btn {
+  @apply px-4 py-2 rounded-md font-medium transition-colors;
+}
 
-  .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700;
-  }
+@utility btn-primary {
+  @apply bg-primary-600 text-white hover:bg-primary-700;
+}
 
-  .btn-secondary {
-    @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
-  }
+@utility btn-secondary {
+  @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+}
 
-  .input {
-    @apply px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
-  }
+@utility input {
+  @apply px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
 }
