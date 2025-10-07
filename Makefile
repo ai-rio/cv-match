@@ -56,6 +56,74 @@ install-backend: ## Install backend dependencies locally
 	@echo "${GREEN}Installing backend dependencies...${NC}"
 	cd backend && pip install -r requirements.txt
 
+install-backend-dev: ## Install backend dev dependencies locally
+	@echo "${GREEN}Installing backend dev dependencies...${NC}"
+	cd backend && pip install -e ".[dev]"
+
+# Frontend helpers
+install-frontend: ## Install frontend dependencies locally
+	@echo "${GREEN}Installing frontend dependencies...${NC}"
+	cd frontend && bun install
+
+install-frontend-dev: ## Install frontend dev dependencies locally
+	@echo "${GREEN}Installing frontend dev dependencies...${NC}"
+	cd frontend && bun install
+
+# Code quality
+lint-frontend: ## Lint frontend code
+	@echo "${GREEN}Linting frontend code...${NC}"
+	cd frontend && bun run lint
+
+lint-frontend-fix: ## Lint and fix frontend code
+	@echo "${GREEN}Linting and fixing frontend code...${NC}"
+	cd frontend && bun run lint:fix
+
+lint-backend: ## Lint backend code
+	@echo "${GREEN}Linting backend code...${NC}"
+	cd backend && uv run --no-project ruff check .
+
+lint-backend-fix: ## Lint and fix backend code
+	@echo "${GREEN}Linting and fixing backend code...${NC}"
+	cd backend && uv run --no-project ruff check --fix .
+
+format-frontend: ## Format frontend code
+	@echo "${GREEN}Formatting frontend code...${NC}"
+	cd frontend && bun run format
+
+format-backend: ## Format backend code
+	@echo "${GREEN}Formatting backend code...${NC}"
+	cd backend && uv run --no-project ruff format .
+
+type-check-frontend: ## Type check frontend code
+	@echo "${GREEN}Type checking frontend code...${NC}"
+	cd frontend && bun run type-check
+
+type-check-backend: ## Type check backend code
+	@echo "${GREEN}Type checking backend code...${NC}"
+	cd backend && uv run --no-project pyright
+
+test-frontend: ## Run frontend tests
+	@echo "${GREEN}Running frontend tests...${NC}"
+	cd frontend && bun run test:coverage
+
+test-backend: ## Run backend tests
+	@echo "${GREEN}Running backend tests...${NC}"
+	cd backend && python -m pytest tests/ -v --cov=app --cov-report=term-missing
+
+test-backend-watch: ## Run backend tests in watch mode
+	@echo "${GREEN}Running backend tests in watch mode...${NC}"
+	cd backend && python -m pytest tests/ -v --cov=app --cov-report=term-missing -f
+
+# Pre-commit setup
+setup-precommit: ## Set up pre-commit hooks
+	@echo "${GREEN}Setting up pre-commit hooks...${NC}"
+	pip install pre-commit
+	pre-commit install
+
+run-precommit: ## Run pre-commit hooks on all files
+	@echo "${GREEN}Running pre-commit hooks...${NC}"
+	pre-commit run --all-files
+
 # Supabase database migrations (all for remote database)
 db-migration-new: ## Create a new migration file (Usage: make db-migration-new name=create_users_table)
 	@echo "${GREEN}Creating new migration file: $(name)${NC}"

@@ -1,7 +1,7 @@
-from supabase import create_client, Client
-from fastapi import UploadFile
-from typing import List, Optional
 import uuid
+
+from fastapi import UploadFile
+from supabase import Client, create_client
 
 from app.core.config import settings
 
@@ -29,7 +29,7 @@ class SupabaseStorageService:
         except Exception:
             self.supabase.storage.create_bucket(self.bucket_name)
 
-    async def upload_file(self, file: UploadFile, path: Optional[str] = None) -> str:
+    async def upload_file(self, file: UploadFile, path: str | None = None) -> str:
         """
         Upload a file to Supabase Storage.
 
@@ -50,7 +50,9 @@ class SupabaseStorageService:
         file_content = await file.read()
 
         # Upload to Supabase Storage
-        self.supabase.storage.from_(self.bucket_name).upload(path=full_path, file=file_content, file_options={"content-type": file.content_type})
+        self.supabase.storage.from_(self.bucket_name).upload(
+            path=full_path, file=file_content, file_options={"content-type": file.content_type}
+        )
 
         # Return the public URL
         public_url = self.supabase.storage.from_(self.bucket_name).get_public_url(full_path)
@@ -69,7 +71,7 @@ class SupabaseStorageService:
         except Exception:
             return False
 
-    def list_files(self, path: Optional[str] = None) -> List[dict]:
+    def list_files(self, path: str | None = None) -> list[dict]:
         """List files in a directory."""
         response = self.supabase.storage.from_(self.bucket_name).list(path or "")
         return response

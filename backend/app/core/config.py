@@ -1,5 +1,3 @@
-from typing import List, Union
-
 from pydantic_settings import BaseSettings
 
 
@@ -10,7 +8,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
 
     # CORS
-    CORS_ORIGINS: Union[List[str], str] = ["http://localhost:3000"]
+    CORS_ORIGINS: list[str] | str = ["http://localhost:3000"]
 
     # Supabase
     SUPABASE_URL: str

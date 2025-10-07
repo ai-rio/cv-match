@@ -1,5 +1,4 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
 
 
 class UserProfile(BaseModel):
@@ -7,8 +6,8 @@ class UserProfile(BaseModel):
 
     id: str
     email: EmailStr
-    full_name: Optional[str] = None
-    avatar_url: Optional[str] = None
+    full_name: str | None = None
+    avatar_url: str | None = None
 
 
 class TokenResponse(BaseModel):

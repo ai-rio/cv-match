@@ -1,0 +1,72 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-json
+      - id: check-merge-conflict
+      - id: debug-statements
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.2.5
+    hooks:
+      - id: prettier
+        files: \.(js|jsx|ts|tsx|json|md|yml|yaml)$
+        types_or: [javascript, jsx, ts, tsx, json, markdown, yaml]
+
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.27.0
+    hooks:
+      - id: eslint
+        files: \.(js|jsx|ts|tsx)$
+        types: [file]
+        additional_dependencies:
+          - eslint@9.27.0
+          - "@typescript-eslint/eslint-plugin"
+          - "@typescript-eslint/parser"
+          - eslint-config-next
+          - eslint-plugin-prettier
+          - eslint-plugin-simple-import-sort
+
+  - repo: local
+    hooks:
+      - id: type-check-frontend
+        name: TypeScript type checking (frontend)
+        entry: bun run type-check
+        language: system
+        files: \.(ts|tsx)$
+        pass_filenames: false
+        always_run: false
+
+      - id: type-check-backend
+        name: Python type checking (backend)
+        entry: pyright
+        language: system
+        files: ^backend/app/.*\.py$
+        pass_filenames: false
+
+      - id: test-frontend
+        name: Run frontend tests
+        entry: bun run test:coverage
+        language: system
+        files: \.(js|jsx|ts|tsx)$
+        pass_filenames: false
+        always_run: false
+
+      - id: test-backend
+        name: Run backend tests
+        entry: cd backend && python -m pytest tests/ -v --cov=app --cov-report=term-missing
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
+        always_run: false

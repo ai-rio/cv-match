@@ -1,12 +1,13 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
-from typing import List, Optional, Literal
 
 
 class LLMUsage(BaseModel):
     """Usage information for an LLM API call."""
 
     prompt_tokens: int
-    completion_tokens: Optional[int] = None
+    completion_tokens: int | None = None
     total_tokens: int
 
 
@@ -39,6 +40,6 @@ class EmbeddingRequest(BaseModel):
 class EmbeddingResponse(BaseModel):
     """Response from embedding creation."""
 
-    embedding: List[float]
+    embedding: list[float]
     model: str
     usage: LLMUsage

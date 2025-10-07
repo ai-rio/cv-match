@@ -29,7 +29,14 @@ app.add_middleware(
     allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", *settings.CORS_ORIGINS],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With", "X-CSRF-Token"],
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "Accept",
+        "Origin",
+        "X-Requested-With",
+        "X-CSRF-Token",
+    ],
     expose_headers=["Content-Type", "Authorization"],
     max_age=600,  # 10 minutes cache for preflight requests
 )
@@ -47,4 +54,6 @@ async def root():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=settings.ENVIRONMENT == "development")
+    uvicorn.run(
+        "app.main:app", host="0.0.0.0", port=8000, reload=settings.ENVIRONMENT == "development"
+    )

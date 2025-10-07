@@ -1,6 +1,6 @@
-from typing import List, Dict, Any, Optional, Union
 import uuid
 from functools import lru_cache
+from typing import Any
 
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
@@ -12,7 +12,12 @@ from app.core.config import settings
 class QdrantService:
     """Service for interacting with Qdrant vector database."""
 
-    def __init__(self, url: str = settings.QDRANT_URL, api_key: str = settings.QDRANT_API_KEY, collection_name: str = settings.QDRANT_COLLECTION_NAME):
+    def __init__(
+        self,
+        url: str = settings.QDRANT_URL,
+        api_key: str = settings.QDRANT_API_KEY,
+        collection_name: str = settings.QDRANT_COLLECTION_NAME,
+    ):
         """
         Initialize the Qdrant service.
 
@@ -40,9 +45,17 @@ class QdrantService:
         collection_names = [collection.name for collection in collections]
 
         if self.collection_name not in collection_names:
-            self.client.create_collection(collection_name=self.collection_name, vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE))
+            self.client.create_collection(
+                collection_name=self.collection_name,
+                vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
+            )
 
-    async def add_documents(self, documents: List[Dict[str, Any]], embeddings: List[List[float]], metadata: Optional[List[Dict[str, Any]]] = None) -> List[str]:
+    async def add_documents(
+        self,
+        documents: list[dict[str, Any]],
+        embeddings: list[list[float]],
+        metadata: list[dict[str, Any]] | None = None,
+    ) -> list[str]:
         """
         Add documents and their embeddings to the vector database.
 
@@ -66,13 +79,23 @@ class QdrantService:
         self.ensure_collection_exists(len(embeddings[0]))
 
         # Add points to collection
-        points = [models.PointStruct(id=ids[i], vector=embeddings[i], payload={"document": documents[i], **metadata[i]}) for i in range(len(documents))]
+        points = [
+            models.PointStruct(
+                id=ids[i], vector=embeddings[i], payload={"document": documents[i], **metadata[i]}
+            )
+            for i in range(len(documents))
+        ]
 
         self.client.upsert(collection_name=self.collection_name, points=points)
 
         return ids
 
-    async def search(self, query_embedding: List[float], limit: int = 10, filter_params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    async def search(
+        self,
+        query_embedding: list[float],
+        limit: int = 10,
+        filter_params: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
         """
         Search for documents similar to the query embedding.
 
@@ -91,11 +114,19 @@ class QdrantService:
         filter_condition = None
         if filter_params:
             filter_condition = models.Filter(
-                must=[models.FieldCondition(key=key, match=models.MatchValue(value=value)) for key, value in filter_params.items()]
+                must=[
+                    models.FieldCondition(key=key, match=models.MatchValue(value=value))
+                    for key, value in filter_params.items()
+                ]
             )
 
         # Perform search
-        search_result = self.client.search(collection_name=self.collection_name, query_vector=query_embedding, limit=limit, query_filter=filter_condition)
+        search_result = self.client.search(
+            collection_name=self.collection_name,
+            query_vector=query_embedding,
+            limit=limit,
+            query_filter=filter_condition,
+        )
 
         # Format results
         results = []
@@ -103,11 +134,18 @@ class QdrantService:
             payload = scored_point.payload
             document = payload.pop("document") if "document" in payload else {}
 
-            results.append({"id": scored_point.id, "score": scored_point.score, "document": document, "metadata": payload})
+            results.append(
+                {
+                    "id": scored_point.id,
+                    "score": scored_point.score,
+                    "document": document,
+                    "metadata": payload,
+                }
+            )
 
         return results
 
-    async def delete(self, ids: Union[str, List[str]]) -> bool:
+    async def delete(self, ids: str | list[str]) -> bool:
         """
         Delete documents from the vector database.
 
@@ -121,13 +159,16 @@ class QdrantService:
             ids = [ids]
 
         try:
-            self.client.delete(collection_name=self.collection_name, points_selector=models.PointIdsList(points=ids))
+            self.client.delete(
+                collection_name=self.collection_name,
+                points_selector=models.PointIdsList(points=ids),
+            )
             return True
         except Exception:
             return False
 
 
-@lru_cache()
+@lru_cache
 def get_vector_db_service() -> QdrantService:
     """Dependency to get a Vector DB service."""
     return QdrantService()

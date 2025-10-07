@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-import openai
-import anthropic
-from pydantic import BaseModel
 from functools import lru_cache
+
+import anthropic
+import openai
+from pydantic import BaseModel
 
 from app.core.config import settings
 from app.models.llm import LLMUsage
@@ -20,7 +21,9 @@ class LLMService(ABC):
     """Abstract base class for LLM services."""
 
     @abstractmethod
-    async def generate_text(self, prompt: str, model: str, max_tokens: int = 500, temperature: float = 0.7, **kwargs) -> LLMResponse:
+    async def generate_text(
+        self, prompt: str, model: str, max_tokens: int = 500, temperature: float = 0.7, **kwargs
+    ) -> LLMResponse:
         """Generate text using the LLM."""
         pass
 
@@ -32,14 +35,27 @@ class OpenAIService(LLMService):
         """Initialize the OpenAI client."""
         self.client = openai.AsyncOpenAI(api_key=api_key)
 
-    async def generate_text(self, prompt: str, model: str = "gpt-3.5-turbo", max_tokens: int = 500, temperature: float = 0.7, **kwargs) -> LLMResponse:
+    async def generate_text(
+        self,
+        prompt: str,
+        model: str = "gpt-3.5-turbo",
+        max_tokens: int = 500,
+        temperature: float = 0.7,
+        **kwargs,
+    ) -> LLMResponse:
         """Generate text using OpenAI."""
         response = await self.client.chat.completions.create(
-            model=model, messages=[{"role": "user", "content": prompt}], max_tokens=max_tokens, temperature=temperature, **kwargs
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=max_tokens,
+            temperature=temperature,
+            **kwargs,
         )
 
         usage = LLMUsage(
-            prompt_tokens=response.usage.prompt_tokens, completion_tokens=response.usage.completion_tokens, total_tokens=response.usage.total_tokens
+            prompt_tokens=response.usage.prompt_tokens,
+            completion_tokens=response.usage.completion_tokens,
+            total_tokens=response.usage.total_tokens,
         )
 
         return LLMResponse(text=response.choices[0].message.content, model=model, usage=usage)
@@ -53,11 +69,20 @@ class AnthropicService(LLMService):
         self.client = anthropic.AsyncAnthropic(api_key=api_key)
 
     async def generate_text(
-        self, prompt: str, model: str = "claude-3-sonnet-20240229", max_tokens: int = 500, temperature: float = 0.7, **kwargs
+        self,
+        prompt: str,
+        model: str = "claude-3-sonnet-20240229",
+        max_tokens: int = 500,
+        temperature: float = 0.7,
+        **kwargs,
     ) -> LLMResponse:
         """Generate text using Anthropic Claude."""
         response = await self.client.messages.create(
-            model=model, max_tokens=max_tokens, temperature=temperature, messages=[{"role": "user", "content": prompt}], **kwargs
+            model=model,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            messages=[{"role": "user", "content": prompt}],
+            **kwargs,
         )
 
         usage = LLMUsage(
@@ -87,7 +112,7 @@ class LLMServiceFactory:
             raise ValueError(f"Unsupported LLM provider: {provider}")
 
 
-@lru_cache()
+@lru_cache
 def get_llm_service(provider: str = "openai") -> LLMService:
     """Dependency to get an LLM service."""
     return LLMServiceFactory.get_service(provider)

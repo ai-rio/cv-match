@@ -1,5 +1,6 @@
-from supabase import create_client, Client
-from typing import Dict, List, Any, Optional, TypeVar, Generic, Type
+from typing import Any, Generic, TypeVar
+
+from supabase import Client, create_client
 
 from app.core.config import settings
 
@@ -9,7 +10,7 @@ T = TypeVar("T")
 class SupabaseDatabaseService(Generic[T]):
     """Service for interacting with Supabase database."""
 
-    def __init__(self, table_name: str, model_class: Type[T]):
+    def __init__(self, table_name: str, model_class: type[T]):
         """
         Initialize the Supabase database service.
 
@@ -21,7 +22,7 @@ class SupabaseDatabaseService(Generic[T]):
         self.table_name = table_name
         self.model_class = model_class
 
-    async def list(self, filters: Optional[Dict[str, Any]] = None) -> List[T]:
+    async def list(self, filters: dict[str, Any] | None = None) -> list[T]:
         """List records with optional filtering."""
         query = self.supabase.table(self.table_name).select("*")
 
@@ -33,7 +34,7 @@ class SupabaseDatabaseService(Generic[T]):
 
         return [self.model_class(**item) for item in response.data]
 
-    async def get(self, id: str) -> Optional[T]:
+    async def get(self, id: str) -> T | None:
         """Get a single record by ID."""
         response = self.supabase.table(self.table_name).select("*").eq("id", id).execute()
 
@@ -42,7 +43,7 @@ class SupabaseDatabaseService(Generic[T]):
 
         return self.model_class(**response.data[0])
 
-    async def create(self, data: Dict[str, Any]) -> T:
+    async def create(self, data: dict[str, Any]) -> T:
         """Create a new record."""
         response = self.supabase.table(self.table_name).insert(data).execute()
 
@@ -51,7 +52,7 @@ class SupabaseDatabaseService(Generic[T]):
 
         return self.model_class(**response.data[0])
 
-    async def update(self, id: str, data: Dict[str, Any]) -> T:
+    async def update(self, id: str, data: dict[str, Any]) -> T:
         """Update an existing record."""
         response = self.supabase.table(self.table_name).update(data).eq("id", id).execute()
 

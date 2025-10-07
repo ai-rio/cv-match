@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import List
-import openai
-import numpy as np
-from pydantic import BaseModel
 from functools import lru_cache
+
+import numpy as np
+import openai
+from pydantic import BaseModel
 
 from app.core.config import settings
 from app.models.llm import LLMUsage
@@ -12,7 +12,7 @@ from app.models.llm import LLMUsage
 class EmbeddingResponse(BaseModel):
     """Response from an embedding service."""
 
-    embedding: List[float]
+    embedding: list[float]
     model: str
     usage: LLMUsage
 
@@ -33,13 +33,19 @@ class OpenAIEmbeddingService(EmbeddingService):
         """Initialize the OpenAI client."""
         self.client = openai.AsyncOpenAI(api_key=api_key)
 
-    async def create_embedding(self, text: str, model: str = "text-embedding-ada-002") -> EmbeddingResponse:
+    async def create_embedding(
+        self, text: str, model: str = "text-embedding-ada-002"
+    ) -> EmbeddingResponse:
         """Create an embedding using OpenAI."""
         response = await self.client.embeddings.create(model=model, input=text)
 
         embedding = response.data[0].embedding
 
-        usage = LLMUsage(prompt_tokens=response.usage.prompt_tokens, completion_tokens=0, total_tokens=response.usage.total_tokens)
+        usage = LLMUsage(
+            prompt_tokens=response.usage.prompt_tokens,
+            completion_tokens=0,
+            total_tokens=response.usage.total_tokens,
+        )
 
         return EmbeddingResponse(embedding=embedding, model=model, usage=usage)
 
@@ -53,7 +59,9 @@ class AnthropicEmbeddingService(EmbeddingService):
         # so this is a placeholder for future implementation
         self.api_key = api_key
 
-    async def create_embedding(self, text: str, model: str = "claude-embedding") -> EmbeddingResponse:
+    async def create_embedding(
+        self, text: str, model: str = "claude-embedding"
+    ) -> EmbeddingResponse:
         """Create an embedding using Anthropic."""
         # This is a placeholder implementation
         # In a real implementation, you'd call the Anthropic embedding API when available
@@ -62,9 +70,13 @@ class AnthropicEmbeddingService(EmbeddingService):
         # In production, you would replace this with the actual API call
         random_embedding = list(np.random.normal(0, 1, 1536))
 
-        usage = LLMUsage(prompt_tokens=len(text.split()), completion_tokens=0, total_tokens=len(text.split()))
+        usage = LLMUsage(
+            prompt_tokens=len(text.split()), completion_tokens=0, total_tokens=len(text.split())
+        )
 
-        return EmbeddingResponse(embedding=[float(x) for x in random_embedding], model=model, usage=usage)
+        return EmbeddingResponse(
+            embedding=[float(x) for x in random_embedding], model=model, usage=usage
+        )
 
 
 class EmbeddingServiceFactory:
@@ -85,7 +97,7 @@ class EmbeddingServiceFactory:
             raise ValueError(f"Unsupported embedding provider: {provider}")
 
 
-@lru_cache()
+@lru_cache
 def get_embedding_service(provider: str = "openai") -> EmbeddingService:
     """Dependency to get an embedding service."""
     return EmbeddingServiceFactory.get_service(provider)

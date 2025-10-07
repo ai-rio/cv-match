@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from typing import List
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.services.vectordb import QdrantService, get_vector_db_service
+from app.models.vectordb import (
+    DeleteDocumentsRequest,
+    DocumentInput,
+    DocumentUploadResponse,
+    SearchQuery,
+    SearchResult,
+)
 from app.services.llm.embedding_service import EmbeddingService, get_embedding_service
 from app.services.supabase.auth import SupabaseAuthService, get_auth_service
-from app.models.vectordb import DocumentInput, SearchQuery, SearchResult, DocumentUploadResponse, DeleteDocumentsRequest
+from app.services.vectordb import QdrantService, get_vector_db_service
 
 router = APIRouter()
 security = HTTPBearer()
@@ -27,22 +32,32 @@ async def add_documents(
         # Generate embeddings for each document
         all_embeddings = []
         for document in request.documents:
-            embedding_response = await embedding_service.create_embedding(text=document.text, model=request.embedding_model)
+            embedding_response = await embedding_service.create_embedding(
+                text=document.text, model=request.embedding_model
+            )
             all_embeddings.append(embedding_response.embedding)
 
         # Prepare documents and metadata for storage
         docs = [{"text": doc.text, "title": doc.title} for doc in request.documents]
-        metadata = [doc.metadata for doc in request.documents] if all(hasattr(doc, "metadata") for doc in request.documents) else None
+        metadata = (
+            [doc.metadata for doc in request.documents]
+            if all(hasattr(doc, "metadata") for doc in request.documents)
+            else None
+        )
 
         # Add documents to vector database
-        doc_ids = await vector_db.add_documents(documents=docs, embeddings=all_embeddings, metadata=metadata)
+        doc_ids = await vector_db.add_documents(
+            documents=docs, embeddings=all_embeddings, metadata=metadata
+        )
 
         return DocumentUploadResponse(document_ids=doc_ids)
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to add documents: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Failed to add documents: {str(e)}"
+        )
 
 
-@router.post("/search", response_model=List[SearchResult])
+@router.post("/search", response_model=list[SearchResult])
 async def search_documents(
     query: SearchQuery,
     credentials: HTTPAuthorizationCredentials = Depends(security),
@@ -56,14 +71,22 @@ async def search_documents(
         await auth_service.get_user(credentials.credentials)
 
         # Generate embedding for the query
-        embedding_response = await embedding_service.create_embedding(text=query.query_text, model=query.embedding_model)
+        embedding_response = await embedding_service.create_embedding(
+            text=query.query_text, model=query.embedding_model
+        )
 
         # Search vector database
-        results = await vector_db.search(query_embedding=embedding_response.embedding, limit=query.limit, filter_params=query.filter_metadata)
+        results = await vector_db.search(
+            query_embedding=embedding_response.embedding,
+            limit=query.limit,
+            filter_params=query.filter_metadata,
+        )
 
         return results
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Search failed: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Search failed: {str(e)}"
+        )
 
 
 @router.delete("/documents", status_code=status.HTTP_204_NO_CONTENT)
@@ -82,6 +105,11 @@ async def delete_documents(
         success = await vector_db.delete(request.document_ids)
 
         if not success:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to delete one or more documents")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to delete one or more documents",
+            )
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Document deletion failed: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Document deletion failed: {str(e)}"
+        )
