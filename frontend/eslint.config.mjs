@@ -1,15 +1,13 @@
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { FlatCompat } from '@eslint/eslintrc';
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import prettier from 'eslint-plugin-prettier';
+import prettierConfig from 'eslint-config-prettier';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
+export default [
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
+  prettierConfig,
   {
     ignores: [
       '.next/**',
@@ -19,25 +17,20 @@ const eslintConfig = [
       '*.config.js',
       '*.config.ts',
       '*.config.mjs',
+      '*.config.cjs',
+      '.lintstagedrc.js',
       'public/**',
+      'build/**',
+      '.git/**',
+      'coverage/**'
     ],
   },
-  ...compat.extends(
-    'next/core-web-vitals',
-    'next/typescript',
-    'plugin:@typescript-eslint/recommended'
-  ),
   {
-    languageOptions: {
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
-    },
+    files: ['**/*.{js,jsx,ts,tsx}'],
     plugins: {
-      '@typescript-eslint': (await import('@typescript-eslint/eslint-plugin')).default,
-      'simple-import-sort': (await import('eslint-plugin-simple-import-sort')).default,
-      prettier: (await import('eslint-plugin-prettier')).default,
+      'simple-import-sort': simpleImportSort,
+      prettier: prettier,
+      '@typescript-eslint': tseslint.plugin,
     },
     rules: {
       // Prettier integration
@@ -48,8 +41,7 @@ const eslintConfig = [
       'simple-import-sort/exports': 'error',
 
       // TypeScript rules
-      'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-require-imports': 'off',
 
@@ -57,24 +49,35 @@ const eslintConfig = [
       'no-console': 'warn',
       'prefer-const': 'error',
       'no-var': 'error',
+      'no-debugger': 'error',
+      'no-alert': 'error',
+
+    },
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: './tsconfig.json',
+      },
     },
   },
   {
-    files: ['**/*.test.ts', '**/*.test.tsx', 'tests/**/*', '__tests__/**/*'],
+    files: ['**/*.test.{ts,tsx,js,jsx}', 'tests/**/*', '__tests__/**/*'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       'no-console': 'off',
+      'prefer-const': 'off',
     },
   },
   {
-    files: ['scripts/**/*', 'jest.*.js'],
+    files: ['scripts/**/*', 'jest.*.{js,mjs}'],
     rules: {
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       'no-console': 'off',
+      'prefer-const': 'off',
     },
   },
 ];
-
-export default eslintConfig;

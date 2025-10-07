@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { signInWithGoogle, signInWithLinkedIn, signInWithEmail, signUpWithEmail, resetPassword } from '@/services/supabase';
+
+import {
+  resetPassword,
+  signInWithEmail,
+  signInWithGoogle,
+  signInWithLinkedIn,
+  signUpWithEmail,
+} from '@/services/supabase';
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState({
@@ -19,8 +26,8 @@ export default function LoginForm() {
       setIsLoading({ ...isLoading, google: true });
       const { error } = await signInWithGoogle();
       if (error) throw error;
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in with Google');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to sign in with Google');
     } finally {
       setIsLoading({ ...isLoading, google: false });
     }
@@ -32,8 +39,8 @@ export default function LoginForm() {
       setIsLoading({ ...isLoading, linkedin: true });
       const { error } = await signInWithLinkedIn();
       if (error) throw error;
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in with LinkedIn');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to sign in with LinkedIn');
     } finally {
       setIsLoading({ ...isLoading, linkedin: false });
     }
@@ -58,8 +65,8 @@ export default function LoginForm() {
         if (error) throw error;
         setSuccess('Check your email for the password reset link.');
       }
-    } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Authentication failed');
     } finally {
       setIsLoading({ ...isLoading, email: false });
     }
@@ -69,10 +76,18 @@ export default function LoginForm() {
     <div className="max-w-md w-full mx-auto p-6 bg-white rounded-lg shadow-md">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-gray-900">
-          {mode === 'signin' ? 'Sign in to your account' : mode === 'signup' ? 'Create a new account' : 'Reset your password'}
+          {mode === 'signin'
+            ? 'Sign in to your account'
+            : mode === 'signup'
+              ? 'Create a new account'
+              : 'Reset your password'}
         </h2>
         <p className="mt-2 text-sm text-gray-600">
-          {mode === 'signin' ? 'Or create a new account' : mode === 'signup' ? 'Or sign in to your account' : 'Enter your email to receive a reset link'}
+          {mode === 'signin'
+            ? 'Or create a new account'
+            : mode === 'signup'
+              ? 'Or sign in to your account'
+              : 'Enter your email to receive a reset link'}
         </p>
       </div>
 
@@ -116,7 +131,7 @@ export default function LoginForm() {
               name="password"
               type="password"
               autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-              required={mode !== 'reset'}
+              required={mode === 'signin' || mode === 'signup'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
@@ -133,10 +148,10 @@ export default function LoginForm() {
             {isLoading.email
               ? 'Loading...'
               : mode === 'signin'
-              ? 'Sign in'
-              : mode === 'signup'
-              ? 'Sign up'
-              : 'Send reset instructions'}
+                ? 'Sign in'
+                : mode === 'signup'
+                  ? 'Sign up'
+                  : 'Send reset instructions'}
           </button>
         </div>
       </form>

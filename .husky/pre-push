@@ -1,4 +1,66 @@
 #!/usr/bin/env sh
 
-echo "🧪 Pre-push checks temporarily disabled (will enable after setup)"
-echo "✅ Pre-push checks passed!"
+echo "🧪 Running pre-push checks..."
+
+# Frontend TypeScript type checking
+if [ -d "frontend" ]; then
+    echo "📝 Running TypeScript type checking..."
+    cd frontend
+    bun run type-check || {
+        echo "❌ TypeScript type checking failed"
+        exit 1
+    }
+    cd ..
+fi
+
+# Frontend ESLint check (no auto-fix on pre-push)
+if [ -d "frontend" ]; then
+    echo "🔍 Running ESLint..."
+    cd frontend
+    bun run lint || {
+        echo "❌ ESLint failed"
+        exit 1
+    }
+    cd ..
+fi
+
+# Backend Python type checking
+if [ -d "backend" ]; then
+    echo "🐍 Running Python type checking..."
+    cd backend
+    if [ -f "pyproject.toml" ]; then
+        uv run mypy app/ --ignore-missing-imports || {
+            echo "❌ Python type checking failed"
+            exit 1
+        }
+    fi
+    cd ..
+fi
+
+# Backend Python linting
+if [ -d "backend" ]; then
+    echo "🐍 Running Python linting..."
+    cd backend
+    uv run ruff check . || {
+        echo "❌ Python linting failed"
+        exit 1
+    }
+    cd ..
+fi
+
+# Optional: Run tests (can be commented out if too slow)
+echo "⚠️  Skipping tests (uncomment in .husky/pre-push to enable)"
+# Uncomment below to run tests before push:
+# if [ -d "frontend" ]; then
+#     echo "⚛️  Running frontend tests..."
+#     cd frontend && bun run test:coverage || exit 1
+#     cd ..
+# fi
+# if [ -d "backend" ]; then
+#     echo "🐍 Running backend tests..."
+#     cd backend && uv run pytest || exit 1
+#     cd ..
+# fi
+
+echo "✅ All pre-push checks passed!"
+echo "🚀 Ready to push!"

@@ -2,7 +2,35 @@
 
 echo "📝 Validating commit message..."
 
-# Skip commitlint for now (will enable after setup)
-echo "📝 Commit message validation temporarily disabled"
+# Run commitlint
+cd frontend && npx commitlint --edit $1 --config commitlint.config.cjs || {
+    echo ""
+    echo "❌ Commit message validation failed!"
+    echo ""
+    echo "Commit messages must follow the conventional commit format:"
+    echo "  type(scope): description"
+    echo ""
+    echo "Examples:"
+    echo "  feat(auth): add Brazilian Portuguese translations"
+    echo "  fix(payment): handle BRL currency conversion"
+    echo "  docs(readme): update setup instructions"
+    echo "  test(api): add resume processing tests"
+    echo "  refactor(database): optimize query performance"
+    echo ""
+    echo "Available types: feat, fix, docs, style, refactor, perf, test, chore,"
+    echo "build, ci, revert, bump, lint, security, deps, i18n, wip"
+    echo ""
+    exit 1
+}
+
+# Additional checks for Brazilian market context
+if grep -q "BRL\|Brazilian\|Portuguese\|PT-BR\|currency\|payment" "$1"; then
+    echo "🇧🇷 Brazilian market commit detected - great!"
+fi
+
+# Check if commit references any tickets
+if grep -q "CV-\|BRL-\|#" "$1"; then
+    echo "🎫 Ticket reference found in commit message"
+fi
 
 echo "✅ Commit message validation passed!"
