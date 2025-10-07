@@ -29,7 +29,7 @@ if [ -d "backend" ]; then
     echo "🐍 Running Python type checking..."
     cd backend
     if [ -f "pyproject.toml" ]; then
-        uv run mypy app/ --ignore-missing-imports || {
+        uv run mypy app/ --ignore-missing-imports --explicit-package-bases || {
             echo "❌ Python type checking failed"
             exit 1
         }
