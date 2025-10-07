@@ -1,0 +1,10 @@
+# Testing dependencies
+pytest==8.3.4
+pytest-asyncio==0.24.0
+pytest-mock==3.14.0
+httpx==0.26.*
+stripe==11.3.0
+faker==30.8.1
+freezegun==1.5.1
+pytest-cov==6.0.0
+pytest-xdist==3.6.1

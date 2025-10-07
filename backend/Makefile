@@ -1,4 +1,4 @@
-.PHONY: install dev test lint format clean venv sync
+.PHONY: install dev test lint format clean venv sync test-webhooks test-unit test-integration test-brazilian install-test-deps
 
 # Default target
 .DEFAULT_GOAL := help
@@ -20,6 +20,10 @@ install: ## Install dependencies with uv
 install-dev: ## Install dependencies with dev tools
 	@echo "${GREEN}Installing dependencies with dev tools...${NC}"
 	uv pip install -e ".[dev]"
+
+install-test-deps: ## Install test dependencies for webhook testing
+	@echo "${GREEN}Installing test dependencies...${NC}"
+	pip install -r requirements-test.txt
 
 sync: ## Sync dependencies (install/update from pyproject.toml)
 	@echo "${BLUE}Syncing dependencies...${NC}"
@@ -57,6 +61,42 @@ test-cov: ## Run tests with coverage
 	@echo "${GREEN}Running tests with coverage...${NC}"
 	pytest --cov=app --cov-report=html --cov-report=term
 
+# Payment Webhook Testing Targets
+test-webhooks: ## Run only webhook tests
+	@echo "${GREEN}Running webhook tests...${NC}"
+	python -m pytest tests/ -m webhook -v
+
+test-unit: ## Run only unit tests
+	@echo "${GREEN}Running unit tests...${NC}"
+	python -m pytest tests/unit/ -v
+
+test-integration: ## Run only integration tests
+	@echo "${GREEN}Running integration tests...${NC}"
+	python -m pytest tests/integration/ -v
+
+test-brazilian: ## Run Brazilian market specific tests
+	@echo "${GREEN}Running Brazilian market tests...${NC}"
+	python -m pytest tests/ -k "brazilian" -v
+
+test-webhook-all: clean-coverage install-test-deps test-webhooks ## Full webhook test suite with setup and cleanup
+
+# Combined webhook test commands
+test-webhook-security: ## Run security-focused webhook tests
+	@echo "${GREEN}Running webhook security tests...${NC}"
+	python -m pytest tests/ -k "security or signature" -v
+
+test-webhook-performance: ## Run performance-focused webhook tests
+	@echo "${GREEN}Running webhook performance tests...${NC}"
+	python -m pytest tests/ -k "performance or timing" -v --durations=10
+
+test-webhook-integration: test-integration ## Alias for integration tests
+test-webhook-unit: test-unit ## Alias for unit tests
+
+# CI/CD webhook testing
+test-webhook-ci: ## Run webhook tests in CI mode
+	@echo "${GREEN}Running webhook tests for CI...${NC}"
+	python -m pytest tests/ -m webhook --cov=app --cov-report=xml --junitxml=pytest-webhook.xml -v
+
 clean: ## Clean up cache files and virtual environment
 	@echo "${YELLOW}Cleaning up cache files...${NC}"
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
@@ -69,6 +109,10 @@ clean: ## Clean up cache files and virtual environment
 	find . -type f -name "*.pyo" -delete
 	find . -type f -name "*.pyd" -delete
 	rm -rf .venv 2>/dev/null || true
+
+clean-coverage: ## Clean only coverage files
+	@echo "${YELLOW}Cleaning coverage files...${NC}"
+	rm -rf .coverage htmlcov/ pytest.xml pytest-webhook.xml
 
 help: ## Show this help
 	@echo "${BLUE}CV-Match Backend - UV Package Manager${NC}"
@@ -83,3 +127,8 @@ help: ## Show this help
 	@echo "  2. source .venv/bin/activate"
 	@echo "  3. make install-dev  # Install with dev tools"
 	@echo "  4. make dev          # Start development server"
+	@echo ""
+	@echo "${YELLOW}Webhook Testing:${NC}"
+	@echo "  1. make install-test-deps  # Install test dependencies"
+	@echo "  2. make test-webhooks     # Run webhook tests"
+	@echo "  3. make test-webhook-all  # Full webhook test suite"
