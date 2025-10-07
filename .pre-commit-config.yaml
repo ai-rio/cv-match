@@ -42,7 +42,7 @@ repos:
     hooks:
       - id: type-check-frontend
         name: TypeScript type checking (frontend)
-        entry: bun run type-check
+        entry: bunx type-check
         language: system
         files: \.(ts|tsx)$
         pass_filenames: false
@@ -57,7 +57,7 @@ repos:
 
       - id: test-frontend
         name: Run frontend tests
-        entry: bun run test:coverage
+        entry: bunx test:coverage
         language: system
         files: \.(js|jsx|ts|tsx)$
         pass_filenames: false

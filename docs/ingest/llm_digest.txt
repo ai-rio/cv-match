@@ -269,11 +269,11 @@ You can manually execute the same commands that the hot reloads call when they d
 
 2. To generate the frontend client:
    ```bash
-   cd nextjs-frontend && bun run generate-client
+   cd nextjs-frontend && bunx generate-client
    ```
    or using Docker:
    ```bash
-   docker compose run --rm --no-deps -T frontend bun run generate-client
+   docker compose run --rm --no-deps -T frontend bunx generate-client
    ```
 
 ### Testing

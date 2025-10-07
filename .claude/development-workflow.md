@@ -24,13 +24,13 @@ supabase db push
 # Start frontend server
 cd frontend
 bun install  # or npm install
-bun run dev  # or npm run dev
+bunx dev  # or npm run dev
 
 # Run tests
-bun run test
+bunx test
 
 # Build for production
-bun run build
+bunx build
 ```
 
 ## Project Setup
@@ -90,7 +90,7 @@ uvicorn app.main:app --reload
 
 # Terminal 2: Frontend
 cd frontend
-bun run dev
+bunx dev
 ```
 
 5. **Verify Setup**:
@@ -130,7 +130,7 @@ supabase db push  # Apply local migrations
 cd backend && source venv/bin/activate && uvicorn app.main:app --reload
 
 # Frontend (Terminal 2)
-cd frontend && bun run dev
+cd frontend && bunx dev
 ```
 
 ### Creating New Features
@@ -249,13 +249,13 @@ curl -X POST http://localhost:8000/api/v1/resumes/analyze \
 
 ```bash
 # Run tests
-bun run test
+bunx test
 
 # Run tests in watch mode
-bun run test --watch
+bunx test --watch
 
 # Test specific component
-bun run test ResumeAnalysis
+bunx test ResumeAnalysis
 
 # Manual testing
 # Open http://localhost:3000
@@ -324,10 +324,10 @@ supabase db reset
 **Next.js Debugging**:
 ```bash
 # Run in debug mode
-NODE_OPTIONS='--inspect' bun run dev
+NODE_OPTIONS='--inspect' bunx dev
 
 # Check build errors
-bun run build
+bunx build
 ```
 
 **Common Issues**:

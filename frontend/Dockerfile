@@ -15,7 +15,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Build the application
-RUN bun run build
+RUN bunx build
 
 # Production image, copy all the files and run next
 FROM base AS runner

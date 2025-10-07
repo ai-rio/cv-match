@@ -165,7 +165,7 @@ python test_resume_integration.py
 ### Frontend Testing
 ```bash
 cd /home/carlos/projects/cv-match/frontend
-bun run dev
+bunx dev
 # Navigate to http://localhost:3000/test-resume
 ```
 

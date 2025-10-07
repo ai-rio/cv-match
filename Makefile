@@ -49,7 +49,7 @@ install-frontend: ## Install frontend dependencies locally
 
 build-frontend: ## Build frontend for production
 	@echo "${GREEN}Building frontend for production...${NC}"
-	cd frontend && bun run build
+	cd frontend && bunx build
 
 # Backend helpers
 install-backend: ## Install backend dependencies locally
@@ -72,11 +72,11 @@ install-frontend-dev: ## Install frontend dev dependencies locally
 # Code quality
 lint-frontend: ## Lint frontend code
 	@echo "${GREEN}Linting frontend code...${NC}"
-	cd frontend && bun run lint
+	cd frontend && bunx lint
 
 lint-frontend-fix: ## Lint and fix frontend code
 	@echo "${GREEN}Linting and fixing frontend code...${NC}"
-	cd frontend && bun run lint:fix
+	cd frontend && bunx lint:fix
 
 lint-backend: ## Lint backend code
 	@echo "${GREEN}Linting backend code...${NC}"
@@ -88,7 +88,7 @@ lint-backend-fix: ## Lint and fix backend code
 
 format-frontend: ## Format frontend code
 	@echo "${GREEN}Formatting frontend code...${NC}"
-	cd frontend && bun run format
+	cd frontend && bunx format
 
 format-backend: ## Format backend code
 	@echo "${GREEN}Formatting backend code...${NC}"
@@ -96,7 +96,7 @@ format-backend: ## Format backend code
 
 type-check-frontend: ## Type check frontend code
 	@echo "${GREEN}Type checking frontend code...${NC}"
-	cd frontend && bun run type-check
+	cd frontend && bunx type-check
 
 type-check-backend: ## Type check backend code
 	@echo "${GREEN}Type checking backend code...${NC}"
@@ -104,7 +104,7 @@ type-check-backend: ## Type check backend code
 
 test-frontend: ## Run frontend tests
 	@echo "${GREEN}Running frontend tests...${NC}"
-	cd frontend && bun run test:coverage
+	cd frontend && bunx test:coverage
 
 test-backend: ## Run backend tests
 	@echo "${GREEN}Running backend tests...${NC}"

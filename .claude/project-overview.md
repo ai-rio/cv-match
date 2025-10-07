@@ -118,7 +118,7 @@ uv run uvicorn app.main:app --reload
 # Frontend
 cd frontend
 bun install
-bun run dev
+bunx dev
 
 # Database
 supabase db push
@@ -271,10 +271,10 @@ pytest --cov=app tests/
 ### Frontend Tests
 ```bash
 # Run Jest tests
-bun run test
+bunx test
 
 # Run E2E tests (if configured)
-bun run test:e2e
+bunx test:e2e
 ```
 
 ## Git Commit Standards

@@ -1,0 +1,35 @@
+{
+  "name": "cv-match-enterprise",
+  "version": "1.0.0",
+  "description": "CV-Match enterprise-grade Git workflow with pre-commit hooks",
+  "private": true,
+  "scripts": {
+    "prepare": "husky .husky",
+    "hooks:install": "husky install",
+    "hooks:uninstall": "husky uninstall",
+    "lint:all": "bunx lint:frontend && bunx lint:backend",
+    "lint:frontend": "cd frontend && bunx lint:fix",
+    "lint:backend": "cd backend && uv run ruff check --fix .",
+    "format:all": "bunx format:frontend && bunx format:backend",
+    "format:frontend": "cd frontend && bunx format",
+    "format:backend": "cd backend && uv run ruff format .",
+    "test:all": "bunx test:frontend && bunx test:backend",
+    "test:frontend": "cd frontend && bunx test:coverage",
+    "test:backend": "cd backend && uv run pytest --cov=app",
+    "type-check:frontend": "cd frontend && bunx type-check",
+    "type-check:backend": "cd backend && uv run mypy app/",
+    "build:frontend": "cd frontend && bunx build",
+    "dev:setup": "bunx install:frontend && bunx install:backend",
+    "install:frontend": "cd frontend && bun install",
+    "install:backend": "cd backend && uv sync",
+    "quality:check": "bunx lint:all && bunx type-check:all && bunx test:all"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0",
+    "python": ">=3.12.0"
+  }
+}

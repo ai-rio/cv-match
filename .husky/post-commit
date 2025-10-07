@@ -1,0 +1,41 @@
+#!/usr/bin/env sh
+
+echo "📊 Recording commit metrics..."
+
+# Get commit info
+COMMIT_HASH=$(git rev-parse --short HEAD)
+COMMIT_AUTHOR=$(git log -1 --format='%an')
+COMMIT_DATE=$(git log -1 --format='%ad' --date=short)
+FILES_CHANGED=$(git diff-tree --no-commit-id --name-only -r HEAD)
+FILE_COUNT=$(echo "$FILES_CHANGED" | wc -l)
+
+# Calculate commit size
+ADDITIONS=$(git diff --stat HEAD~1 HEAD | tail -1 | grep -o '[0-9]*' | head -1)
+DELETIONS=$(git diff --stat HEAD~1 HEAD | tail -1 | grep -o '[0-9]*' | head -2 | tail -1)
+
+# Log metrics (you could send this to a monitoring service)
+echo "Commit: $COMMIT_HASH"
+echo "Author: $COMMIT_AUTHOR"
+echo "Date: $COMMIT_DATE"
+echo "Files changed: $FILE_COUNT"
+echo "Additions: ${ADDITIONS:-0}"
+echo "Deletions: ${DELETIONS:-0}"
+
+# Check for specific patterns
+if echo "$FILES_CHANGED" | grep -q "supabase/migrations"; then
+    echo "🗄️ Database migration committed"
+fi
+
+if echo "$FILES_CHANGED" | grep -q "frontend/\|backend/"; then
+    echo "💻 Code changes committed"
+fi
+
+if echo "$FILES_CHANGED" | grep -q "docs/"; then
+    echo "📚 Documentation updated"
+fi
+
+if echo "$FILES_CHANGED" | grep -q ".md"; then
+    echo "📝 Markdown files updated"
+fi
+
+echo "🎉 Commit $COMMIT_HASH completed successfully!"

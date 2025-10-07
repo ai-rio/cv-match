@@ -38,7 +38,10 @@
       "Read(//home/carlos/projects/cv-match/**)",
       "Bash(python3 -m pip install:*)",
       "mcp__context7__resolve-library-id",
-      "mcp__context7__get-library-docs"
+      "mcp__context7__get-library-docs",
+      "Bash(npx husky:*)",
+      "Bash(mkdir:*)",
+      "Bash(git show:*)"
     ],
     "deny": [],
     "ask": [],
