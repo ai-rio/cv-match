@@ -45,11 +45,11 @@ clean: ## Remove containers and volumes
 # Frontend helpers
 install-frontend: ## Install frontend dependencies locally
 	@echo "${GREEN}Installing frontend dependencies...${NC}"
-	cd frontend && npm install
+	cd frontend && bun install
 
 build-frontend: ## Build frontend for production
 	@echo "${GREEN}Building frontend for production...${NC}"
-	cd frontend && npm run build
+	cd frontend && bun run build
 
 # Backend helpers
 install-backend: ## Install backend dependencies locally

@@ -1,4 +1,4 @@
-.PHONY: install dev test lint clean
+.PHONY: install dev test lint format clean venv sync
 
 # Default target
 .DEFAULT_GOAL := help
@@ -6,37 +6,80 @@
 # Colors for terminal output
 GREEN=\033[0;32m
 YELLOW=\033[0;33m
+BLUE=\033[0;34m
 NC=\033[0m # No Color
 
-install: ## Install dependencies
-	@echo "${GREEN}Installing dependencies...${NC}"
-	pip install -r requirements.txt
+venv: ## Create virtual environment with uv
+	@echo "${GREEN}Creating virtual environment with uv...${NC}"
+	uv venv
+
+install: ## Install dependencies with uv
+	@echo "${GREEN}Installing dependencies with uv...${NC}"
+	uv pip install -e .
+
+install-dev: ## Install dependencies with dev tools
+	@echo "${GREEN}Installing dependencies with dev tools...${NC}"
+	uv pip install -e ".[dev]"
+
+sync: ## Sync dependencies (install/update from pyproject.toml)
+	@echo "${BLUE}Syncing dependencies...${NC}"
+	uv pip install -e ".[dev]"
 
 dev: ## Run development server
 	@echo "${GREEN}Starting development server...${NC}"
 	uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-lint: ## Run linting
-	@echo "${GREEN}Running linters...${NC}"
-	flake8 app
-	isort app
+dev-uv: ## Run development server with uv run (no activation needed)
+	@echo "${GREEN}Starting development server with uv run...${NC}"
+	uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+format: ## Format code with black
+	@echo "${GREEN}Formatting code...${NC}"
 	black app
+
+lint: ## Run linting with ruff
+	@echo "${GREEN}Running linters...${NC}"
+	ruff check app
+
+lint-fix: ## Run linting with automatic fixes
+	@echo "${GREEN}Running linters with fixes...${NC}"
+	ruff check --fix app
+
+type-check: ## Run type checking with mypy
+	@echo "${GREEN}Running type checking...${NC}"
+	mypy app
 
 test: ## Run tests
 	@echo "${GREEN}Running tests...${NC}"
 	pytest
 
-clean: ## Clean up cache files
+test-cov: ## Run tests with coverage
+	@echo "${GREEN}Running tests with coverage...${NC}"
+	pytest --cov=app --cov-report=html --cov-report=term
+
+clean: ## Clean up cache files and virtual environment
 	@echo "${YELLOW}Cleaning up cache files...${NC}"
-	find . -type d -name __pycache__ -exec rm -rf {} +
-	find . -type d -name .pytest_cache -exec rm -rf {} +
-	find . -type d -name .coverage -exec rm -rf {} +
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name .ruff_cache -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name .mypy_cache -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name htmlcov -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name ".coverage" -delete 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete
 	find . -type f -name "*.pyo" -delete
 	find . -type f -name "*.pyd" -delete
+	rm -rf .venv 2>/dev/null || true
 
 help: ## Show this help
+	@echo "${BLUE}CV-Match Backend - UV Package Manager${NC}"
+	@echo ""
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Targets:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@echo "${YELLOW}Quick Start:${NC}"
+	@echo "  1. make venv         # Create virtual environment"
+	@echo "  2. source .venv/bin/activate"
+	@echo "  3. make install-dev  # Install with dev tools"
+	@echo "  4. make dev          # Start development server"

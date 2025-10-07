@@ -38,7 +38,7 @@ __pycache__/
 .pytest_cache/
 .coverage
 .DS_Store
-npm-debug.log*
+bun-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .eslintcache

@@ -1,0 +1,130 @@
+Directory structure:
+└── vintasoftware-nextjs-fastapi-template/
+    ├── README.md
+    ├── CHANGELOG.md
+    ├── docs/
+    │   ├── additional-settings.md
+    │   ├── contributing.md
+    │   ├── deployment.md
+    │   ├── get-started.md
+    │   ├── support.md
+    │   ├── technology-selection.md
+    │   ├── CHANGELOG.md -> CHANGELOG.md
+    │   └── README.md -> README.md
+    ├── fastapi_backend/
+    │   ├── vercel.json
+    │   ├── vercel.prod.json
+    │   ├── watcher.py
+    │   ├── alembic_migrations/
+    │   │   ├── env.py
+    │   │   └── versions/
+    │   │       ├── 402d067a8b92_added_user_table.py
+    │   │       └── b389592974f8_add_item_model.py
+    │   ├── api/
+    │   │   └── index.py
+    │   ├── app/
+    │   │   ├── __init__.py
+    │   │   ├── config.py
+    │   │   ├── database.py
+    │   │   ├── email.py
+    │   │   ├── main.py
+    │   │   ├── models.py
+    │   │   ├── schemas.py
+    │   │   ├── users.py
+    │   │   ├── utils.py
+    │   │   ├── email_templates/
+    │   │   │   └── __init__.py
+    │   │   └── routes/
+    │   │       ├── __init__.py
+    │   │       └── items.py
+    │   ├── commands/
+    │   │   ├── __init__.py
+    │   │   └── generate_openapi_schema.py
+    │   └── tests/
+    │       ├── __init__.py
+    │       ├── conftest.py
+    │       ├── test_database.py
+    │       ├── test_email.py
+    │       ├── commands/
+    │       │   ├── __init__.py
+    │       │   ├── test_generate_openapi_schema.py
+    │       │   └── files/
+    │       │       ├── openapi_test.json
+    │       │       └── openapi_test_output.json
+    │       ├── main/
+    │       │   ├── __init__.py
+    │       │   └── test_main.py
+    │       ├── routes/
+    │       │   ├── __init__.py
+    │       │   └── test_items.py
+    │       └── utils/
+    │           ├── __init__.py
+    │           └── test_utils.py
+    ├── local-shared-data/
+    │   └── openapi.json
+    ├── nextjs-frontend/
+    │   ├── components.json
+    │   ├── jest.config.ts
+    │   ├── middleware.ts
+    │   ├── openapi-ts.config.ts
+    │   ├── openapi.json
+    │   ├── package.json
+    │   ├── tsconfig.json
+    │   ├── vercel.json
+    │   ├── __tests__/
+    │   │   ├── login.test.tsx
+    │   │   ├── loginPage.test.tsx
+    │   │   ├── passwordReset.test.tsx
+    │   │   ├── passwordResetConfirm.test.tsx
+    │   │   ├── passwordResetConfirmPage.test.tsx
+    │   │   ├── passwordResetPage.test.tsx
+    │   │   ├── register.test.ts
+    │   │   └── registerPage.test.tsx
+    │   ├── app/
+    │   │   ├── clientService.ts
+    │   │   ├── layout.tsx
+    │   │   ├── page.tsx
+    │   │   ├── dashboard/
+    │   │   │   ├── deleteButton.tsx
+    │   │   │   ├── layout.tsx
+    │   │   │   ├── page.tsx
+    │   │   │   └── add-item/
+    │   │   │       └── page.tsx
+    │   │   ├── login/
+    │   │   │   └── page.tsx
+    │   │   ├── openapi-client/
+    │   │   │   ├── index.ts
+    │   │   │   ├── sdk.gen.ts
+    │   │   │   └── types.gen.ts
+    │   │   ├── password-recovery/
+    │   │   │   ├── page.tsx
+    │   │   │   └── confirm/
+    │   │   │       └── page.tsx
+    │   │   └── register/
+    │   │       └── page.tsx
+    │   └── components/
+    │       ├── page-pagination.tsx
+    │       ├── page-size-selector.tsx
+    │       ├── actions/
+    │       │   ├── items-action.ts
+    │       │   ├── login-action.ts
+    │       │   ├── logout-action.ts
+    │       │   ├── password-reset-action.ts
+    │       │   └── register-action.ts
+    │       └── ui/
+    │           ├── avatar.tsx
+    │           ├── badge.tsx
+    │           ├── breadcrumb.tsx
+    │           ├── button.tsx
+    │           ├── card.tsx
+    │           ├── dropdown-menu.tsx
+    │           ├── form.tsx
+    │           ├── FormError.tsx
+    │           ├── input.tsx
+    │           ├── label.tsx
+    │           ├── select.tsx
+    │           ├── submitButton.tsx
+    │           ├── table.tsx
+    │           └── tabs.tsx
+    └── .github/
+        └── PULL_REQUEST_TEMPLATE.md

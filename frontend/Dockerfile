@@ -1,12 +1,12 @@
-FROM node:18-alpine AS base
+FROM oven/bun:1-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
-RUN npm ci
+# Copy package.json
+COPY package.json ./
+RUN bun install
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -15,7 +15,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Build the application
-RUN npm run build
+RUN bun run build
 
 # Production image, copy all the files and run next
 FROM base AS runner
@@ -37,4 +37,4 @@ EXPOSE 3000
 
 ENV PORT 3000
 
-CMD ["node", "server.js"]
+CMD ["bun", "server.js"]

@@ -10,23 +10,23 @@ NC=\033[0m # No Color
 
 install: ## Install dependencies
 	@echo "${GREEN}Installing dependencies...${NC}"
-	npm install
+	bun install
 
 dev: ## Run development server
 	@echo "${GREEN}Starting development server...${NC}"
-	npm run dev
+	bun run dev
 
 build: ## Build for production
 	@echo "${GREEN}Building for production...${NC}"
-	npm run build
+	bun run build
 
 start: ## Start production server
 	@echo "${GREEN}Starting production server...${NC}"
-	npm run start
+	bun run start
 
 lint: ## Run linter
 	@echo "${GREEN}Running linter...${NC}"
-	npm run lint
+	bun run lint
 
 clean: ## Clean build artifacts
 	@echo "${YELLOW}Cleaning build artifacts...${NC}"
