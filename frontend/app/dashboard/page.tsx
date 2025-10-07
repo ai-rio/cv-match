@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getCurrentUser, signOut } from '@/services/supabase';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import LoginForm from '@/components/auth/LoginForm';
 import TextGenerator from '@/components/llm/TextGenerator';
+import { getCurrentUser, signOut } from '@/services/supabase';
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
@@ -58,13 +59,8 @@ export default function Dashboard() {
 
           {user ? (
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">
-                Welcome, {user.email}
-              </span>
-              <button
-                onClick={handleSignOut}
-                className="text-sm text-red-600 hover:text-red-800"
-              >
+              <span className="text-sm text-gray-600">Welcome, {user.email}</span>
+              <button onClick={handleSignOut} className="text-sm text-red-600 hover:text-red-800">
                 Sign Out
               </button>
             </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { generateText, TextGenerationRequest, TextGenerationResponse } from '@/services/llm';
 
 export default function TextGenerator() {
@@ -24,7 +25,7 @@ export default function TextGenerator() {
 
       const request: TextGenerationRequest = {
         prompt,
-        ...settings
+        ...settings,
       };
 
       const result = await generateText(request);
@@ -158,8 +159,7 @@ export default function TextGenerator() {
           </div>
 
           <div className="mt-2 text-xs text-gray-500">
-            Model: {response.model} •
-            Tokens: {response.usage.total_tokens} (
+            Model: {response.model} • Tokens: {response.usage.total_tokens} (
             {response.usage.prompt_tokens} prompt,
             {response.usage.completion_tokens} completion)
           </div>

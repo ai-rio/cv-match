@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/services/supabase';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import { supabase } from '@/services/supabase';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -42,18 +43,17 @@ export default function ResetPassword() {
 
       setMessage({
         type: 'success',
-        text: 'Your password has been updated successfully! You can now sign in with your new credentials.'
+        text: 'Your password has been updated successfully! You can now sign in with your new credentials.',
       });
 
       // Redirect after successful password reset
       setTimeout(() => {
         router.push('/dashboard');
       }, 3000);
-
     } catch (error: any) {
       setMessage({
         type: 'error',
-        text: error.message || 'Failed to update password. Please try again.'
+        text: error.message || 'Failed to update password. Please try again.',
       });
     } finally {
       setLoading(false);
@@ -63,9 +63,7 @@ export default function ResetPassword() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-gray-50">
       <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-gray-900 text-center mb-6">
-          Reset Your Password
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-900 text-center mb-6">Reset Your Password</h1>
 
         {message && (
           <div

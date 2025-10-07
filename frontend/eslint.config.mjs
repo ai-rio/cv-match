@@ -19,6 +19,7 @@ export default [
       '*.config.mjs',
       '*.config.cjs',
       '.lintstagedrc.js',
+      'jest.setup.js',
       'public/**',
       'build/**',
       '.git/**',

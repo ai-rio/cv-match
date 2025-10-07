@@ -35,11 +35,7 @@ export default function Home() {
               description="OpenAI and Claude API integrations"
               icon="🤖"
             />
-            <FeatureCard
-              title="Tailwind CSS"
-              description="Utility-first CSS framework"
-              icon="🎨"
-            />
+            <FeatureCard title="Tailwind CSS" description="Utility-first CSS framework" icon="🎨" />
             <FeatureCard
               title="Docker Ready"
               description="Development and production containers"
@@ -66,7 +62,15 @@ export default function Home() {
   );
 }
 
-function FeatureCard({ title, description, icon }: { title: string; description: string; icon: string }) {
+function FeatureCard({
+  title,
+  description,
+  icon,
+}: {
+  title: string;
+  description: string;
+  icon: string;
+}) {
   return (
     <div className="flex flex-col p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
       <div className="flex items-center">

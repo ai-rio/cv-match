@@ -11,9 +11,10 @@ declare const process: {
 // API Base URL
 // For client-side code, use the environment variable or localhost
 // The environment variable is set in docker-compose.yml
-const API_URL = typeof window !== 'undefined'
-  ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
-  : 'http://backend:8000'; // When running server-side in Docker, use the service name
+const API_URL =
+  typeof window !== 'undefined'
+    ? process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+    : 'http://backend:8000'; // When running server-side in Docker, use the service name
 
 // Type definitions
 export interface TextGenerationRequest {
@@ -52,7 +53,9 @@ export interface EmbeddingResponse {
 
 // Helper to get authentication token
 async function getAuthToken() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   return session?.access_token;
 }
 
@@ -71,8 +74,8 @@ async function apiRequest(endpoint: string, method: string, body?: any) {
       method,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json',
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
       },
       mode: 'cors',
       body: body ? JSON.stringify(body) : undefined,
@@ -99,7 +102,9 @@ async function apiRequest(endpoint: string, method: string, body?: any) {
 }
 
 // LLM API functions
-export async function generateText(request: TextGenerationRequest): Promise<TextGenerationResponse> {
+export async function generateText(
+  request: TextGenerationRequest
+): Promise<TextGenerationResponse> {
   return apiRequest('/api/llm/generate', 'POST', request);
 }
 

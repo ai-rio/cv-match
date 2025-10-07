@@ -58,12 +58,16 @@ export async function signOut() {
 }
 
 export async function getCurrentUser() {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   return user;
 }
 
 // Session management
-export function onAuthStateChange(callback: (event: 'SIGNED_IN' | 'SIGNED_OUT' | 'USER_UPDATED', session: any) => void) {
+export function onAuthStateChange(
+  callback: (event: 'SIGNED_IN' | 'SIGNED_OUT' | 'USER_UPDATED', session: any) => void
+) {
   return supabase.auth.onAuthStateChange((event, session) => {
     callback(event as any, session);
   });

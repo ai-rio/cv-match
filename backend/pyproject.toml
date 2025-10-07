@@ -95,3 +95,8 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 asyncio_mode = "auto"
 addopts = "-v --cov=app --cov-report=term-missing --cov-report=html"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.18.2",
+]

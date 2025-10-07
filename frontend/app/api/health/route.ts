@@ -20,7 +20,7 @@ export async function GET() {
     const response = await fetch(`${apiUrl}/`, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
       cache: 'no-store',
     });
@@ -30,7 +30,7 @@ export async function GET() {
         {
           status: 'error',
           message: `Backend connection failed with status: ${response.status}`,
-          backendUrl: apiUrl
+          backendUrl: apiUrl,
         },
         { status: 500 }
       );
@@ -41,7 +41,7 @@ export async function GET() {
     return NextResponse.json({
       status: 'ok',
       backend: data,
-      backendUrl: apiUrl
+      backendUrl: apiUrl,
     });
   } catch (error) {
     console.error('Health check error:', error);
@@ -49,7 +49,7 @@ export async function GET() {
       {
         status: 'error',
         message: error instanceof Error ? error.message : 'Unknown error connecting to backend',
-        backendUrl: 'http://backend:8000'
+        backendUrl: 'http://backend:8000',
       },
       { status: 500 }
     );
