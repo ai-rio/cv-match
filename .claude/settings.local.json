@@ -41,7 +41,8 @@
       "mcp__context7__get-library-docs",
       "Bash(npx husky:*)",
       "Bash(mkdir:*)",
-      "Bash(git show:*)"
+      "Bash(git show:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": [],
