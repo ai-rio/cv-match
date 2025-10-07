@@ -1,0 +1,49 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp:*)",
+      "Bash(supabase:*)",
+      "Bash(make:*)",
+      "Bash(psql:*)",
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Read(//home/carlos/projects/cv-match/backend/**)",
+      "Bash(uv:*)",
+      "Read(//home/carlos/projects/cv-match/.claude/**)",
+      "Read(//WSL.LOCALHOST/UBUNTU/home/carlos/projects/cv-match/.claude/**)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git remote remove:*)",
+      "Bash(python:*)",
+      "Bash(uv run:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv pip install:*)",
+      "Bash(ruff check:*)",
+      "Bash(bun:*)",
+      "Bash(sudo:*)",
+      "Bash(pip install:*)",
+      "Bash(pre-commit:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(cat:*)",
+      "Bash(chmod:*)",
+      "Bash(/home/carlos/projects/.venv/bin/pre-commit:*)",
+      "Bash(npx eslint:*)",
+      "Bash(git reset:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)",
+      "Read(//home/carlos/projects/cv-match/**)",
+      "Bash(python3 -m pip install:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs"
+    ],
+    "deny": [],
+    "ask": [],
+    "additionalDirectories": [
+      "/home/carlos/projects/Resume-Matcher"
+    ]
+  }
+}
