@@ -24,9 +24,9 @@ logger = logging.getLogger(__name__)
 @router.post("/generate", response_model=TextGenerationResponse)
 async def generate_text(
     request: TextGenerationRequest,
+    http_request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security),
     auth_service: SupabaseAuthService = Depends(get_auth_service),
-    http_request: Optional[Request] = None,
     # We will override this service based on the request provider
     llm_service: LLMService = Depends(lambda: get_llm_service("openai")),
 ):
@@ -133,10 +133,10 @@ async def generate_text(
 @router.post("/embedding", response_model=EmbeddingResponse)
 async def create_embedding(
     request: EmbeddingRequest,
+    http_request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security),
     auth_service: SupabaseAuthService = Depends(get_auth_service),
     embedding_service: EmbeddingService = Depends(get_embedding_service),
-    http_request: Optional[Request] = None,
 ):
     """Create an embedding vector for the provided text."""
     try:

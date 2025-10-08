@@ -24,11 +24,11 @@ logger = logging.getLogger(__name__)
 @router.post("/documents", response_model=DocumentUploadResponse)
 async def add_documents(
     request: DocumentInput,
+    http_request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security),
     auth_service: SupabaseAuthService = Depends(get_auth_service),
     embedding_service: EmbeddingService = Depends(get_embedding_service),
     vector_db: QdrantService = Depends(get_vector_db_service),
-    http_request: Optional[Request] = None,
 ):
     """Add documents to the vector database."""
     try:
@@ -101,11 +101,11 @@ async def add_documents(
 @router.post("/search", response_model=list[SearchResult])
 async def search_documents(
     query: SearchQuery,
+    http_request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security),
     auth_service: SupabaseAuthService = Depends(get_auth_service),
     embedding_service: EmbeddingService = Depends(get_embedding_service),
     vector_db: QdrantService = Depends(get_vector_db_service),
-    http_request: Optional[Request] = None,
 ):
     """Search for documents similar to the query."""
     try:

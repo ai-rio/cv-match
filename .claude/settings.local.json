@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(SUPABASE_URL=test SUPABASE_SERVICE_KEY=test uv run python -m pytest tests/unit/test_input_sanitizer.py::TestInputSanitizer::test_system_prompt_injection -v)"
+      "Bash(SUPABASE_URL=test SUPABASE_SERVICE_KEY=test uv run python -m pytest tests/unit/test_input_sanitizer.py::TestInputSanitizer::test_system_prompt_injection -v)",
+      "Bash(docker logs:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker system prune:*)"
     ],
     "deny": [],
     "ask": [],
