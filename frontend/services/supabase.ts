@@ -1,5 +1,11 @@
 import { createClient, type User, type Session } from '@supabase/supabase-js';
-import type { SupabaseUser, SupabaseSession, AuthEvent, AuthResponse, OAuthResponse } from '@/types/supabase';
+import type {
+  SupabaseUser,
+  SupabaseSession,
+  AuthEvent,
+  AuthResponse,
+  OAuthResponse,
+} from '@/types/supabase';
 
 // Initialize the Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -23,13 +29,13 @@ export async function signInWithGoogle(): Promise<OAuthResponse> {
     return {
       provider: 'google',
       url: data?.url || '',
-      error
+      error,
     };
   } catch (error) {
     return {
       provider: 'google',
       url: '',
-      error
+      error,
     };
   }
 }
@@ -45,13 +51,13 @@ export async function signInWithLinkedIn(): Promise<OAuthResponse> {
     return {
       provider: 'linkedin',
       url: data?.url || '',
-      error
+      error,
     };
   } catch (error) {
     return {
       provider: 'linkedin',
       url: '',
-      error
+      error,
     };
   }
 }
@@ -66,13 +72,13 @@ export async function signInWithEmail(email: string, password: string): Promise<
     return {
       user: data.user as SupabaseUser | null,
       session: data.session as SupabaseSession | null,
-      error
+      error,
     };
   } catch (error) {
     return {
       user: null,
       session: null,
-      error
+      error,
     };
   }
 }
@@ -89,13 +95,13 @@ export async function signUpWithEmail(email: string, password: string): Promise<
     return {
       user: data.user as SupabaseUser | null,
       session: data.session as SupabaseSession | null,
-      error
+      error,
     };
   } catch (error) {
     return {
       user: null,
       session: null,
-      error
+      error,
     };
   }
 }
@@ -133,9 +139,7 @@ export async function getCurrentUser(): Promise<SupabaseUser | null> {
 }
 
 // Session management
-export function onAuthStateChange(
-  callback: (event: AuthEvent, session: Session | null) => void
-) {
+export function onAuthStateChange(callback: (event: AuthEvent, session: Session | null) => void) {
   return supabase.auth.onAuthStateChange((event, session) => {
     callback(event as AuthEvent, session);
   });

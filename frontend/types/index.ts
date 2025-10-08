@@ -18,7 +18,11 @@ export type DeepPartial<T> = {
 
 // Common React types
 export type ComponentWithChildren<P = {}> = React.FC<P & { children?: React.ReactNode }>;
-export type AsyncComponent<T = any> = React.FC<{ data?: T; loading?: boolean; error?: string | null }>;
+export type AsyncComponent<T = any> = React.FC<{
+  data?: T;
+  loading?: boolean;
+  error?: string | null;
+}>;
 
 // Form and Event types
 export type FormEventHandler<T = any> = (data: T) => void | Promise<void>;

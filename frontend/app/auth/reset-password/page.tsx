@@ -51,7 +51,8 @@ export default function ResetPassword() {
         router.push('/dashboard');
       }, 3000);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update password. Please try again.';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to update password. Please try again.';
       setMessage({
         type: 'error',
         text: errorMessage,

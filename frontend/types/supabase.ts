@@ -26,7 +26,12 @@ export interface AuthState {
 }
 
 // Auth Event Types
-export type AuthEvent = 'SIGNED_IN' | 'SIGNED_OUT' | 'USER_UPDATED' | 'TOKEN_REFRESHED' | 'PASSWORD_RECOVERY';
+export type AuthEvent =
+  | 'SIGNED_IN'
+  | 'SIGNED_OUT'
+  | 'USER_UPDATED'
+  | 'TOKEN_REFRESHED'
+  | 'PASSWORD_RECOVERY';
 
 // Supabase Auth Response Types
 export interface AuthResponse {
