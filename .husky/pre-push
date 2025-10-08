@@ -13,11 +13,14 @@ if [ -d "frontend" ]; then
     cd ..
 fi
 
-# Frontend ESLint check (warnings allowed)
+# Frontend ESLint check (blocking)
 if [ -d "frontend" ]; then
     echo "🔍 Running ESLint..."
     cd frontend
-    bun run lint || echo "⚠️  ESLint found warnings (not blocking)"
+    bun run lint || {
+        echo "❌ ESLint failed - fix issues before pushing"
+        exit 1
+    }
     cd ..
 fi
 
@@ -25,16 +28,22 @@ fi
 if [ -d "backend" ]; then
     echo "🐍 Running Python linting..."
     cd backend
-    uv run ruff check . || echo "⚠️  Ruff found issues (not blocking)"
+    uv run ruff check . || {
+        echo "❌ Python linting failed - fix issues before pushing"
+        exit 1
+    }
     cd ..
 fi
 
-# Backend Python type checking (informational only)
+# Backend Python type checking (blocking)
 if [ -d "backend" ]; then
     echo "🐍 Running Python type checking..."
     cd backend
     if [ -f "pyproject.toml" ]; then
-        uv run mypy app/ --ignore-missing-imports --explicit-package-bases || echo "⚠️  Mypy found issues (not blocking)"
+        uv run mypy app/ --ignore-missing-imports --explicit-package-bases || {
+            echo "❌ Python type checking failed - fix type errors before pushing"
+            exit 1
+        }
     fi
     cd ..
 fi
