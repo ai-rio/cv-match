@@ -14,7 +14,8 @@
     "type-check": "tsc --noEmit",
     "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules npx jest --watch",
-    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules npx jest --coverage"
+    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules npx jest --coverage",
+    "lint-staged": "lint-staged"
   },
   "dependencies": {
     "@sentry/nextjs": "^10",

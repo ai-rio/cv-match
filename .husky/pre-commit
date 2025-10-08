@@ -5,15 +5,15 @@ echo "🚀 Pre-commit Checks Starting..."
 # Check for staged frontend files and run lint-staged
 if git diff --cached --name-only | grep -q "^frontend/"; then
     echo "🔍 Running lint-staged on frontend files..."
-    cd frontend && npx lint-staged || {
-        echo "❌ Lint-staged failed"
+    cd frontend && bun run lint-staged || {
+        echo "❌ Lint-staged failed - fix critical issues before committing"
         exit 1
     }
     cd ..
 
     echo "📝 Running TypeScript type checking..."
-    cd frontend && npx tsc --noEmit || {
-        echo "❌ TypeScript type checking failed"
+    cd frontend && bun run type-check || {
+        echo "❌ TypeScript type checking failed - fix type errors before committing"
         exit 1
     }
     cd ..
@@ -22,14 +22,14 @@ fi
 # Check for staged Python files and run linting and type checking
 if git diff --cached --name-only | grep -q "\.py$"; then
     echo "🐍 Running Python linting and formatting..."
-    cd backend && uv run ruff check --fix . || {
-        echo "❌ Python linting failed"
+    cd backend && uv run ruff check --fix . --severity=ERROR || {
+        echo "❌ Python linting failed - fix errors before committing"
         exit 1
     }
 
     echo "🐍 Running Python type checking..."
-    uv run mypy app/ --ignore-missing-imports || {
-        echo "❌ Python type checking failed"
+    uv run mypy app/ --ignore-missing-imports --explicit-package-bases --show-error-codes || {
+        echo "❌ Python type checking failed - fix type errors before committing"
         exit 1
     }
     cd ..
