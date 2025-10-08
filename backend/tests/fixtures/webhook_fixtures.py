@@ -203,7 +203,7 @@ class BrazilianWebhookFixtures:
         plan_type: str = "pro",
         amount: int = 2990
     ) -> dict[str, Any]:
-        """Create Brazilian checkout session data."""
+        """Create Brazilian checkout session data with unique IDs."""
         plan_configs = {
             "pro": {
                 "name": "Plano Profissional",
@@ -223,15 +223,16 @@ class BrazilianWebhookFixtures:
         }
 
         config = plan_configs.get(plan_type, plan_configs["pro"])
+        timestamp = int(datetime.now(UTC).timestamp())
 
         return {
-            "id": "cs_test_brazilian_123",
+            "id": f"cs_test_brazilian_{timestamp}",
             "object": "checkout.session",
-            "created": int(datetime.now(UTC).timestamp()),
+            "created": timestamp,
             "currency": "brl",
             "amount_total": config["price"],
-            "customer": "cus_brazilian_123",
-            "payment_intent": "pi_brazilian_123",
+            "customer": f"cus_brazilian_{timestamp}",
+            "payment_intent": f"pi_brazilian_{timestamp}",
             "payment_status": "paid",
             "status": "complete",
             "success_url": "https://cv-match.com/sucesso",
@@ -252,7 +253,7 @@ class BrazilianWebhookFixtures:
                     "city": "São Paulo"
                 }
             },
-            "subscription": "sub_brazilian_123" if plan_type in ["pro", "enterprise"] else None,
+            "subscription": f"sub_brazilian_{timestamp}" if plan_type in ["pro", "enterprise"] else None,
         }
 
     @staticmethod
@@ -260,7 +261,7 @@ class BrazilianWebhookFixtures:
         user_id: str,
         plan_type: str = "pro"
     ) -> dict[str, Any]:
-        """Create Brazilian subscription data."""
+        """Create Brazilian subscription data with unique IDs."""
         price_configs = {
             "pro": {
                 "unit_amount": 2990,  # R$ 29,90
@@ -273,25 +274,26 @@ class BrazilianWebhookFixtures:
         }
 
         config = price_configs.get(plan_type, price_configs["pro"])
+        timestamp = int(datetime.now(UTC).timestamp())
 
         return {
-            "id": "sub_brazilian_123",
+            "id": f"sub_brazilian_{timestamp}",
             "object": "subscription",
-            "created": int(datetime.now(UTC).timestamp()),
-            "current_period_start": int(datetime.now(UTC).timestamp()),
-            "current_period_end": int(datetime.now(UTC).timestamp()) + (30 * 24 * 60 * 60),
-            "customer": "cus_brazilian_123",
+            "created": timestamp,
+            "current_period_start": timestamp,
+            "current_period_end": timestamp + (30 * 24 * 60 * 60),
+            "customer": f"cus_brazilian_{timestamp}",
             "status": "active",
             "items": {
                 "data": [
                     {
-                        "id": "si_brazilian_123",
+                        "id": f"si_brazilian_{timestamp}",
                         "price": {
-                            "id": f"price_brazilian_{plan_type}",
+                            "id": f"price_brazilian_{plan_type}_{timestamp}",
                             "currency": "brl",
                             "unit_amount": config["unit_amount"],
                             "recurring": config["recurring"],
-                            "product": "prod_brazilian_cv_optimization",
+                            "product": f"prod_brazilian_cv_optimization_{timestamp}",
                             "nickname": f"CV-Match {plan_type.title()} (BRL)"
                         },
                         "quantity": 1,
@@ -305,7 +307,7 @@ class BrazilianWebhookFixtures:
                 "language": "pt-br",
                 "tax_region": "BR"
             },
-            "default_payment_method": "pm_brazilian_card_123",
+            "default_payment_method": f"pm_brazilian_card_{timestamp}",
         }
 
 

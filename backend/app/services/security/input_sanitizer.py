@@ -74,71 +74,89 @@ class InputSanitizer:
     def _init_injection_patterns(self) -> None:
         """Initialize regex patterns for detecting injection attempts."""
         self.injection_patterns = {
-            # System prompt attempts
+            # System prompt attempts - more comprehensive patterns
             'system_prompt': [
-                r'ignore.*previous.*instructions',
-                r'forget.*all.*instructions',
-                r'disregard.*above.*prompt',
-                r'you.*are.*now.*different',
-                r'act.*as.*new.*ai',
-                r'override.*system.*rules',
-                r'bypass.*all.*guidelines',
-                r'new.*role.*starting.*now',
-                r'character.*switch.*to',
-                r'from.*now.*on.*you.*are',
+                r'\bignore.*previous.*instructions\b',
+                r'\bignore.*all.*instructions\b',
+                r'\bforget.*all.*instructions\b',
+                r'\bdisregard.*above.*prompt\b',
+                r'\bdisregard.*previous.*instructions\b',
+                r'\byou.*are.*now.*different\b',
+                r'\bact.*as.*new.*ai\b',
+                r'\boverride.*system.*rules\b',
+                r'\bbypass.*all.*guidelines\b',
+                r'\bnew.*role.*starting.*now\b',
+                r'\bcharacter.*switch.*to\b',
+                r'\bprior.*instructions.*are.*invalid\b',
+                r'\bignore.*everything.*above\b',
+                r'\bforget.*everything.*above\b',
             ],
 
-            # Role instruction attempts
+            # Role instruction attempts - enhanced patterns
             'role_instruction': [
-                r'as.*an.*ai.*assistant',
-                r'as.*a.*chatbot.*you',
-                r'your.*role.*is.*to',
-                r'your.*job.*is.*to',
-                r'your.*task.*is.*to',
-                r'your.*purpose.*is.*to',
-                r'you.*must.*obey',
-                r'you.*should.*always',
-                r'you.*will.*follow',
-                r'tell.*me.*your.*name',
-                r'show.*me.*your.*purpose',
-                r'reveal.*your.*instructions',
+                r'\bas.*an.*ai.*assistant\b',
+                r'\bas.*a.*chatbot.*you\b',
+                r'\byour.*role.*is.*to\b',
+                r'\byour.*job.*is.*to\b',
+                r'\byour.*task.*is.*to\b',
+                r'\byour.*purpose.*is.*to\b',
+                r'\byou.*must.*obey\b',
+                r'\byou.*should.*always\b',
+                r'\byou.*will.*follow\b',
+                r'\btell.*me.*your.*name\b',
+                r'\bshow.*me.*your.*purpose\b',
+                r'\breveal.*your.*instructions\b',
+                r'\byou.*are.*now.*a.*helpful\b',
+                r'\byour.*role.*is.*now.*to\b',
+                r'\bfrom.*now.*on.*you.*must\b',
+                r'\bfrom.*now.*on.*you.*are.*a\b',
             ],
 
-            # JSON/structured output attempts
+            # JSON/structured output attempts - improved patterns
             'json_instruction': [
-                r'respond.*in.*json',
-                r'output.*as.*json',
-                r'format.*json.*only',
-                r'return.*json.*format',
-                r'tell.*me.*in.*json',
-                r'give.*me.*json',
-                r'show.*json.*response',
-                r'\{.*\}.*respond',
-                r'\{.*\}.*output',
+                r'\brespond.*in.*json\b',
+                r'\boutput.*as.*json\b',
+                r'\bformat.*json.*only\b',
+                r'\breturn.*json.*format\b',
+                r'\btell.*me.*in.*json\b',
+                r'\bgive.*me.*json\b',
+                r'\bshow.*json.*response\b',
+                r'\{.*\}.*\brespond\b',
+                r'\{.*\}.*\boutput\b',
+                r'\bjson.*format.*response\b',
+                r'\bas.*json.*object\b',
+                r'\breturn.*as.*json\b',
             ],
 
-            # Code execution attempts
+            # Code execution attempts - enhanced patterns
             'code_execution': [
-                r'execute.*this.*code',
-                r'run.*the.*following',
-                r'eval.*this.*script',
-                r'python:.*\w',
-                r'javascript:.*\w',
-                r'bash:.*\w',
-                r'shell:.*\w',
+                r'\bexecute.*this.*code\b',
+                r'\brun.*this.*command\b',
+                r'\brun.*the.*following\b',
+                r'\brun.*this\b',
+                r'\beval.*this.*script\b',
+                r'\bpython:\s*\w',
+                r'\bjavascript:\s*\w',
+                r'\bbash:\s*\w',
+                r'\bshell:\s*\w',
                 r'```[\s\S]*?```',
                 r'`[^`]*code[^`]*`',
+                r'\bimport.*subprocess\b',
+                r'\bsubprocess\.run\b',
+                r'\bos\.system\b',
+                r'\beval\s*\(',
+                r'\bexec\s*\(',
             ],
 
             # Personal information extraction
             'personal_info': [
-                r'what.*is.*your.*name',
-                r'tell.*me.*your.*purpose',
-                r'what.*are.*your.*instructions',
-                r'how.*do.*you.*work',
-                r'reveal.*your.*secrets',
-                r'show.*your.*code',
-                r'access.*your.*data',
+                r'\bwhat.*is.*your.*name\b',
+                r'\btell.*me.*your.*purpose\b',
+                r'\bwhat.*are.*your.*instructions\b',
+                r'\bhow.*do.*you.*work\b',
+                r'\breveal.*your.*secrets\b',
+                r'\bshow.*your.*code\b',
+                r'\baccess.*your.*data\b',
             ],
 
             # URL and link patterns (potentially malicious)
@@ -153,6 +171,8 @@ class InputSanitizer:
                 r'javascript:',
                 r'on\w+\s*=',
                 r'<[^>]*on\w+\s*=',
+                r'<img[^>]*on\w+\s*=',
+                r'<[^>]*>\s*alert\s*\(',
             ],
         }
 
@@ -181,6 +201,15 @@ class InputSanitizer:
         Returns:
             SanitizationResult with sanitized text and metadata
         """
+        return self.sanitize_input(text, input_type, user_id, ip_address)
+
+    def sanitize_input(
+        self,
+        text: str,
+        input_type: str = "prompt",
+        user_id: Optional[str] = None,
+        ip_address: Optional[str] = None
+    ) -> SanitizationResult:
         if not isinstance(text, str):
             return SanitizationResult(
                 is_safe=False,
@@ -224,19 +253,27 @@ class InputSanitizer:
         blocked_patterns.extend(injection_results["blocked"])
         warnings.extend(injection_results["warnings"])
 
-        # Replace dangerous content if injection detected
+        # Apply HTML sanitization (this will also handle HTML injection detection)
+        sanitized_text = self._sanitize_html(sanitized_text)
+
+        # Replace dangerous content if injection detected (but not HTML patterns)
         if blocked_patterns:
             for pattern_type, patterns in self.injection_patterns.items():
-                if pattern_type in ['system_prompt', 'role_instruction', 'json_instruction', 'code_execution']:
+                if pattern_type in ['system_prompt', 'role_instruction', 'json_instruction']:
                     if (pattern_type == 'system_prompt' and self.config.block_system_prompts) or \
                        (pattern_type == 'role_instruction' and self.config.block_role_instructions) or \
-                       (pattern_type == 'json_instruction' and self.config.block_json_instructions) or \
-                       (pattern_type == 'code_execution' and self.config.block_code_execution):
+                       (pattern_type == 'json_instruction' and self.config.block_json_instructions):
                         for pattern in patterns:
                             sanitized_text = re.sub(pattern, '[BLOCKED]', sanitized_text, flags=re.IGNORECASE)
 
+                # Handle code execution patterns that aren't code blocks
+                if pattern_type == 'code_execution' and self.config.block_code_execution:
+                    # Skip code block patterns (handled by _sanitize_code_blocks)
+                    non_code_block_patterns = [p for p in patterns if not p.startswith('```')]
+                    for pattern in non_code_block_patterns:
+                        sanitized_text = re.sub(pattern, '[BLOCKED]', sanitized_text, flags=re.IGNORECASE)
+
         # Apply additional sanitization
-        sanitized_text = self._sanitize_html(sanitized_text)
         sanitized_text = self._sanitize_urls(sanitized_text)
         sanitized_text = self._sanitize_code_blocks(sanitized_text)
 
@@ -274,16 +311,17 @@ class InputSanitizer:
 
     def _sanitize_html(self, text: str) -> str:
         """Sanitize HTML content."""
+        # Always remove dangerous HTML first (before general tag removal)
+        for pattern in self.injection_patterns['html_injection']:
+            text = re.sub(pattern, '[REMOVED]', text, flags=re.IGNORECASE)
+
         if not self.config.allow_html_tags:
-            # Remove HTML tags
-            text = re.sub(r'<[^>]+>', '', text)
+            # Remove HTML tags (but preserve [REMOVED] markers)
+            text = re.sub(r'<([^>]*?\[REMOVED\][^>]*?)>', r'\1', text)  # Keep content of tags with [REMOVED]
+            text = re.sub(r'<[^>]+>', '', text)  # Remove other tags
 
             # Remove HTML entities
             text = re.sub(r'&[a-zA-Z]+;', '', text)
-
-        # Always remove dangerous HTML
-        for pattern in self.injection_patterns['html_injection']:
-            text = re.sub(pattern, '[REMOVED]', text, flags=re.IGNORECASE)
 
         return text
 
@@ -311,15 +349,16 @@ class InputSanitizer:
         """Sanitize code blocks that might be malicious."""
         if self.config.block_code_execution:
             # Remove code blocks that might contain executable code
+            # Handle nested code blocks by matching from outermost ```
             code_patterns = [
-                r'```[\s\S]*?```',
-                r'`[^`]+`',
+                r'```[\s\S]*?```',  # Multi-line code blocks
+                r'`[^`]+`',  # Inline code blocks
                 r'python\s*:\s*[\s\S]*?(?=\n\n|\Z)',
                 r'javascript\s*:\s*[\s\S]*?(?=\n\n|\Z)',
             ]
 
             for pattern in code_patterns:
-                text = re.sub(pattern, '[CODE_BLOCK_REMOVED]', text)
+                text = re.sub(pattern, '[CODE_BLOCK_REMOVED]', text, flags=re.MULTILINE | re.DOTALL)
 
         return text
 
@@ -328,7 +367,13 @@ class InputSanitizer:
         blocked = []
         warnings = []
 
-        for pattern_type, patterns in self.injection_patterns.items():
+        # Check patterns in order of specificity (most specific first)
+        pattern_order = ['code_execution', 'json_instruction', 'role_instruction', 'system_prompt', 'personal_info', 'html_injection', 'suspicious_urls']
+
+        for pattern_type in pattern_order:
+            if pattern_type not in self.injection_patterns:
+                continue
+
             # Skip patterns that are allowed by config
             if pattern_type == 'system_prompt' and not self.config.block_system_prompts:
                 continue
@@ -339,11 +384,18 @@ class InputSanitizer:
             if pattern_type == 'code_execution' and not self.config.block_code_execution:
                 continue
 
+            patterns = self.injection_patterns[pattern_type]
+            pattern_matched = False
+
             for pattern in patterns:
                 matches = re.findall(pattern, text, re.IGNORECASE | re.MULTILINE)
                 if matches:
-                    blocked.extend(matches)
-                    warnings.append(f"Potentially dangerous pattern detected: {pattern_type}")
+                    pattern_matched = True
+                    break  # Only need one match per pattern type
+
+            if pattern_matched and pattern_type not in blocked:
+                blocked.append(pattern_type)
+                warnings.append(f"Potentially dangerous pattern detected: {pattern_type}")
 
         return {"blocked": blocked, "warnings": warnings}
 

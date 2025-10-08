@@ -70,8 +70,8 @@ def webhook_headers() -> dict[str, str]:
 def sample_user() -> dict[str, Any]:
     """Sample user data for testing."""
     return {
-        "id": "user_1234567890",
-        "email": "test@example.com",
+        "id": "8b73efd7-50ae-4d41-b8b7-7edb69ff11f6",
+        "email": "carlos@ai.rio.br",
         "name": "Test User",
         "stripe_customer_id": "cus_test1234567890",
     }
@@ -79,59 +79,61 @@ def sample_user() -> dict[str, Any]:
 
 @pytest.fixture
 def sample_checkout_session() -> dict[str, Any]:
-    """Sample Stripe checkout session data."""
+    """Sample Stripe checkout session data with unique IDs."""
+    timestamp = int(datetime.now(UTC).timestamp())
     return {
-        "id": "cs_test_1234567890",
+        "id": f"cs_test_{timestamp}",
         "object": "checkout.session",
-        "created": 1704067200,  # 2024-01-01 00:00:00 UTC
+        "created": timestamp,
         "currency": "brl",
         "amount_total": 2990,  # R$ 29.90 in cents
-        "customer": "cus_test1234567890",
-        "payment_intent": "pi_test1234567890",
+        "customer": f"cus_test_{timestamp}",
+        "payment_intent": f"pi_test_{timestamp}",
         "payment_status": "paid",
         "status": "complete",
         "success_url": "https://example.com/success",
         "cancel_url": "https://example.com/cancel",
         "metadata": {
-            "user_id": "user_1234567890",
+            "user_id": "8b73efd7-50ae-4d41-b8b7-7edb69ff11f6",
             "product": "cv_optimization",
             "plan": "pro_monthly"
         },
-        "subscription": "sub_test1234567890",
+        "subscription": f"sub_test_{timestamp}",
     }
 
 
 @pytest.fixture
 def sample_subscription() -> dict[str, Any]:
-    """Sample Stripe subscription data."""
+    """Sample Stripe subscription data with unique IDs."""
+    timestamp = int(datetime.now(UTC).timestamp())
     return {
-        "id": "sub_test1234567890",
+        "id": f"sub_test_{timestamp}",
         "object": "subscription",
-        "created": 1704067200,
-        "current_period_start": 1704067200,
-        "current_period_end": 1706745600,  # +30 days
-        "customer": "cus_test1234567890",
+        "created": timestamp,
+        "current_period_start": timestamp,
+        "current_period_end": timestamp + (30 * 24 * 60 * 60),  # +30 days
+        "customer": f"cus_test_{timestamp}",
         "status": "active",
         "items": {
             "data": [
                 {
-                    "id": "si_test1234567890",
+                    "id": f"si_test_{timestamp}",
                     "price": {
-                        "id": "price_test1234567890",
+                        "id": f"price_test_{timestamp}",
                         "currency": "brl",
                         "unit_amount": 2990,
                         "recurring": {
                             "interval": "month",
                             "interval_count": 1,
                         },
-                        "product": "prod_test1234567890",
+                        "product": f"prod_test_{timestamp}",
                     },
                     "quantity": 1,
                 }
             ]
         },
         "metadata": {
-            "user_id": "user_1234567890",
+            "user_id": "8b73efd7-50ae-4d41-b8b7-7edb69ff11f6",
             "plan": "pro_monthly"
         },
     }
@@ -139,39 +141,41 @@ def sample_subscription() -> dict[str, Any]:
 
 @pytest.fixture
 def sample_invoice() -> dict[str, Any]:
-    """Sample Stripe invoice data."""
+    """Sample Stripe invoice data with unique IDs."""
+    timestamp = int(datetime.now(UTC).timestamp())
     return {
-        "id": "in_test1234567890",
+        "id": f"in_test_{timestamp}",
         "object": "invoice",
-        "created": 1704067200,
-        "customer": "cus_test1234567890",
-        "subscription": "sub_test1234567890",
+        "created": timestamp,
+        "customer": f"cus_test_{timestamp}",
+        "subscription": f"sub_test_{timestamp}",
         "status": "paid",
         "amount_paid": 2990,
         "currency": "brl",
-        "period_start": 1704067200,
-        "period_end": 1706745600,
-        "payment_intent": "pi_test1234567890",
+        "period_start": timestamp,
+        "period_end": timestamp + (30 * 24 * 60 * 60),
+        "payment_intent": f"pi_test_{timestamp}",
         "metadata": {
-            "user_id": "user_1234567890"
+            "user_id": "8b73efd7-50ae-4d41-b8b7-7edb69ff11f6"
         },
     }
 
 
 @pytest.fixture
 def sample_payment_intent() -> dict[str, Any]:
-    """Sample Stripe payment intent data."""
+    """Sample Stripe payment intent data with unique IDs."""
+    timestamp = int(datetime.now(UTC).timestamp())
     return {
-        "id": "pi_test1234567890",
+        "id": f"pi_test_{timestamp}",
         "object": "payment_intent",
-        "created": 1704067200,
+        "created": timestamp,
         "amount": 2990,
         "currency": "brl",
-        "customer": "cus_test1234567890",
+        "customer": f"cus_test_{timestamp}",
         "status": "succeeded",
-        "payment_method": "pm_test1234567890",
+        "payment_method": f"pm_test_{timestamp}",
         "metadata": {
-            "user_id": "user_1234567890",
+            "user_id": "8b73efd7-50ae-4d41-b8b7-7edb69ff11f6",
             "product": "cv_optimization"
         },
     }
@@ -179,17 +183,18 @@ def sample_payment_intent() -> dict[str, Any]:
 
 @pytest.fixture
 def webhook_events_base() -> dict[str, Any]:
-    """Base structure for webhook events."""
+    """Base structure for webhook events with unique IDs."""
+    timestamp = int(datetime.now(UTC).timestamp())
     return {
-        "id": "evt_test1234567890",
+        "id": f"evt_test_{timestamp}",
         "object": "event",
         "api_version": "2023-10-16",
-        "created": int(datetime.now(UTC).timestamp()),
+        "created": timestamp,
         "livemode": False,
         "pending_webhooks": 0,
         "request": {
-            "id": "req_test1234567890",
-            "idempotency_key": "test_key_1234567890"
+            "id": f"req_test_{timestamp}",
+            "idempotency_key": f"test_key_{timestamp}"
         },
         "type": "",
         "data": {
@@ -241,6 +246,66 @@ def brazilian_pricing() -> dict[str, Any]:
             ]
         }
     }
+
+
+@pytest.fixture
+async def cleanup_test_data():
+    """Cleanup test data before and after each test."""
+    # Define test patterns to clean up (dynamic IDs generated with timestamps)
+    # We'll clean up any test data created in the last hour to avoid conflicts
+
+    # Clean up before test
+    await _cleanup_test_records()
+
+    yield
+
+    # Clean up after test
+    await _cleanup_test_records()
+
+
+async def _cleanup_test_records():
+    """Clean up test records from all relevant tables."""
+    try:
+        from supabase import create_client
+        from app.core.config import settings
+
+        # Create Supabase client
+        supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
+
+        # Clean up payment_history - remove test records
+        result = supabase.table("payment_history").select("*").ilike("stripe_payment_id", "pi_test_%").execute()
+        for record in result.data or []:
+            supabase.table("payment_history").delete().eq("id", record["id"]).execute()
+
+        # Clean up stripe_webhook_events - remove test records
+        result = supabase.table("stripe_webhook_events").select("*").ilike("stripe_event_id", "evt_test_%").execute()
+        for record in result.data or []:
+            supabase.table("stripe_webhook_events").delete().eq("id", record["id"]).execute()
+
+        # Clean up old static test data (legacy)
+        static_patterns = [
+            "pi_test1234567890",
+            "cs_test1234567890",
+            "cus_test1234567890",
+            "sub_test1234567890",
+            "in_test1234567890",
+            "evt_test1234567890",
+            "req_test1234567890"
+        ]
+
+        for pattern in static_patterns:
+            # Clean up payment_history
+            supabase.table("payment_history").delete().or_(f"stripe_payment_id.eq.{pattern},stripe_checkout_session_id.eq.{pattern}").execute()
+
+            # Clean up webhook events
+            supabase.table("stripe_webhook_events").delete().or_(f"stripe_event_id.eq.{pattern},request_id.eq.{pattern}").execute()
+
+            # Clean up subscriptions
+            supabase.table("subscriptions").delete().or_(f"stripe_subscription_id.eq.{pattern},stripe_customer_id.eq.{pattern}").execute()
+
+    except Exception as e:
+        # Log error but don't fail tests for cleanup issues
+        print(f"Warning: Cleanup failed: {e}")
 
 
 # Environment setup for tests
