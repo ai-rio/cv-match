@@ -4,7 +4,6 @@ Supports Brazilian market with BRL currency and local payment methods.
 """
 
 import os
-from datetime import UTC, datetime
 from typing import Any, Dict, Optional
 
 import stripe

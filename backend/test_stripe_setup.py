@@ -23,7 +23,7 @@ import json
 import os
 import sys
 from datetime import UTC, datetime
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import httpx
 from dotenv import load_dotenv
@@ -593,7 +593,7 @@ class StripeTestValidator:
     async def run_all_tests(self) -> bool:
         """Run all validation tests."""
         print(f"{Colors.BOLD}{Colors.BLUE}🚀 CV-Match Stripe Test Mode Validation{Colors.END}")
-        print(f"Testing Brazilian market payment setup\n")
+        print("Testing Brazilian market payment setup\n")
 
         results = {}
 

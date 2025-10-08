@@ -8,7 +8,7 @@ to prevent prompt injection attacks and ensure secure LLM interactions.
 import logging
 import re
 from typing import Any, Dict, List, Optional, Union
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from app.core.config import settings
 

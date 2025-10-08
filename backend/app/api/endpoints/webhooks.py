@@ -4,10 +4,8 @@ Brazilian market payment webhooks with signature verification.
 """
 
 import logging
-from typing import Any, Dict
 
-import stripe
-from fastapi import APIRouter, Header, HTTPException, Request, Response, status
+from fastapi import APIRouter, Header, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 
 from app.services.stripe_service import stripe_service

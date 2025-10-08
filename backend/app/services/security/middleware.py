@@ -8,15 +8,14 @@ input sanitization and security monitoring to LLM API calls.
 import logging
 import time
 from typing import Any, Dict, Optional
-from fastapi import Request, Response, HTTPException, status
+from fastapi import Request, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from app.services.security.input_sanitizer import (
     SanitizationResult,
-    validate_request,
-    default_sanitizer
+    validate_request
 )
 
 logger = logging.getLogger(__name__)

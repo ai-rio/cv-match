@@ -4,7 +4,7 @@ Handles checkout sessions, payment processing, and subscription management.
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse

@@ -22,7 +22,7 @@ fi
 # Check for staged Python files and run linting and type checking
 if git diff --cached --name-only | grep -q "\.py$"; then
     echo "🐍 Running Python linting and formatting..."
-    cd backend && uv run ruff check --fix . --severity=ERROR || {
+    cd backend && uv run ruff check --fix . --select=E,F || {
         echo "❌ Python linting failed - fix errors before committing"
         exit 1
     }
