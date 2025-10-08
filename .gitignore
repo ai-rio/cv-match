@@ -69,3 +69,4 @@ qdrant_data/
 supabase/.branches
 supabase/.temp
 .claude/
+.env.sentry-build-plugin

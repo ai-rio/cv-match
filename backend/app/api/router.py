@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.endpoints import auth, llm, vectordb
+from app.api.endpoints import auth, llm, vectordb, payments, webhooks
 
 api_router = APIRouter()
 
@@ -8,3 +8,5 @@ api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 api_router.include_router(llm.router, prefix="/llm", tags=["LLM Services"])
 api_router.include_router(vectordb.router, prefix="/vectordb", tags=["Vector Database"])
+api_router.include_router(payments.router, prefix="/payments", tags=["Payments"])
+api_router.include_router(webhooks.router, tags=["Webhooks"])

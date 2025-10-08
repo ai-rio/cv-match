@@ -17,6 +17,7 @@
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules npx jest --coverage"
   },
   "dependencies": {
+    "@sentry/nextjs": "^10",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.39.3",
     "autoprefixer": "^10.4.21",
