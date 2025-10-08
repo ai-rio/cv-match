@@ -7,7 +7,8 @@ import logging
 from datetime import UTC, datetime
 from typing import Any, Dict, Optional
 
-from app.services.supabase.database import SupabaseDatabaseService
+from supabase import Client, create_client
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +18,7 @@ class WebhookService:
 
     def __init__(self):
         """Initialize webhook service."""
-        self.db_service = SupabaseDatabaseService("stripe_webhook_events")
-        self.payment_db = SupabaseDatabaseService("payment_history")
-        self.subscription_db = SupabaseDatabaseService("subscriptions")
-        self.user_db = SupabaseDatabaseService("users")
+        self.supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
 
     def _safe_fromtimestamp(self, timestamp: Any) -> Optional[str]:
         """Safely convert timestamp to ISO string."""
@@ -120,7 +118,7 @@ class WebhookService:
             True if event has been processed, False otherwise
         """
         try:
-            existing_event = await self.db_service.get_by_field(
+            existing_event = await self._get_by_field("stripe_webhook_events", 
                 field_name="stripe_event_id",
                 field_value=stripe_event_id
             )
@@ -159,7 +157,7 @@ class WebhookService:
                 "created_at": datetime.now(UTC).isoformat()
             }
 
-            result = await self.db_service.create(event_log)
+            result = await self._create("stripe_webhook_events", event_log)
             return {
                 "success": True,
                 "webhook_event_id": result.get("id"),
@@ -230,7 +228,7 @@ class WebhookService:
                 }
 
             # Get user information
-            user = await self.user_db.get_by_field("id", user_id)
+            user = await self._get_by_field("users", "id", user_id)
             if not user:
                 return {
                     "success": False,
@@ -253,11 +251,11 @@ class WebhookService:
                 "updated_at": datetime.now(UTC).isoformat()
             }
 
-            payment_result = await self.payment_db.create(payment_record)
+            payment_result = await self._create("payment_history", payment_record)
 
             # Update user with Stripe customer ID if not set
             if not user.get("stripe_customer_id") and session_data.get("customer"):
-                await self.user_db.update(
+                await self._update("users", 
                     user_id,
                     {"stripe_customer_id": session_data.get("customer")}
                 )
@@ -334,7 +332,7 @@ class WebhookService:
                 }
 
             # Find existing subscription
-            existing_sub = await self.subscription_db.get_by_field(
+            existing_sub = await self._get_by_field("subscriptions", 
                 "stripe_subscription_id",
                 stripe_subscription_id
             )
@@ -361,7 +359,7 @@ class WebhookService:
             if canceled_at is not None:
                 update_data["canceled_at"] = datetime.fromtimestamp(canceled_at).isoformat()
 
-            await self.subscription_db.update(existing_sub["id"], update_data)
+            await self._update("subscriptions", existing_sub["id"], update_data)
 
             return {
                 "success": True,
@@ -395,13 +393,13 @@ class WebhookService:
                 }
 
             # Find and update existing subscription
-            existing_sub = await self.subscription_db.get_by_field(
+            existing_sub = await self._get_by_field("subscriptions", 
                 "stripe_subscription_id",
                 stripe_subscription_id
             )
 
             if existing_sub:
-                await self.subscription_db.update(
+                await self._update("subscriptions", 
                     existing_sub["id"],
                     {
                         "status": "canceled",
@@ -443,7 +441,7 @@ class WebhookService:
             user_id = invoice_data.get("metadata", {}).get("user_id")
             if not user_id and invoice_data.get("subscription"):
                 # Try to get user_id from subscription
-                subscription = await self.subscription_db.get_by_field(
+                subscription = await self._get_by_field("subscriptions", 
                     "stripe_subscription_id",
                     invoice_data.get("subscription")
                 )
@@ -471,7 +469,7 @@ class WebhookService:
                 "updated_at": datetime.now(UTC).isoformat()
             }
 
-            payment_result = await self.payment_db.create(payment_record)
+            payment_result = await self._create("payment_history", payment_record)
 
             return {
                 "success": True,
@@ -506,13 +504,13 @@ class WebhookService:
                 }
 
             # Find and update subscription status
-            subscription = await self.subscription_db.get_by_field(
+            subscription = await self._get_by_field("subscriptions", 
                 "stripe_subscription_id",
                 subscription_id
             )
 
             if subscription:
-                await self.subscription_db.update(
+                await self._update("subscriptions", 
                     subscription["id"],
                     {
                         "status": "past_due",
@@ -570,7 +568,7 @@ class WebhookService:
                 "updated_at": datetime.now(UTC).isoformat()
             }
 
-            payment_result = await self.payment_db.create(payment_record)
+            payment_result = await self._create("payment_history", payment_record)
 
             return {
                 "success": True,
@@ -619,7 +617,7 @@ class WebhookService:
                 "updated_at": datetime.now(UTC).isoformat()
             }
 
-            payment_result = await self.payment_db.create(payment_record)
+            payment_result = await self._create("payment_history", payment_record)
 
             return {
                 "success": True,
@@ -656,7 +654,7 @@ class WebhookService:
             "updated_at": datetime.now(UTC).isoformat()
         }
 
-        return await self.subscription_db.create(subscription_record)
+        return await self._create("subscriptions", subscription_record)
 
     async def _mark_event_processed(
         self,
@@ -677,15 +675,31 @@ class WebhookService:
                 update_data["error_message"] = error_message
 
             # Find and update the event
-            existing_event = await self.db_service.get_by_field(
+            existing_event = await self._get_by_field("stripe_webhook_events", 
                 "stripe_event_id",
                 stripe_event_id
             )
 
             if existing_event:
-                await self.db_service.update(existing_event["id"], update_data)
+                await self._update("stripe_webhook_events", existing_event["id"], update_data)
         except Exception as e:
             logger.error(f"Error marking event as processed: {str(e)}")
+
+
+    async def _get_by_field(self, table_name: str, field_name: str, field_value: Any) -> Optional[Dict[str, Any]]:
+        """Get a record by field name and value."""
+        response = self.supabase.table(table_name).select("*").eq(field_name, field_value).execute()
+        return response.data[0] if response.data else None
+
+    async def _create(self, table_name: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a record in a table."""
+        response = self.supabase.table(table_name).insert(data).execute()
+        return response.data[0] if response.data else {}
+
+    async def _update(self, table_name: str, record_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Update a record in a table."""
+        response = self.supabase.table(table_name).update(data).eq("id", record_id).execute()
+        return response.data[0] if response.data else {}
 
     def _get_payment_description(self, session_data: Dict[str, Any]) -> str:
         """Generate payment description based on session data."""

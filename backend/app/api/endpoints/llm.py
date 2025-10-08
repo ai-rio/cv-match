@@ -26,7 +26,6 @@ async def generate_text(
     http_request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security),
     auth_service: SupabaseAuthService = Depends(get_auth_service),
-    # We will override this service based on the request provider
     llm_service: LLMService = Depends(lambda: get_llm_service("openai")),
 ):
     """Generate text using the specified LLM model."""
