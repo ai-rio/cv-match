@@ -16,6 +16,12 @@ async def get_current_user(
     """Get the currently authenticated user profile."""
     try:
         user = await auth_service.get_user(credentials.credentials)
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         return UserProfile(
             id=user.id,
             email=user.email,

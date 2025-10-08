@@ -37,7 +37,7 @@ export default function TextGenerator() {
     }
   };
 
-  const handleSettingChange = (key: keyof typeof settings, value: any) => {
+  const handleSettingChange = (key: keyof typeof settings, value: string | number) => {
     setSettings({ ...settings, [key]: value });
   };
 

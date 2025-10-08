@@ -22,6 +22,12 @@ class WebhookService:
         self.subscription_db = SupabaseDatabaseService("subscriptions")
         self.user_db = SupabaseDatabaseService("users")
 
+    def _safe_fromtimestamp(self, timestamp: Any) -> Optional[str]:
+        """Safely convert timestamp to ISO string."""
+        if timestamp is not None:
+            return datetime.fromtimestamp(float(timestamp)).isoformat()
+        return None
+
     async def process_webhook_event(
         self,
         event_type: str,
@@ -340,22 +346,20 @@ class WebhookService:
                 }
 
             # Update subscription
+            current_period_start = subscription_data.get("current_period_start")
+            current_period_end = subscription_data.get("current_period_end")
+
             update_data = {
                 "status": subscription_data.get("status"),
-                "current_period_start": datetime.fromtimestamp(
-                    subscription_data.get("current_period_start")
-                ).isoformat(),
-                "current_period_end": datetime.fromtimestamp(
-                    subscription_data.get("current_period_end")
-                ).isoformat(),
+                "current_period_start": datetime.fromtimestamp(current_period_start).isoformat() if current_period_start is not None else None,
+                "current_period_end": datetime.fromtimestamp(current_period_end).isoformat() if current_period_end is not None else None,
                 "cancel_at_period_end": subscription_data.get("cancel_at_period_end", False),
                 "updated_at": datetime.now(UTC).isoformat()
             }
 
-            if subscription_data.get("canceled_at"):
-                update_data["canceled_at"] = datetime.fromtimestamp(
-                    subscription_data.get("canceled_at")
-                ).isoformat()
+            canceled_at = subscription_data.get("canceled_at")
+            if canceled_at is not None:
+                update_data["canceled_at"] = datetime.fromtimestamp(canceled_at).isoformat()
 
             await self.subscription_db.update(existing_sub["id"], update_data)
 
@@ -644,12 +648,8 @@ class WebhookService:
             "status": subscription_data.get("status"),
             "price_id": subscription_data.get("items", {}).get("data", [{}])[0].get("price", {}).get("id"),
             "product_id": subscription_data.get("items", {}).get("data", [{}])[0].get("price", {}).get("product"),
-            "current_period_start": datetime.fromtimestamp(
-                subscription_data.get("current_period_start")
-            ).isoformat(),
-            "current_period_end": datetime.fromtimestamp(
-                subscription_data.get("current_period_end")
-            ).isoformat(),
+            "current_period_start": self._safe_fromtimestamp(subscription_data.get("current_period_start")),
+            "current_period_end": self._safe_fromtimestamp(subscription_data.get("current_period_end")),
             "cancel_at_period_end": subscription_data.get("cancel_at_period_end", False),
             "metadata": subscription_data.get("metadata", {}),
             "created_at": datetime.now(UTC).isoformat(),

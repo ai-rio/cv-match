@@ -10,6 +10,9 @@ from typing import Any, Dict, Optional
 import stripe
 from dotenv import load_dotenv
 
+# Stripe error types for proper exception handling
+StripeError = stripe.StripeError
+
 load_dotenv()
 
 
@@ -168,7 +171,7 @@ class StripeService:
                 "amount": plan_config["price"]
             }
 
-        except stripe.error.StripeError as e:
+        except StripeError as e:
             return {
                 "success": False,
                 "error": str(e),
@@ -201,7 +204,7 @@ class StripeService:
             Customer creation result
         """
         try:
-            customer_params = {
+            customer_params: Dict[str, Any] = {
                 "email": email,
                 "metadata": {
                     "user_id": user_id,
@@ -233,7 +236,7 @@ class StripeService:
                 "customer": customer
             }
 
-        except stripe.error.StripeError as e:
+        except StripeError as e:
             return {
                 "success": False,
                 "error": str(e),
@@ -256,7 +259,7 @@ class StripeService:
                 "success": True,
                 "session": session
             }
-        except stripe.error.StripeError as e:
+        except StripeError as e:
             return {
                 "success": False,
                 "error": str(e),
@@ -312,7 +315,7 @@ class StripeService:
                 "currency": self.default_currency
             }
 
-        except stripe.error.StripeError as e:
+        except StripeError as e:
             return {
                 "success": False,
                 "error": str(e),
@@ -356,7 +359,7 @@ class StripeService:
                 "event_id": event.id
             }
 
-        except stripe.error.SignatureVerificationError:
+        except stripe.SignatureVerificationError:
             return {
                 "success": False,
                 "error": "Invalid webhook signature",

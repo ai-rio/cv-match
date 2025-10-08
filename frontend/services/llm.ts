@@ -59,8 +59,21 @@ async function getAuthToken() {
   return session?.access_token;
 }
 
+// API request types
+type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+interface APIRequestOptions {
+  method: HTTPMethod;
+  body?: Record<string, any>;
+  headers?: Record<string, string>;
+}
+
 // Helper to make authenticated API requests
-async function apiRequest(endpoint: string, method: string, body?: any) {
+async function apiRequest<T = any>(
+  endpoint: string,
+  method: HTTPMethod,
+  body?: Record<string, any>
+): Promise<T> {
   const token = await getAuthToken();
 
   if (!token) {
@@ -94,7 +107,7 @@ async function apiRequest(endpoint: string, method: string, body?: any) {
       throw new Error(errorMessage);
     }
 
-    return response.json();
+    return response.json() as Promise<T>;
   } catch (error) {
     console.error('API request error:', error);
     throw error;

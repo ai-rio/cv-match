@@ -1,14 +1,7 @@
 import { NextResponse } from 'next/server';
+import type { HealthCheckResponse, BaseAPIResponse } from '@/types/api';
 
-// Type declaration for process.env
-declare const process: {
-  env: {
-    NEXT_PUBLIC_API_URL?: string;
-    [key: string]: string | undefined;
-  };
-};
-
-export async function GET() {
+export async function GET(): Promise<NextResponse<HealthCheckResponse | BaseAPIResponse>> {
   try {
     // In Docker environment, we need to use the service name
     // This is a Server Component, so we're making this request from the container
@@ -31,7 +24,8 @@ export async function GET() {
           status: 'error',
           message: `Backend connection failed with status: ${response.status}`,
           backendUrl: apiUrl,
-        },
+          timestamp: new Date().toISOString(),
+        } as BaseAPIResponse,
         { status: 500 }
       );
     }
@@ -42,7 +36,8 @@ export async function GET() {
       status: 'ok',
       backend: data,
       backendUrl: apiUrl,
-    });
+      timestamp: new Date().toISOString(),
+    } as HealthCheckResponse);
   } catch (error) {
     console.error('Health check error:', error);
     return NextResponse.json(
@@ -50,7 +45,8 @@ export async function GET() {
         status: 'error',
         message: error instanceof Error ? error.message : 'Unknown error connecting to backend',
         backendUrl: 'http://backend:8000',
-      },
+        timestamp: new Date().toISOString(),
+      } as BaseAPIResponse,
       { status: 500 }
     );
   }

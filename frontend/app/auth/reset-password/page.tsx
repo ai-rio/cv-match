@@ -50,10 +50,11 @@ export default function ResetPassword() {
       setTimeout(() => {
         router.push('/dashboard');
       }, 3000);
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update password. Please try again.';
       setMessage({
         type: 'error',
-        text: error.message || 'Failed to update password. Please try again.',
+        text: errorMessage,
       });
     } finally {
       setLoading(false);

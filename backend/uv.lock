@@ -202,8 +202,10 @@ dependencies = [
     { name = "openai" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "python-dotenv" },
     { name = "python-multipart" },
     { name = "qdrant-client" },
+    { name = "stripe" },
     { name = "supabase" },
     { name = "uvicorn" },
 ]
@@ -236,9 +238,11 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = "==8.4.2" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = "==1.2.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = "==7.0.0" },
+    { name = "python-dotenv", specifier = "==1.1.1" },
     { name = "python-multipart", specifier = "==0.0.9" },
     { name = "qdrant-client", specifier = "==1.5.4" },
     { name = "ruff", marker = "extra == 'dev'", specifier = "==0.13.3" },
+    { name = "stripe", specifier = "==7.14.0" },
     { name = "supabase", specifier = "==2.9.0" },
     { name = "uvicorn", specifier = "==0.34.3" },
 ]
@@ -1101,6 +1105,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a8/af/94cd4925c8a80b4c06bdef60226c04566973f6e2982957d2eabeecb2d5ca/storage3-0.8.2.tar.gz", hash = "sha256:db05d3fe8fb73bd30c814c4c4749664f37a5dfc78b629e8c058ef558c2b89f5a", size = 9041, upload-time = "2024-10-18T07:05:40.219Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c8/67/7d281ba69b3ba3359f528bb0a1cac9d87896938d80119451123e829b3820/storage3-0.8.2-py3-none-any.whl", hash = "sha256:f2e995b18c77a2a9265d1a33047d43e4d6abb11eb3ca5067959f68281c305de3", size = 16230, upload-time = "2024-10-18T07:05:38.408Z" },
+]
+
+[[package]]
+name = "stripe"
+version = "7.14.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f2/b2/f0e2f0ff27d852817da0964a1f50796932a0c1fcdb48aecc3bb95ae91701/stripe-7.14.0.tar.gz", hash = "sha256:556bfa86f8b298b666ff2caa0d754ee19ece52159d12a45ed7ddb02daadd1799", size = 793052, upload-time = "2024-01-25T17:14:57.365Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/03/78/48d087bd5d17ee71fb95c8b241e84128ef7a6da62e88fc2435844163b474/stripe-7.14.0-py2.py3-none-any.whl", hash = "sha256:f39def4dec42b374a39b110ab809c8130e14b7027ee40e3111a658e0f46709cb", size = 903446, upload-time = "2024-01-25T17:14:53.241Z" },
 ]
 
 [[package]]

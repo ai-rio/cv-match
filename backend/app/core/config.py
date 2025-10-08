@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list[str] | str = ["http://localhost:3000"]
 
     # Supabase
-    SUPABASE_URL: str
-    SUPABASE_SERVICE_KEY: str
+    SUPABASE_URL: str = "http://localhost:54321"
+    SUPABASE_SERVICE_KEY: str = "your_service_key_here"
 
     # LLM
     OPENAI_API_KEY: str = ""

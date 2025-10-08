@@ -160,7 +160,7 @@ class InputSanitizer:
         """Initialize rate limiting tracking."""
         # In production, use Redis or similar for distributed rate limiting
         # For now, use in-memory tracking
-        self.rate_limits = {}
+        self.rate_limits: dict[str, list[float]] = {}
 
     def sanitize_text(
         self,
@@ -191,7 +191,7 @@ class InputSanitizer:
 
         warnings = []
         blocked_patterns = []
-        metadata = {"original_length": len(text)}
+        metadata: Dict[str, Any] = {"original_length": len(text)}
 
         # Check rate limits
         if user_id and not self._check_rate_limit(f"user:{user_id}"):
@@ -393,7 +393,7 @@ class InputSanitizer:
         request_data: Dict[str, Any],
         user_id: Optional[str] = None,
         ip_address: Optional[str] = None
-    ) -> Dict[str, SanitizationResult]:
+    ) -> Dict[str, Union[SanitizationResult, List[SanitizationResult]]]:
         """
         Validate an entire LLM request.
 
@@ -405,7 +405,7 @@ class InputSanitizer:
         Returns:
             Dictionary with sanitization results for each field
         """
-        results = {}
+        results: Dict[str, Union[SanitizationResult, List[SanitizationResult]]] = {}
 
         # Sanitize prompt/text fields
         for field_name in ['prompt', 'text', 'query_text']:
@@ -463,7 +463,7 @@ def validate_request(
     request_data: Dict[str, Any],
     user_id: Optional[str] = None,
     ip_address: Optional[str] = None
-) -> Dict[str, SanitizationResult]:
+) -> Dict[str, Union[SanitizationResult, List[SanitizationResult]]]:
     """
     Convenience function for validating LLM requests.
 

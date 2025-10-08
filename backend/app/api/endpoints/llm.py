@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -25,7 +26,7 @@ async def generate_text(
     request: TextGenerationRequest,
     credentials: HTTPAuthorizationCredentials = Depends(security),
     auth_service: SupabaseAuthService = Depends(get_auth_service),
-    http_request: Request = None,
+    http_request: Optional[Request] = None,
     # We will override this service based on the request provider
     llm_service: LLMService = Depends(lambda: get_llm_service("openai")),
 ):
@@ -135,7 +136,7 @@ async def create_embedding(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     auth_service: SupabaseAuthService = Depends(get_auth_service),
     embedding_service: EmbeddingService = Depends(get_embedding_service),
-    http_request: Request = None,
+    http_request: Optional[Request] = None,
 ):
     """Create an embedding vector for the provided text."""
     try:

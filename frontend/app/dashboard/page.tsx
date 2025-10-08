@@ -7,9 +7,10 @@ import { useEffect, useState } from 'react';
 import LoginForm from '@/components/auth/LoginForm';
 import TextGenerator from '@/components/llm/TextGenerator';
 import { getCurrentUser, signOut } from '@/services/supabase';
+import type { SupabaseUser } from '@/types/supabase';
 
 export default function Dashboard() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 

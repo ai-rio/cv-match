@@ -29,7 +29,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         """Initialize security middleware."""
         super().__init__(app)
         self.enable_rate_limiting = enable_rate_limiting
-        self.request_times = {}  # Simple in-memory tracking
+        self.request_times: dict[str, list[float]] = {}  # Simple in-memory tracking
 
     async def dispatch(self, request: Request, call_next):
         """Process request through security middleware."""
@@ -198,10 +198,14 @@ async def validate_and_sanitize_request(
         )
 
         # Check if any validation failed
-        unsafe_results = [
-            field for field, result in validation_results.items()
-            if not result.is_safe
-        ]
+        unsafe_results = []
+        for field, result in validation_results.items():
+            if isinstance(result, list):
+                # For documents, check if any document is unsafe
+                if any(not doc_result.is_safe for doc_result in result):
+                    unsafe_results.append(field)
+            elif not result.is_safe:
+                unsafe_results.append(field)
 
         if unsafe_results:
             error_messages = []

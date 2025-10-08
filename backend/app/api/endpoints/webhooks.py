@@ -246,10 +246,14 @@ async def test_webhook_endpoint() -> JSONResponse:
         }
 
         # Process the test event
+        event_type = str(test_event.get("type", ""))
+        event_data = test_event.get("data", {}).get("object", {})
+        stripe_event_id = str(test_event.get("id", ""))
+
         result = await webhook_service.process_webhook_event(
-            event_type=test_event["type"],
-            event_data=test_event["data"]["object"],
-            stripe_event_id=test_event["id"]
+            event_type=event_type,
+            event_data=event_data,
+            stripe_event_id=stripe_event_id
         )
 
         return JSONResponse(

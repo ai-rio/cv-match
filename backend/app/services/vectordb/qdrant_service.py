@@ -132,6 +132,9 @@ class QdrantService:
         results = []
         for scored_point in search_result:
             payload = scored_point.payload
+            if payload is None:
+                continue
+
             document = payload.pop("document") if "document" in payload else {}
 
             results.append(
@@ -159,9 +162,10 @@ class QdrantService:
             ids = [ids]
 
         try:
+            # Use the ids directly - mypy issue with list invariance
             self.client.delete(
                 collection_name=self.collection_name,
-                points_selector=models.PointIdsList(points=ids),
+                points_selector=models.PointIdsList(points=ids),  # type: ignore
             )
             return True
         except Exception:
