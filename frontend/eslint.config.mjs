@@ -23,7 +23,7 @@ export default [
       'public/**',
       'build/**',
       '.git/**',
-      'coverage/**'
+      'coverage/**',
     ],
   },
   {
@@ -52,7 +52,6 @@ export default [
       'no-var': 'error',
       'no-debugger': 'error',
       'no-alert': 'error',
-
     },
     languageOptions: {
       parser: tseslint.parser,
