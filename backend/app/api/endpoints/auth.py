@@ -1,11 +1,36 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from pydantic import BaseModel
 
 from app.models.auth import TokenResponse, UserProfile
 from app.services.supabase.auth import SupabaseAuthService, get_auth_service
 
 router = APIRouter()
 security = HTTPBearer()
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+@router.post("/login", response_model=TokenResponse)
+async def login(
+    login_data: LoginRequest,
+    auth_service: SupabaseAuthService = Depends(get_auth_service),
+):
+    """Login with email and password."""
+    try:
+        supabase_token = await auth_service.sign_in_with_email_password(
+            login_data.email,
+            login_data.password
+        )
+        return TokenResponse(access_token=supabase_token, token_type="bearer")
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Login failed: {str(e)}",
+        )
 
 
 @router.get("/me", response_model=UserProfile)

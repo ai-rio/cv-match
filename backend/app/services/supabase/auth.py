@@ -33,6 +33,21 @@ class SupabaseAuthService:
         except Exception:
             return None
 
+    async def sign_in_with_email_password(self, email: str, password: str) -> str:
+        """Sign in with email and password."""
+        try:
+            response = self.supabase.auth.sign_in_with_password({
+                "email": email,
+                "password": password
+            })
+
+            if not response.session or not response.session.access_token:
+                raise ValueError("Failed to authenticate with email and password")
+
+            return response.session.access_token
+        except Exception as e:
+            raise ValueError(f"Email/password authentication failed: {str(e)}")
+
     async def sign_in_with_provider_token(self, provider: str, token: str) -> str:
         """Exchange a provider token (Google, LinkedIn) for a Supabase token."""
         if provider not in ["google", "linkedin"]:

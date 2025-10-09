@@ -1,0 +1,125 @@
+{
+  "generic": {
+    "title": "Ocorreu um erro",
+    "subtitle": "Algo deu errado. Por favor, tente novamente.",
+    "retry": "Tentar novamente",
+    "goHome": "Ir para a página inicial",
+    "contactSupport": "Entrar em contato com o suporte"
+  },
+  "notFound": {
+    "title": "Página não encontrada",
+    "subtitle": "A página que você está procurando não existe ou foi movida.",
+    "goHome": "Ir para a página inicial",
+    "search": "Buscar no site"
+  },
+  "unauthorized": {
+    "title": "Acesso não autorizado",
+    "subtitle": "Você não tem permissão para acessar esta página.",
+    "login": "Fazer login",
+    "goHome": "Ir para a página inicial"
+  },
+  "forbidden": {
+    "title": "Acesso negado",
+    "subtitle": "Você não tem permissão para acessar este recurso.",
+    "goHome": "Ir para a página inicial"
+  },
+  "server": {
+    "title": "Erro do servidor",
+    "subtitle": "Estamos tendo problemas técnicos. Tente novamente em alguns minutos.",
+    "retry": "Tentar novamente",
+    "status": "Status do erro: {status}",
+    "checkStatus": "Verificar status do sistema"
+  },
+  "network": {
+    "title": "Erro de conexão",
+    "subtitle": "Não foi possível conectar ao servidor. Verifique sua conexão com a internet.",
+    "retry": "Tentar novamente",
+    "offline": "Você está offline",
+    "checkConnection": "Verificar conexão"
+  },
+  "validation": {
+    "title": "Erro de validação",
+    "subtitle": "Por favor, corrija os erros abaixo e tente novamente.",
+    "required": "Este campo é obrigatório",
+    "invalid": "Este valor é inválido",
+    "tooShort": "Muito curto",
+    "tooLong": "Muito longo",
+    "email": "Digite um e-mail válido",
+    "password": "A senha deve ter pelo menos 8 caracteres",
+    "passwordMismatch": "As senhas não coincidem"
+  },
+  "quota": {
+    "title": "Limite atingido",
+    "subtitle": "Você atingiu seu limite de otimizações mensais.",
+    "upgrade": "Atualizar para Pro",
+    "learnMore": "Saiba mais sobre os planos Pro",
+    "resetDate": "Seu limite será resetado em {date}"
+  },
+  "payment": {
+    "title": "Erro de pagamento",
+    "subtitle": "Ocorreu um erro ao processar seu pagamento.",
+    "retry": "Tentar novamente",
+    "differentMethod": "Usar outro método de pagamento",
+    "contactSupport": "Entrar em contato com o suporte",
+    "brazilianMethods": "Tente usar PIX ou Boleto"
+  },
+  "file": {
+    "title": "Erro de arquivo",
+    "subtitle": "Ocorreu um erro ao processar seu arquivo.",
+    "invalidFormat": "Formato de arquivo inválido",
+    "tooLarge": "Arquivo muito grande",
+    "corrupted": "Arquivo corrompido",
+    "upload": "Tentar upload novamente"
+  },
+  "subscription": {
+    "title": "Erro de assinatura",
+    "subtitle": "Ocorreu um erro com sua assinatura.",
+    "reactivate": "Reativar assinatura",
+    "contactSupport": "Entrar em contato com o suporte",
+    "billing": "Verificar cobrança"
+  },
+  "maintenance": {
+    "title": "Manutenção programada",
+    "subtitle": "Estamos realizando manutenção no sistema. Voltaremos em breve.",
+    "estimatedTime": "Tempo estimado: {time}",
+    "follow": "Acompanhe em nossas redes sociais",
+    "notifications": "Receba notificações por e-mail"
+  },
+  "rateLimit": {
+    "title": "Muitas tentativas",
+    "subtitle": "Você fez muitas tentativas. Por favor, aguarde e tente novamente.",
+    "waitTime": "Aguarde {time} minutos",
+    "tryAgain": "Tentar novamente"
+  },
+  "featureUnavailable": {
+    "title": "Recurso indisponível",
+    "subtitle": "Este recurso não está disponível no seu plano atual.",
+    "upgrade": "Atualizar plano",
+    "learnMore": "Saiba mais"
+  },
+  "browser": {
+    "title": "Navegador não suportado",
+    "subtitle": "Seu navegador não é suportado. Por favor, use um navegador mais recente.",
+    "recommended": "Navegadores recomendados: Chrome, Firefox, Safari, Edge",
+    "download": "Baixar navegador"
+  },
+  "lgpd": {
+    "title": "Proteção de Dados",
+    "subtitle": "Em conformidade com a LGPD, seus dados estão protegidos.",
+    "privacyPolicy": "Leia nossa política de privacidade",
+    "dataRights": "Conheça seus direitos sobre seus dados"
+  },
+  "brazilian": {
+    "payment": {
+      "pixError": "Erro ao processar pagamento PIX",
+      "boletoError": "Erro ao gerar boleto",
+      "paymentTimeout": "Tempo esgotado para pagamento",
+      "paymentConfirmation": "Aguardando confirmação de pagamento"
+    },
+    "validation": {
+      "cpfInvalid": "CPF inválido",
+      "cnpjInvalid": "CNPJ inválido",
+      "phoneInvalid": "Telefone inválido"
+    }
+  }
+}

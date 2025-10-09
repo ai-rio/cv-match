@@ -1,0 +1,125 @@
+{
+  "generic": {
+    "title": "An error occurred",
+    "subtitle": "Something went wrong. Please try again.",
+    "retry": "Try again",
+    "goHome": "Go to homepage",
+    "contactSupport": "Contact support"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "subtitle": "The page you are looking for doesn't exist or has been moved.",
+    "goHome": "Go to homepage",
+    "search": "Search site"
+  },
+  "unauthorized": {
+    "title": "Unauthorized access",
+    "subtitle": "You don't have permission to access this page.",
+    "login": "Sign in",
+    "goHome": "Go to homepage"
+  },
+  "forbidden": {
+    "title": "Access denied",
+    "subtitle": "You don't have permission to access this resource.",
+    "goHome": "Go to homepage"
+  },
+  "server": {
+    "title": "Server error",
+    "subtitle": "We're experiencing technical difficulties. Please try again in a few minutes.",
+    "retry": "Try again",
+    "status": "Error status: {status}",
+    "checkStatus": "Check system status"
+  },
+  "network": {
+    "title": "Connection error",
+    "subtitle": "Unable to connect to server. Please check your internet connection.",
+    "retry": "Try again",
+    "offline": "You are offline",
+    "checkConnection": "Check connection"
+  },
+  "validation": {
+    "title": "Validation error",
+    "subtitle": "Please correct the errors below and try again.",
+    "required": "This field is required",
+    "invalid": "This value is invalid",
+    "tooShort": "Too short",
+    "tooLong": "Too long",
+    "email": "Enter a valid email",
+    "password": "Password must be at least 8 characters",
+    "passwordMismatch": "Passwords don't match"
+  },
+  "quota": {
+    "title": "Limit reached",
+    "subtitle": "You've reached your monthly optimization limit.",
+    "upgrade": "Upgrade to Pro",
+    "learnMore": "Learn more about Pro plans",
+    "resetDate": "Your limit will reset on {date}"
+  },
+  "payment": {
+    "title": "Payment error",
+    "subtitle": "An error occurred while processing your payment.",
+    "retry": "Try again",
+    "differentMethod": "Use a different payment method",
+    "contactSupport": "Contact support",
+    "brazilianMethods": "Try using PIX or Boleto"
+  },
+  "file": {
+    "title": "File error",
+    "subtitle": "An error occurred while processing your file.",
+    "invalidFormat": "Invalid file format",
+    "tooLarge": "File too large",
+    "corrupted": "Corrupted file",
+    "upload": "Try uploading again"
+  },
+  "subscription": {
+    "title": "Subscription error",
+    "subtitle": "An error occurred with your subscription.",
+    "reactivate": "Reactivate subscription",
+    "contactSupport": "Contact support",
+    "billing": "Check billing"
+  },
+  "maintenance": {
+    "title": "Scheduled maintenance",
+    "subtitle": "We're performing system maintenance. We'll be back soon.",
+    "estimatedTime": "Estimated time: {time}",
+    "follow": "Follow us on social media",
+    "notifications": "Get email notifications"
+  },
+  "rateLimit": {
+    "title": "Too many attempts",
+    "subtitle": "You've made too many attempts. Please wait and try again.",
+    "waitTime": "Wait {time} minutes",
+    "tryAgain": "Try again"
+  },
+  "featureUnavailable": {
+    "title": "Feature unavailable",
+    "subtitle": "This feature is not available in your current plan.",
+    "upgrade": "Upgrade plan",
+    "learnMore": "Learn more"
+  },
+  "browser": {
+    "title": "Browser not supported",
+    "subtitle": "Your browser is not supported. Please use a more recent browser.",
+    "recommended": "Recommended browsers: Chrome, Firefox, Safari, Edge",
+    "download": "Download browser"
+  },
+  "lgpd": {
+    "title": "Data Protection",
+    "subtitle": "In compliance with LGPD, your data is protected.",
+    "privacyPolicy": "Read our privacy policy",
+    "dataRights": "Learn about your data rights"
+  },
+  "brazilian": {
+    "payment": {
+      "pixError": "Error processing PIX payment",
+      "boletoError": "Error generating boleto",
+      "paymentTimeout": "Payment time expired",
+      "paymentConfirmation": "Awaiting payment confirmation"
+    },
+    "validation": {
+      "cpfInvalid": "Invalid CPF",
+      "cnpjInvalid": "Invalid CNPJ",
+      "phoneInvalid": "Invalid phone"
+    }
+  }
+}

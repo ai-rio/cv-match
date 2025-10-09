@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import type { HealthCheckResponse, BaseAPIResponse } from '@/types/api';
+
+import type { BaseAPIResponse, HealthCheckResponse } from '@/types/api';
 
 export async function GET(): Promise<NextResponse<HealthCheckResponse | BaseAPIResponse>> {
   try {
@@ -7,6 +8,8 @@ export async function GET(): Promise<NextResponse<HealthCheckResponse | BaseAPIR
     // This is a Server Component, so we're making this request from the container
     const apiUrl = 'http://backend:8000';
 
+    // TODO: Implement proper logging
+    // eslint-disable-next-line no-console
     console.log(`Checking backend health at: ${apiUrl}`);
 
     // Attempt to connect to the backend
@@ -39,6 +42,8 @@ export async function GET(): Promise<NextResponse<HealthCheckResponse | BaseAPIR
       timestamp: new Date().toISOString(),
     } as HealthCheckResponse);
   } catch (error) {
+    // TODO: Implement proper error logging
+    // eslint-disable-next-line no-console
     console.error('Health check error:', error);
     return NextResponse.json(
       {

@@ -3,16 +3,16 @@ import './globals.css';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Vibe coding Boilerplate Application',
-  description: 'A modern full-stack application with NextJS and FastAPI. Built for Vibe coding',
+  title: 'CV-Match - AI Resume Optimization',
+  description: 'Increase your interview chances with perfectly optimized resumes powered by AI',
 };
 
+// This layout is only used for the root URL (/)
+// The main layout is in app/[locale]/layout.tsx
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
-        <main className="min-h-screen bg-gray-50">{children}</main>
-      </body>
+    <html>
+      <body>{children}</body>
     </html>
   );
 }

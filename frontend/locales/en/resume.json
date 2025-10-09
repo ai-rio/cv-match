@@ -1,0 +1,168 @@
+{
+  "title": "Resume Optimization",
+  "subtitle": "Upload your resume and paste the job description to optimize",
+  "upload": {
+    "title": "Upload Resume",
+    "subtitle": "Submit your resume in PDF or DOCX format",
+    "dragDrop": "Drag and drop your resume here, or",
+    "browse": "browse files",
+    "supportedFormats": "Supported formats: PDF, DOCX",
+    "maxSize": "Maximum size: 10MB",
+    "processing": "Processing resume...",
+    "success": "Resume uploaded successfully!",
+    "error": {
+      "invalidFormat": "Invalid file format. Use PDF or DOCX.",
+      "tooLarge": "File too large. Maximum 10MB.",
+      "corrupted": "Corrupted file. Try again.",
+      "network": "Connection error. Try again."
+    }
+  },
+  "jobDescription": {
+    "title": "Job Description",
+    "placeholder": "Paste the complete job description here...",
+    "pasteInstructions": "Paste the job description from the job portal, including requirements, qualifications and job description.",
+    "analyze": "Analyze Description",
+    "analyzing": "Analyzing job description...",
+    "success": "Description analyzed successfully!",
+    "error": "Error analyzing description. Check the text and try again."
+  },
+  "optimization": {
+    "title": "AI Optimization",
+    "subtitle": "Our AI will analyze and optimize your resume",
+    "start": "Start Optimization",
+    "starting": "Starting optimization...",
+    "processing": "Optimizing your resume...",
+    "analyzing": "Analyzing ATS compatibility...",
+    "improving": "Improving keywords...",
+    "formatting": "Formatting structure...",
+    "success": "Resume optimized successfully!",
+    "error": {
+      "network": "Connection error. Try again.",
+      "server": "Server error. Try again later.",
+      "quota": "You've reached your monthly optimization limit.",
+      "payment": "Pro plan required for unlimited optimizations."
+    }
+  },
+  "results": {
+    "title": "Optimization Results",
+    "subtitle": "Your optimized resume and detailed analysis",
+    "download": "Download Resume",
+    "downloading": "Downloading...",
+    "formats": {
+      "txt": "Download as .txt (Free)",
+      "docx": "Download as .docx (Pro)"
+    },
+    "score": {
+      "title": "ATS Score",
+      "current": "Current Score",
+      "optimized": "Optimized Score",
+      "improvement": "Improvement",
+      "excellent": "Excellent (90-100%)",
+      "good": "Good (70-89%)",
+      "fair": "Fair (50-69%)",
+      "poor": "Poor (0-49%)"
+    },
+    "analysis": {
+      "title": "Detailed Analysis",
+      "keywords": {
+        "title": "Keywords",
+        "found": "Found",
+        "missing": "Missing",
+        "improved": "Improved"
+      },
+      "structure": {
+        "title": "Structure",
+        "format": "Formatting",
+        "length": "Length",
+        "sections": "Sections"
+      },
+      "recommendations": {
+        "title": "Recommendations",
+        "critical": "Critical",
+        "important": "Important",
+        "suggestions": "Suggestions"
+      }
+    },
+    "comparison": {
+      "title": "Before and After Comparison",
+      "before": "Before Optimization",
+      "after": "After Optimization",
+      "improvements": "Improvements Made"
+    }
+  },
+  "history": {
+    "title": "Optimization History",
+    "subtitle": "Your previous resume optimizations",
+    "noHistory": "No previous optimizations",
+    "date": "Date",
+    "jobTitle": "Job Title",
+    "company": "Company",
+    "score": "Score",
+    "actions": "Actions",
+    "view": "View",
+    "download": "Download",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this optimization?"
+  },
+  "templates": {
+    "title": "Professional Templates",
+    "subtitle": "Choose a template for your optimized resume",
+    "professional": "Professional",
+    "modern": "Modern",
+    "creative": "Creative",
+    "executive": "Executive",
+    "student": "Student",
+    "technical": "Technical",
+    "apply": "Apply Template",
+    "preview": "Preview",
+    "upgradeRequired": "Pro plan required for professional templates"
+  },
+  "tips": {
+    "title": "Expert Tips",
+    "subtitle": "Guidance from Brazilian professional recruiters",
+    "ats": {
+      "title": "ATS Optimization",
+      "description": "Tips to pass automated screening systems"
+    },
+    "keywords": {
+      "title": "Keywords",
+      "description": "How to use effective keywords in your resume"
+    },
+    "formatting": {
+      "title": "Formatting",
+      "description": "Best practices for resume formatting"
+    },
+    "brazilian": {
+      "title": "Brazilian Market",
+      "description": "Specific tips for the Brazilian job market"
+    },
+    "linkedin": {
+      "title": "LinkedIn",
+      "description": "How to integrate your resume with your LinkedIn profile"
+    },
+    "interview": {
+      "title": "Interview Preparation",
+      "description": "Use your optimized resume to prepare for interviews"
+    }
+  },
+  "brazilian": {
+    "title": "Brazilian Market Features",
+    "subtitle": "Specifically optimized for professionals in Brazil",
+    "certifications": {
+      "title": "Brazilian Certifications",
+      "description": "Recognition of national certifications and courses"
+    },
+    "experience": {
+      "title": "National Experience",
+      "description": "Highlight for companies and experience in the Brazilian market"
+    },
+    "language": {
+      "title": "Brazilian Portuguese",
+      "description": "Optimized for Brazilian Portuguese and local terms"
+    },
+    "format": {
+      "title": "Brazilian Format",
+      "description": "Resume standards accepted in the Brazilian market"
+    }
+  }
+}

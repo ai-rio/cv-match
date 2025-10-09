@@ -9,12 +9,14 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend:/app
-      - /app/node_modules
+      - node_modules_volume:/app/node_modules
+      - next_volume:/app/.next
+      - ./frontend/.env.local:/app/.env.local
     environment:
       - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://localhost:8000
-      - NEXT_PUBLIC_SUPABASE_URL=${SUPABASE_URL}
-      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+    env_file:
+      - ./.env
     depends_on:
       - backend
     networks:
@@ -30,20 +32,21 @@ services:
       - ./backend:/app
     environment:
       - ENVIRONMENT=development
-      - SUPABASE_URL=http://supabase_kong_cv-match:8000
-      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - QDRANT_URL=${QDRANT_URL}
-      - QDRANT_API_KEY=${QDRANT_API_KEY}
-      - QDRANT_COLLECTION_NAME=${QDRANT_COLLECTION_NAME}
-      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
-      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - SUPABASE_URL=http://172.19.0.6:8000
       - CORS_ORIGINS=http://localhost:3000,http://frontend:3000,http://127.0.0.1:3000
+    env_file:
+      - ./.env
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     networks:
       - app-network
+      - supabase_network_cv-match
 
 networks:
   app-network:
     driver: bridge
+  supabase_network_cv-match:
+    external: true
+
+volumes:
+  node_modules_volume:
+  next_volume:

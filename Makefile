@@ -60,11 +60,6 @@ install-backend-dev: ## Install backend dev dependencies locally
 	@echo "${GREEN}Installing backend dev dependencies...${NC}"
 	cd backend && pip install -e ".[dev]"
 
-# Frontend helpers
-install-frontend: ## Install frontend dependencies locally
-	@echo "${GREEN}Installing frontend dependencies...${NC}"
-	cd frontend && bun install
-
 install-frontend-dev: ## Install frontend dev dependencies locally
 	@echo "${GREEN}Installing frontend dev dependencies...${NC}"
 	cd frontend && bun install

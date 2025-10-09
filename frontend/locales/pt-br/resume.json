@@ -1,0 +1,168 @@
+{
+  "title": "Otimização de Currículo",
+  "subtitle": "Carregue seu currículo e cole a descrição da vaga para otimizar",
+  "upload": {
+    "title": "Carregar Currículo",
+    "subtitle": "Envie seu currículo em PDF ou DOCX",
+    "dragDrop": "Arraste e solte seu currículo aqui, ou",
+    "browse": "procurar arquivos",
+    "supportedFormats": "Formatos suportados: PDF, DOCX",
+    "maxSize": "Tamanho máximo: 10MB",
+    "processing": "Processando currículo...",
+    "success": "Currículo carregado com sucesso!",
+    "error": {
+      "invalidFormat": "Formato de arquivo inválido. Use PDF ou DOCX.",
+      "tooLarge": "Arquivo muito grande. Máximo de 10MB.",
+      "corrupted": "Arquivo corrompido. Tente novamente.",
+      "network": "Erro de conexão. Tente novamente."
+    }
+  },
+  "jobDescription": {
+    "title": "Descrição da Vaga",
+    "placeholder": "Cole a descrição completa da vaga aqui...",
+    "pasteInstructions": "Cole a descrição da vaga do portal de empregos, incluindo requisitos, qualificações e descrição do cargo.",
+    "analyze": "Analisar Descrição",
+    "analyzing": "Analisando descrição da vaga...",
+    "success": "Descrição analisada com sucesso!",
+    "error": "Erro ao analisar descrição. Verifique o texto e tente novamente."
+  },
+  "optimization": {
+    "title": "Otimização com IA",
+    "subtitle": "Nossa IA vai analisar e otimizar seu currículo",
+    "start": "Iniciar Otimização",
+    "starting": "Iniciando otimização...",
+    "processing": "Otimizando seu currículo...",
+    "analyzing": "Analisando compatibilidade ATS...",
+    "improving": "Melhorando palavras-chave...",
+    "formatting": "Formatando estrutura...",
+    "success": "Currículo otimizado com sucesso!",
+    "error": {
+      "network": "Erro de conexão. Tente novamente.",
+      "server": "Erro no servidor. Tente novamente mais tarde.",
+      "quota": "Você atingiu seu limite de otimizações mensais.",
+      "payment": "Plano Pro necessário para otimizações ilimitadas."
+    }
+  },
+  "results": {
+    "title": "Resultados da Otimização",
+    "subtitle": "Seu currículo otimizado e análise detalhada",
+    "download": "Baixar Currículo",
+    "downloading": "Baixando...",
+    "formats": {
+      "txt": "Baixar como .txt (Gratuito)",
+      "docx": "Baixar como .docx (Pro)"
+    },
+    "score": {
+      "title": "Pontuação ATS",
+      "current": "Pontuação Atual",
+      "optimized": "Pontuação Otimizada",
+      "improvement": "Melhoria",
+      "excellent": "Excelente (90-100%)",
+      "good": "Bom (70-89%)",
+      "fair": "Regular (50-69%)",
+      "poor": "Ruim (0-49%)"
+    },
+    "analysis": {
+      "title": "Análise Detalhada",
+      "keywords": {
+        "title": "Palavras-chave",
+        "found": "Encontradas",
+        "missing": "Ausentes",
+        "improved": "Melhoradas"
+      },
+      "structure": {
+        "title": "Estrutura",
+        "format": "Formatação",
+        "length": "Comprimento",
+        "sections": "Seções"
+      },
+      "recommendations": {
+        "title": "Recomendações",
+        "critical": "Críticas",
+        "important": "Importantes",
+        "suggestions": "Sugestões"
+      }
+    },
+    "comparison": {
+      "title": "Comparação Antes e Depois",
+      "before": "Antes da Otimização",
+      "after": "Depois da Otimização",
+      "improvements": "Melhorias Realizadas"
+    }
+  },
+  "history": {
+    "title": "Histórico de Otimizações",
+    "subtitle": "Suas otimizações de currículo anteriores",
+    "noHistory": "Nenhuma otimização anterior",
+    "date": "Data",
+    "jobTitle": "Cargo",
+    "company": "Empresa",
+    "score": "Pontuação",
+    "actions": "Ações",
+    "view": "Ver",
+    "download": "Baixar",
+    "delete": "Excluir",
+    "deleteConfirm": "Tem certeza que deseja excluir esta otimização?"
+  },
+  "templates": {
+    "title": "Modelos Profissionais",
+    "subtitle": "Escolha um modelo para seu currículo otimizado",
+    "professional": "Profissional",
+    "modern": "Moderno",
+    "creative": "Criativo",
+    "executive": "Executivo",
+    "student": "Estudante",
+    "technical": "Técnico",
+    "apply": "Aplicar Modelo",
+    "preview": "Visualizar",
+    "upgradeRequired": "Plano Pro necessário para modelos profissionais"
+  },
+  "tips": {
+    "title": "Dicas de Especialistas",
+    "subtitle": "Orientações de recrutadores profissionais brasileiros",
+    "ats": {
+      "title": "Otimização ATS",
+      "description": "Dicas para passar pelos sistemas de triagem automatizada"
+    },
+    "keywords": {
+      "title": "Palavras-chave",
+      "description": "Como usar palavras-chave eficazes no seu currículo"
+    },
+    "formatting": {
+      "title": "Formatação",
+      "description": "Melhores práticas de formatação de currículos"
+    },
+    "brazilian": {
+      "title": "Mercado Brasileiro",
+      "description": "Dicas específicas para o mercado de trabalho no Brasil"
+    },
+    "linkedin": {
+      "title": "LinkedIn",
+      "description": "Como integrar seu currículo com seu perfil LinkedIn"
+    },
+    "interview": {
+      "title": "Preparação para Entrevista",
+      "description": "Use seu currículo otimizado para se preparar para entrevistas"
+    }
+  },
+  "brazilian": {
+    "title": "Recursos para o Mercado Brasileiro",
+    "subtitle": "Otimizado especificamente para profissionais no Brasil",
+    "certifications": {
+      "title": "Certificações Brasileiras",
+      "description": "Reconhecimento de certificações e cursos nacionais"
+    },
+    "experience": {
+      "title": "Experiência Nacional",
+      "description": "Destaque para empresas e experiência no mercado brasileiro"
+    },
+    "language": {
+      "title": "Português Brasileiro",
+      "description": "Otimizado para o português brasileiro e termos locais"
+    },
+    "format": {
+      "title": "Formato Brasileiro",
+      "description": "Padrões de currículo aceitos no mercado brasileiro"
+    }
+  }
+}

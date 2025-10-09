@@ -17,7 +17,9 @@ export type DeepPartial<T> = {
 };
 
 // Common React types
-export type ComponentWithChildren<P = {}> = React.FC<P & { children?: React.ReactNode }>;
+export type ComponentWithChildren<P = Record<string, never>> = React.FC<
+  P & { children?: React.ReactNode }
+>;
 export type AsyncComponent<T = any> = React.FC<{
   data?: T;
   loading?: boolean;

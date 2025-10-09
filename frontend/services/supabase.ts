@@ -1,10 +1,11 @@
-import { createClient, type User, type Session } from '@supabase/supabase-js';
+import { createClient, type Session, type User } from '@supabase/supabase-js';
+
 import type {
-  SupabaseUser,
-  SupabaseSession,
   AuthEvent,
   AuthResponse,
   OAuthResponse,
+  SupabaseSession,
+  SupabaseUser,
 } from '@/types/supabase';
 
 // Initialize the Supabase client

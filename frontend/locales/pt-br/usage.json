@@ -1,0 +1,34 @@
+{
+  "usage": {
+    "optimizations": "Otimizações",
+    "optimizationsUsed": "{used} de {limit} usadas",
+    "unlimited": "Ilimitado",
+    "proUser": "Usuário Pro",
+    "proAccess": "Acesso Pro",
+    "nearlyLimit": "Quase no limite",
+    "gettingClose": "Próximo do limite",
+    "goodAmount": "Quantidade boa",
+    "resetsOn": "Reinicia no dia 1º de cada mês",
+    "upgradeRequired": "Atualização Necessária",
+    "upgradeMessage": "Você atingiu seu limite de otimizações gratuitas",
+    "upgradeNow": "Atualizar Agora",
+    "remainingOptimizations": "{count} otimização restante | {count} otimizações restantes",
+    "noOptimizationsLeft": "Sem otimizações restantes",
+    "limitReached": "Limite Atingido",
+    "becomePro": "Torne-se Pro",
+    "unlimitedAccess": "Acesso ilimitado a todos os recursos",
+    "trackUsage": "Acompanhe seu uso",
+    "monthlyLimit": "Limite mensal reinicia no dia 1º",
+    "fetchError": "Falha ao carregar dados de uso",
+    "authRequired": "Por favor, faça login para continuar",
+    "accessDenied": "Você pode ter atingido seu limite de uso",
+    "serverError": "Erro no servidor. Tente novamente mais tarde",
+    "limitExceeded": "Você atingiu seu limite de uso",
+    "brazilianFeatures": {
+      "pixPayment": "Pagamento PIX disponível",
+      "boletoPayment": "Boleto disponível",
+      "localSupport": "Suporte em português",
+      "lgpdCompliant": "Conforme LGPD"
+    }
+  }
+}

@@ -14,15 +14,15 @@ install: ## Install dependencies
 
 dev: ## Run development server
 	@echo "${GREEN}Starting development server...${NC}"
-	bunx dev
+	bun run dev
 
 build: ## Build for production
 	@echo "${GREEN}Building for production...${NC}"
-	bunx build
+	bun run build
 
 start: ## Start production server
 	@echo "${GREEN}Starting production server...${NC}"
-	bunx start
+	bun run start
 
 lint: ## Run linter
 	@echo "${GREEN}Running linter...${NC}"

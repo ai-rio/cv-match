@@ -1,0 +1,123 @@
+{
+  "header": {
+    "logo": "CV-Match",
+    "navigation": {
+      "features": "Recursos",
+      "pricing": "Preços",
+      "about": "Sobre",
+      "blog": "Blog",
+      "contact": "Contato"
+    },
+    "actions": {
+      "login": "Entrar",
+      "signup": "Cadastrar",
+      "dashboard": "Painel",
+      "profile": "Perfil"
+    },
+    "mobile": {
+      "menu": "Menu",
+      "close": "Fechar"
+    }
+  },
+  "footer": {
+    "brand": {
+      "name": "CV-Match",
+      "tagline": "A ferramenta definitiva para otimização de currículos com IA no Brasil",
+      "description": "Pare de ser rejeitado por sistemas ATS. Otimize seu currículo com IA e consiga mais entrevistas."
+    },
+    "navigation": {
+      "product": {
+        "title": "Produto",
+        "items": {
+          "features": "Recursos",
+          "pricing": "Preços",
+          "templates": "Modelos",
+          "analytics": "Análises"
+        }
+      },
+      "resources": {
+        "title": "Recursos",
+        "items": {
+          "blog": "Blog",
+          "guides": "Guias",
+          "faq": "FAQ",
+          "support": "Suporte"
+        }
+      },
+      "company": {
+        "title": "Empresa",
+        "items": {
+          "about": "Sobre",
+          "careers": "Carreiras",
+          "contact": "Contato",
+          "privacy": "Privacidade"
+        }
+      }
+    },
+    "legal": {
+      "title": "Legal",
+      "items": {
+        "terms": "Termos de Serviço",
+        "privacy": "Política de Privacidade",
+        "cookies": "Política de Cookies",
+        "lgpd": "LGPD"
+      }
+    },
+    "contact": {
+      "title": "Contato",
+      "email": "contato@cv-match.com.br",
+      "phone": "+55 (11) 9999-9999",
+      "address": "São Paulo, SP - Brasil"
+    },
+    "social": {
+      "title": "Siga-nos",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "twitter": "Twitter",
+      "facebook": "Facebook"
+    },
+    "language": {
+      "title": "Idioma",
+      "portuguese": "Português",
+      "english": "English"
+    },
+    "copyright": "© 2025 CV-Match. Todos os direitos reservados.",
+    "madeWith": "Feito com ❤️ no Brasil",
+    "brazilian": {
+      "lgpd": "Conforme LGPD",
+      "local": "Empresa 100% brasileira",
+      "support": "Suporte local"
+    }
+  },
+  "breadcrumb": {
+    "home": "Início",
+    "current": "Atual"
+  },
+  "sidebar": {
+    "toggle": "Alternar menu lateral",
+    "close": "Fechar menu"
+  },
+  "pagination": {
+    "previous": "Anterior",
+    "next": "Próximo",
+    "page": "Página",
+    "of": "de",
+    "showing": "Mostrando",
+    "to": "a",
+    "ofTotal": "de",
+    "results": "resultados"
+  },
+  "search": {
+    "placeholder": "Buscar...",
+    "noResults": "Nenhum resultado encontrado",
+    "suggestions": "Sugestões",
+    "recent": "Buscas recentes",
+    "clear": "Limpar busca"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "markAllRead": "Marcar todas como lidas",
+    "noNotifications": "Nenhuma notificação",
+    "loading": "Carregando notificações..."
+  }
+}

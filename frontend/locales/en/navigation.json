@@ -1,0 +1,123 @@
+{
+  "header": {
+    "logo": "CV-Match",
+    "navigation": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "about": "About",
+      "blog": "Blog",
+      "contact": "Contact"
+    },
+    "actions": {
+      "login": "Login",
+      "signup": "Sign Up",
+      "dashboard": "Dashboard",
+      "profile": "Profile"
+    },
+    "mobile": {
+      "menu": "Menu",
+      "close": "Close"
+    }
+  },
+  "footer": {
+    "brand": {
+      "name": "CV-Match",
+      "tagline": "The ultimate AI-powered resume optimization tool in Brazil",
+      "description": "Stop being rejected by ATS systems. Optimize your resume with AI and get more interviews."
+    },
+    "navigation": {
+      "product": {
+        "title": "Product",
+        "items": {
+          "features": "Features",
+          "pricing": "Pricing",
+          "templates": "Templates",
+          "analytics": "Analytics"
+        }
+      },
+      "resources": {
+        "title": "Resources",
+        "items": {
+          "blog": "Blog",
+          "guides": "Guides",
+          "faq": "FAQ",
+          "support": "Support"
+        }
+      },
+      "company": {
+        "title": "Company",
+        "items": {
+          "about": "About",
+          "careers": "Careers",
+          "contact": "Contact",
+          "privacy": "Privacy"
+        }
+      }
+    },
+    "legal": {
+      "title": "Legal",
+      "items": {
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy",
+        "cookies": "Cookie Policy",
+        "lgpd": "LGPD"
+      }
+    },
+    "contact": {
+      "title": "Contact",
+      "email": "contact@cv-match.com.br",
+      "phone": "+55 (11) 9999-9999",
+      "address": "São Paulo, SP - Brazil"
+    },
+    "social": {
+      "title": "Follow Us",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "twitter": "Twitter",
+      "facebook": "Facebook"
+    },
+    "language": {
+      "title": "Language",
+      "portuguese": "Português",
+      "english": "English"
+    },
+    "copyright": "© 2025 CV-Match. All rights reserved.",
+    "madeWith": "Made with ❤️ in Brazil",
+    "brazilian": {
+      "lgpd": "LGPD Compliant",
+      "local": "100% Brazilian Company",
+      "support": "Local Support"
+    }
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "current": "Current"
+  },
+  "sidebar": {
+    "toggle": "Toggle sidebar",
+    "close": "Close menu"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of",
+    "showing": "Showing",
+    "to": "to",
+    "ofTotal": "of",
+    "results": "results"
+  },
+  "search": {
+    "placeholder": "Search...",
+    "noResults": "No results found",
+    "suggestions": "Suggestions",
+    "recent": "Recent searches",
+    "clear": "Clear search"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications",
+    "loading": "Loading notifications..."
+  }
+}

@@ -1,0 +1,318 @@
+{
+  "dashboard": {
+    "title": "Painel de Controle",
+    "subtitle": "Gerencie suas otimizações e configurações",
+    "optimizeResume": "Otimizar Currículo",
+    "welcome": {
+      "title": "Bem-vindo de volta, {name}!",
+      "subtitle": "Continue otimizando seus currículos para conquistar seu emprego dos sonhos"
+    },
+    "sidebar": {
+      "overview": "Visão Geral",
+      "optimizations": "Otimizações",
+      "analytics": "Análises",
+      "templates": "Modelos",
+      "settings": "Configurações",
+      "billing": "Cobrança",
+      "help": "Ajuda",
+      "logout": "Sair"
+    },
+    "overview": {
+      "title": "Visão Geral",
+      "subtitle": "Resumo das suas atividades",
+      "stats": {
+        "totalOptimizations": "Total de Otimizações",
+        "thisMonth": "Este Mês",
+        "successRate": "Taxa de Sucesso",
+        "activeResumes": "Currículos Ativos",
+        "lastOptimization": "Última Otimização"
+      },
+      "quickActions": {
+        "title": "Ações Rápidas",
+        "newOptimization": "Nova Otimização",
+        "uploadResume": "Carregar Currículo",
+        "viewTemplates": "Ver Modelos",
+        "upgradePlan": "Atualizar Plano"
+      },
+      "recentActivity": {
+        "title": "Atividade Recente",
+        "noActivity": "Nenhuma atividade recente",
+        "optimization": "Otimização de currículo",
+        "templateApplied": "Modelo aplicado",
+        "download": "Currículo baixado"
+      }
+    },
+    "optimizations": {
+      "title": "Minhas Otimizações",
+      "subtitle": "Histórico completo de otimizações de currículo",
+      "search": "Buscar otimizações...",
+      "filter": "Filtrar por:",
+      "allStatus": "Todos os status",
+      "dateRange": "Período",
+      "sortBy": "Ordenar por:",
+      "newest": "Mais recentes",
+      "oldest": "Mais antigos",
+      "highestScore": "Maior pontuação",
+      "jobTitle": "Cargo",
+      "company": "Empresa",
+      "date": "Data",
+      "score": "Pontuação ATS",
+      "status": "Status",
+      "actions": "Ações",
+      "view": "Ver",
+      "download": "Baixar",
+      "share": "Compartilhar",
+      "duplicate": "Duplicar",
+      "delete": "Excluir",
+      "noOptimizations": "Nenhuma otimização encontrada",
+      "deleteConfirm": "Tem certeza que deseja excluir esta otimização? Esta ação não pode ser desfeita."
+    },
+    "analytics": {
+      "title": "Análises e Insights",
+      "subtitle": "Acompanhe seu progresso e métricas",
+      "performance": {
+        "title": "Desempenho",
+        "subtitle": "Métricas de suas otimizações",
+        "successRate": "Taxa de Sucesso",
+        "averageScore": "Pontuação Média",
+        "improvement": "Melhoria Média",
+        "timeToSuccess": "Tempo até o Sucesso"
+      },
+      "trends": {
+        "title": "Tendências",
+        "subtitle": "Evolução ao longo do tempo",
+        "optimizations": "Otimizações por Mês",
+        "scores": "Pontuações por Mês",
+        "industries": "Indústrias",
+        "jobTypes": "Tipos de Cargo"
+      },
+      "insights": {
+        "title": "Insights",
+        "subtitle": "Descobertas baseadas em seus dados",
+        "bestPerforming": "Melhor Desempenho",
+        "improvementAreas": "Áreas de Melhoria",
+        "recommendations": "Recomendações"
+      }
+    },
+    "templates": {
+      "title": "Modelos de Currículo",
+      "subtitle": "Modelos profissionais para otimizar seu currículo",
+      "search": "Buscar modelos...",
+      "filter": "Filtrar por:",
+      "category": "Categoria",
+      "style": "Estilo",
+      "industry": "Indústria",
+      "preview": "Visualizar",
+      "use": "Usar Modelo",
+      "proRequired": "Plano Pro necessário",
+      "upgradeToUse": "Atualize para usar este modelo",
+      "categories": {
+        "professional": "Profissional",
+        "modern": "Moderno",
+        "creative": "Criativo",
+        "executive": "Executivo",
+        "student": "Estudante",
+        "technical": "Técnico"
+      }
+    },
+    "settings": {
+      "title": "Configurações",
+      "subtitle": "Gerencie sua conta e preferências",
+      "profile": {
+        "title": "Perfil",
+        "name": "Nome Completo",
+        "email": "E-mail",
+        "avatar": "Foto de Perfil",
+        "bio": "Biografia",
+        "save": "Salvar Perfil",
+        "saving": "Salvando...",
+        "success": "Perfil atualizado com sucesso!"
+      },
+      "preferences": {
+        "title": "Preferências",
+        "language": "Idioma",
+        "timezone": "Fuso Horário",
+        "notifications": "Notificações",
+        "email": "Notificações por E-mail",
+        "push": "Notificações Push",
+        "marketing": "Marketing e Promoções",
+        "save": "Salvar Preferências",
+        "success": "Preferências salvas com sucesso!"
+      },
+      "privacy": {
+        "title": "Privacidade e Segurança",
+        "changePassword": "Alterar Senha",
+        "twoFactor": "Autenticação de Dois Fatores",
+        "dataExport": "Exportar Dados",
+        "deleteAccount": "Excluir Conta",
+        "deleteConfirm": "Tem certeza que deseja excluir sua conta? Esta ação é permanente."
+      }
+    },
+    "billing": {
+      "title": "Cobrança e Assinatura",
+      "subtitle": "Gerencie seu plano e pagamentos",
+      "currentPlan": "Plano Atual",
+      "usage": "Uso este Mês",
+      "upgrade": "Atualizar Plano",
+      "cancel": "Cancelar Assinatura",
+      "paymentMethods": "Métodos de Pagamento",
+      "invoices": "Faturas",
+      "history": "Histórico de Pagamentos"
+    },
+    "notifications": {
+      "title": "Notificações",
+      "subtitle": "Fique por dentro das atualizações",
+      "markAllRead": "Marcar todas como lidas",
+      "noNotifications": "Nenhuma notificação",
+      "types": {
+        "optimization": "Otimização concluída",
+        "payment": "Pagamento processado",
+        "system": "Atualização do sistema",
+        "marketing": "Promoções e novidades"
+      }
+    },
+    "upgrades": {
+      "title": "Atualize para Pro",
+      "subtitle": "Desbloqueie recursos avançados",
+      "features": [
+        "Otimizações ilimitadas",
+        "Modelos de IA avançados",
+        "Modelos profissionais",
+        "Análises detalhadas",
+        "Suporte prioritário"
+      ],
+      "upgrade": "Atualizar Agora",
+      "learnMore": "Saiba Mais"
+    },
+    "credits": {
+      "title": "Créditos",
+      "freeUsed": "Gratuitos Usados",
+      "purchased": "Comprados",
+      "buyMore": "Comprar Mais",
+      "upgradeToPro": "Atualizar para Pro"
+    },
+    "recentOptimizations": {
+      "title": "Otimizações Recentes",
+      "viewAll": "Ver Todas",
+      "status": {
+        "completed": "Concluída",
+        "processing": "Processando",
+        "failed": "Falhou",
+        "pending": "Pendente"
+      },
+      "actions": {
+        "view": "Ver",
+        "download": "Baixar",
+        "optimize": "Otimizar",
+        "delete": "Excluir"
+      },
+      "noOptimizations": "Nenhuma otimização ainda",
+      "optimizeResume": "Otimizar Currículo"
+    },
+    "help": {
+      "title": "Central de Ajuda",
+      "subtitle": "Como podemos ajudar?",
+      "search": "Buscar ajuda...",
+      "categories": {
+        "gettingStarted": "Primeiros Passos",
+        "optimization": "Otimização",
+        "billing": "Cobrança",
+        "technical": "Suporte Técnico"
+      },
+      "contact": "Entre em Contato",
+      "faq": "Perguntas Frequentes",
+      "guides": "Guias e Tutoriais"
+    }
+  },
+  "usage": {
+    "optimizations": "Otimizações",
+    "optimizationsUsed": "{used} de {limit} usadas",
+    "unlimited": "Ilimitado",
+    "proUser": "Pro",
+    "proAccess": "Acesso Pro",
+    "nearlyLimit": "Quase no limite",
+    "gettingClose": "Chegando perto",
+    "goodAmount": "Bom saldo",
+    "resetsOn": "Redefinido mensalmente",
+    "fetchError": "Erro ao carregar dados de uso"
+  },
+  "usageGuard": {
+    "checkingUsage": "Verificando uso...",
+    "error": "Erro: {message}",
+    "signInRequired": "Você precisa estar autenticado para usar esta função.",
+    "lastOptimization": "Esta é sua última otimização gratuita este mês!",
+    "fewOptimizationsLeft": "Restam apenas {count} otimizações gratuitas este mês.",
+    "limitReached": "Você atingiu seu limite de otimizações gratuitas este mês.",
+    "upgradeTitle": "Atualize para Ilimitado",
+    "upgradeDescription": "Obtenha otimizações ilimitadas e recursos avançados com o plano Pro.",
+    "upgradeNow": "Atualizar Agora",
+    "learnMore": "Saiba Mais"
+  },
+  "upgradeModal": {
+    "limitReached": {
+      "title": "Limite de Otimizações Atingido",
+      "description": "Você usou todas as suas otimizações gratuitas deste mês.",
+      "subtitle": "Você usou {used} de {limit} otimizações gratuitas. Continue otimizando seu currículo com o plano Pro!",
+      "subtitleGeneric": "Seu limite gratuito de otimizações foi atingido. Atualize para continuar!"
+    },
+    "dashboard": {
+      "title": "Desbloqueie Todo o Potencial",
+      "description": "O plano Pro oferece recursos ilimitados para acelerar sua carreira.",
+      "subtitle": "Junte-se a milhares de profissionais que já conseguiram seus empregos dos sonhos."
+    },
+    "optimization": {
+      "title": "Otimize Sem Limites",
+      "description": "Continue refinando seu currículo até alcançar a perfeição.",
+      "subtitle": "O plano Pro permite otimizações ilimitadas para cada vaga."
+    },
+    "default": {
+      "title": "Atualize para Pro",
+      "description": "Recursos avançados para impulsionar sua carreira.",
+      "subtitle": "Otimizações ilimitadas e ferramentas profissionais esperam por você."
+    },
+    "features": {
+      "unlimited": {
+        "title": "Otimizações Ilimitadas",
+        "description": "Otimize seu currículo para quantas vagas quiser"
+      },
+      "advanced": {
+        "title": "IA Avançada",
+        "description": "Acesso aos modelos mais recentes de inteligência artificial"
+      },
+      "templates": {
+        "title": "Modelos Profissionais",
+        "description": "Biblioteca exclusiva de modelos de currículo"
+      },
+      "analytics": {
+        "title": "Análises Detalhadas",
+        "description": "Insights profundos sobre seu progresso"
+      },
+      "priority": {
+        "title": "Suporte Prioritário",
+        "description": "Atendimento personalizado e rápido"
+      },
+      "export": {
+        "title": "Exportação Avançada",
+        "description": "Exporte em múltiplos formatos profissionais"
+      }
+    },
+    "pricing": {
+      "perMonth": "/mês",
+      "valueProp": "Menos que um café por semana para transformar sua carreira"
+    },
+    "socialProof": {
+      "count": "2.000+",
+      "professionals": "profissionais já aprovados",
+      "testimonial": "O CV-Match Pro me ajudou a conseguir meu emprego dos sonhos em menos de 2 semanas!",
+      "author": "Ana Silva, Desenvolvedora"
+    },
+    "guarantee": {
+      "title": "Satisfação Garantida",
+      "description": "Se não ficar satisfeito nos primeiros 30 dias, garantimos reembolso completo."
+    },
+    "actions": {
+      "maybeLater": "Talvez Depois",
+      "upgradeNow": "Atualizar Agora"
+    }
+  }
+}

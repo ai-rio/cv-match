@@ -24,6 +24,7 @@ export default [
       'build/**',
       '.git/**',
       'coverage/**',
+      'next-env.d.ts',
     ],
   },
   {

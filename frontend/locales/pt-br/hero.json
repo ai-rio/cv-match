@@ -1,0 +1,16 @@
+{
+  "hero": {
+    "title": "CV-Match",
+    "subtitle": "Otimização de currículo com IA para ajudá-lo a conseguir o trabalho dos seus sonhos no Brasil",
+    "getStarted": "Começar",
+    "brazilian": {
+      "title": "Especializado no Mercado Brasileiro",
+      "description": "Criado especificamente para profissionais brasileiros conquistarem melhores oportunidades"
+    },
+    "trust": {
+      "users": "+5.000 brasileiros",
+      "success": "Taxa de sucesso de 87%",
+      "companies": "Aceito pelas melhores empresas"
+    }
+  }
+}
