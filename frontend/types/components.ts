@@ -81,7 +81,7 @@ export interface Column<T> {
   key: keyof T;
   label: string;
   sortable?: boolean;
-  render?: (value: any, row: T) => React.ReactNode;
+  render?: (value: unknown, row: T) => React.ReactNode;
 }
 
 export interface TableProps<T> {

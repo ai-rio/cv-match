@@ -23,6 +23,7 @@ export interface TextGenerationRequest {
   max_tokens?: number;
   temperature?: number;
   provider?: 'openai' | 'anthropic';
+  [key: string]: unknown; // Allow additional properties
 }
 
 export interface TextGenerationResponse {
@@ -39,6 +40,7 @@ export interface EmbeddingRequest {
   text: string;
   model?: string;
   provider?: 'openai' | 'anthropic';
+  [key: string]: unknown; // Allow additional properties
 }
 
 export interface EmbeddingResponse {
@@ -62,17 +64,11 @@ async function getAuthToken() {
 // API request types
 type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
-interface APIRequestOptions {
-  method: HTTPMethod;
-  body?: Record<string, any>;
-  headers?: Record<string, string>;
-}
-
 // Helper to make authenticated API requests
-async function apiRequest<T = any>(
+async function apiRequest<T = unknown>(
   endpoint: string,
   method: HTTPMethod,
-  body?: Record<string, any>
+  body?: Record<string, unknown>
 ): Promise<T> {
   const token = await getAuthToken();
 
@@ -80,38 +76,29 @@ async function apiRequest<T = any>(
     throw new Error('Authentication required');
   }
 
-  try {
-    console.log(`Making request to ${API_URL}${endpoint}`);
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+    },
+    mode: 'cors',
+    body: body ? JSON.stringify(body) : undefined,
+  });
 
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-      mode: 'cors',
-      body: body ? JSON.stringify(body) : undefined,
-    });
-
-    console.log(`Response status: ${response.status}`);
-
-    if (!response.ok) {
-      let errorMessage = `API request failed with status ${response.status}`;
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.detail || errorMessage;
-      } catch (e) {
-        // If we can't parse the error as JSON, just use the status message
-      }
-      throw new Error(errorMessage);
+  if (!response.ok) {
+    let errorMessage = `API request failed with status ${response.status}`;
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.detail || errorMessage;
+    } catch {
+      // If we can't parse the error as JSON, just use the status message
     }
-
-    return response.json() as Promise<T>;
-  } catch (error) {
-    console.error('API request error:', error);
-    throw error;
+    throw new Error(errorMessage);
   }
+
+  return response.json() as Promise<T>;
 }
 
 // LLM API functions

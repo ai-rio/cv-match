@@ -20,21 +20,21 @@ export type DeepPartial<T> = {
 export type ComponentWithChildren<P = Record<string, never>> = React.FC<
   P & { children?: React.ReactNode }
 >;
-export type AsyncComponent<T = any> = React.FC<{
+export type AsyncComponent<T = unknown> = React.FC<{
   data?: T;
   loading?: boolean;
   error?: string | null;
 }>;
 
 // Form and Event types
-export type FormEventHandler<T = any> = (data: T) => void | Promise<void>;
+export type FormEventHandler<T = unknown> = (data: T) => void | Promise<void>;
 export type ChangeHandler = (value: string) => void;
 export type AsyncChangeHandler = (value: string) => Promise<void>;
 
 // Error handling types
 export type ErrorWithMessage = Error & { message: string };
-export type AsyncFunction<T = any> = () => Promise<T>;
-export type AsyncFunctionWithParams<P = any, T = any> = (params: P) => Promise<T>;
+export type AsyncFunction<T = unknown> = () => Promise<T>;
+export type AsyncFunctionWithParams<P = unknown, T = unknown> = (params: P) => Promise<T>;
 
 // Common state patterns
 export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
@@ -47,7 +47,7 @@ export type StateWithLoading<T> = {
 // ID and timestamp types
 export type ID = string;
 export type Timestamp = string;
-export type JsonObject = Record<string, any>;
+export type JsonObject = Record<string, unknown>;
 
 // Pagination types
 export type PaginationParams = {

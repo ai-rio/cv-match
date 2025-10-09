@@ -11,10 +11,7 @@ class ApiService {
     this.baseUrl = API_URL;
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 
     const defaultHeaders = {
@@ -22,9 +19,14 @@ class ApiService {
     };
 
     // Remove Content-Type header for FormData requests
-    const headers = options.body instanceof FormData
-      ? { ...defaultHeaders, ...options.headers, 'Content-Type': undefined }
-      : { ...defaultHeaders, ...options.headers };
+    const headers =
+      options.body instanceof FormData
+        ? Object.fromEntries(
+            Object.entries({ ...defaultHeaders, ...options.headers }).filter(
+              ([key]) => key !== 'Content-Type'
+            )
+          )
+        : { ...defaultHeaders, ...options.headers };
 
     try {
       const response = await fetch(url, {
@@ -95,7 +97,7 @@ class ApiService {
   }
 
   // Generic POST method
-  async post<T>(endpoint: string, data?: any, token?: string) {
+  async post<T>(endpoint: string, data?: unknown, token?: string) {
     const headers: Record<string, string> = {};
     if (token) {
       headers.Authorization = `Bearer ${token}`;
@@ -109,7 +111,7 @@ class ApiService {
   }
 
   // Generic PUT method
-  async put<T>(endpoint: string, data?: any, token?: string) {
+  async put<T>(endpoint: string, data?: unknown, token?: string) {
     const headers: Record<string, string> = {};
     if (token) {
       headers.Authorization = `Bearer ${token}`;

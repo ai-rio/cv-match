@@ -1,4 +1,4 @@
-import { createClient, type Session, type User } from '@supabase/supabase-js';
+import { createClient, type Session } from '@supabase/supabase-js';
 
 import type {
   AuthEvent,
@@ -13,7 +13,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Missing Supabase environment variables. Authentication might not work correctly.');
+  // Missing Supabase environment variables - authentication might not work correctly
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -36,7 +36,7 @@ export async function signInWithGoogle(): Promise<OAuthResponse> {
     return {
       provider: 'google',
       url: '',
-      error,
+      error: error instanceof Error ? error : new Error('Unknown error'),
     };
   }
 }
@@ -58,7 +58,7 @@ export async function signInWithLinkedIn(): Promise<OAuthResponse> {
     return {
       provider: 'linkedin',
       url: '',
-      error,
+      error: error instanceof Error ? error : new Error('Unknown error'),
     };
   }
 }
@@ -79,7 +79,7 @@ export async function signInWithEmail(email: string, password: string): Promise<
     return {
       user: null,
       session: null,
-      error,
+      error: error instanceof Error ? error : new Error('Unknown error'),
     };
   }
 }
@@ -102,28 +102,28 @@ export async function signUpWithEmail(email: string, password: string): Promise<
     return {
       user: null,
       session: null,
-      error,
+      error: error instanceof Error ? error : new Error('Unknown error'),
     };
   }
 }
 
-export async function resetPassword(email: string): Promise<{ error: any | null }> {
+export async function resetPassword(email: string): Promise<{ error: Error | null }> {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/reset-password`,
     });
     return { error };
   } catch (error) {
-    return { error };
+    return { error: error instanceof Error ? error : new Error('Unknown error') };
   }
 }
 
-export async function signOut(): Promise<{ error: any | null }> {
+export async function signOut(): Promise<{ error: Error | null }> {
   try {
     const { error } = await supabase.auth.signOut();
     return { error };
   } catch (error) {
-    return { error };
+    return { error: error instanceof Error ? error : new Error('Unknown error') };
   }
 }
 
@@ -133,8 +133,7 @@ export async function getCurrentUser(): Promise<SupabaseUser | null> {
       data: { user },
     } = await supabase.auth.getUser();
     return user as SupabaseUser | null;
-  } catch (error) {
-    console.error('Error getting current user:', error);
+  } catch {
     return null;
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { Briefcase, FileText, Link2, Upload } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

@@ -489,19 +489,17 @@ export default function UploadPage() {
       // });
 
       // For now, just simulate the process
-      // TODO: Implement proper logging
-      // eslint-disable-next-line no-console
-      console.log('Form submitted:', { resumeFile: resumeFile?.name, jobDescription });
 
       // Redirect to a mock processing page for now
       setTimeout(() => {
         router.push('/dashboard');
       }, 2000);
-    } catch (err: any) {
-      // TODO: Implement proper error logging
-      // eslint-disable-next-line no-console
-      console.error('Error submitting form:', err);
-      setError(err.message || 'Erro ao processar solicitação. Por favor, tente novamente.');
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Erro ao processar solicitação. Por favor, tente novamente.'
+      );
     } finally {
       setIsSubmitting(false);
     }

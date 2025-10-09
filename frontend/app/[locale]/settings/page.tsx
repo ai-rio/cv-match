@@ -14,7 +14,6 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function SettingsPage() {
   const t = useTranslations('dashboard');
-  const tCommon = useTranslations('common');
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');

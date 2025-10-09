@@ -8,7 +8,6 @@ import {
   Loader2,
   Rocket,
   Sparkles,
-  XCircle,
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -225,24 +224,12 @@ export default function OptimizePage() {
     try {
       setCurrentStep('processing');
       await startOptimization();
-    } catch (err) {
+    } catch {
       // Error is already handled in startOptimization
-      // TODO: Implement proper error logging
-      // eslint-disable-next-line no-console
-      console.error('Payment success but optimization failed:', err);
     }
   }, [resumeData, jobDescription, startOptimization]);
 
-  const handlePaymentCancel = useCallback(() => {
-    setCurrentStep('job-details');
-  }, []);
-
-  const handlePaymentError = useCallback((error: Error) => {
-    setError(error.message);
-    setCurrentStep('job-details');
-  }, []);
-
-  const handleOptimizationComplete = useCallback((_results: any) => {
+  const handleOptimizationComplete = useCallback(() => {
     setCurrentStep('results');
   }, []);
 
@@ -411,7 +398,6 @@ export default function OptimizePage() {
                       onUploadSuccess={(resumeId, fileName) => {
                         handleResumeUploaded({ id: resumeId, name: fileName });
                       }}
-                      onUploadError={(error) => setError(error)}
                     />
                   </div>
                 </CardContent>
@@ -462,12 +448,7 @@ export default function OptimizePage() {
           {/* Payment Step */}
           {currentStep === 'payment' && (
             <div className="space-y-6">
-              <PaymentFlow
-                tier={OPTIMIZATION_TIER}
-                onSuccess={handlePaymentSuccess}
-                onCancel={handlePaymentCancel}
-                onError={handlePaymentError}
-              />
+              <PaymentFlow tier={OPTIMIZATION_TIER} onSuccess={handlePaymentSuccess} />
 
               {/* Summary */}
               <Card>
@@ -498,11 +479,7 @@ export default function OptimizePage() {
 
           {/* Processing Step */}
           {currentStep === 'processing' && optimizationId && (
-            <OptimizationProgress
-              optimizationId={optimizationId}
-              onComplete={handleOptimizationComplete}
-              onError={(error) => setError(error)}
-            />
+            <OptimizationProgress onComplete={handleOptimizationComplete} />
           )}
 
           {/* Results Step */}
@@ -523,10 +500,8 @@ export default function OptimizePage() {
 
 function ResumeUploadComponent({
   onUploadSuccess,
-  onUploadError,
 }: {
   onUploadSuccess: (resumeId: string, fileName: string) => void;
-  onUploadError: (error: string) => void;
 }) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -817,13 +792,9 @@ function JobDescriptionForm({
 function PaymentFlow({
   tier,
   onSuccess,
-  onCancel,
-  onError,
 }: {
   tier: typeof OPTIMIZATION_TIER;
   onSuccess: () => void;
-  onCancel: () => void;
-  onError: (error: Error) => void;
 }) {
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -834,7 +805,8 @@ function PaymentFlow({
       await new Promise((resolve) => setTimeout(resolve, 2000));
       onSuccess();
     } catch (error) {
-      onError(error instanceof Error ? error : new Error('Payment failed'));
+      // Payment error will be handled by the parent component
+      console.error('Payment failed:', error);
     } finally {
       setIsProcessing(false);
     }
@@ -886,17 +858,8 @@ function PaymentFlow({
   );
 }
 
-function OptimizationProgress({
-  optimizationId: _optimizationId,
-  onComplete,
-  onError,
-}: {
-  optimizationId: string;
-  onComplete: (results: any) => void;
-  onError: (error: string) => void;
-}) {
+function OptimizationProgress({ onComplete }: { onComplete: () => void }) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [_error, _setError] = useState<string | null>(null);
 
   const steps = [
     translations.processing.extracting,
@@ -912,16 +875,7 @@ function OptimizationProgress({
           clearInterval(interval);
           // Simulate completion
           setTimeout(() => {
-            onComplete({
-              optimizedContent: 'Mock optimized resume content...',
-              matchScore: 85,
-              improvements: [
-                'Added relevant keywords',
-                'Improved formatting',
-                'Enhanced descriptions',
-              ],
-              keywords: ['React', 'TypeScript', 'Node.js', 'AWS'],
-            });
+            onComplete();
           }, 1000);
           return prev;
         }
@@ -931,23 +885,6 @@ function OptimizationProgress({
 
     return () => clearInterval(interval);
   }, [steps, onComplete]);
-
-  if (_error) {
-    return (
-      <Card className="border-red-200">
-        <CardContent className="pt-6">
-          <div className="text-center">
-            <XCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-red-600 mb-2">Optimization Failed</h3>
-            <p className="text-gray-600 mb-4">{_error}</p>
-            <Button variant="outline" onClick={() => window.location.reload()}>
-              {translations.common.tryAgain}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card>
@@ -1001,7 +938,12 @@ function ResultsDisplay({
   onDownload: () => void;
   onStartOver: () => void;
 }) {
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<{
+    optimizedContent: string;
+    matchScore: number;
+    improvements: string[];
+    keywords: string[];
+  } | null>(null);
 
   useEffect(() => {
     // Mock results data

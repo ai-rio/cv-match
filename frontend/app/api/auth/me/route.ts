@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const response = await fetch(`${API_URL}/api/auth/me`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -32,11 +32,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(data);
-  } catch (error) {
-    console.error('Get user profile error:', error);
-    return NextResponse.json(
-      { detail: 'Internal server error' },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ detail: 'Internal server error' }, { status: 500 });
   }
 }

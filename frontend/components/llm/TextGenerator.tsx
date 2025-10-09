@@ -7,7 +7,12 @@ export default function TextGenerator() {
   const [response, setResponse] = useState<TextGenerationResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [settings, setSettings] = useState<Omit<TextGenerationRequest, 'prompt'>>({
+  const [settings, setSettings] = useState<{
+    model: string;
+    max_tokens: number;
+    temperature: number;
+    provider: 'openai' | 'anthropic';
+  }>({
     model: 'gpt-3.5-turbo',
     max_tokens: 500,
     temperature: 0.7,
@@ -30,8 +35,8 @@ export default function TextGenerator() {
 
       const result = await generateText(request);
       setResponse(result);
-    } catch (err: any) {
-      setError(err.message || 'Failed to generate text');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to generate text');
     } finally {
       setIsLoading(false);
     }
@@ -40,6 +45,17 @@ export default function TextGenerator() {
   const handleSettingChange = (key: keyof typeof settings, value: string | number) => {
     setSettings({ ...settings, [key]: value });
   };
+
+  const handleSelectChange =
+    (key: keyof typeof settings) => (e: React.ChangeEvent<HTMLSelectElement>) => {
+      handleSettingChange(key, e.target.value);
+    };
+
+  const handleRangeChange =
+    (key: keyof typeof settings, parser: (value: string) => number) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      handleSettingChange(key, parser(e.target.value));
+    };
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -69,7 +85,7 @@ export default function TextGenerator() {
             <select
               id="provider"
               value={settings.provider}
-              onChange={(e) => handleSettingChange('provider', e.target.value)}
+              onChange={handleSelectChange('provider')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
             >
               <option value="openai">OpenAI</option>
@@ -84,7 +100,7 @@ export default function TextGenerator() {
             <select
               id="model"
               value={settings.model}
-              onChange={(e) => handleSettingChange('model', e.target.value)}
+              onChange={handleSelectChange('model')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
             >
               {settings.provider === 'openai' ? (
@@ -112,7 +128,7 @@ export default function TextGenerator() {
               max="1"
               step="0.1"
               value={settings.temperature}
-              onChange={(e) => handleSettingChange('temperature', parseFloat(e.target.value))}
+              onChange={handleRangeChange('temperature', parseFloat)}
               className="w-full"
             />
           </div>
@@ -128,7 +144,7 @@ export default function TextGenerator() {
               max="2000"
               step="50"
               value={settings.max_tokens}
-              onChange={(e) => handleSettingChange('max_tokens', parseInt(e.target.value))}
+              onChange={handleRangeChange('max_tokens', parseInt)}
               className="w-full"
             />
           </div>

@@ -7,12 +7,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
   // Provide a fallback locale if requestLocale is not available
   let locale = await requestLocale;
 
-  if (!locale || !locales.includes(locale as any)) {
+  if (!locale || !locales.includes(locale as (typeof locales)[number])) {
     locale = defaultLocale;
   }
 
   // Load all translation namespaces for the locale
-  const messages: Record<string, any> = {};
+  const messages: Record<string, unknown> = {};
 
   // Define all available namespaces
   const namespaces = [

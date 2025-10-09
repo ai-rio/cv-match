@@ -1,11 +1,11 @@
 // API Response Base Types
-export interface BaseAPIResponse<T = any> {
+export interface BaseAPIResponse<T = unknown> {
   status: 'success' | 'error';
   data?: T;
   error?: {
     message: string;
     code?: string;
-    details?: any;
+    details?: unknown;
   };
   timestamp?: string;
 }
@@ -156,7 +156,7 @@ export interface Subscription {
 export interface APIError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
   field?: string;
   timestamp: string;
 }
@@ -167,7 +167,7 @@ export interface ValidationError extends APIError {
 }
 
 // API Utility Types
-export type APIEndpoint<TRequest = any, TResponse = any> = {
+export type APIEndpoint<TRequest = unknown, TResponse = unknown> = {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   path: string;
   request?: TRequest;
@@ -191,7 +191,7 @@ export interface SearchParams {
   page_size?: number;
   sort_by?: string;
   sort_order?: 'asc' | 'desc';
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 }
 
 export interface FilterOption {

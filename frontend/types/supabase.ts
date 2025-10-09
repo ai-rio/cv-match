@@ -3,8 +3,8 @@ export interface SupabaseUser {
   id: string;
   email?: string;
   phone?: string;
-  user_metadata?: Record<string, any>;
-  app_metadata?: Record<string, any>;
+  user_metadata?: Record<string, unknown>;
+  app_metadata?: Record<string, unknown>;
   created_at: string;
   updated_at?: string;
   aud: string;
@@ -37,22 +37,22 @@ export type AuthEvent =
 export interface AuthResponse {
   user: SupabaseUser | null;
   session: SupabaseSession | null;
-  error: any | null;
+  error: Error | null;
 }
 
 export interface OAuthResponse {
   provider: string;
   url: string;
-  error: any | null;
+  error: Error | null;
 }
 
 // API Request/Response Types
-export interface APIResponse<T = any> {
+export interface APIResponse<T = unknown> {
   data?: T;
   error?: {
     message: string;
     code?: string;
-    details?: any;
+    details?: unknown;
   };
   status: 'success' | 'error';
 }

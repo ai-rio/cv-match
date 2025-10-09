@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { createClient } from '@/lib/supabase/client';
 
 // Mock translation object - will be replaced with next-intl later
 const translations = {
@@ -92,9 +91,8 @@ export default function ResultsPage() {
         if (mockStatus.status === 'completed' || mockStatus.status === 'failed') {
           // Will be cleared in useEffect cleanup
         }
-      } catch (err: any) {
-        console.error('Error fetching resume improvement status:', err);
-        setError(err.message || translations.results.error);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : translations.results.error);
         setLoading(false);
         // Will be cleared in useEffect cleanup
       }
@@ -135,8 +133,7 @@ export default function ResultsPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err: any) {
-      console.error('Error downloading file:', err);
+    } catch {
       setError('Erro ao baixar arquivo. Por favor, tente novamente.');
     } finally {
       setDownloading(false);
