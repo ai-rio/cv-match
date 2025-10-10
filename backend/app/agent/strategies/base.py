@@ -1,17 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, TypeVar
 
 from ..providers.base import Provider
+
+StrategyType = TypeVar("StrategyType")
 
 
 class Strategy(ABC):
     @abstractmethod
-    async def __call__(
-        self,
-        prompt: str,
-        provider: Provider,
-        **generation_args: Any
-    ) -> dict[str, Any]:
+    async def __call__(self, prompt: str, provider: Provider, **generation_args: Any) -> Any:
         """
         Abstract method which should be used to define the strategy for
         generating a response from LLM.
@@ -22,6 +19,6 @@ class Strategy(ABC):
             **generation_args (Any): Additional arguments for generation.
 
         Returns:
-            Dict[str, Any]: The generated response and any additional information.
+            Any: The generated response (can be dict, str, etc. depending on strategy).
         """
         ...

@@ -1,9 +1,8 @@
-from typing import Optional
+from typing import Any, cast
 
 from supabase import Client, create_client
 
 from app.core.config import settings
-
 
 
 class SupabaseAuthService:
@@ -17,24 +16,27 @@ class SupabaseAuthService:
         # Create the client with the properly structured options
         self.supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
 
-    async def get_user(self, jwt_token: str) -> Optional[object]:
+    async def get_user(self, jwt_token: str) -> dict[str, Any] | None:
         """Get user data from a JWT token."""
         # Use the Supabase client to get user information
         try:
             response = self.supabase.auth.get_user(jwt_token)
-            if response is None:
+            if response is None or response.user is None:
                 return None
-            return response.user
+            return {
+                "id": response.user.id,
+                "email": response.user.email,
+                "user_metadata": getattr(response.user, "user_metadata", {}),
+            }
         except Exception:
             return None
 
     async def sign_in_with_email_password(self, email: str, password: str) -> str:
         """Sign in with email and password."""
         try:
-            response = self.supabase.auth.sign_in_with_password({
-                "email": email,
-                "password": password
-            })
+            response = self.supabase.auth.sign_in_with_password(
+                {"email": email, "password": password}
+            )
 
             if not response.session or not response.session.access_token:
                 raise ValueError("Failed to authenticate with email and password")
@@ -54,8 +56,8 @@ class SupabaseAuthService:
         try:
             # For Google, use signInWithIDToken with proper credentials structure
             if provider == "google":
-                credentials = {"id_token": token, "provider": "google"}
-                response = self.supabase.auth.sign_in_with_id_token(credentials)
+                credentials: dict[str, Any] = {"id_token": token, "provider": "google"}
+                response = self.supabase.auth.sign_in_with_id_token(cast(Any, credentials))
             else:
                 # For other providers, you might need different implementations
                 raise ValueError(f"Provider {provider} not yet implemented")

@@ -5,7 +5,7 @@ Adapted from Resume-Matcher for cv-match architecture.
 
 import json
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 
@@ -58,11 +58,7 @@ class ScoreImprovementService:
         """
 
     def _build_improvement_prompt(
-        self,
-        resume_text: str,
-        job_description: str,
-        current_score: float,
-        improvements: List[str]
+        self, resume_text: str, job_description: str, current_score: float, improvements: list[str]
     ) -> str:
         """Build prompt for resume improvement."""
         improvements_text = "\n".join([f"- {imp}" for imp in improvements])
@@ -90,11 +86,7 @@ class ScoreImprovementService:
         }}
         """
 
-    def calculate_cosine_similarity(
-        self,
-        embedding1: np.ndarray,
-        embedding2: np.ndarray
-    ) -> float:
+    def calculate_cosine_similarity(self, embedding1: np.ndarray, embedding2: np.ndarray) -> float:
         """
         Calculate cosine similarity between two embeddings.
 
@@ -122,7 +114,7 @@ class ScoreImprovementService:
 
         return float(dot_product / (norm1 * norm2))
 
-    def _parse_score_response(self, response: str) -> Dict[str, Any]:
+    def _parse_score_response(self, response: str) -> dict[str, Any]:
         """
         Parse LLM response for score analysis.
 
@@ -151,14 +143,10 @@ class ScoreImprovementService:
                 "strengths": ["Análise parcial concluída"],
                 "improvements": ["Revisar resposta do LLM"],
                 "keywords": [],
-                "suggestions": ["Tentar novamente"]
+                "suggestions": ["Tentar novamente"],
             }
 
-    async def calculate_match_score(
-        self,
-        resume_text: str,
-        job_description: str
-    ) -> Dict[str, Any]:
+    async def calculate_match_score(self, resume_text: str, job_description: str) -> dict[str, Any]:
         """
         Calculate match score between resume and job description using LLM.
 
@@ -177,7 +165,7 @@ class ScoreImprovementService:
             response = await self.agent_manager.generate(
                 prompt,
                 max_tokens=2000,
-                temperature=0.3  # Lower for more consistent scoring
+                temperature=0.3,  # Lower for more consistent scoring
             )
 
             # Parse response
@@ -188,8 +176,7 @@ class ScoreImprovementService:
                 resume_embedding = await self.embedding_manager.embed(resume_text)
                 job_embedding = await self.embedding_manager.embed(job_description)
                 embedding_score = self.calculate_cosine_similarity(
-                    np.array(resume_embedding),
-                    np.array(job_embedding)
+                    np.array(resume_embedding), np.array(job_embedding)
                 )
 
                 # Add embedding score to result
@@ -207,12 +194,8 @@ class ScoreImprovementService:
             raise ProviderError(f"Failed to calculate match score: {str(e)}") from e
 
     async def improve_resume(
-        self,
-        resume_text: str,
-        job_description: str,
-        current_score: float,
-        improvements: List[str]
-    ) -> Dict[str, Any]:
+        self, resume_text: str, job_description: str, current_score: float, improvements: list[str]
+    ) -> dict[str, Any]:
         """
         Generate improved version of resume based on analysis.
 
@@ -235,7 +218,7 @@ class ScoreImprovementService:
             response = await self.agent_manager.generate(
                 prompt,
                 max_tokens=3000,
-                temperature=0.7  # Higher for creative improvements
+                temperature=0.7,  # Higher for creative improvements
             )
 
             # Parse response
@@ -247,8 +230,7 @@ class ScoreImprovementService:
                 resume_embedding = await self.embedding_manager.embed(improved_resume)
                 job_embedding = await self.embedding_manager.embed(job_description)
                 new_similarity = self.calculate_cosine_similarity(
-                    np.array(resume_embedding),
-                    np.array(job_embedding)
+                    np.array(resume_embedding), np.array(job_embedding)
                 )
 
                 result["new_embedding_similarity"] = new_similarity
@@ -264,11 +246,7 @@ class ScoreImprovementService:
             logger.error(f"Error improving resume: {e}")
             raise ProviderError(f"Failed to improve resume: {str(e)}") from e
 
-    async def analyze_and_improve(
-        self,
-        resume_text: str,
-        job_description: str
-    ) -> Dict[str, Any]:
+    async def analyze_and_improve(self, resume_text: str, job_description: str) -> dict[str, Any]:
         """
         Complete analysis and improvement workflow.
 
@@ -290,7 +268,7 @@ class ScoreImprovementService:
             result = {
                 "original_score": current_score,
                 "analysis": score_analysis,
-                "improvements_generated": False
+                "improvements_generated": False,
             }
 
             if current_score < 80 and improvements:  # Only improve if score < 80%
@@ -301,13 +279,17 @@ class ScoreImprovementService:
                     resume_text, job_description, current_score, improvements
                 )
 
-                result.update({
-                    "improvements_generated": True,
-                    "improved_resume": improvement_result.get("improved_resume"),
-                    "changes_made": improvement_result.get("changes_made", []),
-                    "expected_score": improvement_result.get("expected_score"),
-                    "new_embedding_similarity": improvement_result.get("new_embedding_similarity")
-                })
+                result.update(
+                    {
+                        "improvements_generated": True,
+                        "improved_resume": improvement_result.get("improved_resume"),
+                        "changes_made": improvement_result.get("changes_made", []),
+                        "expected_score": improvement_result.get("expected_score"),
+                        "new_embedding_similarity": improvement_result.get(
+                            "new_embedding_similarity"
+                        ),
+                    }
+                )
 
             return result
 
@@ -315,7 +297,7 @@ class ScoreImprovementService:
             logger.error(f"Error in complete analysis workflow: {e}")
             raise ProviderError(f"Analysis failed: {str(e)}") from e
 
-    async def extract_keywords(self, text: str, context: str = "general") -> List[str]:
+    async def extract_keywords(self, text: str, context: str = "general") -> list[str]:
         """
         Extract keywords from text using LLM.
 
@@ -327,11 +309,7 @@ class ScoreImprovementService:
             List of extracted keywords
         """
         try:
-            context_map = {
-                "resume": "currículo",
-                "job": "vaga de emprego",
-                "general": "texto"
-            }
+            context_map = {"resume": "currículo", "job": "vaga de emprego", "general": "texto"}
 
             context_text = context_map.get(context, "texto")
 
@@ -346,11 +324,7 @@ class ScoreImprovementService:
             ["palavra1", "palavra2", "palavra3"]
             """
 
-            response = await self.agent_manager.generate(
-                prompt,
-                max_tokens=500,
-                temperature=0.2
-            )
+            response = await self.agent_manager.generate(prompt, max_tokens=500, temperature=0.2)
 
             try:
                 keywords = json.loads(response)

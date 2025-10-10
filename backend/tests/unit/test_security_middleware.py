@@ -46,9 +46,9 @@ class TestSecurityMiddleware:
         request.headers = {"user-agent": "test-agent"}
         call_next = AsyncMock(return_value=Response("OK"))
 
-        with patch.object(self.middleware, '_get_client_ip', return_value="192.168.1.1"):
-            with patch.object(self.middleware, '_check_request_rate', return_value=True):
-                with patch.object(self.middleware, '_log_security_event', new_callable=AsyncMock):
+        with patch.object(self.middleware, "_get_client_ip", return_value="192.168.1.1"):
+            with patch.object(self.middleware, "_check_request_rate", return_value=True):
+                with patch.object(self.middleware, "_log_security_event", new_callable=AsyncMock):
                     response = await self.middleware.dispatch(request, call_next)
 
                     call_next.assert_called_once_with(request)
@@ -61,9 +61,11 @@ class TestSecurityMiddleware:
         request.client.host = "192.168.1.1"
         request.headers = {"user-agent": "test-agent"}
 
-        with patch.object(self.middleware, '_get_client_ip', return_value="192.168.1.1"):
-            with patch.object(self.middleware, '_check_request_rate', return_value=False):
-                with patch.object(self.middleware, '_log_security_event', new_callable=AsyncMock) as mock_log:
+        with patch.object(self.middleware, "_get_client_ip", return_value="192.168.1.1"):
+            with patch.object(self.middleware, "_check_request_rate", return_value=False):
+                with patch.object(
+                    self.middleware, "_log_security_event", new_callable=AsyncMock
+                ) as mock_log:
                     response = await self.middleware.dispatch(request, AsyncMock())
 
                     assert response.status_code == 429
@@ -133,11 +135,9 @@ class TestSecurityMiddleware:
         request.method = "POST"
         request.headers = {"user-agent": "test-agent"}
 
-        with patch('app.services.security.middleware.logger') as mock_logger:
+        with patch("app.services.security.middleware.logger") as mock_logger:
             await self.middleware._log_security_event(
-                request,
-                "TEST_EVENT",
-                {"extra_data": "test_value"}
+                request, "TEST_EVENT", {"extra_data": "test_value"}
             )
 
             mock_logger.info.assert_called_once()
@@ -157,27 +157,23 @@ class TestValidateAndSanitizeRequest:
         request = Mock()
         request.client.host = "192.168.1.1"
 
-        with patch('app.services.security.middleware.validate_request') as mock_validate:
+        with patch("app.services.security.middleware.validate_request") as mock_validate:
             mock_validate.return_value = {
                 "prompt": Mock(
                     is_safe=True,
                     sanitized_input="Generate a story about AI",
                     warnings=[],
-                    blocked_patterns=[]
+                    blocked_patterns=[],
                 )
             }
 
             result = await validate_and_sanitize_request(
-                request_data,
-                credentials=credentials,
-                request=request
+                request_data, credentials=credentials, request=request
             )
 
             assert result["prompt"] == "Generate a story about AI"
             mock_validate.assert_called_once_with(
-                request_data,
-                user_id=None,
-                ip_address="192.168.1.1"
+                request_data, user_id=None, ip_address="192.168.1.1"
             )
 
     async def test_validation_failure(self):
@@ -190,22 +186,23 @@ class TestValidateAndSanitizeRequest:
         request = Mock()
         request.client.host = "192.168.1.1"
 
-        with patch('app.services.security.middleware.validate_request') as mock_validate:
+        with patch("app.services.security.middleware.validate_request") as mock_validate:
             mock_validate.return_value = {
                 "prompt": Mock(
                     is_safe=False,
                     sanitized_input="",
                     warnings=["System prompt injection detected"],
-                    blocked_patterns=["system_prompt"]
+                    blocked_patterns=["system_prompt"],
                 )
             }
 
-            with patch('app.services.security.middleware.log_security_validation_failure', new_callable=AsyncMock):
+            with patch(
+                "app.services.security.middleware.log_security_validation_failure",
+                new_callable=AsyncMock,
+            ):
                 with pytest.raises(HTTPException) as exc_info:
                     await validate_and_sanitize_request(
-                        request_data,
-                        credentials=credentials,
-                        request=request
+                        request_data, credentials=credentials, request=request
                     )
 
                 assert exc_info.value.status_code == 400
@@ -223,11 +220,21 @@ class TestValidateAndSanitizeRequest:
         request = Mock()
         request.client.host = "192.168.1.1"
 
-        with patch('app.services.security.middleware.validate_request') as mock_validate:
+        with patch("app.services.security.middleware.validate_request") as mock_validate:
             mock_validate.return_value = {
                 "documents": [
-                    Mock(is_safe=True, sanitized_input="Document 1 content", warnings=[], blocked_patterns=[]),
-                    Mock(is_safe=True, sanitized_input="Document 2 content", warnings=[], blocked_patterns=[]),
+                    Mock(
+                        is_safe=True,
+                        sanitized_input="Document 1 content",
+                        warnings=[],
+                        blocked_patterns=[],
+                    ),
+                    Mock(
+                        is_safe=True,
+                        sanitized_input="Document 2 content",
+                        warnings=[],
+                        blocked_patterns=[],
+                    ),
                 ]
             }
 
@@ -245,7 +252,7 @@ class TestValidateAndSanitizeRequest:
         request_data = {"prompt": "test"}
         request = Mock()
 
-        with patch('app.services.security.middleware.validate_request') as mock_validate:
+        with patch("app.services.security.middleware.validate_request") as mock_validate:
             mock_validate.side_effect = Exception("Unexpected error")
 
             with pytest.raises(HTTPException) as exc_info:
@@ -261,8 +268,7 @@ class TestSecurityResponseFunctions:
     def test_create_security_error_response(self):
         """Test creation of security error responses."""
         response = create_security_error_response(
-            "Test error message",
-            {"details": "additional info"}
+            "Test error message", {"details": "additional info"}
         )
 
         assert response.status_code == 400
@@ -275,19 +281,13 @@ class TestSecurityResponseFunctions:
         request_data = {"prompt": "malicious input"}
         validation_results = {
             "prompt": Mock(
-                is_safe=False,
-                warnings=["Injection detected"],
-                blocked_patterns=["system_prompt"]
+                is_safe=False, warnings=["Injection detected"], blocked_patterns=["system_prompt"]
             )
         }
         client_ip = "192.168.1.1"
 
-        with patch('app.services.security.middleware.logger') as mock_logger:
-            await log_security_validation_failure(
-                request_data,
-                validation_results,
-                client_ip
-            )
+        with patch("app.services.security.middleware.logger") as mock_logger:
+            await log_security_validation_failure(request_data, validation_results, client_ip)
 
             mock_logger.warning.assert_called_once()
             assert "VALIDATION_FAILURE" in str(mock_logger.warning.call_args)
@@ -298,12 +298,8 @@ class TestSecurityResponseFunctions:
         validation_results = {"prompt": Mock(is_safe=True)}
         client_ip = "192.168.1.1"
 
-        with patch('app.services.security.middleware.logger') as mock_logger:
-            await log_security_validation_success(
-                request_data,
-                validation_results,
-                client_ip
-            )
+        with patch("app.services.security.middleware.logger") as mock_logger:
+            await log_security_validation_success(request_data, validation_results, client_ip)
 
             mock_logger.info.assert_called_once()
             assert "VALIDATION_SUCCESS" in str(mock_logger.info.call_args)
@@ -321,7 +317,7 @@ class TestMiddlewareConfiguration:
         request.client.host = "192.168.1.1"
 
         # Should not check rate limits
-        with patch.object(middleware, '_check_request_rate'):
+        with patch.object(middleware, "_check_request_rate"):
             # Simulate internal logic that would check rate limiting
             assert middleware.enable_rate_limiting is False
 
@@ -338,9 +334,9 @@ class TestMiddlewareConfiguration:
         # Simulate an error during processing
         call_next = AsyncMock(side_effect=Exception("Unexpected error"))
 
-        with patch.object(middleware, '_get_client_ip', return_value="192.168.1.1"):
-            with patch.object(middleware, '_check_request_rate', return_value=True):
-                with patch.object(middleware, '_log_security_event', new_callable=AsyncMock):
+        with patch.object(middleware, "_get_client_ip", return_value="192.168.1.1"):
+            with patch.object(middleware, "_check_request_rate", return_value=True):
+                with patch.object(middleware, "_log_security_event", new_callable=AsyncMock):
                     with pytest.raises(Exception):
                         await middleware.dispatch(request, call_next)
 
@@ -357,10 +353,12 @@ class TestMiddlewareConfiguration:
         response = Response("OK")
         call_next = AsyncMock(return_value=response)
 
-        with patch('time.time', side_effect=[0.0, 0.1]):  # 100ms processing time
-            with patch.object(middleware, '_get_client_ip', return_value="192.168.1.1"):
-                with patch.object(middleware, '_check_request_rate', return_value=True):
-                    with patch.object(middleware, '_log_security_event', new_callable=AsyncMock) as mock_log:
+        with patch("time.time", side_effect=[0.0, 0.1]):  # 100ms processing time
+            with patch.object(middleware, "_get_client_ip", return_value="192.168.1.1"):
+                with patch.object(middleware, "_check_request_rate", return_value=True):
+                    with patch.object(
+                        middleware, "_log_security_event", new_callable=AsyncMock
+                    ) as mock_log:
                         result = await middleware.dispatch(request, call_next)
 
                         assert result == response
@@ -385,9 +383,9 @@ class TestSecurityIntegration:
         response = Response("OK")
         call_next = AsyncMock(return_value=response)
 
-        with patch.object(middleware, '_get_client_ip', return_value="192.168.1.1"):
-            with patch.object(middleware, '_check_request_rate', return_value=True):
-                with patch.object(middleware, '_log_security_event', new_callable=AsyncMock):
+        with patch.object(middleware, "_get_client_ip", return_value="192.168.1.1"):
+            with patch.object(middleware, "_check_request_rate", return_value=True):
+                with patch.object(middleware, "_log_security_event", new_callable=AsyncMock):
                     result = await middleware.dispatch(request, call_next)
 
                     assert result == response
@@ -407,7 +405,7 @@ class TestSecurityIntegration:
         response.status_code = 200
         call_next = AsyncMock(return_value=response)
 
-        with patch.object(middleware, '_log_security_event', new_callable=AsyncMock) as mock_log:
+        with patch.object(middleware, "_log_security_event", new_callable=AsyncMock) as mock_log:
             await middleware.dispatch(request, call_next)
 
             # Should log both request received and completed
@@ -418,11 +416,11 @@ class TestSecurityIntegration:
             for call in mock_log.call_args_list:
                 args, kwargs = call
                 request_arg = args[0]  # First argument is the request
-                event_type = args[1]   # Second argument is the event type
+                event_type = args[1]  # Second argument is the event type
 
                 # Verify the middleware is being called correctly
-                assert hasattr(request_arg, 'url')
-                assert hasattr(request_arg, 'method')
+                assert hasattr(request_arg, "url")
+                assert hasattr(request_arg, "method")
 
                 if event_type == "REQUEST_RECEIVED":
                     # For REQUEST_RECEIVED, only 2 args (request, event_type)

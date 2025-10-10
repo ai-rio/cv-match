@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.models.vectordb import (
@@ -11,9 +11,9 @@ from app.models.vectordb import (
     SearchResult,
 )
 from app.services.llm.embedding_service import EmbeddingService, get_embedding_service
+from app.services.security.middleware import validate_and_sanitize_request
 from app.services.supabase.auth import SupabaseAuthService, get_auth_service
 from app.services.vectordb import QdrantService, get_vector_db_service
-from app.services.security.middleware import validate_and_sanitize_request
 
 router = APIRouter()
 security = HTTPBearer()
@@ -33,29 +33,31 @@ async def add_documents(
     try:
         # Validate user authentication
         user = await auth_service.get_user(credentials.credentials)
-        user_id = user.id if hasattr(user, 'id') else None
-        logger.info(
-            f"User authenticated: {user.email if hasattr(user, 'email') else 'Unknown user'}"
-        )
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+            )
+        user_id = user.get("id")
+        logger.info(f"User authenticated: {user.get('email', 'Unknown user')}")
 
         # Validate and sanitize input
         try:
-            client_ip = http_request.client.host if http_request and http_request.client else "unknown"
             sanitized_request_data = await validate_and_sanitize_request(
-                request.dict(),
-                credentials=credentials,
-                request=http_request
+                request.dict(), credentials=credentials, request=http_request
             )
 
             # Update request with sanitized data
-            sanitized_documents = sanitized_request_data.get('documents', request.documents)
+            sanitized_documents = sanitized_request_data.get("documents", request.documents)
 
             # Log sanitization warnings if any
-            if 'documents' in sanitized_request_data:
-                for i, doc_result in enumerate(sanitized_request_data['documents']):
-                    if hasattr(doc_result, 'warnings') and len(doc_result.warnings) > 0:
+            if "documents" in sanitized_request_data:
+                for i, doc_result in enumerate(sanitized_request_data["documents"]):
+                    if hasattr(doc_result, "warnings") and len(doc_result.warnings) > 0:
+                        warnings = doc_result.warnings
                         logger.warning(
-                            f"Input sanitization warnings for document {i}, user {user_id}: {doc_result.warnings}"
+                            f"Input sanitization warnings for document {i}, "
+                            f"user {user_id}: {warnings}"
                         )
 
         except HTTPException:
@@ -64,8 +66,7 @@ async def add_documents(
         except Exception as sanitization_error:
             logger.error(f"Input sanitization error: {str(sanitization_error)}")
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Input validation failed"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Input validation failed"
             )
 
         # Generate embeddings for each document
@@ -110,28 +111,30 @@ async def search_documents(
     try:
         # Validate user authentication
         user = await auth_service.get_user(credentials.credentials)
-        user_id = user.id if hasattr(user, 'id') else None
-        logger.info(
-            f"User authenticated: {user.email if hasattr(user, 'email') else 'Unknown user'}"
-        )
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+            )
+        user_id = user.get("id")
+        logger.info(f"User authenticated: {user.get('email', 'Unknown user')}")
 
         # Validate and sanitize input
         try:
-            client_ip = http_request.client.host if http_request and http_request.client else "unknown"
             sanitized_request_data = await validate_and_sanitize_request(
-                query.dict(),
-                credentials=credentials,
-                request=http_request
+                query.dict(), credentials=credentials, request=http_request
             )
 
             # Update query with sanitized data
-            sanitized_query_text = sanitized_request_data.get('query_text', query.query_text)
+            sanitized_query_text = sanitized_request_data.get("query_text", query.query_text)
 
             # Log sanitization warnings if any
-            if hasattr(sanitized_request_data, 'query_text') and len(sanitized_request_data['query_text'].warnings) > 0:
-                logger.warning(
-                    f"Input sanitization warnings for user {user_id}: {sanitized_request_data['query_text'].warnings}"
-                )
+            if (
+                hasattr(sanitized_request_data, "query_text")
+                and len(sanitized_request_data["query_text"].warnings) > 0
+            ):
+                warnings = sanitized_request_data["query_text"].warnings
+                logger.warning(f"Input sanitization warnings for user {user_id}: {warnings}")
 
         except HTTPException:
             # Re-raise HTTP exceptions from validation
@@ -139,8 +142,7 @@ async def search_documents(
         except Exception as sanitization_error:
             logger.error(f"Input sanitization error: {str(sanitization_error)}")
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Input validation failed"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Input validation failed"
             )
 
         # Generate embedding for the query

@@ -11,7 +11,7 @@ from app.services.security import SecurityMiddleware
 # Configure logging
 logging.basicConfig(
     level=getattr(logging, settings.SECURITY_LOG_LEVEL.upper()),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ async def root():
         "status": "online",
         "environment": settings.ENVIRONMENT,
         "version": "0.1.0",
-        "security_enabled": settings.ENABLE_RATE_LIMITING
+        "security_enabled": settings.ENABLE_RATE_LIMITING,
     }
 
 
@@ -92,7 +92,7 @@ async def security_health():
             "block_role_instructions": settings.BLOCK_ROLE_INSTRUCTIONS,
             "block_json_instructions": settings.BLOCK_JSON_INSTRUCTIONS,
             "block_code_execution": settings.BLOCK_CODE_EXECUTION,
-        }
+        },
     }
 
 
@@ -100,8 +100,10 @@ if __name__ == "__main__":
     import uvicorn
 
     logger.info(f"Starting server in {settings.ENVIRONMENT} mode")
-    logger.info(f"Security features: Rate limiting={settings.ENABLE_RATE_LIMITING}, "
-                f"Input sanitization=enabled, Security logging={settings.ENABLE_SECURITY_LOGGING}")
+    logger.info(
+        f"Security features: Rate limiting={settings.ENABLE_RATE_LIMITING}, "
+        f"Input sanitization=enabled, Security logging={settings.ENABLE_SECURITY_LOGGING}"
+    )
 
     uvicorn.run(
         "app.main:app", host="0.0.0.0", port=8000, reload=settings.ENVIRONMENT == "development"

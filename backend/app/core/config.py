@@ -51,7 +51,7 @@ class Settings(BaseSettings):
 
     # Rate Limiting
     RATE_LIMIT_PER_USER: int = 60  # requests per minute
-    RATE_LIMIT_PER_IP: int = 100   # requests per minute
+    RATE_LIMIT_PER_IP: int = 100  # requests per minute
     ENABLE_RATE_LIMITING: bool = True
 
     # Security Monitoring

@@ -15,10 +15,7 @@ FENCE_PATTERN = re.compile(r"```(?:json)?\s*([\s\S]*?)```", re.IGNORECASE)
 
 class JSONWrapper(Strategy):
     async def __call__(
-        self,
-        prompt: str,
-        provider: Provider,
-        **generation_args: Any
+        self, prompt: str, provider: Provider, **generation_args: Any
     ) -> dict[str, Any]:
         """
         Wrapper strategy to format the prompt as JSON with the help of LLM.
@@ -62,8 +59,7 @@ class JSONWrapper(Strategy):
         if candidates:
             # If we had candidates but none parsed, log the last error contextfully
             _err_preview = (
-                response if len(response) <= 2000
-                else response[:2000] + "... (truncated)"
+                response if len(response) <= 2000 else response[:2000] + "... (truncated)"
             )
             logger.error(
                 "provider returned non-JSON. failed to parse candidate blocks - response: %s",
@@ -77,12 +73,7 @@ class JSONWrapper(Strategy):
 
 
 class MDWrapper(Strategy):
-    async def __call__(
-        self,
-        prompt: str,
-        provider: Provider,
-        **generation_args: Any
-    ) -> dict[str, Any]:
+    async def __call__(self, prompt: str, provider: Provider, **generation_args: Any) -> str:
         """
         Wrapper strategy to format the prompt as Markdown with the help of LLM.
         """

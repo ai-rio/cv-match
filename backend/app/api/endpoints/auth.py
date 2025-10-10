@@ -22,8 +22,7 @@ async def login(
     """Login with email and password."""
     try:
         supabase_token = await auth_service.sign_in_with_email_password(
-            login_data.email,
-            login_data.password
+            login_data.email, login_data.password
         )
         return TokenResponse(access_token=supabase_token, token_type="bearer")
     except Exception as e:
@@ -48,10 +47,10 @@ async def get_current_user(
                 headers={"WWW-Authenticate": "Bearer"},
             )
         return UserProfile(
-            id=user.id,
-            email=user.email,
-            full_name=user.user_metadata.get("full_name", ""),
-            avatar_url=user.user_metadata.get("avatar_url", ""),
+            id=user.get("id", ""),
+            email=user.get("email", ""),
+            full_name=user.get("user_metadata", {}).get("full_name", ""),
+            avatar_url=user.get("user_metadata", {}).get("avatar_url", ""),
         )
     except Exception as e:
         raise HTTPException(

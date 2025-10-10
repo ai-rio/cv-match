@@ -6,7 +6,7 @@ Tests that all modules can be imported correctly.
 
 import sys
 import importlib
-from pathlib import Path
+
 
 def test_import(module_name: str, description: str = ""):
     """Test importing a module."""
@@ -20,6 +20,7 @@ def test_import(module_name: str, description: str = ""):
     except Exception as e:
         print(f"❌ Error importing {module_name}: {e}")
         return False
+
 
 def main():
     """Run all import tests."""
@@ -72,6 +73,7 @@ def main():
     else:
         print(f"⚠️ {total - passed} modules failed to import")
         return False
+
 
 if __name__ == "__main__":
     success = main()

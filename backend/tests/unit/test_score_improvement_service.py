@@ -16,9 +16,10 @@ from app.services.score_improvement_service import ScoreImprovementService
 @pytest.fixture
 def score_service():
     """Create ScoreImprovementService instance for testing."""
-    with patch('app.services.score_improvement_service.AgentManager') as mock_agent_manager, \
-         patch('app.services.score_improvement_service.EmbeddingManager') as mock_embedding_manager:
-
+    with (
+        patch("app.services.score_improvement_service.AgentManager") as mock_agent_manager,
+        patch("app.services.score_improvement_service.EmbeddingManager") as mock_embedding_manager,
+    ):
         mock_agent_manager.return_value = MagicMock()
         mock_embedding_manager.return_value = MagicMock()
 
@@ -77,19 +78,19 @@ def mock_score_response():
         "strengths": [
             "Experiência sólida com Python e FastAPI",
             "Conhecimento em PostgreSQL",
-            "Experiência relevante na área"
+            "Experiência relevante na área",
         ],
         "improvements": [
             "Adicionar informações sobre experiências com cloud",
             "Detalhar projetos específicos",
-            "Incluir certificações relevantes"
+            "Incluir certificações relevantes",
         ],
         "keywords": ["Python", "FastAPI", "PostgreSQL", "Docker", "API"],
         "suggestions": [
             "Adicionar seção de projetos pessoais",
             "Incluir métricas de impacto nos projetos",
-            "Mencionar experiências com liderança técnica"
-        ]
+            "Mencionar experiências com liderança técnica",
+        ],
     }
 
 
@@ -120,30 +121,34 @@ def mock_improvement_response():
             "Adicionado certificações AWS e PostgreSQL",
             "Incluídas métricas quantitativas de impacto",
             "Destacada experiência em liderança técnica",
-            "Adicionada seção de projetos com resultados"
+            "Adicionada seção de projetos com resultados",
         ],
-        "expected_score": 92
+        "expected_score": 92,
     }
 
 
 def test_score_service_initialization():
     """Test ScoreImprovementService initialization."""
-    with patch('app.services.score_improvement_service.AgentManager') as mock_agent_manager, \
-         patch('app.services.score_improvement_service.EmbeddingManager') as mock_embedding_manager:
-
+    with (
+        patch("app.services.score_improvement_service.AgentManager") as mock_agent_manager,
+        patch("app.services.score_improvement_service.EmbeddingManager") as mock_embedding_manager,
+    ):
         mock_agent_manager.return_value = MagicMock()
         mock_embedding_manager.return_value = MagicMock()
 
         service = ScoreImprovementService()
 
         assert service is not None
-        assert hasattr(service, 'agent_manager')
-        assert hasattr(service, 'embedding_manager')
+        assert hasattr(service, "agent_manager")
+        assert hasattr(service, "embedding_manager")
 
 
 def test_score_service_initialization_error():
     """Test ScoreImprovementService initialization with error."""
-    with patch('app.services.score_improvement_service.AgentManager', side_effect=Exception("Initialization failed")):
+    with patch(
+        "app.services.score_improvement_service.AgentManager",
+        side_effect=Exception("Initialization failed"),
+    ):
         with pytest.raises(Exception, match="Failed to initialize ScoreImprovementService"):
             ScoreImprovementService()
 
@@ -287,7 +292,9 @@ async def test_calculate_match_score_embedding_error(
 
 
 @pytest.mark.asyncio
-async def test_calculate_match_score_llm_error(score_service, sample_resume_text, sample_job_description):
+async def test_calculate_match_score_llm_error(
+    score_service, sample_resume_text, sample_job_description
+):
     """Test match score calculation with LLM error."""
     # Mock LLM error
     score_service.agent_manager.generate = AsyncMock(side_effect=Exception("LLM failed"))
@@ -304,7 +311,9 @@ async def test_improve_resume_success(
     improvements = ["Adicionar métricas", "Incluir certificações"]
 
     # Mock LLM response
-    score_service.agent_manager.generate = AsyncMock(return_value=json.dumps(mock_improvement_response))
+    score_service.agent_manager.generate = AsyncMock(
+        return_value=json.dumps(mock_improvement_response)
+    )
 
     # Mock embedding response
     score_service.embedding_manager.embed = AsyncMock(
@@ -346,7 +355,9 @@ async def test_analyze_and_improve_high_score(
     high_score_response["score"] = 90
 
     score_service.agent_manager.generate = AsyncMock(return_value=json.dumps(high_score_response))
-    score_service.embedding_manager.embed = AsyncMock(side_effect=[np.array([1, 2, 3]), np.array([4, 5, 6])])
+    score_service.embedding_manager.embed = AsyncMock(
+        side_effect=[np.array([1, 2, 3]), np.array([4, 5, 6])]
+    )
 
     result = await score_service.analyze_and_improve(sample_resume_text, sample_job_description)
 
@@ -358,7 +369,11 @@ async def test_analyze_and_improve_high_score(
 
 @pytest.mark.asyncio
 async def test_analyze_and_improve_low_score(
-    score_service, sample_resume_text, sample_job_description, mock_score_response, mock_improvement_response
+    score_service,
+    sample_resume_text,
+    sample_job_description,
+    mock_score_response,
+    mock_improvement_response,
 ):
     """Test complete analysis workflow with low score (improvements needed)."""
     # Low score response (below threshold)
@@ -370,7 +385,12 @@ async def test_analyze_and_improve_low_score(
         side_effect=[json.dumps(low_score_response), json.dumps(mock_improvement_response)]
     )
     score_service.embedding_manager.embed = AsyncMock(
-        side_effect=[np.array([1, 2, 3]), np.array([4, 5, 6]), np.array([7, 8, 9]), np.array([10, 11, 12])]
+        side_effect=[
+            np.array([1, 2, 3]),
+            np.array([4, 5, 6]),
+            np.array([7, 8, 9]),
+            np.array([10, 11, 12]),
+        ]
     )
 
     result = await score_service.analyze_and_improve(sample_resume_text, sample_job_description)
@@ -389,7 +409,9 @@ async def test_extract_keywords_valid_response(score_service):
     test_text = "Python developer with experience in FastAPI, PostgreSQL, and Docker"
 
     # Mock LLM response
-    score_service.agent_manager.generate = AsyncMock(return_value='["Python", "FastAPI", "PostgreSQL", "Docker"]')
+    score_service.agent_manager.generate = AsyncMock(
+        return_value='["Python", "FastAPI", "PostgreSQL", "Docker"]'
+    )
 
     result = await score_service.extract_keywords(test_text, "resume")
 
@@ -420,19 +442,25 @@ async def test_extract_keywords_different_contexts(score_service):
     test_text = "Software engineer experienced in web development"
 
     # Mock LLM response
-    score_service.agent_manager.generate = AsyncMock(return_value='["software", "engineer", "web", "development"]')
+    score_service.agent_manager.generate = AsyncMock(
+        return_value='["software", "engineer", "web", "development"]'
+    )
 
     # Test resume context
     result_resume = await score_service.extract_keywords(test_text, "resume")
     assert isinstance(result_resume, list)
 
     # Test job context
-    score_service.agent_manager.generate = AsyncMock(return_value='["software", "engineer", "web", "development"]')
+    score_service.agent_manager.generate = AsyncMock(
+        return_value='["software", "engineer", "web", "development"]'
+    )
     result_job = await score_service.extract_keywords(test_text, "job")
     assert isinstance(result_job, list)
 
     # Test general context
-    score_service.agent_manager.generate = AsyncMock(return_value='["software", "engineer", "web", "development"]')
+    score_service.agent_manager.generate = AsyncMock(
+        return_value='["software", "engineer", "web", "development"]'
+    )
     result_general = await score_service.extract_keywords(test_text, "general")
     assert isinstance(result_general, list)
 

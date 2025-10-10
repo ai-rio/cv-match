@@ -11,9 +11,8 @@ Requirements:
 """
 
 import httpx
-import json
 import asyncio
-from typing import Dict, Any
+
 
 class P0Verifier:
     def __init__(self, base_url: str = "http://localhost:8000"):
@@ -23,11 +22,7 @@ class P0Verifier:
 
     def log_verification(self, requirement: str, passed: bool, details: str = ""):
         """Log verification result."""
-        result = {
-            "requirement": requirement,
-            "passed": passed,
-            "details": details
-        }
+        result = {"requirement": requirement, "passed": passed, "details": details}
         self.verification_results.append(result)
 
         status = "✅ PASS" if passed else "❌ FAIL"
@@ -48,7 +43,9 @@ class P0Verifier:
 
             upload_endpoint = "/api/resumes/upload"
             if upload_endpoint in paths:
-                self.log_verification("Resume upload endpoint exists", True, f"Found at {upload_endpoint}")
+                self.log_verification(
+                    "Resume upload endpoint exists", True, f"Found at {upload_endpoint}"
+                )
 
                 # Check for POST method
                 if "post" in paths[upload_endpoint]:
@@ -60,18 +57,24 @@ class P0Verifier:
                     if request_body:
                         self.log_verification("Request body schema defined", True)
                     else:
-                        self.log_verification("Request body schema defined", False, "No request body found")
+                        self.log_verification(
+                            "Request body schema defined", False, "No request body found"
+                        )
 
                     # Check response model
                     responses = post_spec.get("responses", {})
                     if "201" in responses:
                         self.log_verification("201 response defined", True)
                     else:
-                        self.log_verification("201 response defined", False, "No 201 response found")
+                        self.log_verification(
+                            "201 response defined", False, "No 201 response found"
+                        )
                 else:
                     self.log_verification("POST method available", False, "No POST method found")
             else:
-                self.log_verification("Resume upload endpoint exists", False, f"Endpoint {upload_endpoint} not found")
+                self.log_verification(
+                    "Resume upload endpoint exists", False, f"Endpoint {upload_endpoint} not found"
+                )
 
         except Exception as e:
             self.log_verification("Resume upload endpoint exists", False, f"Error: {str(e)}")
@@ -80,22 +83,32 @@ class P0Verifier:
         try:
             # Import models to verify they exist
             import sys
-            import os
-            sys.path.append('/app')
 
-            from app.models.resume import ResumeUploadResponse, ResumeResponse
-            self.log_verification("Resume Pydantic models defined", True, "ResumeUploadResponse, ResumeResponse")
+            sys.path.append("/app")
+
+            # Import just to verify they exist
+            from app.models.resume import ResumeUploadResponse  # noqa: F401
+            from app.models.resume import ResumeResponse  # noqa: F401
+
+            self.log_verification(
+                "Resume Pydantic models defined", True, "ResumeUploadResponse, ResumeResponse"
+            )
         except ImportError as e:
-            self.log_verification("Resume Pydantic models defined", False, f"Import error: {str(e)}")
+            self.log_verification(
+                "Resume Pydantic models defined", False, f"Import error: {str(e)}"
+            )
         except Exception as e:
             self.log_verification("Resume Pydantic models defined", False, f"Error: {str(e)}")
 
         # Check text extraction service
         try:
-            from app.services.text_extraction import extract_text
+            from app.services.text_extraction import extract_text  # noqa: F401
+
             self.log_verification("Text extraction service available", True)
         except ImportError as e:
-            self.log_verification("Text extraction service available", False, f"Import error: {str(e)}")
+            self.log_verification(
+                "Text extraction service available", False, f"Import error: {str(e)}"
+            )
         except Exception as e:
             self.log_verification("Text extraction service available", False, f"Error: {str(e)}")
 
@@ -125,19 +138,27 @@ class P0Verifier:
                         if "post" in paths[endpoint]:
                             self.log_verification("POST method for start endpoint", True)
                         else:
-                            self.log_verification("POST method for start endpoint", False, "No POST method")
+                            self.log_verification(
+                                "POST method for start endpoint", False, "No POST method"
+                            )
                     elif "{optimization_id}" in endpoint:
                         if "get" in paths[endpoint]:
                             self.log_verification("GET method for get endpoint", True)
                         else:
-                            self.log_verification("GET method for get endpoint", False, "No GET method")
+                            self.log_verification(
+                                "GET method for get endpoint", False, "No GET method"
+                            )
                     else:  # list endpoint
                         if "get" in paths[endpoint]:
                             self.log_verification("GET method for list endpoint", True)
                         else:
-                            self.log_verification("GET method for list endpoint", False, "No GET method")
+                            self.log_verification(
+                                "GET method for list endpoint", False, "No GET method"
+                            )
                 else:
-                    self.log_verification(f"Optimization endpoint exists: {endpoint}", False, "Endpoint not found")
+                    self.log_verification(
+                        f"Optimization endpoint exists: {endpoint}", False, "Endpoint not found"
+                    )
 
         except Exception as e:
             self.log_verification("Optimization endpoints exist", False, f"Error: {str(e)}")
@@ -145,16 +166,23 @@ class P0Verifier:
         # Check Pydantic models
         try:
             import sys
-            sys.path.append('/app')
 
-            from app.models.optimization import (
-                StartOptimizationRequest,
-                OptimizationResponse,
-                OptimizationStatus
+            sys.path.append("/app")
+
+            # Import just to verify they exist
+            from app.models.optimization import StartOptimizationRequest  # noqa: F401
+            from app.models.optimization import OptimizationResponse  # noqa: F401
+            from app.models.optimization import OptimizationStatus
+
+            self.log_verification(
+                "Optimization Pydantic models defined",
+                True,
+                "StartOptimizationRequest, OptimizationResponse, OptimizationStatus",
             )
-            self.log_verification("Optimization Pydantic models defined", True, "StartOptimizationRequest, OptimizationResponse, OptimizationStatus")
         except ImportError as e:
-            self.log_verification("Optimization Pydantic models defined", False, f"Import error: {str(e)}")
+            self.log_verification(
+                "Optimization Pydantic models defined", False, f"Import error: {str(e)}"
+            )
         except Exception as e:
             self.log_verification("Optimization Pydantic models defined", False, f"Error: {str(e)}")
 
@@ -167,16 +195,18 @@ class P0Verifier:
                 OptimizationStatus.PENDING_PAYMENT,
                 OptimizationStatus.PROCESSING,
                 OptimizationStatus.COMPLETED,
-                OptimizationStatus.FAILED
+                OptimizationStatus.FAILED,
             ]
 
             status_names = [status.value for status in statuses]
             expected_statuses = ["pending_payment", "processing", "completed", "failed"]
 
             if all(status in status_names for status in expected_statuses):
-                self.log_verification("Status tracking implemented", True, f"Statuses: {status_names}")
+                self.log_verification(
+                    "Status tracking implemented", True, f"Statuses: {status_names}"
+                )
             else:
-                self.log_verification("Status tracking implemented", False, f"Missing statuses")
+                self.log_verification("Status tracking implemented", False, "Missing statuses")
 
         except ImportError as e:
             self.log_verification("Status tracking implemented", False, f"Import error: {str(e)}")
@@ -199,14 +229,24 @@ class P0Verifier:
             optimization_endpoints = [p for p in paths.keys() if "/optimizations" in p]
 
             if len(resume_endpoints) > 0:
-                self.log_verification("Resume routes registered", True, f"Found {len(resume_endpoints)} endpoints")
+                self.log_verification(
+                    "Resume routes registered", True, f"Found {len(resume_endpoints)} endpoints"
+                )
             else:
-                self.log_verification("Resume routes registered", False, "No resume endpoints found")
+                self.log_verification(
+                    "Resume routes registered", False, "No resume endpoints found"
+                )
 
             if len(optimization_endpoints) > 0:
-                self.log_verification("Optimization routes registered", True, f"Found {len(optimization_endpoints)} endpoints")
+                self.log_verification(
+                    "Optimization routes registered",
+                    True,
+                    f"Found {len(optimization_endpoints)} endpoints",
+                )
             else:
-                self.log_verification("Optimization routes registered", False, "No optimization endpoints found")
+                self.log_verification(
+                    "Optimization routes registered", False, "No optimization endpoints found"
+                )
 
         except Exception as e:
             self.log_verification("Routes registered", False, f"Error: {str(e)}")
@@ -217,20 +257,34 @@ class P0Verifier:
             response = await self.client.post(f"{self.base_url}/api/optimizations/start", json={})
 
             if response.status_code == 401:
-                self.log_verification("Authentication dependency implemented", True, "Unauthenticated requests properly rejected")
+                self.log_verification(
+                    "Authentication dependency implemented",
+                    True,
+                    "Unauthenticated requests properly rejected",
+                )
             else:
-                self.log_verification("Authentication dependency implemented", False, f"Expected 401, got {response.status_code}")
+                self.log_verification(
+                    "Authentication dependency implemented",
+                    False,
+                    f"Expected 401, got {response.status_code}",
+                )
 
         except Exception as e:
-            self.log_verification("Authentication dependency implemented", False, f"Error: {str(e)}")
+            self.log_verification(
+                "Authentication dependency implemented", False, f"Error: {str(e)}"
+            )
 
         # Check auth module exists
         try:
             import sys
-            sys.path.append('/app')
 
-            from app.core.auth import get_current_user
-            self.log_verification("Auth module implemented", True, "get_current_user function available")
+            sys.path.append("/app")
+
+            from app.core.auth import get_current_user  # noqa: F401
+
+            self.log_verification(
+                "Auth module implemented", True, "get_current_user function available"
+            )
         except ImportError as e:
             self.log_verification("Auth module implemented", False, f"Import error: {str(e)}")
         except Exception as e:
@@ -244,11 +298,18 @@ class P0Verifier:
         # Check if we can run Python with UV (in Docker environment)
         try:
             import subprocess
-            result = subprocess.run(['python', '-c', 'import sys; print("UV environment working")'],
-                                  capture_output=True, text=True, timeout=10)
+
+            result = subprocess.run(
+                ["python", "-c", 'import sys; print("UV environment working")'],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
 
             if result.returncode == 0:
-                self.log_verification("UV environment functional", True, "Python execution successful")
+                self.log_verification(
+                    "UV environment functional", True, "Python execution successful"
+                )
             else:
                 self.log_verification("UV environment functional", False, "Python execution failed")
 
@@ -257,12 +318,14 @@ class P0Verifier:
 
         # Check dependencies are available
         try:
-            import fastapi
-            import pydantic
-            import httpx
-            import supabase
+            import fastapi  # noqa: F401
+            import pydantic  # noqa: F401
+            import httpx  # noqa: F401
+            import supabase  # noqa: F401
 
-            self.log_verification("Dependencies available via UV", True, "FastAPI, Pydantic, HTTPX, Supabase")
+            self.log_verification(
+                "Dependencies available via UV", True, "FastAPI, Pydantic, HTTPX, Supabase"
+            )
         except ImportError as e:
             self.log_verification("Dependencies available via UV", False, f"Import error: {str(e)}")
 
@@ -288,7 +351,7 @@ class P0Verifier:
         print(f"Total checks: {total}")
         print(f"Passed: {passed}")
         print(f"Failed: {total - passed}")
-        print(f"Success rate: {(passed/total)*100:.1f}%")
+        print(f"Success rate: {(passed / total) * 100:.1f}%")
 
         if passed == total:
             print("\n🎉 ALL P0 REQUIREMENTS VERIFIED!")
@@ -306,11 +369,13 @@ class P0Verifier:
         await self.client.aclose()
         return passed == total
 
+
 async def main():
     """Main verification runner."""
     verifier = P0Verifier()
     success = await verifier.run_verification()
     return 0 if success else 1
+
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

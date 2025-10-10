@@ -38,7 +38,7 @@ class LlamaIndexProvider(Provider):
         api_base_url: str = settings.LLM_BASE_URL or "",
         model_name: str = settings.LL_MODEL or "",
         provider: str = settings.LLM_PROVIDER or "",
-        opts: dict[str, Any] = None,
+        opts: dict[str, Any] | None = None,
     ):
         if opts is None:
             opts = {}
@@ -57,7 +57,7 @@ class LlamaIndexProvider(Provider):
             )
 
         # This doesn't work on 100% of the LlamaIndex LLM integrations,
-    # but it's a fairly reliable pattern,
+        # but it's a fairly reliable pattern,
         # and works for the important ones such as OpenAILike.
         kwargs_for_provider = {
             "model": model_name,
@@ -70,9 +70,9 @@ class LlamaIndexProvider(Provider):
         if api_base_url:
             kwargs_for_provider["base_url"] = kwargs_for_provider["api_base"] = api_base_url
         kwargs_for_provider.update(opts)
-        kwargs_for_provider["context_window"] = kwargs_for_provider[
-            "max_tokens"
-        ] = kwargs_for_provider.get("num_ctx", 20000)
+        kwargs_for_provider["context_window"] = kwargs_for_provider["max_tokens"] = (
+            kwargs_for_provider.get("num_ctx", 20000)
+        )
         self._client = provider_obj(**kwargs_for_provider)
 
     def _generate_sync(self, prompt: str, **options) -> str:
@@ -123,9 +123,9 @@ class LlamaIndexEmbeddingProvider(EmbeddingProvider):
         }
         if self._api_base_url:
             kwargs_for_provider["base_url"] = kwargs_for_provider["api_base"] = self._api_base_url
-        kwargs_for_provider["context_window"] = kwargs_for_provider[
-            "max_tokens"
-        ] = kwargs_for_provider.get("num_ctx", 20000)
+        kwargs_for_provider["context_window"] = kwargs_for_provider["max_tokens"] = (
+            kwargs_for_provider.get("num_ctx", 20000)
+        )
 
         self._client = provider_obj(**kwargs_for_provider)
 

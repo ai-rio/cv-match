@@ -7,16 +7,14 @@ input sanitization and security monitoring to LLM API calls.
 
 import logging
 import time
-from typing import Any, Dict, Optional
-from fastapi import Request, HTTPException, status
+from typing import Any
+
+from fastapi import HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
-from app.services.security.input_sanitizer import (
-    SanitizationResult,
-    validate_request
-)
+from app.services.security.input_sanitizer import SanitizationResult, validate_request
 
 logger = logging.getLogger(__name__)
 
@@ -49,13 +47,11 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             # Apply rate limiting if enabled
             if self.enable_rate_limiting and not self._check_request_rate(client_ip):
                 await self._log_security_event(
-                    request,
-                    "RATE_LIMIT_EXCEEDED",
-                    {"client_ip": client_ip}
+                    request, "RATE_LIMIT_EXCEEDED", {"client_ip": client_ip}
                 )
                 return JSONResponse(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    content={"detail": "Rate limit exceeded"}
+                    content={"detail": "Rate limit exceeded"},
                 )
 
             # Process the request
@@ -66,19 +62,14 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             await self._log_security_event(
                 request,
                 "REQUEST_COMPLETED",
-                {
-                    "status_code": response.status_code,
-                    "process_time": process_time
-                }
+                {"status_code": response.status_code, "process_time": process_time},
             )
 
             return response
 
         except Exception as e:
             await self._log_security_event(
-                request,
-                "SECURITY_ERROR",
-                {"error": str(e), "client_ip": client_ip}
+                request, "SECURITY_ERROR", {"error": str(e), "client_ip": client_ip}
             )
             raise
 
@@ -88,7 +79,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             "/api/llm/generate",
             "/api/llm/embedding",
             "/api/vectordb/documents",
-            "/api/vectordb/search"
+            "/api/vectordb/search",
         ]
         return any(path.startswith(endpoint) for endpoint in llm_endpoints)
 
@@ -106,7 +97,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         # Fall back to client host
         return request.client.host if request.client else "unknown"
 
-    async def _extract_user_id(self, request: Request) -> Optional[str]:
+    async def _extract_user_id(self, request: Request) -> str | None:
         """Extract user ID from request if available."""
         try:
             # This would need to be implemented based on your auth system
@@ -125,8 +116,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
         # Clean old entries
         self.request_times[client_ip] = [
-            timestamp for timestamp in self.request_times[client_ip]
-            if timestamp > window_start
+            timestamp for timestamp in self.request_times[client_ip] if timestamp > window_start
         ]
 
         # Check rate limit (100 requests per minute by default)
@@ -138,10 +128,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         return True
 
     async def _log_security_event(
-        self,
-        request: Request,
-        event_type: str,
-        extra_data: Optional[Dict[str, Any]] = None
+        self, request: Request, event_type: str, extra_data: dict[str, Any] | None = None
     ) -> None:
         """Log security-related events."""
         log_data = {
@@ -150,7 +137,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             "method": request.method,
             "client_ip": self._get_client_ip(request),
             "user_agent": request.headers.get("user-agent", ""),
-            "timestamp": time.time()
+            "timestamp": time.time(),
         }
 
         if extra_data:
@@ -163,10 +150,10 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
 
 async def validate_and_sanitize_request(
-    request_data: Dict[str, Any],
-    credentials: Optional[HTTPAuthorizationCredentials] = None,
-    request: Optional[Request] = None
-) -> Dict[str, Any]:
+    request_data: dict[str, Any],
+    credentials: HTTPAuthorizationCredentials | None = None,
+    request: Request | None = None,
+) -> dict[str, Any]:
     """
     Validate and sanitize request data for LLM endpoints.
 
@@ -190,11 +177,7 @@ async def validate_and_sanitize_request(
             client_ip = request.client.host if request.client else "unknown"
 
         # Validate and sanitize request
-        validation_results = validate_request(
-            request_data,
-            user_id=user_id,
-            ip_address=client_ip
-        )
+        validation_results = validate_request(request_data, user_id=user_id, ip_address=client_ip)
 
         # Check if any validation failed
         unsafe_results = []
@@ -224,19 +207,19 @@ async def validate_and_sanitize_request(
                 detail={
                     "error": "Input validation failed",
                     "unsafe_fields": unsafe_results,
-                    "warnings": error_messages[:5]  # Limit to first 5 warnings
-                }
+                    "warnings": error_messages[:5],  # Limit to first 5 warnings
+                },
             )
 
         # Replace original data with sanitized data
         sanitized_data = request_data.copy()
 
         for field, result in validation_results.items():
-            if field == 'documents' and isinstance(result, list):
+            if field == "documents" and isinstance(result, list):
                 # Handle documents array
                 for i, doc_result in enumerate(result):
-                    if i < len(sanitized_data['documents']):
-                        sanitized_data['documents'][i]['text'] = doc_result.sanitized_input
+                    if i < len(sanitized_data["documents"]):
+                        sanitized_data["documents"][i]["text"] = doc_result.sanitized_input
             elif field in sanitized_data and isinstance(result, SanitizationResult):
                 sanitized_data[field] = result.sanitized_input
 
@@ -251,14 +234,12 @@ async def validate_and_sanitize_request(
         logger.error(f"Unexpected error during request validation: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error during request validation"
+            detail="Internal server error during request validation",
         )
 
 
 async def log_security_validation_failure(
-    request_data: Dict[str, Any],
-    validation_results: Dict[str, Any],
-    client_ip: Optional[str]
+    request_data: dict[str, Any], validation_results: dict[str, Any], client_ip: str | None
 ) -> None:
     """Log failed security validation."""
     logger.warning(
@@ -269,28 +250,29 @@ async def log_security_validation_failure(
             "validation_results": {
                 field: {
                     "is_safe": (
-                            result.is_safe if hasattr(result, 'is_safe')
-                            else all(r.is_safe for r in result)
-                        ),
-                        "warnings": (
-                            result.warnings if hasattr(result, 'warnings')
-                            else [r.warnings for r in result]
-                        ),
-                        "blocked_patterns": (
-                            result.blocked_patterns if hasattr(result, 'blocked_patterns')
-                            else [r.blocked_patterns for r in result]
-                        )
+                        result.is_safe
+                        if hasattr(result, "is_safe")
+                        else all(r.is_safe for r in result)
+                    ),
+                    "warnings": (
+                        result.warnings
+                        if hasattr(result, "warnings")
+                        else [r.warnings for r in result]
+                    ),
+                    "blocked_patterns": (
+                        result.blocked_patterns
+                        if hasattr(result, "blocked_patterns")
+                        else [r.blocked_patterns for r in result]
+                    ),
                 }
                 for field, result in validation_results.items()
-            }
-        }
+            },
+        },
     )
 
 
 async def log_security_validation_success(
-    request_data: Dict[str, Any],
-    validation_results: Dict[str, Any],
-    client_ip: Optional[str]
+    request_data: dict[str, Any], validation_results: dict[str, Any], client_ip: str | None
 ) -> None:
     """Log successful security validation."""
     logger.info(
@@ -298,25 +280,18 @@ async def log_security_validation_success(
         extra={
             "event_type": "VALIDATION_SUCCESS",
             "client_ip": client_ip,
-            "fields_validated": list(validation_results.keys())
-        }
+            "fields_validated": list(validation_results.keys()),
+        },
     )
 
 
 def create_security_error_response(
-    message: str,
-    details: Optional[Dict[str, Any]] = None
+    message: str, details: dict[str, Any] | None = None
 ) -> JSONResponse:
     """Create a standardized security error response."""
-    content = {
-        "error": "Security validation failed",
-        "message": message
-    }
+    content = {"error": "Security validation failed", "message": message}
 
     if details:
         content.update(details)
 
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content=content
-    )
+    return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=content)

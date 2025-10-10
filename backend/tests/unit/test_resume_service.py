@@ -53,8 +53,8 @@ def sample_resume_text():
 async def test_resume_service_initialization(resume_service):
     """Test ResumeService can be initialized successfully."""
     assert resume_service is not None
-    assert hasattr(resume_service, 'md')
-    assert hasattr(resume_service, '_validate_docx_dependencies')
+    assert hasattr(resume_service, "md")
+    assert hasattr(resume_service, "_validate_docx_dependencies")
 
 
 def test_get_file_extension_pdf(resume_service):
@@ -77,7 +77,7 @@ def test_get_file_extension_unknown(resume_service):
     assert ext == ""
 
 
-@patch('app.services.resume_service.SupabaseDatabaseService')
+@patch("app.services.resume_service.SupabaseDatabaseService")
 @pytest.mark.asyncio
 async def test_convert_and_store_resume_pdf_success(
     mock_db_service, resume_service, mock_pdf_content, sample_resume_text
@@ -89,14 +89,14 @@ async def test_convert_and_store_resume_pdf_success(
     mock_db_service.return_value = mock_service_instance
 
     # Mock MarkItDown conversion
-    with patch.object(resume_service.md, 'convert') as mock_convert:
+    with patch.object(resume_service.md, "convert") as mock_convert:
         mock_convert.return_value = MagicMock(text_content=sample_resume_text)
 
         result = await resume_service.convert_and_store_resume(
             file_bytes=mock_pdf_content,
             file_type="application/pdf",
             filename="test.pdf",
-            content_type="md"
+            content_type="md",
         )
 
         assert result == "test-resume-123"
@@ -104,7 +104,7 @@ async def test_convert_and_store_resume_pdf_success(
         mock_service_instance.create.assert_called_once()
 
 
-@patch('app.services.resume_service.SupabaseDatabaseService')
+@patch("app.services.resume_service.SupabaseDatabaseService")
 @pytest.mark.asyncio
 async def test_convert_and_store_resume_docx_success(
     mock_db_service, resume_service, mock_docx_content, sample_resume_text
@@ -116,14 +116,14 @@ async def test_convert_and_store_resume_docx_success(
     mock_db_service.return_value = mock_service_instance
 
     # Mock MarkItDown conversion
-    with patch.object(resume_service.md, 'convert') as mock_convert:
+    with patch.object(resume_service.md, "convert") as mock_convert:
         mock_convert.return_value = MagicMock(text_content=sample_resume_text)
 
         result = await resume_service.convert_and_store_resume(
             file_bytes=mock_docx_content,
             file_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             filename="test.docx",
-            content_type="html"
+            content_type="html",
         )
 
         assert result == "test-resume-456"
@@ -135,7 +135,7 @@ async def test_convert_and_store_resume_docx_success(
 async def test_convert_and_store_resume_conversion_failure(resume_service, mock_pdf_content):
     """Test handling of conversion failures."""
     # Mock MarkItDown conversion failure
-    with patch.object(resume_service.md, 'convert') as mock_convert:
+    with patch.object(resume_service.md, "convert") as mock_convert:
         mock_convert.side_effect = Exception("Conversion failed")
 
         with pytest.raises(Exception, match="File conversion failed"):
@@ -143,7 +143,7 @@ async def test_convert_and_store_resume_conversion_failure(resume_service, mock_
                 file_bytes=mock_pdf_content,
                 file_type="application/pdf",
                 filename="test.pdf",
-                content_type="md"
+                content_type="md",
             )
 
 
@@ -151,7 +151,7 @@ async def test_convert_and_store_resume_conversion_failure(resume_service, mock_
 async def test_convert_and_store_resume_docx_dependency_error(resume_service, mock_docx_content):
     """Test handling of DOCX dependency errors."""
     # Mock MarkItDown conversion with dependency error
-    with patch.object(resume_service.md, 'convert') as mock_convert:
+    with patch.object(resume_service.md, "convert") as mock_convert:
         mock_convert.side_effect = Exception("MissingDependencyException: DOCX support missing")
 
         with pytest.raises(Exception, match="markitdown is missing DOCX support"):
@@ -159,11 +159,11 @@ async def test_convert_and_store_resume_docx_dependency_error(resume_service, mo
                 file_bytes=mock_docx_content,
                 file_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 filename="test.docx",
-                content_type="md"
+                content_type="md",
             )
 
 
-@patch('app.services.resume_service.SupabaseDatabaseService')
+@patch("app.services.resume_service.SupabaseDatabaseService")
 @pytest.mark.asyncio
 async def test_store_resume_in_db(mock_db_service, resume_service, sample_resume_text):
     """Test storing resume data in database."""
@@ -187,7 +187,7 @@ async def test_store_resume_in_db(mock_db_service, resume_service, sample_resume
 @pytest.mark.asyncio
 async def test_store_resume_in_db_different_content_types(resume_service, sample_resume_text):
     """Test storing resume with different content types."""
-    with patch('app.services.resume_service.SupabaseDatabaseService') as mock_db_service:
+    with patch("app.services.resume_service.SupabaseDatabaseService") as mock_db_service:
         mock_service_instance = AsyncMock()
         mock_service_instance.create.return_value = MagicMock(resume_id="test-resume-999")
         mock_db_service.return_value = mock_service_instance
@@ -208,9 +208,11 @@ async def test_store_resume_in_db_different_content_types(resume_service, sample
         assert call_args["content_type"] == "text/plain"
 
 
-@patch('app.services.resume_service.SupabaseDatabaseService')
+@patch("app.services.resume_service.SupabaseDatabaseService")
 @pytest.mark.asyncio
-async def test_get_resume_with_processed_data_success(mock_db_service, resume_service, sample_resume_text):
+async def test_get_resume_with_processed_data_success(
+    mock_db_service, resume_service, sample_resume_text
+):
     """Test successful retrieval of resume data."""
     # Mock the database service
     mock_service_instance = AsyncMock()
@@ -219,7 +221,7 @@ async def test_get_resume_with_processed_data_success(mock_db_service, resume_se
         "resume_id": "test-resume-123",
         "content": sample_resume_text,
         "content_type": "text/markdown",
-        "created_at": "2024-01-01T00:00:00Z"
+        "created_at": "2024-01-01T00:00:00Z",
     }
     mock_db_service.return_value = mock_service_instance
 
@@ -234,7 +236,7 @@ async def test_get_resume_with_processed_data_success(mock_db_service, resume_se
 @pytest.mark.asyncio
 async def test_get_resume_with_processed_data_not_found(resume_service):
     """Test handling of resume not found."""
-    with patch('app.services.resume_service.SupabaseDatabaseService') as mock_db_service:
+    with patch("app.services.resume_service.SupabaseDatabaseService") as mock_db_service:
         mock_service_instance = AsyncMock()
         mock_service_instance.get.return_value = None
         mock_db_service.return_value = mock_service_instance
@@ -260,20 +262,20 @@ async def test_extract_structured_json_not_implemented(resume_service):
 
 def test_validate_docx_dependencies_missing(resume_service):
     """Test validation of DOCX dependencies when missing."""
-    with patch('app.services.resume_service.logger') as mock_logger:
+    with patch("app.services.resume_service.logger") as mock_logger:
         # Simulate missing dependency
-        with patch('markitdown.converters.DocxConverter', side_effect=ImportError):
+        with patch("markitdown.converters.DocxConverter", side_effect=ImportError):
             resume_service._validate_docx_dependencies()
             mock_logger.warning.assert_called()
 
 
 def test_validate_docx_dependencies_available(resume_service):
     """Test validation of DOCX dependencies when available."""
-    with patch('markitdown.converters.DocxConverter') as mock_converter:
+    with patch("markitdown.converters.DocxConverter") as mock_converter:
         mock_converter.return_value = MagicMock()
 
         # Should not raise any warnings
-        with patch('app.services.resume_service.logger') as mock_logger:
+        with patch("app.services.resume_service.logger") as mock_logger:
             resume_service._validate_docx_dependencies()
             mock_logger.warning.assert_not_called()
 
@@ -282,29 +284,29 @@ def test_validate_docx_dependencies_available(resume_service):
 async def test_convert_and_store_resume_temp_file_cleanup(resume_service, mock_pdf_content):
     """Test that temporary files are properly cleaned up."""
 
-    with patch('app.services.resume_service.SupabaseDatabaseService') as mock_db_service:
+    with patch("app.services.resume_service.SupabaseDatabaseService") as mock_db_service:
         mock_service_instance = AsyncMock()
         mock_service_instance.create.return_value = MagicMock(resume_id="test-resume")
         mock_db_service.return_value = mock_service_instance
 
-        with patch.object(resume_service.md, 'convert') as mock_convert:
+        with patch.object(resume_service.md, "convert") as mock_convert:
             mock_convert.return_value = MagicMock(text_content="sample text")
 
             # Track temp files
-            with patch('tempfile.NamedTemporaryFile') as mock_temp_file:
+            with patch("tempfile.NamedTemporaryFile") as mock_temp_file:
                 mock_file = MagicMock()
                 mock_file.name = "/tmp/test_temp_file.pdf"
                 mock_temp_file.return_value.__enter__.return_value = mock_file
 
-                with patch('os.path.exists') as mock_exists:
-                    with patch('os.remove') as mock_remove:
+                with patch("os.path.exists") as mock_exists:
+                    with patch("os.remove") as mock_remove:
                         mock_exists.return_value = True
 
                         await resume_service.convert_and_store_resume(
                             file_bytes=mock_pdf_content,
                             file_type="application/pdf",
                             filename="test.pdf",
-                            content_type="md"
+                            content_type="md",
                         )
 
                         # Verify cleanup

@@ -43,7 +43,7 @@ class TextExtractionService:
         try:
             # Handle bytes input
             if isinstance(file_content, bytes):
-                file_obj = io.BytesIO(file_content)
+                file_obj: io.BytesIO | BinaryIO = io.BytesIO(file_content)
             else:
                 file_obj = file_content
 
@@ -89,7 +89,7 @@ class TextExtractionService:
         try:
             # Handle bytes input
             if isinstance(file_content, bytes):
-                file_obj = io.BytesIO(file_content)
+                file_obj: io.BytesIO | BinaryIO = io.BytesIO(file_content)
             else:
                 file_obj = file_content
 

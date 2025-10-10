@@ -11,8 +11,7 @@ This script tests the complete optimization workflow including:
 import asyncio
 import httpx
 import json
-import base64
-from typing import Dict, Any, Optional
+from typing import Optional
 
 # Test configuration
 BASE_URL = "http://localhost:8000"
@@ -119,7 +118,9 @@ class CVMatchAPITester:
         try:
             response = await self.client.get(f"{BASE_URL}/health/security")
             success = response.status_code == 200
-            details = "Security configuration loaded" if success else f"Status: {response.status_code}"
+            details = (
+                "Security configuration loaded" if success else f"Status: {response.status_code}"
+            )
             self.log_test("Security Health Check", success, details)
             return success
         except Exception as e:
@@ -130,13 +131,10 @@ class CVMatchAPITester:
         """Test resume upload without authentication (should fail)."""
         try:
             # Create a dummy file content
-            file_content = SAMPLE_RESUME_TEXT.encode('utf-8')
-            files = {'file': ('test_resume.txt', file_content, 'text/plain')}
+            file_content = SAMPLE_RESUME_TEXT.encode("utf-8")
+            files = {"file": ("test_resume.txt", file_content, "text/plain")}
 
-            response = await self.client.post(
-                f"{API_BASE}/resumes/upload",
-                files=files
-            )
+            response = await self.client.post(f"{API_BASE}/resumes/upload", files=files)
 
             # Should return 401 (unauthorized) or 403 (forbidden)
             success = response.status_code in [401, 403]
@@ -154,13 +152,10 @@ class CVMatchAPITester:
                 "resume_id": "test-resume-id",
                 "job_description": SAMPLE_JOB_DESCRIPTION,
                 "job_title": "Desenvolvedor Python",
-                "company": "Tech Company"
+                "company": "Tech Company",
             }
 
-            response = await self.client.post(
-                f"{API_BASE}/optimizations/start",
-                json=request_data
-            )
+            response = await self.client.post(f"{API_BASE}/optimizations/start", json=request_data)
 
             # Should return 401 (unauthorized) or 403 (forbidden)
             success = response.status_code in [401, 403]
@@ -224,7 +219,10 @@ class CVMatchAPITester:
                 has_resumes = any("/resumes" in path for path in paths.keys())
                 has_optimizations = any("/optimizations" in path for path in paths.keys())
 
-                details = f"Schema loaded, endpoints found: resumes={has_resumes}, optimizations={has_optimizations}"
+                details = (
+                    f"Schema loaded, endpoints found: "
+                    f"resumes={has_resumes}, optimizations={has_optimizations}"
+                )
                 success = success and has_resumes and has_optimizations
             else:
                 details = f"Status: {response.status_code}"
@@ -241,10 +239,7 @@ class CVMatchAPITester:
             # Test invalid request data
             invalid_data = {"resume_id": 123, "job_description": ""}  # Invalid types
 
-            response = await self.client.post(
-                f"{API_BASE}/optimizations/start",
-                json=invalid_data
-            )
+            response = await self.client.post(f"{API_BASE}/optimizations/start", json=invalid_data)
 
             # Should return 422 (validation error) even without auth
             success = response.status_code == 422
@@ -259,15 +254,14 @@ class CVMatchAPITester:
         """Test CORS headers are present."""
         try:
             response = await self.client.options(
-                f"{API_BASE}/resumes/upload",
-                headers={"Origin": "http://localhost:3000"}
+                f"{API_BASE}/resumes/upload", headers={"Origin": "http://localhost:3000"}
             )
 
             # Check for CORS headers
             cors_headers = [
                 "access-control-allow-origin",
                 "access-control-allow-methods",
-                "access-control-allow-headers"
+                "access-control-allow-headers",
             ]
 
             has_cors = any(header in response.headers for header in cors_headers)

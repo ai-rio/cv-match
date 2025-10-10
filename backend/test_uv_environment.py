@@ -7,6 +7,7 @@ Tests UV package manager functionality.
 import subprocess
 import sys
 
+
 def run_command(cmd, description):
     """Run a command and return success status."""
     try:
@@ -28,19 +29,13 @@ def run_command(cmd, description):
         print(f"❌ {description} (exception: {e})")
         return False
 
+
 def main():
     """Run UV environment tests."""
     print("🔧 Testing UV Environment")
     print("=" * 50)
 
     # UV commands to test
-    tests = [
-        ("which uv", "UV installation check"),
-        ("uv --version", "UV version"),
-        ("uv python list", "UV Python list"),
-        ("uv tree", "UV dependency tree"),
-        ("uv run python --version", "UV Python execution"),
-    ]
 
     # Since we're testing in Docker, let's adapt the tests
     docker_tests = [
@@ -67,6 +62,7 @@ def main():
     else:
         print(f"⚠️ {total - passed} tests failed")
         return False
+
 
 if __name__ == "__main__":
     success = main()

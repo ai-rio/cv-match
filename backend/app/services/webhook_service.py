@@ -5,9 +5,10 @@ Handles payment webhooks with Brazilian market support and idempotency.
 
 import logging
 from datetime import UTC, datetime
-from typing import Any, Dict, Optional
+from typing import Any
 
 from supabase import create_client
+
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -20,18 +21,15 @@ class WebhookService:
         """Initialize webhook service."""
         self.supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
 
-    def _safe_fromtimestamp(self, timestamp: Any) -> Optional[str]:
+    def _safe_fromtimestamp(self, timestamp: Any) -> str | None:
         """Safely convert timestamp to ISO string."""
         if timestamp is not None:
             return datetime.fromtimestamp(float(timestamp)).isoformat()
         return None
 
     async def process_webhook_event(
-        self,
-        event_type: str,
-        event_data: Dict[str, Any],
-        stripe_event_id: str
-    ) -> Dict[str, Any]:
+        self, event_type: str, event_data: dict[str, Any], stripe_event_id: str
+    ) -> dict[str, Any]:
         """
         Process a webhook event with idempotency protection.
 
@@ -54,7 +52,7 @@ class WebhookService:
                     "success": True,
                     "message": "Event already processed",
                     "event_id": stripe_event_id,
-                    "idempotent": True
+                    "idempotent": True,
                 }
 
             # Log the webhook event
@@ -62,7 +60,7 @@ class WebhookService:
                 stripe_event_id=stripe_event_id,
                 event_type=event_type,
                 data=event_data,
-                processed=False
+                processed=False,
             )
 
             # Process based on event type
@@ -75,7 +73,7 @@ class WebhookService:
             await self._mark_event_processed(
                 stripe_event_id=stripe_event_id,
                 processing_time_ms=processing_time,
-                error_message=None if result.get("success") else result.get("error")
+                error_message=None if result.get("success") else result.get("error"),
             )
 
             return {
@@ -84,7 +82,7 @@ class WebhookService:
                 "event_type": event_type,
                 "processed": True,
                 "processing_time_ms": processing_time,
-                **result
+                **result,
             }
 
         except Exception as e:
@@ -96,7 +94,7 @@ class WebhookService:
             await self._mark_event_processed(
                 stripe_event_id=stripe_event_id,
                 processing_time_ms=processing_time,
-                error_message=error_message
+                error_message=error_message,
             )
 
             return {
@@ -104,7 +102,7 @@ class WebhookService:
                 "event_id": stripe_event_id,
                 "event_type": event_type,
                 "error": error_message,
-                "processing_time_ms": processing_time
+                "processing_time_ms": processing_time,
             }
 
     async def is_event_processed(self, stripe_event_id: str) -> bool:
@@ -118,9 +116,8 @@ class WebhookService:
             True if event has been processed, False otherwise
         """
         try:
-            existing_event = await self._get_by_field("stripe_webhook_events", 
-                field_name="stripe_event_id",
-                field_value=stripe_event_id
+            existing_event = await self._get_by_field(
+                "stripe_webhook_events", field_name="stripe_event_id", field_value=stripe_event_id
             )
             return existing_event is not None and existing_event.get("processed", False)
         except Exception as e:
@@ -129,12 +126,8 @@ class WebhookService:
             return False
 
     async def log_webhook_event(
-        self,
-        stripe_event_id: str,
-        event_type: str,
-        data: Dict[str, Any],
-        processed: bool = False
-    ) -> Dict[str, Any]:
+        self, stripe_event_id: str, event_type: str, data: dict[str, Any], processed: bool = False
+    ) -> dict[str, Any]:
         """
         Log a webhook event to the database.
 
@@ -154,27 +147,22 @@ class WebhookService:
                 "processed": processed,
                 "processing_started_at": datetime.now(UTC).isoformat(),
                 "data": data,
-                "created_at": datetime.now(UTC).isoformat()
+                "created_at": datetime.now(UTC).isoformat(),
             }
 
             result = await self._create("stripe_webhook_events", event_log)
             return {
                 "success": True,
                 "webhook_event_id": result.get("id"),
-                "stripe_event_id": stripe_event_id
+                "stripe_event_id": stripe_event_id,
             }
         except Exception as e:
             logger.error(f"Error logging webhook event: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     async def _process_specific_event(
-        self,
-        event_type: str,
-        event_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, event_type: str, event_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Process a specific webhook event type.
 
@@ -206,10 +194,10 @@ class WebhookService:
             return {
                 "success": True,
                 "message": f"Event type {event_type} not handled",
-                "handled": False
+                "handled": False,
             }
 
-    async def process_checkout_session(self, session_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def process_checkout_session(self, session_data: dict[str, Any]) -> dict[str, Any]:
         """
         Process checkout.session.completed event.
 
@@ -222,20 +210,14 @@ class WebhookService:
         try:
             user_id = session_data.get("metadata", {}).get("user_id")
             if not user_id:
-                return {
-                    "success": False,
-                    "error": "User ID not found in session metadata"
-                }
+                return {"success": False, "error": "User ID not found in session metadata"}
 
             # Get user payment profile information
             user_payment_profile = await self._get_by_field(
                 "user_payment_profiles", "user_id", user_id
             )
             if not user_payment_profile:
-                return {
-                    "success": False,
-                    "error": f"User payment profile {user_id} not found"
-                }
+                return {"success": False, "error": f"User payment profile {user_id} not found"}
 
             # Create payment history record
             payment_record = {
@@ -247,13 +229,12 @@ class WebhookService:
                 "currency": session_data.get("currency", "brl"),
                 "status": "completed",
                 "payment_type": (
-                    "subscription_setup" if session_data.get("subscription")
-                    else "one_time"
+                    "subscription_setup" if session_data.get("subscription") else "one_time"
                 ),
                 "description": self._get_payment_description(session_data),
                 "metadata": session_data.get("metadata", {}),
                 "created_at": datetime.now(UTC).isoformat(),
-                "updated_at": datetime.now(UTC).isoformat()
+                "updated_at": datetime.now(UTC).isoformat(),
             }
 
             payment_result = await self._create("payment_history", payment_record)
@@ -261,9 +242,10 @@ class WebhookService:
             # Update user payment profile with Stripe customer ID if not set
             if not user_payment_profile.get("stripe_customer_id") and session_data.get("customer"):
                 try:
-                    await self._update("user_payment_profiles",
+                    await self._update(
+                        "user_payment_profiles",
                         user_payment_profile["id"],
-                        {"stripe_customer_id": session_data.get("customer")}
+                        {"stripe_customer_id": session_data.get("customer")},
                     )
                 except Exception as e:
                     # If update fails due to duplicate customer ID, it's already set - continue
@@ -278,20 +260,16 @@ class WebhookService:
                 "payment_id": payment_result.get("id"),
                 "user_id": user_id,
                 "amount": session_data.get("amount_total"),
-                "currency": session_data.get("currency")
+                "currency": session_data.get("currency"),
             }
 
         except Exception as e:
             logger.error(f"Error processing checkout session: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     async def process_subscription_created(
-        self,
-        subscription_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, subscription_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Process customer.subscription.created event.
 
@@ -304,10 +282,7 @@ class WebhookService:
         try:
             user_id = subscription_data.get("metadata", {}).get("user_id")
             if not user_id:
-                return {
-                    "success": False,
-                    "error": "User ID not found in subscription metadata"
-                }
+                return {"success": False, "error": "User ID not found in subscription metadata"}
 
             subscription_record = await self._create_subscription_record(subscription_data, user_id)
 
@@ -315,20 +290,16 @@ class WebhookService:
                 "success": True,
                 "subscription_id": subscription_record.get("id"),
                 "user_id": user_id,
-                "status": subscription_data.get("status")
+                "status": subscription_data.get("status"),
             }
 
         except Exception as e:
             logger.error(f"Error processing subscription created: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     async def process_subscription_updated(
-        self,
-        subscription_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, subscription_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Process customer.subscription.updated event.
 
@@ -341,21 +312,17 @@ class WebhookService:
         try:
             stripe_subscription_id = subscription_data.get("id")
             if not stripe_subscription_id:
-                return {
-                    "success": False,
-                    "error": "Subscription ID not found"
-                }
+                return {"success": False, "error": "Subscription ID not found"}
 
             # Find existing subscription
-            existing_sub = await self._get_by_field("subscriptions", 
-                "stripe_subscription_id",
-                stripe_subscription_id
+            existing_sub = await self._get_by_field(
+                "subscriptions", "stripe_subscription_id", stripe_subscription_id
             )
 
             if not existing_sub:
                 return {
                     "success": False,
-                    "error": f"Subscription {stripe_subscription_id} not found"
+                    "error": f"Subscription {stripe_subscription_id} not found",
                 }
 
             # Update subscription
@@ -366,14 +333,16 @@ class WebhookService:
                 "status": subscription_data.get("status"),
                 "current_period_start": (
                     datetime.fromtimestamp(current_period_start).isoformat()
-                    if current_period_start is not None else None
+                    if current_period_start is not None
+                    else None
                 ),
                 "current_period_end": (
                     datetime.fromtimestamp(current_period_end).isoformat()
-                    if current_period_end is not None else None
+                    if current_period_end is not None
+                    else None
                 ),
                 "cancel_at_period_end": subscription_data.get("cancel_at_period_end", False),
-                "updated_at": datetime.now(UTC).isoformat()
+                "updated_at": datetime.now(UTC).isoformat(),
             }
 
             canceled_at = subscription_data.get("canceled_at")
@@ -385,20 +354,16 @@ class WebhookService:
             return {
                 "success": True,
                 "subscription_id": existing_sub["id"],
-                "status": subscription_data.get("status")
+                "status": subscription_data.get("status"),
             }
 
         except Exception as e:
             logger.error(f"Error processing subscription updated: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     async def process_subscription_deleted(
-        self,
-        subscription_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, subscription_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Process customer.subscription.deleted event.
 
@@ -411,50 +376,43 @@ class WebhookService:
         try:
             stripe_subscription_id = subscription_data.get("id")
             if not stripe_subscription_id:
-                return {
-                    "success": False,
-                    "error": "Subscription ID not found"
-                }
+                return {"success": False, "error": "Subscription ID not found"}
 
             # Find and update existing subscription
-            existing_sub = await self._get_by_field("subscriptions", 
-                "stripe_subscription_id",
-                stripe_subscription_id
+            existing_sub = await self._get_by_field(
+                "subscriptions", "stripe_subscription_id", stripe_subscription_id
             )
 
             if existing_sub:
-                await self._update("subscriptions", 
+                await self._update(
+                    "subscriptions",
                     existing_sub["id"],
                     {
                         "status": "canceled",
                         "canceled_at": datetime.fromtimestamp(
                             subscription_data.get("canceled_at", datetime.now(UTC).timestamp())
                         ).isoformat(),
-                        "updated_at": datetime.now(UTC).isoformat()
-                    }
+                        "updated_at": datetime.now(UTC).isoformat(),
+                    },
                 )
                 return {
                     "success": True,
                     "subscription_id": existing_sub["id"],
-                    "status": "canceled"
+                    "status": "canceled",
                 }
             else:
                 return {
                     "success": False,
-                    "error": f"Subscription {stripe_subscription_id} not found"
+                    "error": f"Subscription {stripe_subscription_id} not found",
                 }
 
         except Exception as e:
             logger.error(f"Error processing subscription deleted: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     async def process_invoice_payment_succeeded(
-        self,
-        invoice_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, invoice_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Process invoice.payment_succeeded event.
 
@@ -468,18 +426,14 @@ class WebhookService:
             user_id = invoice_data.get("metadata", {}).get("user_id")
             if not user_id and invoice_data.get("subscription"):
                 # Try to get user_id from subscription
-                subscription = await self._get_by_field("subscriptions", 
-                    "stripe_subscription_id",
-                    invoice_data.get("subscription")
+                subscription = await self._get_by_field(
+                    "subscriptions", "stripe_subscription_id", invoice_data.get("subscription")
                 )
                 if subscription:
                     user_id = subscription.get("user_id")
 
             if not user_id:
-                return {
-                    "success": False,
-                    "error": "User ID not found"
-                }
+                return {"success": False, "error": "User ID not found"}
 
             # Create payment history record
             payment_record = {
@@ -493,7 +447,7 @@ class WebhookService:
                 "description": f"Pagamento da assinatura - {invoice_data.get('id')}",
                 "metadata": invoice_data.get("metadata", {}),
                 "created_at": datetime.now(UTC).isoformat(),
-                "updated_at": datetime.now(UTC).isoformat()
+                "updated_at": datetime.now(UTC).isoformat(),
             }
 
             payment_result = await self._create("payment_history", payment_record)
@@ -502,17 +456,14 @@ class WebhookService:
                 "success": True,
                 "payment_history_id": payment_result.get("id"),
                 "user_id": user_id,
-                "amount": invoice_data.get("amount_paid")
+                "amount": invoice_data.get("amount_paid"),
             }
 
         except Exception as e:
             logger.error(f"Error processing invoice payment succeeded: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
-    async def process_invoice_payment_failed(self, invoice_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def process_invoice_payment_failed(self, invoice_data: dict[str, Any]) -> dict[str, Any]:
         """
         Process invoice.payment_failed event.
 
@@ -525,44 +476,32 @@ class WebhookService:
         try:
             subscription_id = invoice_data.get("subscription")
             if not subscription_id:
-                return {
-                    "success": False,
-                    "error": "Subscription ID not found in invoice"
-                }
+                return {"success": False, "error": "Subscription ID not found in invoice"}
 
             # Find and update subscription status
-            subscription = await self._get_by_field("subscriptions", 
-                "stripe_subscription_id",
-                subscription_id
+            subscription = await self._get_by_field(
+                "subscriptions", "stripe_subscription_id", subscription_id
             )
 
             if subscription:
-                await self._update("subscriptions", 
+                await self._update(
+                    "subscriptions",
                     subscription["id"],
-                    {
-                        "status": "past_due",
-                        "updated_at": datetime.now(UTC).isoformat()
-                    }
+                    {"status": "past_due", "updated_at": datetime.now(UTC).isoformat()},
                 )
                 return {
                     "success": True,
                     "subscription_id": subscription["id"],
-                    "status": "past_due"
+                    "status": "past_due",
                 }
             else:
-                return {
-                    "success": False,
-                    "error": f"Subscription {subscription_id} not found"
-                }
+                return {"success": False, "error": f"Subscription {subscription_id} not found"}
 
         except Exception as e:
             logger.error(f"Error processing invoice payment failed: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
-    async def process_payment_intent_succeeded(self, intent_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def process_payment_intent_succeeded(self, intent_data: dict[str, Any]) -> dict[str, Any]:
         """
         Process payment_intent.succeeded event.
 
@@ -575,10 +514,7 @@ class WebhookService:
         try:
             user_id = intent_data.get("metadata", {}).get("user_id")
             if not user_id:
-                return {
-                    "success": False,
-                    "error": "User ID not found in payment intent metadata"
-                }
+                return {"success": False, "error": "User ID not found in payment intent metadata"}
 
             # Create payment history record
             payment_record = {
@@ -592,7 +528,7 @@ class WebhookService:
                 "description": f"Pagamento único - {intent_data.get('id')}",
                 "metadata": intent_data.get("metadata", {}),
                 "created_at": datetime.now(UTC).isoformat(),
-                "updated_at": datetime.now(UTC).isoformat()
+                "updated_at": datetime.now(UTC).isoformat(),
             }
 
             payment_result = await self._create("payment_history", payment_record)
@@ -601,17 +537,14 @@ class WebhookService:
                 "success": True,
                 "payment_id": payment_result.get("id"),
                 "user_id": user_id,
-                "amount": intent_data.get("amount")
+                "amount": intent_data.get("amount"),
             }
 
         except Exception as e:
             logger.error(f"Error processing payment intent succeeded: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
-    async def process_payment_intent_failed(self, intent_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def process_payment_intent_failed(self, intent_data: dict[str, Any]) -> dict[str, Any]:
         """
         Process payment_intent.payment_failed event.
 
@@ -624,10 +557,7 @@ class WebhookService:
         try:
             user_id = intent_data.get("metadata", {}).get("user_id")
             if not user_id:
-                return {
-                    "success": False,
-                    "error": "User ID not found in payment intent metadata"
-                }
+                return {"success": False, "error": "User ID not found in payment intent metadata"}
 
             # Create failed payment record
             payment_record = {
@@ -641,7 +571,7 @@ class WebhookService:
                 "description": f"Pagamento falhou - {intent_data.get('id')}",
                 "metadata": intent_data.get("metadata", {}),
                 "created_at": datetime.now(UTC).isoformat(),
-                "updated_at": datetime.now(UTC).isoformat()
+                "updated_at": datetime.now(UTC).isoformat(),
             }
 
             payment_result = await self._create("payment_history", payment_record)
@@ -650,21 +580,16 @@ class WebhookService:
                 "success": True,
                 "payment_id": payment_result.get("id"),
                 "user_id": user_id,
-                "status": "failed"
+                "status": "failed",
             }
 
         except Exception as e:
             logger.error(f"Error processing payment intent failed: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     async def _create_subscription_record(
-        self,
-        subscription_data: Dict[str, Any],
-        user_id: str
-    ) -> Dict[str, Any]:
+        self, subscription_data: dict[str, Any], user_id: str
+    ) -> dict[str, Any]:
         """Create a subscription record in the database."""
         # Handle missing timestamp data for test scenarios
         current_period_start = subscription_data.get("current_period_start")
@@ -676,6 +601,7 @@ class WebhookService:
         if not current_period_end:
             # Default to 30 days from now for monthly subscription
             from datetime import timedelta
+
             current_period_end = (datetime.now(UTC) + timedelta(days=30)).timestamp()
 
         subscription_record = {
@@ -683,30 +609,28 @@ class WebhookService:
             "stripe_subscription_id": subscription_data.get("id"),
             "stripe_customer_id": subscription_data.get("customer"),
             "status": "active",  # Subscriptions should always be "active"
-                                 # when created from checkout
+            # when created from checkout
             "price_id": (
-                subscription_data.get("items", {}).get("data", [{}])[0]
-                .get("price", {}).get("id")
+                subscription_data.get("items", {}).get("data", [{}])[0].get("price", {}).get("id")
             ),
             "product_id": (
-                subscription_data.get("items", {}).get("data", [{}])[0]
-                .get("price", {}).get("product")
+                subscription_data.get("items", {})
+                .get("data", [{}])[0]
+                .get("price", {})
+                .get("product")
             ),
             "current_period_start": self._safe_fromtimestamp(current_period_start),
             "current_period_end": self._safe_fromtimestamp(current_period_end),
             "cancel_at_period_end": subscription_data.get("cancel_at_period_end", False),
             "metadata": subscription_data.get("metadata", {}),
             "created_at": datetime.now(UTC).isoformat(),
-            "updated_at": datetime.now(UTC).isoformat()
+            "updated_at": datetime.now(UTC).isoformat(),
         }
 
         return await self._create("subscriptions", subscription_record)
 
     async def _mark_event_processed(
-        self,
-        stripe_event_id: str,
-        processing_time_ms: float,
-        error_message: Optional[str] = None
+        self, stripe_event_id: str, processing_time_ms: float, error_message: str | None = None
     ):
         """Mark a webhook event as processed."""
         try:
@@ -714,16 +638,15 @@ class WebhookService:
                 "processed": True,
                 "processing_completed_at": datetime.now(UTC).isoformat(),
                 "processed_at": datetime.now(UTC).isoformat(),
-                "processing_time_ms": processing_time_ms
+                "processing_time_ms": processing_time_ms,
             }
 
             if error_message:
                 update_data["error_message"] = error_message
 
             # Find and update the event
-            existing_event = await self._get_by_field("stripe_webhook_events", 
-                "stripe_event_id",
-                stripe_event_id
+            existing_event = await self._get_by_field(
+                "stripe_webhook_events", "stripe_event_id", stripe_event_id
             )
 
             if existing_event:
@@ -731,33 +654,26 @@ class WebhookService:
         except Exception as e:
             logger.error(f"Error marking event as processed: {str(e)}")
 
-
     async def _get_by_field(
-        self,
-        table_name: str,
-        field_name: str,
-        field_value: Any
-    ) -> Optional[Dict[str, Any]]:
+        self, table_name: str, field_name: str, field_value: Any
+    ) -> dict[str, Any] | None:
         """Get a record by field name and value."""
         response = self.supabase.table(table_name).select("*").eq(field_name, field_value).execute()
         return response.data[0] if response.data else None
 
-    async def _create(self, table_name: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _create(self, table_name: str, data: dict[str, Any]) -> dict[str, Any]:
         """Create a record in a table."""
         response = self.supabase.table(table_name).insert(data).execute()
         return response.data[0] if response.data else {}
 
     async def _update(
-        self,
-        table_name: str,
-        record_id: str,
-        data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, table_name: str, record_id: str, data: dict[str, Any]
+    ) -> dict[str, Any]:
         """Update a record in a table."""
         response = self.supabase.table(table_name).update(data).eq("id", record_id).execute()
         return response.data[0] if response.data else {}
 
-    def _get_payment_description(self, session_data: Dict[str, Any]) -> str:
+    def _get_payment_description(self, session_data: dict[str, Any]) -> str:
         """Generate payment description based on session data."""
         plan = session_data.get("metadata", {}).get("plan", "unknown")
         amount = session_data.get("amount_total", 0)
@@ -770,7 +686,7 @@ class WebhookService:
             "pro": "Plano Profissional",
             "enterprise": "Plano Empresarial",
             "lifetime": "Acesso Vitalício",
-            "free": "Plano Grátis"
+            "free": "Plano Grátis",
         }
 
         plan_name = plan_names.get(plan, f"Plano {plan}")

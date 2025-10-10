@@ -24,9 +24,7 @@ class WebhookFixtureGenerator:
         return f"evt_test_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}_{self.event_counter:04d}"
 
     def create_checkout_session_completed_event(
-        self,
-        session_data: dict[str, Any],
-        event_id: str = None
+        self, session_data: dict[str, Any], event_id: str = None
     ) -> dict[str, Any]:
         """Create checkout.session.completed webhook event."""
         return {
@@ -38,18 +36,14 @@ class WebhookFixtureGenerator:
             "pending_webhooks": 0,
             "request": {
                 "id": f"req_test_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}",
-                "idempotency_key": f"checkout_key_{datetime.now(UTC).timestamp()}"
+                "idempotency_key": f"checkout_key_{datetime.now(UTC).timestamp()}",
             },
             "type": "checkout.session.completed",
-            "data": {
-                "object": session_data
-            }
+            "data": {"object": session_data},
         }
 
     def create_invoice_payment_succeeded_event(
-        self,
-        invoice_data: dict[str, Any],
-        event_id: str = None
+        self, invoice_data: dict[str, Any], event_id: str = None
     ) -> dict[str, Any]:
         """Create invoice.payment_succeeded webhook event."""
         return {
@@ -61,18 +55,14 @@ class WebhookFixtureGenerator:
             "pending_webhooks": 0,
             "request": {
                 "id": f"req_test_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}",
-                "idempotency_key": f"invoice_key_{datetime.now(UTC).timestamp()}"
+                "idempotency_key": f"invoice_key_{datetime.now(UTC).timestamp()}",
             },
             "type": "invoice.payment_succeeded",
-            "data": {
-                "object": invoice_data
-            }
+            "data": {"object": invoice_data},
         }
 
     def create_invoice_payment_failed_event(
-        self,
-        invoice_data: dict[str, Any],
-        event_id: str = None
+        self, invoice_data: dict[str, Any], event_id: str = None
     ) -> dict[str, Any]:
         """Create invoice.payment_failed webhook event."""
         return {
@@ -84,18 +74,14 @@ class WebhookFixtureGenerator:
             "pending_webhooks": 0,
             "request": {
                 "id": f"req_test_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}",
-                "idempotency_key": f"invoice_failed_key_{datetime.now(UTC).timestamp()}"
+                "idempotency_key": f"invoice_failed_key_{datetime.now(UTC).timestamp()}",
             },
             "type": "invoice.payment_failed",
-            "data": {
-                "object": invoice_data
-            }
+            "data": {"object": invoice_data},
         }
 
     def create_customer_subscription_created_event(
-        self,
-        subscription_data: dict[str, Any],
-        event_id: str = None
+        self, subscription_data: dict[str, Any], event_id: str = None
     ) -> dict[str, Any]:
         """Create customer.subscription.created webhook event."""
         return {
@@ -107,18 +93,14 @@ class WebhookFixtureGenerator:
             "pending_webhooks": 0,
             "request": {
                 "id": f"req_test_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}",
-                "idempotency_key": f"sub_create_key_{datetime.now(UTC).timestamp()}"
+                "idempotency_key": f"sub_create_key_{datetime.now(UTC).timestamp()}",
             },
             "type": "customer.subscription.created",
-            "data": {
-                "object": subscription_data
-            }
+            "data": {"object": subscription_data},
         }
 
     def create_customer_subscription_updated_event(
-        self,
-        subscription_data: dict[str, Any],
-        event_id: str = None
+        self, subscription_data: dict[str, Any], event_id: str = None
     ) -> dict[str, Any]:
         """Create customer.subscription.updated webhook event."""
         return {
@@ -130,18 +112,14 @@ class WebhookFixtureGenerator:
             "pending_webhooks": 0,
             "request": {
                 "id": f"req_test_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}",
-                "idempotency_key": f"sub_update_key_{datetime.now(UTC).timestamp()}"
+                "idempotency_key": f"sub_update_key_{datetime.now(UTC).timestamp()}",
             },
             "type": "customer.subscription.updated",
-            "data": {
-                "object": subscription_data
-            }
+            "data": {"object": subscription_data},
         }
 
     def create_customer_subscription_deleted_event(
-        self,
-        subscription_data: dict[str, Any],
-        event_id: str = None
+        self, subscription_data: dict[str, Any], event_id: str = None
     ) -> dict[str, Any]:
         """Create customer.subscription.deleted webhook event."""
         return {
@@ -153,12 +131,10 @@ class WebhookFixtureGenerator:
             "pending_webhooks": 0,
             "request": {
                 "id": f"req_test_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}",
-                "idempotency_key": f"sub_delete_key_{datetime.now(UTC).timestamp()}"
+                "idempotency_key": f"sub_delete_key_{datetime.now(UTC).timestamp()}",
             },
             "type": "customer.subscription.deleted",
-            "data": {
-                "object": subscription_data
-            }
+            "data": {"object": subscription_data},
         }
 
 
@@ -175,9 +151,7 @@ class WebhookSignatureGenerator:
 
         signed_payload = f"{timestamp}.{payload}"
         signature = hmac.new(
-            self.webhook_secret.encode('utf-8'),
-            signed_payload.encode('utf-8'),
-            hashlib.sha256
+            self.webhook_secret.encode("utf-8"), signed_payload.encode("utf-8"), hashlib.sha256
         ).hexdigest()
 
         return f"t={timestamp},v1={signature}"
@@ -199,9 +173,7 @@ class BrazilianWebhookFixtures:
 
     @staticmethod
     def create_brazilian_checkout_session(
-        user_id: str,
-        plan_type: str = "pro",
-        amount: int = 2990
+        user_id: str, plan_type: str = "pro", amount: int = 2990
     ) -> dict[str, Any]:
         """Create Brazilian checkout session data with unique IDs."""
         plan_configs = {
@@ -219,7 +191,7 @@ class BrazilianWebhookFixtures:
                 "name": "Acesso Vitalício",
                 "description": "Acesso vitalício ao plano profissional",
                 "price": 29700,
-            }
+            },
         }
 
         config = plan_configs.get(plan_type, plan_configs["pro"])
@@ -242,35 +214,30 @@ class BrazilianWebhookFixtures:
                 "product": "cv_optimization",
                 "plan": plan_type,
                 "market": "brazil",
-                "language": "pt-br"
+                "language": "pt-br",
             },
             "customer_details": {
                 "email": "usuario@exemplo.com.br",
                 "name": "João Silva",
-                "address": {
-                    "country": "BR",
-                    "state": "SP",
-                    "city": "São Paulo"
-                }
+                "address": {"country": "BR", "state": "SP", "city": "São Paulo"},
             },
-            "subscription": f"sub_brazilian_{timestamp}" if plan_type in ["pro", "enterprise"] else None,
+            "subscription": f"sub_brazilian_{timestamp}"
+            if plan_type in ["pro", "enterprise"]
+            else None,
         }
 
     @staticmethod
-    def create_brazilian_subscription(
-        user_id: str,
-        plan_type: str = "pro"
-    ) -> dict[str, Any]:
+    def create_brazilian_subscription(user_id: str, plan_type: str = "pro") -> dict[str, Any]:
         """Create Brazilian subscription data with unique IDs."""
         price_configs = {
             "pro": {
                 "unit_amount": 2990,  # R$ 29,90
-                "recurring": {"interval": "month"}
+                "recurring": {"interval": "month"},
             },
             "enterprise": {
                 "unit_amount": 9990,  # R$ 99,90
-                "recurring": {"interval": "month"}
-            }
+                "recurring": {"interval": "month"},
+            },
         }
 
         config = price_configs.get(plan_type, price_configs["pro"])
@@ -294,7 +261,7 @@ class BrazilianWebhookFixtures:
                             "unit_amount": config["unit_amount"],
                             "recurring": config["recurring"],
                             "product": f"prod_brazilian_cv_optimization_{timestamp}",
-                            "nickname": f"CV-Match {plan_type.title()} (BRL)"
+                            "nickname": f"CV-Match {plan_type.title()} (BRL)",
                         },
                         "quantity": 1,
                     }
@@ -305,7 +272,7 @@ class BrazilianWebhookFixtures:
                 "plan": plan_type,
                 "market": "brazil",
                 "language": "pt-br",
-                "tax_region": "BR"
+                "tax_region": "BR",
             },
             "default_payment_method": f"pm_brazilian_card_{timestamp}",
         }

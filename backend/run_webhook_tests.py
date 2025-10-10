@@ -12,10 +12,10 @@ from pathlib import Path
 
 def run_command(cmd: list, description: str) -> int:
     """Run a command and return the exit code."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(cmd)}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     result = subprocess.run(cmd)
     return result.returncode
@@ -34,38 +34,23 @@ Examples:
   python run_webhook_tests.py coverage               # Run with coverage report
   python run_webhook_tests.py brazilian             # Run Brazilian market tests
   python run_webhook_tests.py --verbose              # Verbose output
-        """
+        """,
     )
 
     parser.add_argument(
         "test_type",
         choices=["all", "integration", "unit", "coverage", "brazilian"],
         help="Type of tests to run",
-        default="all"
+        default="all",
     )
 
-    parser.add_argument(
-        "-v", "--verbose",
-        action="store_true",
-        help="Enable verbose output"
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
 
-    parser.add_argument(
-        "-k", "--keyword",
-        help="Filter tests by keyword"
-    )
+    parser.add_argument("-k", "--keyword", help="Filter tests by keyword")
 
-    parser.add_argument(
-        "--cov",
-        action="store_true",
-        help="Generate coverage report"
-    )
+    parser.add_argument("--cov", action="store_true", help="Generate coverage report")
 
-    parser.add_argument(
-        "--html",
-        action="store_true",
-        help="Generate HTML coverage report"
-    )
+    parser.add_argument("--html", action="store_true", help="Generate HTML coverage report")
 
     args = parser.parse_args()
 

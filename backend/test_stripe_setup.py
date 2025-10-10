@@ -35,14 +35,17 @@ load_dotenv()
 BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
+
 class Colors:
     """Terminal colors for test output."""
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    BOLD = '\033[1m'
-    END = '\033[0m'
+
+    GREEN = "\033[92m"
+    RED = "\033[91m"
+    YELLOW = "\033[93m"
+    BLUE = "\033[94m"
+    BOLD = "\033[1m"
+    END = "\033[0m"
+
 
 class StripeTestValidator:
     """Validates Stripe test mode setup for Brazilian market."""
@@ -52,9 +55,13 @@ class StripeTestValidator:
         self.test_results = []
         self.start_time = datetime.now(UTC)
 
-    def log_test(self, test_name: str, passed: bool, message: str = "", details: Dict[str, Any] = None):
+    def log_test(
+        self, test_name: str, passed: bool, message: str = "", details: Dict[str, Any] = None
+    ):
         """Log a test result."""
-        status = f"{Colors.GREEN}✅ PASS{Colors.END}" if passed else f"{Colors.RED}❌ FAIL{Colors.END}"
+        status = (
+            f"{Colors.GREEN}✅ PASS{Colors.END}" if passed else f"{Colors.RED}❌ FAIL{Colors.END}"
+        )
         print(f"{status} {test_name}")
         if message:
             print(f"    {Colors.BLUE}{message}{Colors.END}")
@@ -62,13 +69,15 @@ class StripeTestValidator:
             for key, value in details.items():
                 print(f"    {Colors.YELLOW}{key}:{Colors.END} {value}")
 
-        self.test_results.append({
-            "test_name": test_name,
-            "passed": passed,
-            "message": message,
-            "details": details or {},
-            "timestamp": datetime.now(UTC).isoformat()
-        })
+        self.test_results.append(
+            {
+                "test_name": test_name,
+                "passed": passed,
+                "message": message,
+                "details": details or {},
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+        )
 
     async def test_configuration(self) -> bool:
         """Test Stripe configuration and environment setup."""
@@ -89,21 +98,21 @@ class StripeTestValidator:
             "Stripe Secret Key (Test Mode)",
             has_stripe_key,
             "Key exists and is in test mode" if has_stripe_key else "Missing or invalid test key",
-            {"key_prefix": stripe_key[:7] + "..." if stripe_key else "None"}
+            {"key_prefix": stripe_key[:7] + "..." if stripe_key else "None"},
         )
 
         self.log_test(
             "Webhook Secret (Test Mode)",
             has_webhook_secret,
             "Webhook secret configured" if has_webhook_secret else "Missing webhook secret",
-            {"secret_prefix": webhook_secret[:8] + "..." if webhook_secret else "None"}
+            {"secret_prefix": webhook_secret[:8] + "..." if webhook_secret else "None"},
         )
 
         self.log_test(
             "Publishable Key (Test Mode)",
             has_publishable_key,
             "Frontend key configured" if has_publishable_key else "Missing publishable key",
-            {"key_prefix": publishable_key[:7] + "..." if publishable_key else "None"}
+            {"key_prefix": publishable_key[:7] + "..." if publishable_key else "None"},
         )
 
         # Test 2: Brazilian Market Configuration
@@ -115,26 +124,33 @@ class StripeTestValidator:
             "Brazilian Currency (BRL)",
             currency.lower() == "brl",
             f"Currency set to {currency}",
-            {"currency": currency}
+            {"currency": currency},
         )
 
         self.log_test(
             "Brazilian Country (BR)",
             country.upper() == "BR",
             f"Country set to {country}",
-            {"country": country}
+            {"country": country},
         )
 
         self.log_test(
             "Brazilian Locale (pt-br)",
             locale.lower() == "pt-br",
             f"Locale set to {locale}",
-            {"locale": locale}
+            {"locale": locale},
         )
 
-        config_passed = all([has_stripe_key, has_webhook_secret, has_publishable_key,
-                           currency.lower() == "brl", country.upper() == "BR",
-                           locale.lower() == "pt-br"])
+        config_passed = all(
+            [
+                has_stripe_key,
+                has_webhook_secret,
+                has_publishable_key,
+                currency.lower() == "brl",
+                country.upper() == "BR",
+                locale.lower() == "pt-br",
+            ]
+        )
 
         return config_passed
 
@@ -163,8 +179,8 @@ class StripeTestValidator:
                             "stripe_configured": stripe_configured,
                             "test_mode": test_mode,
                             "currency": data.get("currency"),
-                            "country": data.get("country")
-                        }
+                            "country": data.get("country"),
+                        },
                     )
 
                     if not stripe_configured:
@@ -176,12 +192,14 @@ class StripeTestValidator:
                         "Payments API Health",
                         False,
                         f"HTTP {response.status_code}",
-                        {"response_text": response.text[:200]}
+                        {"response_text": response.text[:200]},
                     )
                     health_passed = False
 
                 # Test Webhooks Health
-                response = await client.get(f"{self.base_url}/api/webhooks/stripe/health", timeout=10)
+                response = await client.get(
+                    f"{self.base_url}/api/webhooks/stripe/health", timeout=10
+                )
                 webhooks_healthy = response.status_code == 200
 
                 if webhooks_healthy:
@@ -195,8 +213,8 @@ class StripeTestValidator:
                         {
                             "webhook_configured": webhook_configured,
                             "test_mode": data.get("test_mode"),
-                            "currency": data.get("currency")
-                        }
+                            "currency": data.get("currency"),
+                        },
                     )
 
                     if not webhook_configured:
@@ -206,7 +224,7 @@ class StripeTestValidator:
                         "Webhooks API Health",
                         False,
                         f"HTTP {response.status_code}",
-                        {"response_text": response.text[:200]}
+                        {"response_text": response.text[:200]},
                     )
                     health_passed = False
 
@@ -215,7 +233,7 @@ class StripeTestValidator:
                     "API Connection",
                     False,
                     f"Connection error: {str(e)}",
-                    {"base_url": self.base_url}
+                    {"base_url": self.base_url},
                 )
                 health_passed = False
 
@@ -243,7 +261,7 @@ class StripeTestValidator:
                         "Brazilian Pricing Plans",
                         has_all_plans,
                         f"Found {len(pricing)} pricing plans",
-                        {"plans": list(pricing.keys())}
+                        {"plans": list(pricing.keys())},
                     )
 
                     # Check specific plan configurations
@@ -252,11 +270,14 @@ class StripeTestValidator:
                         pro_price_correct = pro_plan.get("price") == 2990  # R$ 29,90
                         pro_currency_correct = pro_plan.get("currency") == "brl"
 
+                        price = pro_plan.get("price", 0) / 100
+                        currency = pro_plan.get("currency")
+                        price_msg = f"Price: R$ {price:.2f}, Currency: {currency}"
                         self.log_test(
                             "Pro Plan Configuration",
                             pro_price_correct and pro_currency_correct,
-                            f"Price: R$ {pro_plan.get('price', 0) / 100:.2f}, Currency: {pro_plan.get('currency')}",
-                            pro_plan
+                            price_msg,
+                            pro_plan,
                         )
 
                         if not (pro_price_correct and pro_currency_correct):
@@ -270,7 +291,10 @@ class StripeTestValidator:
                             "Enterprise Plan Configuration",
                             enterprise_price_correct,
                             f"Price: R$ {enterprise_plan.get('price', 0) / 100:.2f}",
-                            {"price": enterprise_plan.get("price"), "currency": enterprise_plan.get("currency")}
+                            {
+                                "price": enterprise_plan.get("price"),
+                                "currency": enterprise_plan.get("currency"),
+                            },
                         )
 
                         if not enterprise_price_correct:
@@ -281,16 +305,12 @@ class StripeTestValidator:
                         "Pricing API",
                         False,
                         f"HTTP {response.status_code}",
-                        {"response_text": response.text[:200]}
+                        {"response_text": response.text[:200]},
                     )
                     pricing_passed = False
 
             except httpx.RequestError as e:
-                self.log_test(
-                    "Pricing API Connection",
-                    False,
-                    f"Connection error: {str(e)}"
-                )
+                self.log_test("Pricing API Connection", False, f"Connection error: {str(e)}")
                 pricing_passed = False
 
         return pricing_passed
@@ -309,13 +329,13 @@ class StripeTestValidator:
                     "user_email": "validacao@exemplo.com.br",
                     "plan_type": "pro",
                     "success_url": f"{FRONTEND_URL}/sucesso",
-                    "cancel_url": f"{FRONTEND_URL}/cancelar"
+                    "cancel_url": f"{FRONTEND_URL}/cancelar",
                 }
 
                 response = await client.post(
                     f"{self.base_url}/api/payments/create-checkout-session",
                     json=request_data,
-                    timeout=10
+                    timeout=10,
                 )
 
                 if response.status_code == 200:
@@ -331,15 +351,15 @@ class StripeTestValidator:
                                 "session_id": data.get("session_id", "")[:20] + "...",
                                 "plan_type": data.get("plan_type"),
                                 "currency": data.get("currency"),
-                                "amount": data.get("amount")
-                            }
+                                "amount": data.get("amount"),
+                            },
                         )
                     else:
                         self.log_test(
                             "Pro Plan Checkout Session",
                             False,
                             data.get("error", "Unknown error"),
-                            data
+                            data,
                         )
                         checkout_passed = False
                 else:
@@ -347,7 +367,7 @@ class StripeTestValidator:
                         "Pro Plan Checkout Session",
                         False,
                         f"HTTP {response.status_code}",
-                        {"response_text": response.text[:200]}
+                        {"response_text": response.text[:200]},
                     )
                     checkout_passed = False
 
@@ -355,46 +375,32 @@ class StripeTestValidator:
                 free_request = {
                     "user_id": "test_user_free_123",
                     "user_email": "gratis@exemplo.com.br",
-                    "plan_type": "free"
+                    "plan_type": "free",
                 }
 
                 response = await client.post(
                     f"{self.base_url}/api/payments/create-checkout-session",
                     json=free_request,
-                    timeout=10
+                    timeout=10,
                 )
 
                 if response.status_code == 200:
                     data = response.json()
                     if data.get("success") and data.get("plan_type") == "free":
                         self.log_test(
-                            "Free Plan Checkout",
-                            True,
-                            "Free plan activated without payment",
-                            data
+                            "Free Plan Checkout", True, "Free plan activated without payment", data
                         )
                     else:
                         self.log_test(
-                            "Free Plan Checkout",
-                            False,
-                            "Free plan checkout failed",
-                            data
+                            "Free Plan Checkout", False, "Free plan checkout failed", data
                         )
                         checkout_passed = False
                 else:
-                    self.log_test(
-                        "Free Plan Checkout",
-                        False,
-                        f"HTTP {response.status_code}"
-                    )
+                    self.log_test("Free Plan Checkout", False, f"HTTP {response.status_code}")
                     checkout_passed = False
 
             except httpx.RequestError as e:
-                self.log_test(
-                    "Checkout Session API",
-                    False,
-                    f"Connection error: {str(e)}"
-                )
+                self.log_test("Checkout Session API", False, f"Connection error: {str(e)}")
                 checkout_passed = False
 
         return checkout_passed
@@ -408,7 +414,9 @@ class StripeTestValidator:
         async with httpx.AsyncClient() as client:
             try:
                 # Test webhook health
-                response = await client.get(f"{self.base_url}/api/webhooks/stripe/health", timeout=10)
+                response = await client.get(
+                    f"{self.base_url}/api/webhooks/stripe/health", timeout=10
+                )
 
                 if response.status_code == 200:
                     data = response.json()
@@ -419,19 +427,17 @@ class StripeTestValidator:
                         {
                             "status": data.get("status"),
                             "stripe_configured": data.get("stripe_configured"),
-                            "test_mode": data.get("test_mode")
-                        }
+                            "test_mode": data.get("test_mode"),
+                        },
                     )
                 else:
-                    self.log_test(
-                        "Webhook Health Check",
-                        False,
-                        f"HTTP {response.status_code}"
-                    )
+                    self.log_test("Webhook Health Check", False, f"HTTP {response.status_code}")
                     webhooks_passed = False
 
                 # Test test webhook processing
-                response = await client.post(f"{self.base_url}/api/webhooks/stripe/test", timeout=10)
+                response = await client.post(
+                    f"{self.base_url}/api/webhooks/stripe/test", timeout=10
+                )
 
                 if response.status_code == 200:
                     data = response.json()
@@ -444,26 +450,24 @@ class StripeTestValidator:
                             "Test webhook processed successfully",
                             {
                                 "test_event_id": data.get("test_event_id"),
-                                "processing_success": data.get("processing_result", {}).get("success")
-                            }
+                                "processing_success": data.get("processing_result", {}).get(
+                                    "success"
+                                ),
+                            },
                         )
                     else:
                         self.log_test(
-                            "Test Webhook Processing",
-                            False,
-                            data.get("message", "Unknown error")
+                            "Test Webhook Processing", False, data.get("message", "Unknown error")
                         )
                         webhooks_passed = False
                 else:
-                    self.log_test(
-                        "Test Webhook Processing",
-                        False,
-                        f"HTTP {response.status_code}"
-                    )
+                    self.log_test("Test Webhook Processing", False, f"HTTP {response.status_code}")
                     webhooks_passed = False
 
                 # Test payment methods endpoint
-                response = await client.get(f"{self.base_url}/api/webhooks/stripe/test-payment-methods", timeout=10)
+                response = await client.get(
+                    f"{self.base_url}/api/webhooks/stripe/test-payment-methods", timeout=10
+                )
 
                 if response.status_code == 200:
                     data = response.json()
@@ -476,23 +480,15 @@ class StripeTestValidator:
                         {
                             "currency": data.get("currency"),
                             "country": data.get("country"),
-                            "methods": [pm.get("name") for pm in payment_methods]
-                        }
+                            "methods": [pm.get("name") for pm in payment_methods],
+                        },
                     )
                 else:
-                    self.log_test(
-                        "Test Payment Methods",
-                        False,
-                        f"HTTP {response.status_code}"
-                    )
+                    self.log_test("Test Payment Methods", False, f"HTTP {response.status_code}")
                     webhooks_passed = False
 
             except httpx.RequestError as e:
-                self.log_test(
-                    "Webhook API Connection",
-                    False,
-                    f"Connection error: {str(e)}"
-                )
+                self.log_test("Webhook API Connection", False, f"Connection error: {str(e)}")
                 webhooks_passed = False
 
         return webhooks_passed
@@ -517,7 +513,7 @@ class StripeTestValidator:
                         "pro": "Plano Profissional",
                         "enterprise": "Plano Empresarial",
                         "lifetime": "Acesso Vitalício",
-                        "free": "Plano Grátis"
+                        "free": "Plano Grátis",
                     }
 
                     for plan_key, expected_name in portuguese_names.items():
@@ -529,7 +525,7 @@ class StripeTestValidator:
                                 f"Portuguese Plan Name ({plan_key})",
                                 name_correct,
                                 f"Expected: {expected_name}, Got: {actual_name}",
-                                {"expected": expected_name, "actual": actual_name}
+                                {"expected": expected_name, "actual": actual_name},
                             )
 
                             if not name_correct:
@@ -540,17 +536,13 @@ class StripeTestValidator:
                     "user_id": "user_brazilian_test_123",
                     "user_email": "usuario@exemplo.com.br",
                     "plan_type": "pro",
-                    "metadata": {
-                        "market": "brazil",
-                        "language": "pt-br",
-                        "document_type": "CPF"
-                    }
+                    "metadata": {"market": "brazil", "language": "pt-br", "document_type": "CPF"},
                 }
 
                 response = await client.post(
                     f"{self.base_url}/api/payments/create-checkout-session",
                     json=brazilian_user_request,
-                    timeout=10
+                    timeout=10,
                 )
 
                 if response.status_code == 200:
@@ -562,30 +554,24 @@ class StripeTestValidator:
                             "Brazilian user metadata processed correctly",
                             {
                                 "user_email": brazilian_user_request["user_email"],
-                                "metadata": brazilian_user_request["metadata"]
-                            }
+                                "metadata": brazilian_user_request["metadata"],
+                            },
                         )
                     else:
                         self.log_test(
                             "Brazilian User Data Processing",
                             False,
-                            data.get("error", "Unknown error")
+                            data.get("error", "Unknown error"),
                         )
                         brazilian_passed = False
                 else:
                     self.log_test(
-                        "Brazilian User Data Processing",
-                        False,
-                        f"HTTP {response.status_code}"
+                        "Brazilian User Data Processing", False, f"HTTP {response.status_code}"
                     )
                     brazilian_passed = False
 
             except httpx.RequestError as e:
-                self.log_test(
-                    "Brazilian Features API",
-                    False,
-                    f"Connection error: {str(e)}"
-                )
+                self.log_test("Brazilian Features API", False, f"Connection error: {str(e)}")
                 brazilian_passed = False
 
         return brazilian_passed
@@ -632,7 +618,11 @@ class StripeTestValidator:
             print(f"{status} {suite_name.title()}")
 
         overall_passed = all(results.values())
-        overall_status = f"{Colors.GREEN}✅ ALL TESTS PASSED{Colors.END}" if overall_passed else f"{Colors.RED}❌ SOME TESTS FAILED{Colors.END}"
+        overall_status = (
+            f"{Colors.GREEN}✅ ALL TESTS PASSED{Colors.END}"
+            if overall_passed
+            else f"{Colors.RED}❌ SOME TESTS FAILED{Colors.END}"
+        )
 
         print(f"\n{Colors.BOLD}Overall Status: {overall_status}{Colors.END}")
 
@@ -646,7 +636,7 @@ class StripeTestValidator:
                 "failed_tests": sum(1 for r in self.test_results if not r["passed"]),
                 "duration_seconds": (datetime.now(UTC) - self.start_time).total_seconds(),
                 "overall_passed": all(results.values()),
-                "test_suites": results
+                "test_suites": results,
             },
             "detailed_results": self.test_results,
             "environment": {
@@ -656,14 +646,16 @@ class StripeTestValidator:
                 "webhook_secret_configured": bool(os.getenv("STRIPE_WEBHOOK_SECRET")),
                 "brazilian_currency": os.getenv("NEXT_PUBLIC_DEFAULT_CURRENCY"),
                 "brazilian_country": os.getenv("NEXT_PUBLIC_DEFAULT_COUNTRY"),
-                "brazilian_locale": os.getenv("NEXT_PUBLIC_DEFAULT_LOCALE")
-            }
+                "brazilian_locale": os.getenv("NEXT_PUBLIC_DEFAULT_LOCALE"),
+            },
         }
 
-        report_filename = f"stripe_validation_report_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}.json"
+        report_filename = (
+            f"stripe_validation_report_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}.json"
+        )
 
         try:
-            with open(report_filename, 'w', encoding='utf-8') as f:
+            with open(report_filename, "w", encoding="utf-8") as f:
                 json.dump(report, f, indent=2, ensure_ascii=False)
 
             print(f"\n{Colors.BLUE}📄 Detailed report saved: {report_filename}{Colors.END}")
@@ -683,34 +675,14 @@ Examples:
   python test_stripe_setup.py --payments    # Test payment flows only
   python test_stripe_setup.py --webhooks    # Test webhooks only
   python test_stripe_setup.py --brazilian   # Test Brazilian features only
-        """
+        """,
     )
 
-    parser.add_argument(
-        "--all",
-        action="store_true",
-        help="Run all validation tests"
-    )
-    parser.add_argument(
-        "--config",
-        action="store_true",
-        help="Test configuration only"
-    )
-    parser.add_argument(
-        "--payments",
-        action="store_true",
-        help="Test payment flows only"
-    )
-    parser.add_argument(
-        "--webhooks",
-        action="store_true",
-        help="Test webhooks only"
-    )
-    parser.add_argument(
-        "--brazilian",
-        action="store_true",
-        help="Test Brazilian features only"
-    )
+    parser.add_argument("--all", action="store_true", help="Run all validation tests")
+    parser.add_argument("--config", action="store_true", help="Test configuration only")
+    parser.add_argument("--payments", action="store_true", help="Test payment flows only")
+    parser.add_argument("--webhooks", action="store_true", help="Test webhooks only")
+    parser.add_argument("--brazilian", action="store_true", help="Test Brazilian features only")
 
     args = parser.parse_args()
 
@@ -733,12 +705,14 @@ Examples:
             if args.brazilian:
                 success &= await validator.test_brazilian_features()
 
-            validator.print_summary({
-                "configuration": args.config,
-                "payments": args.payments,
-                "webhooks": args.webhooks,
-                "brazilian": args.brazilian
-            })
+            validator.print_summary(
+                {
+                    "configuration": args.config,
+                    "payments": args.payments,
+                    "webhooks": args.webhooks,
+                    "brazilian": args.brazilian,
+                }
+            )
 
         sys.exit(0 if success else 1)
 

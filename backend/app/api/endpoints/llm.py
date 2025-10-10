@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.config import settings
@@ -12,8 +12,8 @@ from app.models.llm import (
 )
 from app.services.llm.embedding_service import EmbeddingService, get_embedding_service
 from app.services.llm.llm_service import LLMService, get_llm_service
-from app.services.supabase.auth import SupabaseAuthService, get_auth_service
 from app.services.security.middleware import validate_and_sanitize_request
+from app.services.supabase.auth import SupabaseAuthService, get_auth_service
 
 router = APIRouter()
 security = HTTPBearer()  # Make authentication required
@@ -38,10 +38,13 @@ async def generate_text(
         # Validate user authentication
         try:
             user = await auth_service.get_user(credentials.credentials)
-            user_id = user.id if hasattr(user, 'id') else None
-            logger.info(
-                f"User authenticated: {user.email if hasattr(user, 'email') else 'Unknown user'}"
-            )
+            if user is None:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid authentication credentials",
+                )
+            user_id = user.get("id")
+            logger.info(f"User authenticated: {user.get('email', 'Unknown user')}")
         except Exception as auth_error:
             logger.error(f"Authentication error: {str(auth_error)}")
             raise HTTPException(
@@ -52,21 +55,20 @@ async def generate_text(
 
         # Validate and sanitize input
         try:
-            client_ip = http_request.client.host if http_request and http_request.client else "unknown"
             sanitized_request_data = await validate_and_sanitize_request(
-                request.dict(),
-                credentials=credentials,
-                request=http_request
+                request.dict(), credentials=credentials, request=http_request
             )
 
             # Update request with sanitized data
-            sanitized_prompt = sanitized_request_data.get('prompt', request.prompt)
+            sanitized_prompt = sanitized_request_data.get("prompt", request.prompt)
 
             # Log sanitization warnings if any
-            if hasattr(sanitized_request_data, 'prompt') and len(sanitized_request_data['prompt'].warnings) > 0:
-                logger.warning(
-                    f"Input sanitization warnings for user {user_id}: {sanitized_request_data['prompt'].warnings}"
-                )
+            if (
+                hasattr(sanitized_request_data, "prompt")
+                and len(sanitized_request_data["prompt"].warnings) > 0
+            ):
+                warnings = sanitized_request_data["prompt"].warnings
+                logger.warning(f"Input sanitization warnings for user {user_id}: {warnings}")
 
         except HTTPException:
             # Re-raise HTTP exceptions from validation
@@ -74,8 +76,7 @@ async def generate_text(
         except Exception as sanitization_error:
             logger.error(f"Input sanitization error: {str(sanitization_error)}")
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Input validation failed"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Input validation failed"
             )
 
         # Get the right LLM service based on provider
@@ -93,13 +94,17 @@ async def generate_text(
 
             # Check if API keys are configured
             if request.provider == "openai" and not settings.OPENAI_API_KEY:
-                raise ValueError(
-                    "OpenAI API key not configured. Please set the OPENAI_API_KEY environment variable."
+                error_msg = (
+                    "OpenAI API key not configured. "
+                    "Please set the OPENAI_API_KEY environment variable."
                 )
+                raise ValueError(error_msg)
             elif request.provider == "anthropic" and not settings.ANTHROPIC_API_KEY:
-                raise ValueError(
-                    "Anthropic API key not configured. Please set the ANTHROPIC_API_KEY environment variable."
+                error_msg = (
+                    "Anthropic API key not configured. "
+                    "Please set the ANTHROPIC_API_KEY environment variable."
                 )
+                raise ValueError(error_msg)
 
             response = await llm_service.generate_text(
                 prompt=sanitized_prompt,  # Use sanitized prompt
@@ -141,10 +146,13 @@ async def create_embedding(
         # Validate user authentication
         try:
             user = await auth_service.get_user(credentials.credentials)
-            user_id = user.id if hasattr(user, 'id') else None
-            logger.info(
-                f"User authenticated: {user.email if hasattr(user, 'email') else 'Unknown user'}"
-            )
+            if user is None:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid authentication credentials",
+                )
+            user_id = user.get("id")
+            logger.info(f"User authenticated: {user.get('email', 'Unknown user')}")
         except Exception as auth_error:
             logger.error(f"Authentication error: {str(auth_error)}")
             raise HTTPException(
@@ -155,21 +163,20 @@ async def create_embedding(
 
         # Validate and sanitize input
         try:
-            client_ip = http_request.client.host if http_request and http_request.client else "unknown"
             sanitized_request_data = await validate_and_sanitize_request(
-                request.dict(),
-                credentials=credentials,
-                request=http_request
+                request.dict(), credentials=credentials, request=http_request
             )
 
             # Update request with sanitized data
-            sanitized_text = sanitized_request_data.get('text', request.text)
+            sanitized_text = sanitized_request_data.get("text", request.text)
 
             # Log sanitization warnings if any
-            if hasattr(sanitized_request_data, 'text') and len(sanitized_request_data['text'].warnings) > 0:
-                logger.warning(
-                    f"Input sanitization warnings for user {user_id}: {sanitized_request_data['text'].warnings}"
-                )
+            if (
+                hasattr(sanitized_request_data, "text")
+                and len(sanitized_request_data["text"].warnings) > 0
+            ):
+                warnings = sanitized_request_data["text"].warnings
+                logger.warning(f"Input sanitization warnings for user {user_id}: {warnings}")
 
         except HTTPException:
             # Re-raise HTTP exceptions from validation
@@ -177,12 +184,13 @@ async def create_embedding(
         except Exception as sanitization_error:
             logger.error(f"Input sanitization error: {str(sanitization_error)}")
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Input validation failed"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Input validation failed"
             )
 
         # Generate embedding with the embedding service
-        embedding = await embedding_service.create_embedding(text=sanitized_text, model=request.model)
+        embedding = await embedding_service.create_embedding(
+            text=sanitized_text, model=request.model
+        )
 
         return EmbeddingResponse(
             embedding=embedding.embedding, model=embedding.model, usage=embedding.usage

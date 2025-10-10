@@ -3,6 +3,7 @@ from typing import Any
 from ..core.config import settings
 from ..core.exceptions import ProviderError
 from .providers.base import EmbeddingProvider, Provider
+from .strategies.base import Strategy
 from .strategies.wrapper import JSONWrapper, MDWrapper
 
 
@@ -13,6 +14,7 @@ class AgentManager:
         model: str = settings.LL_MODEL or "anthropic/claude-3.5-sonnet",
         model_provider: str = settings.LLM_PROVIDER or "openrouter",
     ) -> None:
+        self.strategy: Strategy
         match strategy:
             case "md":
                 self.strategy = MDWrapper()
@@ -33,16 +35,19 @@ class AgentManager:
             case "openai":
                 from .providers.openai import OpenAIProvider
 
-                api_key = opts.get("llm_api_key", settings.LLM_API_KEY or "")
+                api_key = str(opts.get("llm_api_key", settings.LLM_API_KEY or "")) or None
                 return OpenAIProvider(model_name=self.model, api_key=api_key, opts=opts)
             case "openrouter":
                 from .providers.openrouter import OpenRouterProvider
 
-                api_key = (
-                    opts.get("llm_api_key", settings.OPENROUTER_API_KEY) or
-                    settings.LLM_API_KEY or ""
+                api_key_raw = (
+                    opts.get("llm_api_key", settings.OPENROUTER_API_KEY)
+                    or settings.LLM_API_KEY
+                    or ""
                 )
-                api_base_url = opts.get("llm_base_url", settings.LLM_BASE_URL or "")
+                api_base_url_raw = opts.get("llm_base_url", settings.LLM_BASE_URL or "")
+                api_key = str(api_key_raw) if api_key_raw else None
+                api_base_url = str(api_base_url_raw) if api_base_url_raw else None
                 return OpenRouterProvider(
                     model_name=self.model,
                     api_key=api_key,
@@ -55,7 +60,7 @@ class AgentManager:
                     "Supported providers: openai, openrouter"
                 )
 
-    async def run(self, prompt: str, **kwargs: Any) -> dict[str, Any]:
+    async def run(self, prompt: str, **kwargs: Any) -> Any:
         """
         Run the agent with the given prompt and generation arguments.
         """
@@ -67,7 +72,12 @@ class AgentManager:
         Generate text response (convenience method).
         """
         result = await self.run(prompt, **kwargs)
-        return result.get("text", "")
+        if isinstance(result, dict):
+            return result.get("text", "")
+        elif isinstance(result, str):
+            return result
+        else:
+            return str(result)
 
 
 class EmbeddingManager:
@@ -84,16 +94,22 @@ class EmbeddingManager:
             case "openai":
                 from .providers.openai import OpenAIEmbeddingProvider
 
-                api_key = kwargs.get("openai_api_key", settings.EMBEDDING_API_KEY or "")
+                api_key = (
+                    str(kwargs.get("openai_api_key", settings.EMBEDDING_API_KEY or "")) or None
+                )
                 return OpenAIEmbeddingProvider(api_key=api_key, embedding_model=self._model)
             case "openrouter":
                 from .providers.openrouter import OpenRouterEmbeddingProvider
 
-                api_key = kwargs.get(
+                api_key_raw = kwargs.get(
                     "embedding_api_key",
-                    settings.OPENROUTER_API_KEY or settings.EMBEDDING_API_KEY or ""
+                    settings.OPENROUTER_API_KEY or settings.EMBEDDING_API_KEY or "",
                 )
-                api_base_url = kwargs.get("embedding_base_url", settings.EMBEDDING_BASE_URL or "")
+                api_base_url_raw = kwargs.get(
+                    "embedding_base_url", settings.EMBEDDING_BASE_URL or ""
+                )
+                api_key = str(api_key_raw) if api_key_raw else None
+                api_base_url = str(api_base_url_raw) if api_base_url_raw else None
                 return OpenRouterEmbeddingProvider(
                     api_key=api_key,
                     embedding_model=self._model,

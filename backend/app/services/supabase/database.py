@@ -22,13 +22,24 @@ class SupabaseDatabaseService(Generic[T]):
         self.table_name = table_name
         self.model_class = model_class
 
-    async def list(self, filters: dict[str, Any] | None = None) -> list[T]:
-        """List records with optional filtering."""
+    async def list(
+        self,
+        filters: dict[str, Any] | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> list[T]:
+        """List records with optional filtering and pagination."""
         query = self.supabase.table(self.table_name).select("*")
 
         if filters:
             for key, value in filters.items():
                 query = query.eq(key, value)
+
+        if limit is not None:
+            query = query.limit(limit)
+
+        if offset is not None:
+            query = query.offset(offset)
 
         response = query.execute()
 

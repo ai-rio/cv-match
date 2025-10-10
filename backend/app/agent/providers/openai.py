@@ -17,7 +17,7 @@ class OpenAIProvider(Provider):
         self,
         api_key: str | None = None,
         model_name: str = settings.LL_MODEL or "gpt-3.5-turbo",
-        opts: dict[str, Any] = None,
+        opts: dict[str, Any] | None = None,
     ):
         if opts is None:
             opts = {}
@@ -70,9 +70,7 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
     async def embed(self, text: str) -> list[float]:
         try:
             response = await run_in_threadpool(
-                self._client.embeddings.create,
-                input=text,
-                model=self._model
+                self._client.embeddings.create, input=text, model=self._model
             )
             return response.data[0].embedding
         except Exception as e:

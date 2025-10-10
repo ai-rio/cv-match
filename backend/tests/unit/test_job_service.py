@@ -24,8 +24,8 @@ def sample_job_data():
         "resume_id": "test-resume-123",
         "job_descriptions": [
             "Desenvolvedor Python Sênior na Tech Corp",
-            "Analista de Dados Pleno na DataCorp"
-        ]
+            "Analista de Dados Pleno na DataCorp",
+        ],
     }
 
 
@@ -66,11 +66,9 @@ async def test_job_service_initialization(job_service):
     # TODO: Add assertions for agent manager when AI Integration is complete
 
 
-@patch('app.services.job_service.SupabaseDatabaseService')
+@patch("app.services.job_service.SupabaseDatabaseService")
 @pytest.mark.asyncio
-async def test_create_and_store_job_success(
-    mock_db_service, job_service, sample_job_data
-):
+async def test_create_and_store_job_success(mock_db_service, job_service, sample_job_data):
     """Test successful job creation and storage."""
     # Mock the database service for jobs
     mock_job_service_instance = AsyncMock()
@@ -82,8 +80,10 @@ async def test_create_and_store_job_success(
     mock_processed_service_instance.create.return_value = MagicMock(id="processed-123")
 
     # Mock resume check
-    with patch.object(job_service, '_is_resume_available', return_value=True):
-        with patch.object(job_service, '_extract_and_store_structured_job', return_value="test-job-123") as mock_extract:
+    with patch.object(job_service, "_is_resume_available", return_value=True):
+        with patch.object(
+            job_service, "_extract_and_store_structured_job", return_value="test-job-123"
+        ) as mock_extract:
             result = await job_service.create_and_store_job(sample_job_data)
 
             assert len(result) == 2
@@ -91,46 +91,38 @@ async def test_create_and_store_job_success(
             assert mock_extract.call_count == 2
 
 
-@patch('app.services.job_service.SupabaseDatabaseService')
+@patch("app.services.job_service.SupabaseDatabaseService")
 @pytest.mark.asyncio
-async def test_create_and_store_job_resume_not_found(
-    mock_db_service, job_service, sample_job_data
-):
+async def test_create_and_store_job_resume_not_found(mock_db_service, job_service, sample_job_data):
     """Test job creation when resume is not found."""
     # Mock resume check to return False
-    with patch.object(job_service, '_is_resume_available', return_value=False):
-        with pytest.raises(AssertionError, match="resume corresponding to resume_id: test-resume-123 not found"):
+    with patch.object(job_service, "_is_resume_available", return_value=False):
+        with pytest.raises(
+            AssertionError, match="resume corresponding to resume_id: test-resume-123 not found"
+        ):
             await job_service.create_and_store_job(sample_job_data)
 
 
-@patch('app.services.job_service.SupabaseDatabaseService')
+@patch("app.services.job_service.SupabaseDatabaseService")
 @pytest.mark.asyncio
-async def test_create_and_store_job_empty_job_descriptions(
-    mock_db_service, job_service
-):
+async def test_create_and_store_job_empty_job_descriptions(mock_db_service, job_service):
     """Test job creation with empty job descriptions."""
-    empty_job_data = {
-        "resume_id": "test-resume-123",
-        "job_descriptions": []
-    }
+    empty_job_data = {"resume_id": "test-resume-123", "job_descriptions": []}
 
     # Mock resume check
-    with patch.object(job_service, '_is_resume_available', return_value=True):
+    with patch.object(job_service, "_is_resume_available", return_value=True):
         result = await job_service.create_and_store_job(empty_job_data)
 
         assert len(result) == 0
 
 
-@patch('app.services.job_service.SupabaseDatabaseService')
+@patch("app.services.job_service.SupabaseDatabaseService")
 @pytest.mark.asyncio
 async def test_create_and_store_job_single_description(
     mock_db_service, job_service, sample_job_description
 ):
     """Test job creation with single job description."""
-    job_data = {
-        "resume_id": "test-resume-123",
-        "job_descriptions": [sample_job_description]
-    }
+    job_data = {"resume_id": "test-resume-123", "job_descriptions": [sample_job_description]}
 
     # Mock the database service
     mock_job_service_instance = AsyncMock()
@@ -138,8 +130,10 @@ async def test_create_and_store_job_single_description(
     mock_db_service.return_value = mock_job_service_instance
 
     # Mock resume check and extraction
-    with patch.object(job_service, '_is_resume_available', return_value=True):
-        with patch.object(job_service, '_extract_and_store_structured_job', return_value="test-job-single") as mock_extract:
+    with patch.object(job_service, "_is_resume_available", return_value=True):
+        with patch.object(
+            job_service, "_extract_and_store_structured_job", return_value="test-job-single"
+        ) as mock_extract:
             result = await job_service.create_and_store_job(job_data)
 
             assert len(result) == 1
@@ -147,7 +141,7 @@ async def test_create_and_store_job_single_description(
             mock_extract.assert_called_once()
 
 
-@patch('app.services.job_service.SupabaseDatabaseService')
+@patch("app.services.job_service.SupabaseDatabaseService")
 @pytest.mark.asyncio
 async def test_is_resume_available_true(mock_db_service, job_service):
     """Test resume availability check when resume exists."""
@@ -162,7 +156,7 @@ async def test_is_resume_available_true(mock_db_service, job_service):
     mock_service_instance.get.assert_called_once_with("test-resume-123")
 
 
-@patch('app.services.job_service.SupabaseDatabaseService')
+@patch("app.services.job_service.SupabaseDatabaseService")
 @pytest.mark.asyncio
 async def test_is_resume_available_false(mock_db_service, job_service):
     """Test resume availability check when resume doesn't exist."""
@@ -177,7 +171,7 @@ async def test_is_resume_available_false(mock_db_service, job_service):
     mock_service_instance.get.assert_called_once_with("test-resume-999")
 
 
-@patch('app.services.job_service.SupabaseDatabaseService')
+@patch("app.services.job_service.SupabaseDatabaseService")
 @pytest.mark.asyncio
 async def test_extract_and_store_structured_job_success(
     mock_db_service, job_service, sample_job_description
@@ -187,7 +181,7 @@ async def test_extract_and_store_structured_job_success(
     mock_processed_service_instance = AsyncMock()
     mock_processed_service_instance.create.return_value = MagicMock(id="processed-job-123")
 
-    with patch.object(job_service, '_extract_structured_json') as mock_extract:
+    with patch.object(job_service, "_extract_structured_json") as mock_extract:
         mock_extract.return_value = {
             "job_title": "Desenvolvedor Python Sênior",
             "company_profile": "TechCorp Brasil",
@@ -199,16 +193,15 @@ async def test_extract_and_store_structured_job_success(
             "qualifications": ["Python", "FastAPI", "PostgreSQL"],
             "compensation_and_benfits": ["Salário competitivo", "Plano de saúde"],
             "application_info": ["Enviar currículo para careers@techcorp.com"],
-            "extracted_keywords": ["Python", "FastAPI", "AWS", "Docker"]
+            "extracted_keywords": ["Python", "FastAPI", "AWS", "Docker"],
         }
 
         # Mock the database service call
-        with patch('app.services.job_service.SupabaseDatabaseService') as mock_db_service_class:
+        with patch("app.services.job_service.SupabaseDatabaseService") as mock_db_service_class:
             mock_db_service_class.return_value = mock_processed_service_instance
 
             result = await job_service._extract_and_store_structured_job(
-                job_id="test-job-123",
-                job_description_text=sample_job_description
+                job_id="test-job-123", job_description_text=sample_job_description
             )
 
             assert result == "test-job-123"
@@ -218,10 +211,9 @@ async def test_extract_and_store_structured_job_success(
 @pytest.mark.asyncio
 async def test_extract_and_store_structured_job_extraction_failed(job_service):
     """Test structured job extraction when extraction fails."""
-    with patch.object(job_service, '_extract_structured_json', return_value=None):
+    with patch.object(job_service, "_extract_structured_json", return_value=None):
         result = await job_service._extract_and_store_structured_job(
-            job_id="test-job-123",
-            job_description_text="sample text"
+            job_id="test-job-123", job_description_text="sample text"
         )
 
         assert result is None
@@ -251,7 +243,7 @@ async def test_extract_structured_json_empty_text(job_service):
     # Should still return mock data for empty input
 
 
-@patch('app.services.job_service.SupabaseDatabaseService')
+@patch("app.services.job_service.SupabaseDatabaseService")
 @pytest.mark.asyncio
 async def test_get_job_with_processed_data_success(mock_db_service, job_service):
     """Test successful retrieval of job data."""
@@ -262,7 +254,7 @@ async def test_get_job_with_processed_data_success(mock_db_service, job_service)
         "job_id": "test-job-123",
         "resume_id": "test-resume-456",
         "content": "Sample job description",
-        "created_at": "2024-01-01T00:00:00Z"
+        "created_at": "2024-01-01T00:00:00Z",
     }
     mock_db_service.return_value = mock_service_instance
 
@@ -277,7 +269,7 @@ async def test_get_job_with_processed_data_success(mock_db_service, job_service)
 @pytest.mark.asyncio
 async def test_get_job_with_processed_data_not_found(job_service):
     """Test handling of job not found."""
-    with patch('app.services.job_service.SupabaseDatabaseService') as mock_db_service:
+    with patch("app.services.job_service.SupabaseDatabaseService") as mock_db_service:
         mock_service_instance = AsyncMock()
         mock_service_instance.get.return_value = None
         mock_db_service.return_value = mock_service_instance
@@ -286,7 +278,7 @@ async def test_get_job_with_processed_data_not_found(job_service):
             await job_service.get_job_with_processed_data("test-job-999")
 
 
-@patch('app.services.job_service.SupabaseDatabaseService')
+@patch("app.services.job_service.SupabaseDatabaseService")
 @pytest.mark.asyncio
 async def test_extract_and_store_structured_job_data_structure(
     mock_db_service, job_service, sample_job_description
@@ -296,7 +288,7 @@ async def test_extract_and_store_structured_job_data_structure(
     mock_processed_service_instance = AsyncMock()
     mock_processed_service_instance.create.return_value = MagicMock(id="processed-job-123")
 
-    with patch.object(job_service, '_extract_structured_json') as mock_extract:
+    with patch.object(job_service, "_extract_structured_json") as mock_extract:
         mock_extract.return_value = {
             "job_title": "Test Job",
             "company_profile": "Test Company",
@@ -308,15 +300,14 @@ async def test_extract_and_store_structured_job_data_structure(
             "qualifications": ["Qualification 1", "Qualification 2"],
             "compensation_and_benfits": ["Benefit 1", "Benefit 2"],
             "application_info": ["Info 1"],
-            "extracted_keywords": ["Keyword 1", "Keyword 2"]
+            "extracted_keywords": ["Keyword 1", "Keyword 2"],
         }
 
-        with patch('app.services.job_service.SupabaseDatabaseService') as mock_db_service_class:
+        with patch("app.services.job_service.SupabaseDatabaseService") as mock_db_service_class:
             mock_db_service_class.return_value = mock_processed_service_instance
 
             await job_service._extract_and_store_structured_job(
-                job_id="test-job-123",
-                job_description_text=sample_job_description
+                job_id="test-job-123", job_description_text=sample_job_description
             )
 
             # Verify the data structure passed to database
@@ -325,8 +316,14 @@ async def test_extract_and_store_structured_job_data_structure(
             assert call_args["job_id"] == "test-job-123"
             assert call_args["job_title"] == "Test Job"
             assert call_args["company_profile"] == "Test Company"
-            assert call_args["key_responsibilities"]["key_responsibilities"] == ["Responsibility 1", "Responsibility 2"]
-            assert call_args["extracted_keywords"]["extracted_keywords"] == ["Keyword 1", "Keyword 2"]
+            assert call_args["key_responsibilities"]["key_responsibilities"] == [
+                "Responsibility 1",
+                "Responsibility 2",
+            ]
+            assert call_args["extracted_keywords"]["extracted_keywords"] == [
+                "Keyword 1",
+                "Keyword 2",
+            ]
 
 
 @pytest.mark.asyncio
@@ -338,7 +335,7 @@ async def test_extract_and_store_structured_job_handles_none_values(
     mock_processed_service_instance = AsyncMock()
     mock_processed_service_instance.create.return_value = MagicMock(id="processed-job-123")
 
-    with patch.object(job_service, '_extract_structured_json') as mock_extract:
+    with patch.object(job_service, "_extract_structured_json") as mock_extract:
         mock_extract.return_value = {
             "job_title": "Test Job",
             "company_profile": None,
@@ -350,15 +347,14 @@ async def test_extract_and_store_structured_job_handles_none_values(
             "qualifications": None,
             "compensation_and_benfits": None,
             "application_info": None,
-            "extracted_keywords": None
+            "extracted_keywords": None,
         }
 
-        with patch('app.services.job_service.SupabaseDatabaseService') as mock_db_service_class:
+        with patch("app.services.job_service.SupabaseDatabaseService") as mock_db_service_class:
             mock_db_service_class.return_value = mock_processed_service_instance
 
             await job_service._extract_and_store_structured_job(
-                job_id="test-job-123",
-                job_description_text=sample_job_description
+                job_id="test-job-123", job_description_text=sample_job_description
             )
 
             # Verify None values are handled properly

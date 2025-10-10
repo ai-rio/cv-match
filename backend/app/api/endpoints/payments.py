@@ -4,7 +4,6 @@ Handles checkout sessions, payment processing, and subscription management.
 """
 
 import logging
-from typing import Dict, Optional
 
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
@@ -19,28 +18,31 @@ router = APIRouter(prefix="/payments", tags=["Payments"])
 
 class CreateCheckoutSessionRequest(BaseModel):
     """Request model for creating a checkout session."""
+
     user_id: str
     user_email: EmailStr
     plan_type: str = "pro"  # free, pro, enterprise, lifetime
-    success_url: Optional[str] = None
-    cancel_url: Optional[str] = None
-    metadata: Optional[Dict[str, str]] = None
+    success_url: str | None = None
+    cancel_url: str | None = None
+    metadata: dict[str, str] | None = None
 
 
 class CreatePaymentIntentRequest(BaseModel):
     """Request model for creating a payment intent."""
+
     user_id: str
     user_email: EmailStr
     amount: int  # Amount in cents (BRL)
-    metadata: Optional[Dict[str, str]] = None
+    metadata: dict[str, str] | None = None
 
 
 class CreateCustomerRequest(BaseModel):
     """Request model for creating a customer."""
+
     user_id: str
     email: EmailStr
-    name: Optional[str] = None
-    address: Optional[Dict[str, str]] = None
+    name: str | None = None
+    address: dict[str, str] | None = None
 
 
 @router.post("/create-checkout-session")
@@ -70,7 +72,7 @@ async def create_checkout_session(request: CreateCheckoutSessionRequest) -> JSON
             plan_type=request.plan_type,
             success_url=request.success_url,
             cancel_url=request.cancel_url,
-            metadata=request.metadata
+            metadata=request.metadata,
         )
 
         if result["success"]:
@@ -82,15 +84,12 @@ async def create_checkout_session(request: CreateCheckoutSessionRequest) -> JSON
                     "checkout_url": result["checkout_url"],
                     "plan_type": result["plan_type"],
                     "currency": result["currency"],
-                    "amount": result["amount"]
-                }
+                    "amount": result["amount"],
+                },
             )
         else:
             logger.error(f"Checkout session creation failed: {result['error']}")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=result["error"]
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result["error"])
 
     except HTTPException:
         raise
@@ -98,7 +97,7 @@ async def create_checkout_session(request: CreateCheckoutSessionRequest) -> JSON
         logger.error(f"Unexpected error creating checkout session: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error creating checkout session"
+            detail="Internal server error creating checkout session",
         )
 
 
@@ -121,7 +120,7 @@ async def create_payment_intent(request: CreatePaymentIntentRequest) -> JSONResp
             amount=request.amount,
             user_id=request.user_id,
             user_email=request.user_email,
-            metadata=request.metadata
+            metadata=request.metadata,
         )
 
         if result["success"]:
@@ -132,15 +131,12 @@ async def create_payment_intent(request: CreatePaymentIntentRequest) -> JSONResp
                     "client_secret": result["client_secret"],
                     "payment_intent_id": result["payment_intent_id"],
                     "amount": result["amount"],
-                    "currency": result["currency"]
-                }
+                    "currency": result["currency"],
+                },
             )
         else:
             logger.error(f"Payment intent creation failed: {result['error']}")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=result["error"]
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result["error"])
 
     except HTTPException:
         raise
@@ -148,7 +144,7 @@ async def create_payment_intent(request: CreatePaymentIntentRequest) -> JSONResp
         logger.error(f"Unexpected error creating payment intent: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error creating payment intent"
+            detail="Internal server error creating payment intent",
         )
 
 
@@ -168,10 +164,7 @@ async def create_customer(request: CreateCustomerRequest) -> JSONResponse:
     """
     try:
         result = await stripe_service.create_customer(
-            user_id=request.user_id,
-            email=request.email,
-            name=request.name,
-            address=request.address
+            user_id=request.user_id, email=request.email, name=request.name, address=request.address
         )
 
         if result["success"]:
@@ -180,15 +173,12 @@ async def create_customer(request: CreateCustomerRequest) -> JSONResponse:
                 content={
                     "success": True,
                     "customer_id": result["customer_id"],
-                    "customer": result["customer"]
-                }
+                    "customer": result["customer"],
+                },
             )
         else:
             logger.error(f"Customer creation failed: {result['error']}")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=result["error"]
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result["error"])
 
     except HTTPException:
         raise
@@ -196,7 +186,7 @@ async def create_customer(request: CreateCustomerRequest) -> JSONResponse:
         logger.error(f"Unexpected error creating customer: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error creating customer"
+            detail="Internal server error creating customer",
         )
 
 
@@ -220,17 +210,11 @@ async def retrieve_checkout_session(session_id: str) -> JSONResponse:
         if result["success"]:
             return JSONResponse(
                 status_code=status.HTTP_200_OK,
-                content={
-                    "success": True,
-                    "session": result["session"]
-                }
+                content={"success": True, "session": result["session"]},
             )
         else:
             logger.error(f"Session retrieval failed: {result['error']}")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=result["error"]
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result["error"])
 
     except HTTPException:
         raise
@@ -238,7 +222,7 @@ async def retrieve_checkout_session(session_id: str) -> JSONResponse:
         logger.error(f"Unexpected error retrieving session: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error retrieving session"
+            detail="Internal server error retrieving session",
         )
 
 
@@ -259,14 +243,14 @@ async def get_brazilian_pricing() -> JSONResponse:
                 "pricing": pricing,
                 "currency": "brl",
                 "country": "BR",
-                "locale": "pt-BR"
-            }
+                "locale": "pt-BR",
+            },
         )
     except Exception as e:
         logger.error(f"Error getting pricing: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error getting pricing"
+            detail="Internal server error getting pricing",
         )
 
 
@@ -280,7 +264,9 @@ async def payments_health_check() -> JSONResponse:
     """
     try:
         stripe_configured = bool(stripe_service.api_key)
-        test_mode = stripe_service.api_key.startswith("sk_test_") if stripe_service.api_key else False
+        test_mode = (
+            stripe_service.api_key.startswith("sk_test_") if stripe_service.api_key else False
+        )
 
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -290,15 +276,12 @@ async def payments_health_check() -> JSONResponse:
                 "test_mode": test_mode,
                 "currency": stripe_service.default_currency,
                 "country": stripe_service.default_country,
-                "locale": stripe_service.default_locale
-            }
+                "locale": stripe_service.default_locale,
+            },
         )
     except Exception as e:
         logger.error(f"Payments health check failed: {str(e)}")
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content={
-                "status": "unhealthy",
-                "error": str(e)
-            }
+            content={"status": "unhealthy", "error": str(e)},
         )

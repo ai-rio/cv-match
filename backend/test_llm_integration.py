@@ -4,7 +4,6 @@ Tests AgentManager, EmbeddingManager, and ScoreImprovementService.
 """
 
 import asyncio
-import json
 import logging
 import sys
 from pathlib import Path
@@ -18,8 +17,7 @@ from app.core.exceptions import ProviderError
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -30,14 +28,14 @@ async def test_agent_manager():
 
     try:
         # Test initialization
-        manager = AgentManager()
+        AgentManager()
         logger.info("✅ AgentManager initialized successfully")
 
         # Test with different providers
         managers = [
             AgentManager(model_provider="openrouter"),
             AgentManager(strategy="json"),
-            AgentManager(strategy="md")
+            AgentManager(strategy="md"),
         ]
 
         logger.info(f"✅ Created {len(managers)} AgentManager instances with different configs")
@@ -58,11 +56,7 @@ async def test_llm_completion():
 
         # Test simple completion
         prompt = "Diga 'olá' em português"
-        response = await manager.generate(
-            prompt,
-            max_tokens=50,
-            temperature=0.7
-        )
+        response = await manager.generate(prompt, max_tokens=50, temperature=0.7)
 
         logger.info(f"✅ LLM Response: {response[:100]}")
         logger.info("✅ LLM completion test passed")
@@ -75,11 +69,7 @@ async def test_llm_completion():
             "lingua": "português"
         }
         """
-        json_response = await manager.generate(
-            json_prompt,
-            max_tokens=100,
-            temperature=0.3
-        )
+        json_response = await manager.generate(json_prompt, max_tokens=100, temperature=0.3)
 
         logger.info(f"✅ JSON Response: {json_response[:100]}")
         logger.info("✅ JSON completion test passed")

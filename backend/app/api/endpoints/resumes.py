@@ -5,13 +5,11 @@ API endpoints for resume upload and management.
 import logging
 import uuid
 from datetime import datetime
-from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 
 from app.core.auth import get_current_user
-from app.models.resume import ResumeUploadResponse, ResumeResponse, ResumeListResponse
+from app.models.resume import ResumeListResponse, ResumeResponse, ResumeUploadResponse
 from app.services.resume_service import ResumeService
 from app.services.supabase.database import SupabaseDatabaseService
 
@@ -22,8 +20,7 @@ router = APIRouter(prefix="/resumes", tags=["resumes"])
 
 @router.post("/upload", response_model=ResumeUploadResponse, status_code=201)
 async def upload_resume(
-    file: UploadFile = File(...),
-    current_user: dict = Depends(get_current_user)
+    file: UploadFile = File(...), current_user: dict = Depends(get_current_user)
 ) -> ResumeUploadResponse:
     """
     Upload and process a resume file.
@@ -45,14 +42,13 @@ async def upload_resume(
         # Validate file type
         allowed_types = [
             "application/pdf",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         ]
 
         if file.content_type not in allowed_types:
             raise HTTPException(
                 status_code=400,
-                detail=f"Unsupported file type: {file.content_type}. "
-                       f"Allowed types: PDF, DOCX"
+                detail=f"Unsupported file type: {file.content_type}. Allowed types: PDF, DOCX",
             )
 
         # Validate file size (max 10MB)
@@ -60,10 +56,7 @@ async def upload_resume(
         file_content = await file.read()
 
         if len(file_content) > max_size:
-            raise HTTPException(
-                status_code=400,
-                detail="File too large. Maximum size is 10MB."
-            )
+            raise HTTPException(status_code=400, detail="File too large. Maximum size is 10MB.")
 
         # Reset file pointer for processing
         await file.seek(0)
@@ -75,44 +68,37 @@ async def upload_resume(
         resume_id = await resume_service.convert_and_store_resume(
             file_bytes=file_content,
             file_type=file.content_type,
-            filename=file.filename,
-            content_type="md"  # Store as markdown
+            filename=file.filename or "unknown_file",
+            content_type="md",  # Store as markdown
         )
 
         # Get the stored resume data
         resume_data = await resume_service.get_resume_with_processed_data(resume_id)
 
         if not resume_data:
-            raise HTTPException(
-                status_code=500,
-                detail="Failed to retrieve stored resume data"
-            )
+            raise HTTPException(status_code=500, detail="Failed to retrieve stored resume data")
 
         # Extract relevant information
         raw_resume = resume_data.get("raw_resume", {})
 
         return ResumeUploadResponse(
             id=resume_id,
-            filename=file.filename,
+            filename=file.filename or "unknown_file",
             extracted_text=raw_resume.get("content"),
             content_type=raw_resume.get("content_type", "text/markdown"),
-            created_at=raw_resume.get("created_at", datetime.utcnow())
+            created_at=raw_resume.get("created_at", datetime.utcnow()),
         )
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Resume upload failed: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Resume upload failed: {str(e)}"
-        ) from e
+        raise HTTPException(status_code=500, detail=f"Resume upload failed: {str(e)}") from e
 
 
 @router.get("/{resume_id}", response_model=ResumeResponse)
 async def get_resume(
-    resume_id: str,
-    current_user: dict = Depends(get_current_user)
+    resume_id: str, current_user: dict = Depends(get_current_user)
 ) -> ResumeResponse:
     """
     Get a specific resume by ID.
@@ -132,10 +118,7 @@ async def get_resume(
         resume_data = await resume_service.get_resume_with_processed_data(resume_id)
 
         if not resume_data:
-            raise HTTPException(
-                status_code=404,
-                detail="Resume not found"
-            )
+            raise HTTPException(status_code=404, detail="Resume not found")
 
         # Extract relevant information
         raw_resume = resume_data.get("raw_resume", {})
@@ -146,24 +129,21 @@ async def get_resume(
             extracted_text=raw_resume.get("content"),
             content_type=raw_resume.get("content_type", "text/markdown"),
             created_at=raw_resume.get("created_at", datetime.utcnow()),
-            updated_at=raw_resume.get("updated_at")
+            updated_at=raw_resume.get("updated_at"),
         )
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to get resume {resume_id}: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to retrieve resume: {str(e)}"
-        ) from e
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve resume: {str(e)}") from e
 
 
 @router.get("/", response_model=ResumeListResponse)
 async def list_resumes(
     limit: int = Query(10, ge=1, le=100, description="Number of resumes to return"),
     offset: int = Query(0, ge=0, description="Number of resumes to skip"),
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
 ) -> ResumeListResponse:
     """
     List resumes for the current user.
@@ -191,35 +171,26 @@ async def list_resumes(
         # Convert to response format
         resumes = []
         for resume_dict in resumes_data:
-            resumes.append(ResumeResponse(
-                id=resume_dict.get("resume_id", str(uuid.uuid4())),
-                filename=resume_dict.get("filename", "Unknown"),
-                extracted_text=resume_dict.get("content"),
-                content_type=resume_dict.get("content_type", "text/markdown"),
-                created_at=resume_dict.get("created_at", datetime.utcnow()),
-                updated_at=resume_dict.get("updated_at")
-            ))
+            resumes.append(
+                ResumeResponse(
+                    id=resume_dict.get("resume_id", str(uuid.uuid4())),
+                    filename=resume_dict.get("filename", "Unknown"),
+                    extracted_text=resume_dict.get("content"),
+                    content_type=resume_dict.get("content_type", "text/markdown"),
+                    created_at=resume_dict.get("created_at", datetime.utcnow()),
+                    updated_at=resume_dict.get("updated_at"),
+                )
+            )
 
-        return ResumeListResponse(
-            resumes=resumes,
-            total=len(resumes),
-            limit=limit,
-            offset=offset
-        )
+        return ResumeListResponse(resumes=resumes, total=len(resumes), limit=limit, offset=offset)
 
     except Exception as e:
         logger.error(f"Failed to list resumes: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to list resumes: {str(e)}"
-        ) from e
+        raise HTTPException(status_code=500, detail=f"Failed to list resumes: {str(e)}") from e
 
 
 @router.delete("/{resume_id}", status_code=204)
-async def delete_resume(
-    resume_id: str,
-    current_user: dict = Depends(get_current_user)
-) -> None:
+async def delete_resume(resume_id: str, current_user: dict = Depends(get_current_user)) -> None:
     """
     Delete a resume by ID.
 
@@ -236,10 +207,7 @@ async def delete_resume(
         resume_data = await resume_service.get_resume_with_processed_data(resume_id)
 
         if not resume_data:
-            raise HTTPException(
-                status_code=404,
-                detail="Resume not found"
-            )
+            raise HTTPException(status_code=404, detail="Resume not found")
 
         # Delete resume using database service
         service = SupabaseDatabaseService("resumes", dict)
@@ -251,7 +219,4 @@ async def delete_resume(
         raise
     except Exception as e:
         logger.error(f"Failed to delete resume {resume_id}: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to delete resume: {str(e)}"
-        ) from e
+        raise HTTPException(status_code=500, detail=f"Failed to delete resume: {str(e)}") from e

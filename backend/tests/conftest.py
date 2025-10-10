@@ -53,7 +53,9 @@ def mock_supabase() -> AsyncMock:
     mock = AsyncMock()
     mock.table.return_value.select.return_value.eq.return_value.execute.return_value.data = []
     mock.table.return_value.insert.return_value.execute.return_value.data = [{"id": "test-id"}]
-    mock.table.return_value.update.return_value.eq.return_value.execute.return_value.data = [{"id": "test-id"}]
+    mock.table.return_value.update.return_value.eq.return_value.execute.return_value.data = [
+        {"id": "test-id"}
+    ]
     return mock
 
 
@@ -96,7 +98,7 @@ def sample_checkout_session() -> dict[str, Any]:
         "metadata": {
             "user_id": "8b73efd7-50ae-4d41-b8b7-7edb69ff11f6",
             "product": "cv_optimization",
-            "plan": "pro_monthly"
+            "plan": "pro_monthly",
         },
         "subscription": f"sub_test_{timestamp}",
     }
@@ -132,10 +134,7 @@ def sample_subscription() -> dict[str, Any]:
                 }
             ]
         },
-        "metadata": {
-            "user_id": "8b73efd7-50ae-4d41-b8b7-7edb69ff11f6",
-            "plan": "pro_monthly"
-        },
+        "metadata": {"user_id": "8b73efd7-50ae-4d41-b8b7-7edb69ff11f6", "plan": "pro_monthly"},
     }
 
 
@@ -155,9 +154,7 @@ def sample_invoice() -> dict[str, Any]:
         "period_start": timestamp,
         "period_end": timestamp + (30 * 24 * 60 * 60),
         "payment_intent": f"pi_test_{timestamp}",
-        "metadata": {
-            "user_id": "8b73efd7-50ae-4d41-b8b7-7edb69ff11f6"
-        },
+        "metadata": {"user_id": "8b73efd7-50ae-4d41-b8b7-7edb69ff11f6"},
     }
 
 
@@ -176,7 +173,7 @@ def sample_payment_intent() -> dict[str, Any]:
         "payment_method": f"pm_test_{timestamp}",
         "metadata": {
             "user_id": "8b73efd7-50ae-4d41-b8b7-7edb69ff11f6",
-            "product": "cv_optimization"
+            "product": "cv_optimization",
         },
     }
 
@@ -192,14 +189,9 @@ def webhook_events_base() -> dict[str, Any]:
         "created": timestamp,
         "livemode": False,
         "pending_webhooks": 0,
-        "request": {
-            "id": f"req_test_{timestamp}",
-            "idempotency_key": f"test_key_{timestamp}"
-        },
+        "request": {"id": f"req_test_{timestamp}", "idempotency_key": f"test_key_{timestamp}"},
         "type": "",
-        "data": {
-            "object": {}
-        }
+        "data": {"object": {}},
     }
 
 
@@ -212,11 +204,7 @@ def brazilian_pricing() -> dict[str, Any]:
             "price": 0,
             "currency": "brl",
             "credits": 5,
-            "features": [
-                "5 análises de currículo por mês",
-                "Matching básico",
-                "Download em PDF"
-            ]
+            "features": ["5 análises de currículo por mês", "Matching básico", "Download em PDF"],
         },
         "pro": {
             "name": "Profissional",
@@ -228,8 +216,8 @@ def brazilian_pricing() -> dict[str, Any]:
                 "Matching avançado com IA",
                 "Templates brasileiros",
                 "Suporte prioritário",
-                "Análise de compatibilidade com vagas"
-            ]
+                "Análise de compatibilidade com vagas",
+            ],
         },
         "enterprise": {
             "name": "Empresarial",
@@ -242,9 +230,9 @@ def brazilian_pricing() -> dict[str, Any]:
                 "API de integração",
                 "Múltiplos usuários",
                 "Relatórios avançados",
-                "Suporte dedicado"
-            ]
-        }
+                "Suporte dedicado",
+            ],
+        },
     }
 
 
@@ -273,12 +261,22 @@ async def _cleanup_test_records():
         supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
 
         # Clean up payment_history - remove test records
-        result = supabase.table("payment_history").select("*").ilike("stripe_payment_id", "pi_test_%").execute()
+        result = (
+            supabase.table("payment_history")
+            .select("*")
+            .ilike("stripe_payment_id", "pi_test_%")
+            .execute()
+        )
         for record in result.data or []:
             supabase.table("payment_history").delete().eq("id", record["id"]).execute()
 
         # Clean up stripe_webhook_events - remove test records
-        result = supabase.table("stripe_webhook_events").select("*").ilike("stripe_event_id", "evt_test_%").execute()
+        result = (
+            supabase.table("stripe_webhook_events")
+            .select("*")
+            .ilike("stripe_event_id", "evt_test_%")
+            .execute()
+        )
         for record in result.data or []:
             supabase.table("stripe_webhook_events").delete().eq("id", record["id"]).execute()
 
@@ -290,18 +288,24 @@ async def _cleanup_test_records():
             "sub_test1234567890",
             "in_test1234567890",
             "evt_test1234567890",
-            "req_test1234567890"
+            "req_test1234567890",
         ]
 
         for pattern in static_patterns:
             # Clean up payment_history
-            supabase.table("payment_history").delete().or_(f"stripe_payment_id.eq.{pattern},stripe_checkout_session_id.eq.{pattern}").execute()
+            supabase.table("payment_history").delete().or_(
+                f"stripe_payment_id.eq.{pattern},stripe_checkout_session_id.eq.{pattern}"
+            ).execute()
 
             # Clean up webhook events
-            supabase.table("stripe_webhook_events").delete().or_(f"stripe_event_id.eq.{pattern},request_id.eq.{pattern}").execute()
+            supabase.table("stripe_webhook_events").delete().or_(
+                f"stripe_event_id.eq.{pattern},request_id.eq.{pattern}"
+            ).execute()
 
             # Clean up subscriptions
-            supabase.table("subscriptions").delete().or_(f"stripe_subscription_id.eq.{pattern},stripe_customer_id.eq.{pattern}").execute()
+            supabase.table("subscriptions").delete().or_(
+                f"stripe_subscription_id.eq.{pattern},stripe_customer_id.eq.{pattern}"
+            ).execute()
 
     except Exception as e:
         # Log error but don't fail tests for cleanup issues
