@@ -37,7 +37,9 @@ class OpenRouterProvider(Provider):
         # Get API key from settings or OPENROUTER_API_KEY
         self.api_key = api_key or settings.OPENROUTER_API_KEY or settings.LLM_API_KEY
         if not self.api_key:
-            raise ProviderError("OpenRouter API key is missing. Set OPENROUTER_API_KEY in your .env file.")
+            raise ProviderError(
+                "OpenRouter API key is missing. Set OPENROUTER_API_KEY in your .env file."
+            )
 
         # Get model name
         self.model = model_name or settings.LL_MODEL or "anthropic/claude-3.5-sonnet"
@@ -119,7 +121,9 @@ class OpenRouterEmbeddingProvider(EmbeddingProvider):
         # Get API key
         self.api_key = api_key or settings.OPENROUTER_API_KEY or settings.EMBEDDING_API_KEY
         if not self.api_key:
-            raise ProviderError("OpenRouter API key is missing. Set OPENROUTER_API_KEY in your .env file.")
+            raise ProviderError(
+                "OpenRouter API key is missing. Set OPENROUTER_API_KEY in your .env file."
+            )
 
         # Get model
         self._model = embedding_model or settings.EMBEDDING_MODEL or "text-embedding-3-small"

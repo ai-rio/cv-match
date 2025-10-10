@@ -321,7 +321,7 @@ class TestMiddlewareConfiguration:
         request.client.host = "192.168.1.1"
 
         # Should not check rate limits
-        with patch.object(middleware, '_check_request_rate') as mock_check:
+        with patch.object(middleware, '_check_request_rate'):
             # Simulate internal logic that would check rate limiting
             assert middleware.enable_rate_limiting is False
 

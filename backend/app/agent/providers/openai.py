@@ -69,7 +69,11 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
 
     async def embed(self, text: str) -> list[float]:
         try:
-            response = await run_in_threadpool(self._client.embeddings.create, input=text, model=self._model)
+            response = await run_in_threadpool(
+                self._client.embeddings.create,
+                input=text,
+                model=self._model
+            )
             return response.data[0].embedding
         except Exception as e:
             raise ProviderError(f"OpenAI - error generating embedding: {e}") from e

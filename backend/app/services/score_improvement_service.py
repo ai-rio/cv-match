@@ -5,7 +5,7 @@ Adapted from Resume-Matcher for cv-match architecture.
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import numpy as np
 
@@ -336,7 +336,8 @@ class ScoreImprovementService:
             context_text = context_map.get(context, "texto")
 
             prompt = f"""
-            Extraia as palavras-chave mais importantes deste {context_text} para o mercado brasileiro.
+            Extraia as palavras-chave mais importantes deste {context_text}
+            para o mercado brasileiro.
 
             TEXTO:
             {text}

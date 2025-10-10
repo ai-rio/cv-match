@@ -67,7 +67,9 @@ class TestWebhookService:
         with patch('app.services.webhook_service.create_client') as mock_create_client:
             mock_client = MagicMock()
             # Mock the synchronous call chain
-            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = []
+            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+                []
+            ]
             mock_create_client.return_value = mock_client
 
             from app.services.webhook_service import WebhookService
@@ -111,7 +113,9 @@ class TestWebhookService:
         with patch('app.services.webhook_service.create_client') as mock_create_client:
             mock_client = MagicMock()
             # Mock user lookup
-            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_user]
+            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+                mock_user
+            ]
             # Mock payment creation
             mock_client.table.return_value.insert.return_value.execute.return_value.data = [{"id": "payment_test_123"}]
             mock_create_client.return_value = mock_client
@@ -141,7 +145,9 @@ class TestWebhookService:
         with patch('app.services.webhook_service.create_client') as mock_create_client:
             mock_client = MagicMock()
             # Mock user lookup
-            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_user]
+            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+                mock_user
+            ]
             # Mock subscription creation
             mock_client.table.return_value.insert.return_value.execute.return_value.data = [{"id": "subscription_test_123"}]
             mock_create_client.return_value = mock_client
@@ -177,7 +183,9 @@ class TestWebhookService:
         with patch('app.services.webhook_service.create_client') as mock_create_client:
             mock_client = MagicMock()
             # Mock subscription lookup
-            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_subscription]
+            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+                mock_subscription
+            ]
             # Mock payment creation
             mock_client.table.return_value.insert.return_value.execute.return_value.data = [{"id": "payment_history_test_123"}]
             mock_create_client.return_value = mock_client
@@ -208,9 +216,13 @@ class TestWebhookService:
         with patch('app.services.webhook_service.create_client') as mock_create_client:
             mock_client = MagicMock()
             # Mock subscription lookup
-            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_subscription]
+            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+                mock_subscription
+            ]
             # Mock subscription update
-            mock_client.table.return_value.update.return_value.eq.return_value.execute.return_value.data = [{**mock_subscription, "status": "past_due"}]
+            mock_client.table.return_value.update.return_value.eq.return_value.execute.return_value.data = [
+                {**mock_subscription, "status": "past_due"}
+            ]
             mock_create_client.return_value = mock_client
 
             from app.services.webhook_service import WebhookService
@@ -240,9 +252,13 @@ class TestWebhookService:
         with patch('app.services.webhook_service.create_client') as mock_create_client:
             mock_client = MagicMock()
             # Mock subscription lookup
-            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_subscription]
+            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+                mock_subscription
+            ]
             # Mock subscription update
-            mock_client.table.return_value.update.return_value.eq.return_value.execute.return_value.data = [{**mock_subscription, "status": "canceled"}]
+            mock_client.table.return_value.update.return_value.eq.return_value.execute.return_value.data = [
+                {**mock_subscription, "status": "canceled"}
+            ]
             mock_create_client.return_value = mock_client
 
             from app.services.webhook_service import WebhookService
@@ -290,7 +306,9 @@ class TestWebhookService:
         with patch('app.services.webhook_service.create_client') as mock_create_client:
             mock_client = MagicMock()
             # Mock user lookup returns empty
-            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = []
+            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+                []
+            ]
             mock_create_client.return_value = mock_client
 
             from app.services.webhook_service import WebhookService
@@ -328,9 +346,13 @@ class TestWebhookService:
         with patch('app.services.webhook_service.create_client') as mock_create_client:
             mock_client = MagicMock()
             # Mock user lookup
-            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_user]
+            mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+                mock_user
+            ]
             # Mock payment creation
-            mock_client.table.return_value.insert.return_value.execute.return_value.data = [{"id": "payment_brazilian_123"}]
+            mock_client.table.return_value.insert.return_value.execute.return_value.data = [
+                {"id": "payment_brazilian_123"}
+            ]
             mock_create_client.return_value = mock_client
 
             from app.services.webhook_service import WebhookService

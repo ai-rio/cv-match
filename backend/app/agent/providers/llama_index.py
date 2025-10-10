@@ -17,7 +17,9 @@ def _get_real_provider(provider_name):
     # llama_index.llms.openai_like.OpenAILike
     # llama_index.embeddings.openai_like.OpenAILikeEmbedding
     if not isinstance(provider_name, str):
-        raise ValueError("provider_name must be a string denoting a fully-qualified Python class name")
+        raise ValueError(
+            "provider_name must be a string denoting a fully-qualified Python class name"
+        )
     dotpos = provider_name.rfind(".")
     if dotpos < 0:
         raise ValueError("provider_name not correctly formatted")
@@ -50,10 +52,12 @@ class LlamaIndexProvider(Provider):
         provider_obj, self._modname, self._classname = _get_real_provider(provider)
         if not issubclass(provider_obj, BaseLLM):
             raise TypeError(
-                "LLM provider must be e.g. a llama_index.llms.* class - a subclass of llama_index.core.base.llms.base.BaseLLM"
+                "LLM provider must be e.g. a llama_index.llms.* class - "
+                "a subclass of llama_index.core.base.llms.base.BaseLLM"
             )
 
-        # This doesn't work on 100% of the LlamaIndex LLM integrations, but it's a fairly reliable pattern,
+        # This doesn't work on 100% of the LlamaIndex LLM integrations,
+    # but it's a fairly reliable pattern,
         # and works for the important ones such as OpenAILike.
         kwargs_for_provider = {
             "model": model_name,
@@ -66,9 +70,9 @@ class LlamaIndexProvider(Provider):
         if api_base_url:
             kwargs_for_provider["base_url"] = kwargs_for_provider["api_base"] = api_base_url
         kwargs_for_provider.update(opts)
-        kwargs_for_provider["context_window"] = kwargs_for_provider["max_tokens"] = kwargs_for_provider.get(
-            "num_ctx", 20000
-        )
+        kwargs_for_provider["context_window"] = kwargs_for_provider[
+            "max_tokens"
+        ] = kwargs_for_provider.get("num_ctx", 20000)
         self._client = provider_obj(**kwargs_for_provider)
 
     def _generate_sync(self, prompt: str, **options) -> str:
@@ -103,7 +107,8 @@ class LlamaIndexEmbeddingProvider(EmbeddingProvider):
         provider_obj, self._modname, self._classname = _get_real_provider(provider)
         if not issubclass(provider_obj, BaseEmbedding):
             raise TypeError(
-                "Embedding provider must be e.g. a llama_index.embeddings.* class - a subclass of llama_index.core.base.embeddings.base.BaseEmbedding"
+                "Embedding provider must be e.g. a llama_index.embeddings.* class - "
+                "a subclass of llama_index.core.base.embeddings.base.BaseEmbedding"
             )
         # Again, this doesn't work on 100% of the LlamaIndex embedding
         # integrations, but it's a fairly reliable pattern, and works
@@ -118,9 +123,9 @@ class LlamaIndexEmbeddingProvider(EmbeddingProvider):
         }
         if self._api_base_url:
             kwargs_for_provider["base_url"] = kwargs_for_provider["api_base"] = self._api_base_url
-        kwargs_for_provider["context_window"] = kwargs_for_provider["max_tokens"] = kwargs_for_provider.get(
-            "num_ctx", 20000
-        )
+        kwargs_for_provider["context_window"] = kwargs_for_provider[
+            "max_tokens"
+        ] = kwargs_for_provider.get("num_ctx", 20000)
 
         self._client = provider_obj(**kwargs_for_provider)
 

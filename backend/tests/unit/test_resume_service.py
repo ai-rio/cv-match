@@ -281,8 +281,6 @@ def test_validate_docx_dependencies_available(resume_service):
 @pytest.mark.asyncio
 async def test_convert_and_store_resume_temp_file_cleanup(resume_service, mock_pdf_content):
     """Test that temporary files are properly cleaned up."""
-    temp_files_before = []
-    temp_files_during = []
 
     with patch('app.services.resume_service.SupabaseDatabaseService') as mock_db_service:
         mock_service_instance = AsyncMock()

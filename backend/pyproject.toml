@@ -3,7 +3,7 @@ name = "cv-match-backend"
 version = "0.1.0"
 description = "CV-Match Backend API - AI-powered resume optimization for the Brazilian market"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 license = { text = "MIT" }
 authors = [
     { name = "Carlos", email = "carlos@cvmatch.com" }
@@ -120,4 +120,5 @@ markers = [
 [dependency-groups]
 dev = [
     "mypy==1.18.2",
+    "ruff>=0.13.3",
 ]

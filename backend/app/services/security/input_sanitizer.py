@@ -260,18 +260,25 @@ class InputSanitizer:
         if blocked_patterns:
             for pattern_type, patterns in self.injection_patterns.items():
                 if pattern_type in ['system_prompt', 'role_instruction', 'json_instruction']:
-                    if (pattern_type == 'system_prompt' and self.config.block_system_prompts) or \
-                       (pattern_type == 'role_instruction' and self.config.block_role_instructions) or \
-                       (pattern_type == 'json_instruction' and self.config.block_json_instructions):
+                    if (
+                        (pattern_type == 'system_prompt' and self.config.block_system_prompts) or
+                        (pattern_type == 'role_instruction' and self.config.block_role_instructions)
+                        or
+                        (pattern_type == 'json_instruction' and self.config.block_json_instructions)
+                    ):
                         for pattern in patterns:
-                            sanitized_text = re.sub(pattern, '[BLOCKED]', sanitized_text, flags=re.IGNORECASE)
+                            sanitized_text = re.sub(
+                                pattern, '[BLOCKED]', sanitized_text, flags=re.IGNORECASE
+                            )
 
                 # Handle code execution patterns that aren't code blocks
                 if pattern_type == 'code_execution' and self.config.block_code_execution:
                     # Skip code block patterns (handled by _sanitize_code_blocks)
                     non_code_block_patterns = [p for p in patterns if not p.startswith('```')]
                     for pattern in non_code_block_patterns:
-                        sanitized_text = re.sub(pattern, '[BLOCKED]', sanitized_text, flags=re.IGNORECASE)
+                        sanitized_text = re.sub(
+                            pattern, '[BLOCKED]', sanitized_text, flags=re.IGNORECASE
+                        )
 
         # Apply additional sanitization
         sanitized_text = self._sanitize_urls(sanitized_text)
@@ -317,7 +324,9 @@ class InputSanitizer:
 
         if not self.config.allow_html_tags:
             # Remove HTML tags (but preserve [REMOVED] markers)
-            text = re.sub(r'<([^>]*?\[REMOVED\][^>]*?)>', r'\1', text)  # Keep content of tags with [REMOVED]
+            text = re.sub(
+                r'<([^>]*?\[REMOVED\][^>]*?)>', r'\1', text
+            )  # Keep content of tags with [REMOVED]
             text = re.sub(r'<[^>]+>', '', text)  # Remove other tags
 
             # Remove HTML entities
@@ -368,7 +377,10 @@ class InputSanitizer:
         warnings = []
 
         # Check patterns in order of specificity (most specific first)
-        pattern_order = ['code_execution', 'json_instruction', 'role_instruction', 'system_prompt', 'personal_info', 'html_injection', 'suspicious_urls']
+        pattern_order = [
+                'code_execution', 'json_instruction', 'role_instruction',
+                'system_prompt', 'personal_info', 'html_injection', 'suspicious_urls'
+            ]
 
         for pattern_type in pattern_order:
             if pattern_type not in self.injection_patterns:
@@ -431,7 +443,10 @@ class InputSanitizer:
         ]
 
         # Check limit
-        limit = self.config.rate_limit_per_user if key.startswith('user:') else self.config.rate_limit_per_ip
+        limit = (
+                self.config.rate_limit_per_user if key.startswith('user:')
+                else self.config.rate_limit_per_ip
+            )
 
         if len(self.rate_limits[key]) >= limit:
             return False

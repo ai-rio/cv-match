@@ -44,7 +44,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
             # Get client info for rate limiting
             client_ip = self._get_client_ip(request)
-            user_id = await self._extract_user_id(request)
+            await self._extract_user_id(request)
 
             # Apply rate limiting if enabled
             if self.enable_rate_limiting and not self._check_request_rate(client_ip):
@@ -268,9 +268,18 @@ async def log_security_validation_failure(
             "client_ip": client_ip,
             "validation_results": {
                 field: {
-                    "is_safe": result.is_safe if hasattr(result, 'is_safe') else all(r.is_safe for r in result),
-                    "warnings": result.warnings if hasattr(result, 'warnings') else [r.warnings for r in result],
-                    "blocked_patterns": result.blocked_patterns if hasattr(result, 'blocked_patterns') else [r.blocked_patterns for r in result]
+                    "is_safe": (
+                            result.is_safe if hasattr(result, 'is_safe')
+                            else all(r.is_safe for r in result)
+                        ),
+                        "warnings": (
+                            result.warnings if hasattr(result, 'warnings')
+                            else [r.warnings for r in result]
+                        ),
+                        "blocked_patterns": (
+                            result.blocked_patterns if hasattr(result, 'blocked_patterns')
+                            else [r.blocked_patterns for r in result]
+                        )
                 }
                 for field, result in validation_results.items()
             }
@@ -294,7 +303,10 @@ async def log_security_validation_success(
     )
 
 
-def create_security_error_response(message: str, details: Optional[Dict[str, Any]] = None) -> JSONResponse:
+def create_security_error_response(
+    message: str,
+    details: Optional[Dict[str, Any]] = None
+) -> JSONResponse:
     """Create a standardized security error response."""
     content = {
         "error": "Security validation failed",

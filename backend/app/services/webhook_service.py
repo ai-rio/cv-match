@@ -228,7 +228,9 @@ class WebhookService:
                 }
 
             # Get user payment profile information
-            user_payment_profile = await self._get_by_field("user_payment_profiles", "user_id", user_id)
+            user_payment_profile = await self._get_by_field(
+                "user_payment_profiles", "user_id", user_id
+            )
             if not user_payment_profile:
                 return {
                     "success": False,
@@ -244,7 +246,10 @@ class WebhookService:
                 "amount": session_data.get("amount_total", 0),
                 "currency": session_data.get("currency", "brl"),
                 "status": "completed",
-                "payment_type": "subscription_setup" if session_data.get("subscription") else "one_time",
+                "payment_type": (
+                    "subscription_setup" if session_data.get("subscription")
+                    else "one_time"
+                ),
                 "description": self._get_payment_description(session_data),
                 "metadata": session_data.get("metadata", {}),
                 "created_at": datetime.now(UTC).isoformat(),
@@ -283,7 +288,10 @@ class WebhookService:
                 "error": str(e)
             }
 
-    async def process_subscription_created(self, subscription_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def process_subscription_created(
+        self,
+        subscription_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Process customer.subscription.created event.
 
@@ -317,7 +325,10 @@ class WebhookService:
                 "error": str(e)
             }
 
-    async def process_subscription_updated(self, subscription_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def process_subscription_updated(
+        self,
+        subscription_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Process customer.subscription.updated event.
 
@@ -353,8 +364,14 @@ class WebhookService:
 
             update_data = {
                 "status": subscription_data.get("status"),
-                "current_period_start": datetime.fromtimestamp(current_period_start).isoformat() if current_period_start is not None else None,
-                "current_period_end": datetime.fromtimestamp(current_period_end).isoformat() if current_period_end is not None else None,
+                "current_period_start": (
+                    datetime.fromtimestamp(current_period_start).isoformat()
+                    if current_period_start is not None else None
+                ),
+                "current_period_end": (
+                    datetime.fromtimestamp(current_period_end).isoformat()
+                    if current_period_end is not None else None
+                ),
                 "cancel_at_period_end": subscription_data.get("cancel_at_period_end", False),
                 "updated_at": datetime.now(UTC).isoformat()
             }
@@ -378,7 +395,10 @@ class WebhookService:
                 "error": str(e)
             }
 
-    async def process_subscription_deleted(self, subscription_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def process_subscription_deleted(
+        self,
+        subscription_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Process customer.subscription.deleted event.
 
@@ -431,7 +451,10 @@ class WebhookService:
                 "error": str(e)
             }
 
-    async def process_invoice_payment_succeeded(self, invoice_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def process_invoice_payment_succeeded(
+        self,
+        invoice_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Process invoice.payment_succeeded event.
 
@@ -659,9 +682,16 @@ class WebhookService:
             "user_id": user_id,
             "stripe_subscription_id": subscription_data.get("id"),
             "stripe_customer_id": subscription_data.get("customer"),
-            "status": "active",  # Subscriptions should always be "active" when created from checkout
-            "price_id": subscription_data.get("items", {}).get("data", [{}])[0].get("price", {}).get("id"),
-            "product_id": subscription_data.get("items", {}).get("data", [{}])[0].get("price", {}).get("product"),
+            "status": "active",  # Subscriptions should always be "active"
+                                 # when created from checkout
+            "price_id": (
+                subscription_data.get("items", {}).get("data", [{}])[0]
+                .get("price", {}).get("id")
+            ),
+            "product_id": (
+                subscription_data.get("items", {}).get("data", [{}])[0]
+                .get("price", {}).get("product")
+            ),
             "current_period_start": self._safe_fromtimestamp(current_period_start),
             "current_period_end": self._safe_fromtimestamp(current_period_end),
             "cancel_at_period_end": subscription_data.get("cancel_at_period_end", False),
@@ -702,7 +732,12 @@ class WebhookService:
             logger.error(f"Error marking event as processed: {str(e)}")
 
 
-    async def _get_by_field(self, table_name: str, field_name: str, field_value: Any) -> Optional[Dict[str, Any]]:
+    async def _get_by_field(
+        self,
+        table_name: str,
+        field_name: str,
+        field_value: Any
+    ) -> Optional[Dict[str, Any]]:
         """Get a record by field name and value."""
         response = self.supabase.table(table_name).select("*").eq(field_name, field_value).execute()
         return response.data[0] if response.data else None
@@ -712,7 +747,12 @@ class WebhookService:
         response = self.supabase.table(table_name).insert(data).execute()
         return response.data[0] if response.data else {}
 
-    async def _update(self, table_name: str, record_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _update(
+        self,
+        table_name: str,
+        record_id: str,
+        data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Update a record in a table."""
         response = self.supabase.table(table_name).update(data).eq("id", record_id).execute()
         return response.data[0] if response.data else {}
@@ -721,7 +761,7 @@ class WebhookService:
         """Generate payment description based on session data."""
         plan = session_data.get("metadata", {}).get("plan", "unknown")
         amount = session_data.get("amount_total", 0)
-        currency = session_data.get("currency", "brl")
+        session_data.get("currency", "brl")
 
         # Convert amount from cents to reais
         amount_brl = amount / 100

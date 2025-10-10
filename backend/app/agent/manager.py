@@ -38,7 +38,10 @@ class AgentManager:
             case "openrouter":
                 from .providers.openrouter import OpenRouterProvider
 
-                api_key = opts.get("llm_api_key", settings.OPENROUTER_API_KEY or settings.LLM_API_KEY or "")
+                api_key = (
+                    opts.get("llm_api_key", settings.OPENROUTER_API_KEY) or
+                    settings.LLM_API_KEY or ""
+                )
                 api_base_url = opts.get("llm_base_url", settings.LLM_BASE_URL or "")
                 return OpenRouterProvider(
                     model_name=self.model,
@@ -48,7 +51,8 @@ class AgentManager:
                 )
             case _:
                 raise ProviderError(
-                    f"Unsupported LLM provider: {self.model_provider}. Supported providers: openai, openrouter"
+                    f"Unsupported LLM provider: {self.model_provider}. "
+                    "Supported providers: openai, openrouter"
                 )
 
     async def run(self, prompt: str, **kwargs: Any) -> dict[str, Any]:
@@ -86,7 +90,8 @@ class EmbeddingManager:
                 from .providers.openrouter import OpenRouterEmbeddingProvider
 
                 api_key = kwargs.get(
-                    "embedding_api_key", settings.OPENROUTER_API_KEY or settings.EMBEDDING_API_KEY or ""
+                    "embedding_api_key",
+                    settings.OPENROUTER_API_KEY or settings.EMBEDDING_API_KEY or ""
                 )
                 api_base_url = kwargs.get("embedding_base_url", settings.EMBEDDING_BASE_URL or "")
                 return OpenRouterEmbeddingProvider(
@@ -96,7 +101,8 @@ class EmbeddingManager:
                 )
             case _:
                 raise ProviderError(
-                    f"Unsupported embedding provider: {self._model_provider}. Supported providers: openai, openrouter"
+                    f"Unsupported embedding provider: {self._model_provider}. "
+                    "Supported providers: openai, openrouter"
                 )
 
     async def embed(self, text: str, **kwargs: Any) -> list[float]:

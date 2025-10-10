@@ -61,7 +61,8 @@ class ResumeService:
 
         Args:
             file_bytes: Raw bytes of the uploaded file
-            file_type: MIME type of the file ("application/pdf" or "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            file_type: MIME type of the file ("application/pdf" or
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
             filename: Original filename
             content_type: Output format ("md" for markdown or "html")
 
@@ -84,11 +85,13 @@ class ResumeService:
                 if "MissingDependencyException" in error_msg or "DocxConverter" in error_msg:
                     raise Exception(
                         "File conversion failed: markitdown is missing DOCX support. "
-                        "Please install with: pip install 'markitdown[all]==0.1.2' or contact system administrator."
+                        "Please install with: pip install 'markitdown[all]==0.1.2' "
+                        "or contact system administrator."
                     ) from e
                 elif "docx" in error_msg.lower():
                     raise Exception(
-                        f"DOCX file processing failed: {error_msg}. Please ensure the file is a valid DOCX document."
+                        f"DOCX file processing failed: {error_msg}. "
+                        "Please ensure the file is a valid DOCX document."
                     ) from e
                 else:
                     raise Exception(f"File conversion failed: {error_msg}") from e
@@ -96,7 +99,9 @@ class ResumeService:
             resume_id = await self._store_resume_in_db(text_content, content_type)
 
             # TODO: Uncomment when AI Integration is complete
-            # await self._extract_and_store_structured_resume(resume_id=resume_id, resume_text=text_content)
+            # await self._extract_and_store_structured_resume(
+            #     resume_id=resume_id, resume_text=text_content
+            # )
 
             return resume_id
         finally:
