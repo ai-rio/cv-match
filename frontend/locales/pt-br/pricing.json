@@ -1,140 +1,138 @@
 {
-  "pricing": {
-    "title": "Escolha seu plano",
-    "subtitle": "Comece gratuitamente, atualize quando precisar de mais recursos",
-    "badge": "🚀 Oferta Especial de Lançamento",
-    "hero": {
-      "title": "Otimize seu Currículo,",
-      "highlight": "Conquiste seu Emprego dos Sonhos",
-      "subtitle": "Pare de ser rejeitado por sistemas ATS. Nossa ferramenta com IA ajuda você a criar o currículo perfeito que passa pela triagem automatizada e garante entrevistas.",
-      "getStarted": "Começar Gratuitamente",
-      "buyLifetime": "Comprar Acesso Vitalício (R$29)"
+  "title": "Escolha seu plano",
+  "subtitle": "Comece gratuitamente, atualize quando precisar de mais recursos",
+  "badge": "🚀 Oferta Especial de Lançamento",
+  "hero": {
+    "title": "Otimize seu Currículo,",
+    "highlight": "Conquiste seu Emprego dos Sonhos",
+    "subtitle": "Pare de ser rejeitado por sistemas ATS. Nossa ferramenta com IA ajuda você a criar o currículo perfeito que passa pela triagem automatizada e garante entrevistas.",
+    "getStarted": "Começar Gratuitamente",
+    "buyLifetime": "Comprar Acesso Vitalício (R$29)"
+  },
+  "socialProof": {
+    "resumesOptimized": "Currículos Otimizados",
+    "successRate": "Taxa de Sucesso",
+    "happyUsers": "Usuários Satisfeitos"
+  },
+  "features": {
+    "title": "Por que CV-Match?",
+    "subtitle": "Criado por recrutadores, para candidatos de emprego no Brasil",
+    "aiPowered": {
+      "title": "Com IA Avançada",
+      "description": "Modelos de IA avançados analisam seu currículo em relação às descrições de vagas e fornecem melhorias específicas e acionáveis."
     },
-    "socialProof": {
-      "resumesOptimized": "Currículos Otimizados",
-      "successRate": "Taxa de Sucesso",
-      "happyUsers": "Usuários Satisfeitos"
+    "atsOptimized": {
+      "title": "Otimizado para ATS",
+      "description": "Vença os sistemas de rastreamento de candidatos com formatação otimizada e posicionamento de palavras-chave que ultrapassa a triagem automatizada."
     },
-    "features": {
-      "title": "Por que CV-Match?",
-      "subtitle": "Criado por recrutadores, para candidatos de emprego no Brasil",
-      "aiPowered": {
-        "title": "Com IA Avançada",
-        "description": "Modelos de IA avançados analisam seu currículo em relação às descrições de vagas e fornecem melhorias específicas e acionáveis."
+    "realResults": {
+      "title": "Resultados Reais",
+      "description": "Taxa de sucesso de 87% com usuários conseguindo entrevistas em 2 semanas após usar nossos currículos otimizados."
+    }
+  },
+  "faq": {
+    "title": "Perguntas Frequentes",
+    "subtitle": "Tudo o que você precisa saber sobre nossos planos",
+    "questions": [
+      {
+        "question": "Qual é a diferença entre os planos Gratuito e Pro?",
+        "answer": "O plano Gratuito inclui 1 otimização por mês com recursos básicos. O plano Pro oferece otimizações ilimitadas, modelos de IA avançados, modelos profissionais e suporte prioritário."
       },
-      "atsOptimized": {
-        "title": "Otimizado para ATS",
-        "description": "Vença os sistemas de rastreamento de candidatos com formatação otimizada e posicionamento de palavras-chave que ultrapassa a triagem automatizada."
+      {
+        "question": "Posso cancelar minha assinatura a qualquer momento?",
+        "answer": "Sim! Você pode cancelar sua assinatura mensal a qualquer momento. O plano Pro Vitalício é um pagamento único e não pode ser cancelado."
       },
-      "realResults": {
-        "title": "Resultados Reais",
-        "description": "Taxa de sucesso de 87% com usuários conseguindo entrevistas em 2 semanas após usar nossos currículos otimizados."
+      {
+        "question": "Quais formatos de arquivo são suportados?",
+        "answer": "Suportamos PDF, DOCX e arquivos de texto. Você pode baixar seus currículos otimizados em formato .txt (plano Gratuito) ou .docx (plano Pro)."
+      },
+      {
+        "question": "Como funciona a otimização com IA?",
+        "answer": "Nossa IA analisa seu currículo e a descrição da vaga, identificando palavras-chave importantes e áreas de melhoria para aumentar sua compatibilidade com sistemas ATS."
+      },
+      {
+        "question": "Existe uma garantia de devolução de dinheiro?",
+        "answer": "Sim! Oferecemos garantia de devolução de dinheiro em 30 dias. Se você não estiver satisfeito, entre em contato conosco para um reembolso completo."
       }
+    ]
+  },
+  "trust": {
+    "moneyBack": "Garantia de devolução de dinheiro em 30 dias",
+    "cancelAnytime": "Cancele a qualquer momento",
+    "securePayment": "Pagamento seguro via Stripe",
+    "brazilianPayment": "Pagamentos com PIX e Boleto disponíveis"
+  },
+  "cta": {
+    "title": "Pronto para Conquistar seu Emprego dos Sonhos?",
+    "subtitle": "Junte-se a milhares de candidatos que otimizaram seus currículos com CV-Match",
+    "button": "Começar Gratuitamente",
+    "note": "Não é necessário cartão de crédito • 1 otimização gratuita por mês"
+  },
+  "whatsIncluded": "O que está incluído",
+  "currentPlan": {
+    "title": "Seu Plano Atual",
+    "subtitle": "Gerencie sua assinatura CV-Match e uso",
+    "status": {
+      "active": "Ativo",
+      "trial": "Teste",
+      "pastDue": "Em Atraso",
+      "canceled": "Cancelado"
     },
-    "faq": {
-      "title": "Perguntas Frequentes",
-      "subtitle": "Tudo o que você precisa saber sobre nossos planos",
-      "questions": [
-        {
-          "question": "Qual é a diferença entre os planos Gratuito e Pro?",
-          "answer": "O plano Gratuito inclui 1 otimização por mês com recursos básicos. O plano Pro oferece otimizações ilimitadas, modelos de IA avançados, modelos profissionais e suporte prioritário."
-        },
-        {
-          "question": "Posso cancelar minha assinatura a qualquer momento?",
-          "answer": "Sim! Você pode cancelar sua assinatura mensal a qualquer momento. O plano Pro Vitalício é um pagamento único e não pode ser cancelado."
-        },
-        {
-          "question": "Quais formatos de arquivo são suportados?",
-          "answer": "Suportamos PDF, DOCX e arquivos de texto. Você pode baixar seus currículos otimizados em formato .txt (plano Gratuito) ou .docx (plano Pro)."
-        },
-        {
-          "question": "Como funciona a otimização com IA?",
-          "answer": "Nossa IA analisa seu currículo e a descrição da vaga, identificando palavras-chave importantes e áreas de melhoria para aumentar sua compatibilidade com sistemas ATS."
-        },
-        {
-          "question": "Existe uma garantia de devolução de dinheiro?",
-          "answer": "Sim! Oferecemos garantia de devolução de dinheiro em 30 dias. Se você não estiver satisfeito, entre em contato conosco para um reembolso completo."
-        }
-      ]
+    "upgrade": {
+      "lifetime": "Atualizar para Pro Vitalício",
+      "monthly": "Iniciar Plano Mensal"
     },
-    "trust": {
-      "moneyBack": "Garantia de devolução de dinheiro em 30 dias",
-      "cancelAnytime": "Cancele a qualquer momento",
-      "securePayment": "Pagamento seguro via Stripe",
-      "brazilianPayment": "Pagamentos com PIX e Boleto disponíveis"
-    },
-    "cta": {
-      "title": "Pronto para Conquistar seu Emprego dos Sonhos?",
-      "subtitle": "Junte-se a milhares de candidatos que otimizaram seus currículos com CV-Match",
+    "billing": "Histórico de Cobrança",
+    "cancel": "Cancelar Plano",
+    "canceling": "Cancelando...",
+    "cancelConfirm": "Tem certeza que deseja cancelar sua assinatura?"
+  },
+  "plans": {
+    "free": {
+      "name": "Gratuito",
+      "description": "Perfeito para experimentar a otimização de currículo",
+      "price": "Gratuito",
+      "period": "",
       "button": "Começar Gratuitamente",
-      "note": "Não é necessário cartão de crédito • 1 otimização gratuita por mês"
-    },
-    "whatsIncluded": "O que está incluído",
-    "currentPlan": {
-      "title": "Seu Plano Atual",
-      "subtitle": "Gerencie sua assinatura CV-Match e uso",
-      "status": {
-        "active": "Ativo",
-        "trial": "Teste",
-        "pastDue": "Em Atraso",
-        "canceled": "Cancelado"
-      },
-      "upgrade": {
-        "lifetime": "Atualizar para Pro Vitalício",
-        "monthly": "Iniciar Plano Mensal"
-      },
-      "billing": "Histórico de Cobrança",
-      "cancel": "Cancelar Plano",
-      "canceling": "Cancelando...",
-      "cancelConfirm": "Tem certeza que deseja cancelar sua assinatura?"
-    },
-    "plans": {
-      "free": {
-        "name": "Gratuito",
-        "description": "Perfeito para experimentar a otimização de currículo",
-        "price": "Gratuito",
-        "period": "",
-        "button": "Começar Gratuitamente",
-        "features": {
-          "basicAnalysis": "Pontuação básica de compatibilidade ATS",
-          "limitedOptimizations": "1 otimização por mês"
-        }
-      },
-      "pro": {
-        "name": "Pro",
-        "description": "Otimizações ilimitadas e recursos avançados",
-        "price": "R$29",
-        "period": "/mês",
-        "button": "Começar com Pro",
-        "features": {
-          "unlimitedOptimizations": "Otimizações ilimitadas",
-          "advancedAnalysis": "Análise avançada com IA",
-          "professionalTemplates": "Modelos de currículo profissionais",
-          "prioritySupport": "Suporte prioritário",
-          "multipleFormats": "Exportação em múltiplos formatos",
-          "brazilianMarket": "Foco no mercado brasileiro"
-        }
+      "features": {
+        "basicAnalysis": "Pontuação básica de compatibilidade ATS",
+        "limitedOptimizations": "1 otimização por mês"
       }
     },
-    "brazilianFeatures": {
-      "title": "Recursos para o Mercado Brasileiro",
-      "subtitle": "Especialmente desenvolvido para profissionais no Brasil",
-      "lgpd": {
-        "title": "LGPD Compliance",
-        "description": "Totalmente conforme com a Lei Geral de Proteção de Dados brasileira"
-      },
-      "localPayment": {
-        "title": "Pagamentos Locais",
-        "description": "Aceitamos PIX, Boleto e cartões de crédito brasileiros"
-      },
-      "localContent": {
-        "title": "Conteúdo Localizado",
-        "description": "Exemplos e modelos adaptados para o mercado de trabalho brasileiro"
-      },
-      "localSupport": {
-        "title": "Suporte em Português",
-        "description": "Atendimento ao cliente especializado no horário comercial brasileiro"
+    "pro": {
+      "name": "Pro",
+      "description": "Otimizações ilimitadas e recursos avançados",
+      "price": "R$29",
+      "period": "/mês",
+      "button": "Começar com Pro",
+      "features": {
+        "unlimitedOptimizations": "Otimizações ilimitadas",
+        "advancedAnalysis": "Análise avançada com IA",
+        "professionalTemplates": "Modelos de currículo profissionais",
+        "prioritySupport": "Suporte prioritário",
+        "multipleFormats": "Exportação em múltiplos formatos",
+        "brazilianMarket": "Foco no mercado brasileiro"
       }
+    }
+  },
+  "brazilianFeatures": {
+    "title": "Recursos para o Mercado Brasileiro",
+    "subtitle": "Especialmente desenvolvido para profissionais no Brasil",
+    "lgpd": {
+      "title": "LGPD Compliance",
+      "description": "Totalmente conforme com a Lei Geral de Proteção de Dados brasileira"
+    },
+    "localPayment": {
+      "title": "Pagamentos Locais",
+      "description": "Aceitamos PIX, Boleto e cartões de crédito brasileiros"
+    },
+    "localContent": {
+      "title": "Conteúdo Localizado",
+      "description": "Exemplos e modelos adaptados para o mercado de trabalho brasileiro"
+    },
+    "localSupport": {
+      "title": "Suporte em Português",
+      "description": "Atendimento ao cliente especializado no horário comercial brasileiro"
     }
   }
 }

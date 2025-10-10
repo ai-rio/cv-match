@@ -10,7 +10,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -131,7 +131,7 @@ const OPTIMIZATION_TIER = {
 
 type WorkflowStep = 'upload' | 'job-details' | 'payment' | 'processing' | 'results';
 
-export default function OptimizePage() {
+function OptimizePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const resumeId = searchParams.get('resume_id');
@@ -491,6 +491,25 @@ export default function OptimizePage() {
             />
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+export default function OptimizePage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <OptimizePageContent />
+    </Suspense>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+        <p className="text-gray-600">Loading...</p>
       </div>
     </div>
   );
