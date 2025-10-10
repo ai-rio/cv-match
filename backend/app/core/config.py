@@ -14,9 +14,22 @@ class Settings(BaseSettings):
     SUPABASE_URL: str = "http://localhost:54321"
     SUPABASE_SERVICE_KEY: str = "your_service_key_here"
 
-    # LLM
+    # LLM Configuration
+    LLM_PROVIDER: str = "openrouter"
+    LL_MODEL: str = "anthropic/claude-3.5-sonnet"
+    LLM_API_KEY: str = ""
+    LLM_BASE_URL: str = ""
+    OPENROUTER_API_KEY: str = ""
+
+    # Individual LLM provider keys
     OPENAI_API_KEY: str = ""
     ANTHROPIC_API_KEY: str = ""
+
+    # Embedding Configuration
+    EMBEDDING_PROVIDER: str = "openrouter"
+    EMBEDDING_MODEL: str = "text-embedding-3-small"
+    EMBEDDING_API_KEY: str = ""
+    EMBEDDING_BASE_URL: str = ""
 
     # Vector Database
     QDRANT_URL: str = ""
