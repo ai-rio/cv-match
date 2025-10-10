@@ -71,7 +71,7 @@ class TextExtractionService:
 
         except Exception as e:
             logger.exception(f"Error extracting text from PDF: {str(e)}")
-            raise TextExtractionError(f"Falha ao extrair texto do PDF: {str(e)}")
+            raise TextExtractionError(f"Falha ao extrair texto do PDF: {str(e)}") from e
 
     async def extract_text_from_docx(self, file_content: bytes | BinaryIO) -> str:
         """
@@ -123,7 +123,7 @@ class TextExtractionService:
 
         except Exception as e:
             logger.exception(f"Error extracting text from DOCX: {str(e)}")
-            raise TextExtractionError(f"Falha ao extrair texto do DOCX: {str(e)}")
+            raise TextExtractionError(f"Falha ao extrair texto do DOCX: {str(e)}") from e
 
     async def extract_text(self, file_content: bytes | BinaryIO, file_extension: str) -> str:
         """
@@ -180,7 +180,9 @@ class TextExtractionService:
 
         return cleaned.strip()
 
-    def validate_text_length(self, text: str, min_length: int = 50, max_length: int = 50000) -> bool:
+    def validate_text_length(
+        self, text: str, min_length: int = 50, max_length: int = 50000
+    ) -> bool:
         """
         Validate that extracted text has reasonable length.
 

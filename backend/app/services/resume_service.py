@@ -1,14 +1,11 @@
-import json
 import logging
 import os
 import tempfile
 import uuid
 
 from markitdown import MarkItDown
-from pydantic import ValidationError
 
 from app.services.supabase.database import SupabaseDatabaseService
-from app.core.config import settings
 
 # TODO: These will need to be created in a later phase
 # from app.agent import AgentManager
@@ -43,8 +40,12 @@ class ResumeService:
         except ImportError:
             missing_deps.append("markitdown[all]==0.1.2")
         except Exception as e:
-            if "MissingDependencyException" in str(e) or "dependencies needed to read .docx files" in str(e):
-                missing_deps.append("markitdown[all]==0.1.2 (current installation missing DOCX extras)")
+            if "MissingDependencyException" in str(
+                e
+            ) or "dependencies needed to read .docx files" in str(e):
+                missing_deps.append(
+                    "markitdown[all]==0.1.2 (current installation missing DOCX extras)"
+                )
 
         if missing_deps:
             logger.warning(
@@ -67,7 +68,9 @@ class ResumeService:
         Returns:
             None
         """
-        with tempfile.NamedTemporaryFile(delete=False, suffix=self._get_file_extension(file_type)) as temp_file:
+        with tempfile.NamedTemporaryFile(
+            delete=False, suffix=self._get_file_extension(file_type)
+        ) as temp_file:
             temp_file.write(file_bytes)
             temp_path = temp_file.name
 
@@ -115,7 +118,12 @@ class ResumeService:
         resume_id = str(uuid.uuid4())
 
         # Map short content types to full MIME types for database constraint
-        content_type_mapping = {"md": "text/markdown", "html": "text/html", "plain": "text/plain", "text": "text/plain"}
+        content_type_mapping = {
+            "md": "text/markdown",
+            "html": "text/html",
+            "plain": "text/plain",
+            "text": "text/plain",
+        }
 
         db_content_type = content_type_mapping.get(content_type, "text/markdown")
 
@@ -130,7 +138,7 @@ class ResumeService:
         service = SupabaseDatabaseService("resumes", dict)
         result = await service.create(resume_data)
 
-        return result.resume_id if hasattr(result, 'resume_id') else resume_id
+        return result.resume_id if hasattr(result, "resume_id") else resume_id
 
     # TODO: These methods will be implemented when AI Integration is complete
     async def _extract_and_store_structured_resume(self, resume_id, resume_text: str) -> None:

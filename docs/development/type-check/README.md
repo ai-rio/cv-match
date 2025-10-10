@@ -1,856 +1,308 @@
-# Type Checking Methodology
+# Type Checking Methodology - Bulk Fix Approach
 
-This document outlines the comprehensive type checking approach for the Resume-Matcher monorepo, covering both TypeScript (frontend) and Python (backend).
+**Purpose**: Systematic approach for identifying and fixing type errors in bulk  
+**Focus**: High-impact fixes using error classification and prioritization
 
-## Overview
+---
 
-Our type checking strategy ensures type safety across the entire stack:
-
-- **Frontend**: TypeScript with `tsc` for Next.js 15+ application
-- **Backend**: Python 3.12+ with Pyright for FastAPI application
-- **Unified Interface**: Root-level scripts for checking both simultaneously
-
-## Quick Start
+## 🎯 Quick Start
 
 ```bash
-# Check both frontend and backend
-bun run type-check
-
-# Check frontend only
-bun run type-check:frontend
-
-# Check backend only
-bun run type-check:backend
-
-# Analyze errors with detailed breakdown
-bun run type-check:errors
-
-# Analyze frontend errors only
-bun run type-check:errors:frontend
-
-# Analyze backend errors only
-bun run type-check:errors:backend
-```
-
-## Methodology
-
-Our approach follows a **high-impact, systematic methodology** that prioritizes fixes based on:
-
-1. **Impact** - Errors that block builds or affect multiple files
-2. **Frequency** - Most common error types first
-3. **Complexity** - Simple fixes before complex refactoring
-4. **Incremental Adoption** - Balanced strictness for gradual improvement
-
----
-
-## TypeScript Error Classification
-
-### By Error Code
-
-| Error Code  | Description             | Priority | Strategy                                   |
-| ----------- | ----------------------- | -------- | ------------------------------------------ |
-| **TS2339**  | Property does not exist | High     | Type guards, assertions, interface updates |
-| **TS2345**  | Argument not assignable | High     | Type casting, interface alignment          |
-| **TS18047** | Possibly null/undefined | Medium   | Null assertions, optional chaining         |
-| **TS7006**  | Implicit any parameter  | Low      | Explicit type annotations                  |
-| **TS2322**  | Type not assignable     | Medium   | Type casting, interface updates            |
-| **TS18046** | Possibly undefined      | Medium   | Default values, type guards                |
-| **TS2304**  | Cannot find name        | High     | Import fixes, declaration files            |
-| **TS2307**  | Cannot find module      | Critical | Module resolution, install deps            |
-
-### By Impact Level
-
-#### 🔴 Critical (Fix First)
-
-- Build-blocking errors (TS2304, TS2307)
-- Type generation failures
-- Import/export issues
-- Core infrastructure types
-
-#### 🟡 High Impact (Fix Second)
-
-- Errors affecting multiple files (TS2339, TS2345)
-- Database relationship types
-- Common utility functions
-- Shared component interfaces
-
-#### 🟢 Medium Impact (Fix Third)
-
-- Component-specific errors (TS2322)
-- Null safety issues (TS18047, TS18046)
-- Parameter type annotations (TS7006)
-- Local type mismatches
-
----
-
-## Python Error Classification
-
-### By Pyright Error Type
-
-| Error Type                           | Description                     | Priority | Strategy                               |
-| ------------------------------------ | ------------------------------- | -------- | -------------------------------------- |
-| **reportGeneralTypeIssues**          | General type inconsistencies    | High     | Add type hints, fix type mismatches    |
-| **reportOptionalMemberAccess**       | Accessing possibly None values  | High     | Add None checks, use Optional properly |
-| **reportUnboundVariable**            | Variable used before assignment | Critical | Fix logic flow, add initialization     |
-| **reportMissingImports**             | Import cannot be resolved       | Critical | Fix imports, install packages          |
-| **reportIncompatibleMethodOverride** | Method override incompatible    | High     | Fix signatures, align with parent      |
-| **reportPrivateImportUsage**         | Using private module exports    | Medium   | Use public APIs, refactor imports      |
-| **reportOptionalCall**               | Calling possibly None function  | High     | Add None checks before calling         |
-| **reportDeprecated**                 | Using deprecated features       | Low      | Update to modern APIs                  |
-
-### By Impact Level
-
-#### 🔴 Critical (Fix First)
-
-- Unbound variables (runtime errors)
-- Missing imports (import failures)
-- Type generation failures
-- Core infrastructure types
-
-#### 🟡 High Impact (Fix Second)
-
-- General type issues affecting logic
-- Optional access without checks
-- Method override incompatibilities
-- Pydantic model validation errors
-
-#### 🟢 Medium Impact (Fix Third)
-
-- Private import usage
-- Unused imports/variables
-- Optional parameter issues
-- Local type annotations
-
----
-
-## Fixing Strategies
-
-### TypeScript Patterns
-
-#### 1. Type Assertions (Quick Wins)
-
-```typescript
-// Before: Property 'success' does not exist on union type
-(result?.success !==
-  false(
-    // After: Use type assertion for complex unions
-    result as any
-  )?.success) !==
-  false;
-
-// Better: Use type narrowing
-if (result && 'success' in result) {
-  result.success !== false;
-}
-```
-
-#### 2. Null Safety Patterns
-
-```typescript
-// Before: 'session' is possibly null
-userId: session.user.id;
-
-// After: Use null assertion after null check
-userId: session!.user.id;
-
-// Better: Handle null case
-userId: session?.user.id ?? 'anonymous';
-```
-
-#### 3. Supabase Relationship Types
-
-```typescript
-// Before: Missing relationship types
-subscriptions: {
-  Row: {
-    id: string
-    price_id: string | null
-  }
-}
-
-// After: Add optional relationship types
-subscriptions: {
-  Row: {
-    id: string
-    price_id: string | null
-    // Relationships (optional for queries with joins)
-    prices?: {
-      id: string
-      unit_amount: number | null
-      products?: {
-        name: string | null
-      }
-    }
-  }
-}
-```
-
-#### 4. Parameter Type Annotations
-
-```typescript
-// Before: Parameter 'price' implicitly has 'any' type
-prices.map(price => ({ ... }))
-
-// After: Explicit type annotation
-prices.map((price: Price) => ({ ... }))
-
-// Or: Use inference with proper types
-prices.map((price) => ({
-  id: price.id as string,
-  amount: price.amount as number,
-}))
-```
-
-### Python Patterns
-
-#### 1. FastAPI Route Type Hints
-
-```python
-# Before: Missing type hints
-@app.post("/optimize")
-async def optimize_resume(resume, job_description):
-    return {"status": "success"}
-
-# After: Full type hints with Pydantic
-from app.schemas.pydantic.resume import ResumeOptimizationRequest
-from app.schemas.pydantic.resume import ResumeOptimizationResponse
-
-@app.post("/optimize", response_model=ResumeOptimizationResponse)
-async def optimize_resume(request: ResumeOptimizationRequest) -> ResumeOptimizationResponse:
-    return ResumeOptimizationResponse(status="success")
-```
-
-#### 2. Pydantic Model Type Safety
-
-```python
-# Before: Missing field types
-class User(BaseModel):
-    id: int
-    name = "John Doe"  # Type inferred but not explicit
-    email = None  # Type unclear
-
-# After: Explicit types with Optional
-from typing import Optional
-
-class User(BaseModel):
-    id: int
-    name: str = "John Doe"
-    email: Optional[str] = None
-
-# Python 3.10+: Use union syntax
-class User(BaseModel):
-    id: int
-    name: str = "John Doe"
-    email: str | None = None
-```
-
-#### 3. Optional Parameter Handling
-
-```python
-# Before: Not handling None case
-def get_user_email(user_id: int) -> str:
-    user = find_user(user_id)  # Returns Optional[User]
-    return user.email  # Error: user is possibly None
-
-# After: Proper None handling
-def get_user_email(user_id: int) -> Optional[str]:
-    user = find_user(user_id)
-    if user is None:
-        return None
-    return user.email
-
-# Or: Use walrus operator with type narrowing
-def get_user_email(user_id: int) -> Optional[str]:
-    if (user := find_user(user_id)) is not None:
-        return user.email
-    return None
-```
-
-#### 4. Generic Type Annotations
-
-```python
-# Before: Generic types without parameters
-def get_items() -> list:
-    return []
-
-# After: Specific generic types
-def get_items() -> list[dict[str, Any]]:
-    return []
-
-# Better: Use Pydantic models
-from app.models.resume import Resume
-
-def get_resumes() -> list[Resume]:
-    return []
-```
-
-#### 5. Type Narrowing with TYPE_CHECKING
-
-```python
-# Use for type hints that are only needed for checking
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from sqlalchemy.orm import Session
-    from app.models.user import User
-
-def get_user(db: "Session", user_id: int) -> "User | None":
-    return db.query(User).filter(User.id == user_id).first()
+# Check types
+cd /home/carlos/projects/cv-match/frontend
+bun run build  # TypeScript check via Next.js
+
+cd /home/carlos/projects/cv-match/backend
+docker compose exec backend python -m pytest  # Python type hints checked via tests
+
+# Analyze errors
+bun run build 2>&1 | grep "error TS" | wc -l  # Count TS errors
 ```
 
 ---
 
-## Configuration Files
+## 📊 Error Classification System
 
-### TypeScript: `apps/frontend/tsconfig.json`
+### Priority Levels
 
-```json
-{
-  "compilerOptions": {
-    "strict": true,
-    "noEmit": true,
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "esnext",
-    "moduleResolution": "bundler"
-  }
-}
-```
-
-Key settings:
-
-- `strict: true` - Enables all strict type checking options
-- `noEmit: true` - Only check types, don't generate files
-- `moduleResolution: "bundler"` - Modern module resolution for Next.js
-
-### Python: `apps/backend/pyrightconfig.json`
-
-```json
-{
-  "typeCheckingMode": "standard",
-  "pythonVersion": "3.12",
-  "reportGeneralTypeIssues": true,
-  "reportOptionalMemberAccess": true,
-  "reportUnboundVariable": true,
-  "reportMissingImports": true
-}
-```
-
-Key settings:
-
-- `typeCheckingMode: "standard"` - Balanced strictness for incremental adoption
-- `reportGeneralTypeIssues: true` - Catch basic type errors
-- `reportOptionalMemberAccess: true` - Enforce None checks
-- `analyzeUnannotatedFunctions: true` - Check functions without type hints
+| Priority | When to Fix | Impact | Examples |
+|----------|-------------|--------|----------|
+| 🔴 **Critical** | Immediately | Blocks builds | Module not found, syntax errors |
+| 🟡 **High** | Within 1 day | Affects multiple files | Type mismatches in shared code |
+| 🟢 **Medium** | Within 1 week | Local to file/component | Component prop types |
+| ⚪ **Low** | Anytime | Cosmetic | Unused variables |
 
 ---
 
-## Tools and Commands
+## 🔧 Bulk Fixing Methodology
 
-### Error Analysis
+### Step 1: Count and Categorize (5 min)
 
 ```bash
-# Get comprehensive error analysis
-bun run type-check:errors
+# Get error count
+bun run build 2>&1 | grep -E "error TS[0-9]+" | wc -l
 
-# TypeScript error count
-bun run type-check:frontend 2>&1 | grep -c "error TS" || echo "0"
-
-# Python error count
-bun run type-check:backend 2>&1 | grep -c "error:" || echo "0"
-
-# TypeScript error breakdown by type
-bun run type-check:frontend 2>&1 | grep -E "error TS[0-9]+" | \
+# Group by error type
+bun run build 2>&1 | grep -E "error TS[0-9]+" | \
   sed 's/.*error \(TS[0-9]*\).*/\1/' | sort | uniq -c | sort -nr
-
-# Find specific TypeScript error type
-bun run type-check:frontend 2>&1 | grep "TS2339" | head -5
-
-# Find specific Python error type
-bun run type-check:backend 2>&1 | grep "reportGeneralTypeIssues" | head -5
 ```
 
-### File-Specific Checks
-
-```bash
-# Check specific TypeScript file
-cd apps/frontend
-bunx tsc --noEmit src/path/to/file.ts
-
-# Check specific Python file
-cd apps/backend
-uv run pyright app/path/to/file.py
-
-# Find related TypeScript files
-find apps/frontend/src -name "*.ts" -o -name "*.tsx" | \
-  xargs grep -l "problematic_type"
-
-# Find related Python files
-find apps/backend/app -name "*.py" | \
-  xargs grep -l "problematic_type"
+**Output example**:
 ```
-
-### Integration with Development
-
-```bash
-# Check before committing
-bun run type-check
-
-# Watch mode for TypeScript (in frontend directory)
-cd apps/frontend
-bun run type-check -- --watch
-
-# Auto-fix some TypeScript issues with ts-migrate (install if needed)
-# npx ts-migrate migrate .
+45 TS2339  # Property does not exist
+23 TS18047 # Possibly null/undefined
+12 TS2345  # Argument not assignable
+8  TS7006  # Implicit any
 ```
 
 ---
 
-## Common Patterns
+### Step 2: Prioritize by Impact (2 min)
 
-### Frontend (TypeScript)
+**Critical** (Fix first):
+- TS2307 - Cannot find module
+- TS2304 - Cannot find name
+- Build-blocking errors
 
-#### Next.js Page Components
+**High Impact** (Fix second):
+- TS2339 - Property does not exist on type
+- TS2345 - Argument of type X not assignable to Y
+- Errors in shared utilities/components
 
+**Medium Impact** (Fix third):
+- TS18047 - Object is possibly null/undefined
+- TS2322 - Type X not assignable to type Y
+- Component-specific errors
+
+**Low Impact** (Fix last):
+- TS7006 - Implicit 'any' parameter
+- TS6133 - Declared but never used
+
+---
+
+### Step 3: Fix in Batches (Bulk approach)
+
+#### Batch 1: Quick Wins (30 min)
+Target: Simple, high-frequency errors
+
+**Pattern: Null safety (TS18047)**
 ```typescript
-import { type Metadata } from 'next'
+// Before: Object is possibly 'null'
+const email = user.email;
 
-export const metadata: Metadata = {
-  title: 'Resume Optimizer',
-  description: 'Optimize your resume for ATS',
-}
-
-interface PageProps {
-  params: { id: string }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
-
-export default async function Page({ params, searchParams }: PageProps) {
-  // Type-safe implementation
-  const id = params.id
-  return <div>Resume {id}</div>
-}
+// Fix: Add null check
+const email = user?.email ?? 'unknown';
 ```
 
-#### React Component Props
+**Pattern: Type assertions (TS2339)**
+```typescript
+// Before: Property 'data' does not exist
+const items = response.data;
 
+// Fix: Type assertion (when you know the type)
+const items = (response as { data: Item[] }).data;
+```
+
+**Count fixes**: `git diff | grep "^+" | wc -l`
+
+---
+
+#### Batch 2: Shared Code (1 hour)
+Target: Types affecting multiple files
+
+**Pattern: Interface updates**
+```typescript
+// Update interface once
+interface ApiResponse<T> {
+  data: T;
+  error?: string;
+  success: boolean;
+}
+
+// Use everywhere
+const result: ApiResponse<User[]> = await fetchUsers();
+```
+
+**Verify**: Run build, count remaining errors
+
+---
+
+#### Batch 3: Component Props (1 hour)
+Target: Component-specific errors
+
+**Pattern: Props interface**
 ```typescript
 interface ButtonProps {
-  variant?: 'primary' | 'secondary'
-  size?: 'sm' | 'md' | 'lg'
-  children: React.ReactNode
-  onClick?: () => void
+  variant?: 'primary' | 'secondary';
+  onClick?: () => void;
+  children: React.ReactNode;
 }
 
-export function Button({
-  variant = 'primary',
-  size = 'md',
-  children,
-  onClick
-}: ButtonProps) {
-  return (
-    <button className={`btn-${variant} btn-${size}`} onClick={onClick}>
-      {children}
-    </button>
-  )
+export function Button({ variant = 'primary', onClick, children }: ButtonProps) {
+  // Implementation
 }
 ```
 
-#### Supabase Client Types
+---
 
+### Step 4: Verify Progress (5 min)
+
+```bash
+# Before fixes
+echo "Before: X errors"
+
+# After each batch
+bun run build 2>&1 | grep "error TS" | wc -l
+echo "After Batch 1: Y errors (X-Y fixed)"
+
+# Track progress
+echo "Progress: $((100 * Y / X))% remaining"
+```
+
+---
+
+## 🚀 Speed Optimization Strategies
+
+### 1. Use Global Find-Replace
+
+For repeated patterns:
+```bash
+# Example: Add null checks to all `.email` accesses
+find frontend/app -name "*.tsx" -exec sed -i 's/user\.email/user?.email ?? ""/g' {} +
+```
+
+### 2. Fix by File Impact
+
+```bash
+# Find files with most errors
+bun run build 2>&1 | grep "error TS" | \
+  cut -d'(' -f1 | sort | uniq -c | sort -nr | head -10
+```
+
+Focus on files with 5+ errors first.
+
+### 3. Use TypeScript's `// @ts-expect-error`
+
+For errors you'll fix later:
 ```typescript
-import { createClient } from '@/lib/supabase/client';
-import type { Database } from '@/types/supabase';
-
-type Resume = Database['public']['Tables']['resumes']['Row'];
-type ResumeInsert = Database['public']['Tables']['resumes']['Insert'];
-
-async function getResume(id: string): Promise<Resume | null> {
-  const supabase = createClient();
-  const { data, error } = await supabase.from('resumes').select('*').eq('id', id).single();
-
-  if (error) return null;
-  return data;
-}
-```
-
-### Backend (Python)
-
-#### FastAPI Route Handlers
-
-```python
-from fastapi import APIRouter, HTTPException, Depends
-from app.schemas.pydantic.resume import (
-    ResumeCreateRequest,
-    ResumeResponse,
-)
-from app.services.resume_service import ResumeService
-from app.core.dependencies import get_resume_service
-
-router = APIRouter(prefix="/api/v1/resumes", tags=["resumes"])
-
-@router.post("/", response_model=ResumeResponse)
-async def create_resume(
-    request: ResumeCreateRequest,
-    service: ResumeService = Depends(get_resume_service),
-) -> ResumeResponse:
-    """Create a new resume with full type safety."""
-    try:
-        resume = await service.create(request)
-        return ResumeResponse.from_orm(resume)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-```
-
-#### Pydantic Models
-
-```python
-from pydantic import BaseModel, Field, EmailStr, validator
-from typing import Optional
-from datetime import datetime
-
-class UserBase(BaseModel):
-    email: EmailStr
-    full_name: str = Field(..., min_length=1, max_length=100)
-
-class UserCreate(UserBase):
-    password: str = Field(..., min_length=8)
-
-    @validator('password')
-    def validate_password(cls, v: str) -> str:
-        if not any(c.isupper() for c in v):
-            raise ValueError('Password must contain uppercase letter')
-        return v
-
-class UserResponse(UserBase):
-    id: str
-    created_at: datetime
-
-    class Config:
-        from_attributes = True  # Pydantic v2 (was orm_mode in v1)
-```
-
-#### Service Layer
-
-```python
-from typing import Optional, List
-from sqlalchemy.orm import Session
-from app.models.resume import Resume
-from app.schemas.pydantic.resume import ResumeCreateRequest
-
-class ResumeService:
-    def __init__(self, db: Session) -> None:
-        self.db = db
-
-    async def create(self, request: ResumeCreateRequest) -> Resume:
-        resume = Resume(**request.model_dump())
-        self.db.add(resume)
-        await self.db.commit()
-        await self.db.refresh(resume)
-        return resume
-
-    async def get_by_id(self, resume_id: str) -> Optional[Resume]:
-        return self.db.query(Resume).filter(Resume.id == resume_id).first()
-
-    async def list_by_user(self, user_id: str, limit: int = 10) -> List[Resume]:
-        return (
-            self.db.query(Resume)
-            .filter(Resume.user_id == user_id)
-            .limit(limit)
-            .all()
-        )
+// @ts-expect-error TODO: Fix type mismatch in next PR
+const data = complexFunction(param);
 ```
 
 ---
 
-## Best Practices
+## 📝 Common Patterns & Quick Fixes
 
-### 1. Prioritize by Impact
-
-- Fix build-blocking errors first (TS2307, unbound variables)
-- Address high-frequency errors next (TS2339, reportGeneralTypeIssues)
-- Leave cosmetic issues for last (unused variables)
-
-### 2. Use Temporary Solutions Strategically
-
-**TypeScript:**
-
-- `any` type for complex union scenarios (document why)
-- Type assertions for known-safe operations
-- `// @ts-expect-error` with explanation for edge cases
-
-**Python:**
-
-- `type: ignore` comments with reason
-- `Any` type for truly dynamic data
-- Gradual typing for legacy code
-
-### 3. Maintain Momentum
-
-- Fix errors in batches of 5-10
-- Run `bun run type-check` frequently
-- Use `bun run type-check:errors` for progress tracking
-- Document patterns for team consistency
-
-### 4. Balance Speed vs. Quality
-
-- Quick fixes for development velocity
-- Proper types for long-term maintainability
-- Refactor incrementally as understanding improves
-- Use strict mode for new files only initially
-
-### 5. Leverage Tools
-
-**TypeScript:**
-
-- VSCode IntelliSense for type hints
-- ESLint with TypeScript rules
-- Prettier for formatting
-- ts-migrate for bulk migrations
-
-**Python:**
-
-- Pyright VSCode extension
-- Ruff for linting and formatting
-- mypy for additional checking (if needed)
-- pydantic for runtime validation
-
----
-
-## Integration with CI/CD
-
-### Pre-commit Hook
-
-Add to `.husky/pre-commit`:
-
-```bash
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-# Run type checks
-bun run type-check || {
-  echo "❌ Type check failed. Fix errors before committing."
-  exit 1
-}
-```
-
-### GitHub Actions
-
-Add to `.github/workflows/type-check.yml`:
-
-```yaml
-name: Type Check
-
-on:
-  pull_request:
-    branches: [main, develop]
-  push:
-    branches: [main, develop]
-
-jobs:
-  type-check:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Type check frontend
-        run: bun run type-check:frontend
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install UV
-        run: pip install uv
-
-      - name: Type check backend
-        run: bun run type-check:backend
-
-      - name: Generate error report
-        if: failure()
-        run: bun run type-check:errors
-```
-
----
-
-## Troubleshooting
-
-### TypeScript Issues
-
-**Issue**: `Cannot find module '@/...'`
-
-```bash
-# Solution: Check tsconfig.json paths
-{
-  "paths": {
-    "@/*": ["./*"]
-  }
-}
-```
-
-**Issue**: `Property does not exist on type 'never'`
-
+### Pattern 1: Possibly Null/Undefined
 ```typescript
-// Solution: Initialize with proper type
-const [state, setState] = useState<MyType[]>([]); // Not: useState([])
+// Quick fix: Optional chaining + nullish coalescing
+data?.field ?? defaultValue
 ```
 
-**Issue**: Module not found after installation
-
-```bash
-# Solution: Restart TypeScript server in VSCode
-# Cmd/Ctrl + Shift + P -> "TypeScript: Restart TS Server"
-```
-
-### Python Issues
-
-**Issue**: `Import could not be resolved`
-
-```bash
-# Solution: Install dependencies
-cd apps/backend
-uv sync
-
-# Or: Check pyrightconfig.json venv settings
-{
-  "venvPath": ".",
-  "venv": ".venv"
-}
-```
-
-**Issue**: `reportGeneralTypeIssues` everywhere
-
-```python
-# Solution: Add type hints incrementally
-# Start with function signatures
-def process_resume(data: dict[str, Any]) -> Resume:
-    ...
-```
-
-**Issue**: Pyright not finding packages
-
-```bash
-# Solution: Ensure virtual environment is activated
-cd apps/backend
-source .venv/bin/activate  # Unix
-# or
-.venv\Scripts\activate  # Windows
-
-# Reinstall with UV
-uv sync
-```
-
----
-
-## Monorepo-Specific Considerations
-
-### Shared Types Between Frontend and Backend
-
-Consider creating a shared types package:
-
-```bash
-# Future enhancement
-packages/
-  shared-types/
-    src/
-      resume.ts
-      job.ts
-```
-
-Use code generation to keep types in sync:
-
-- Generate TypeScript types from Pydantic models
-- Use tools like `pydantic-to-typescript`
-
-### Cross-Stack Type Safety
-
-When frontend calls backend:
-
+### Pattern 2: Union Type Issues
 ```typescript
-// Frontend API client with typed responses
-import type { ResumeResponse } from '@/types/api';
-
-async function getResume(id: string): Promise<ResumeResponse> {
-  const response = await fetch(`/api/v1/resumes/${id}`);
-  return response.json(); // Type-safe
+// Quick fix: Type guard
+if ('property' in object) {
+  // TypeScript knows object has 'property' here
 }
 ```
 
-```python
-# Backend ensures response matches TypeScript expectations
-from app.schemas.pydantic.resume import ResumeResponse
+### Pattern 3: Any Parameters
+```typescript
+// Quick fix: Add basic type
+function handler(event: React.FormEvent) { }
+```
 
-@router.get("/{id}", response_model=ResumeResponse)
-async def get_resume(id: str) -> ResumeResponse:
-    # FastAPI validates response matches schema
-    ...
+### Pattern 4: Missing Properties
+```typescript
+// Quick fix: Make property optional
+interface User {
+  email?: string;  // Add ? if property might not exist
+}
 ```
 
 ---
 
-## Quick Reference
+## 🎯 Success Metrics
 
-### Error Priority Matrix
+Track your progress:
 
-| Error Type                     | Priority    | Fix Time  | Impact |
-| ------------------------------ | ----------- | --------- | ------ |
-| Build-blocking                 | 🔴 Critical | Immediate | High   |
-| Type mismatches in core logic  | 🔴 Critical | < 1 day   | High   |
-| Null safety in routes/services | 🟡 High     | < 2 days  | Medium |
-| Missing type annotations       | 🟡 High     | < 3 days  | Medium |
-| Component prop types           | 🟢 Medium   | < 1 week  | Low    |
-| Unused variables               | 🟢 Low      | Anytime   | Low    |
+| Metric | Target | How to Measure |
+|--------|--------|----------------|
+| Error count | < 50 | `grep "error TS" \| wc -l` |
+| Critical errors | 0 | Check build passes |
+| Files with errors | < 20% | Count files with errors |
+| Time per batch | < 1 hour | Track time spent |
 
-### Commands Cheat Sheet
+---
 
+## 💡 Pro Tips
+
+1. **Fix in order**: Critical → High → Medium → Low
+2. **Batch similar errors**: Fix all TS2339 together
+3. **Test after each batch**: Run build, ensure it works
+4. **Commit frequently**: After each successful batch
+5. **Document patterns**: For team consistency
+
+---
+
+## 🔄 Iterative Process
+
+```
+1. Count errors
+2. Pick highest priority batch (5-10 errors)
+3. Fix batch (30-60 min)
+4. Run build
+5. Count remaining errors
+6. Repeat until target reached
+```
+
+**Goal**: Reduce errors by 50% per session
+
+---
+
+## 📋 Quick Reference
+
+### Essential Commands
 ```bash
-# Full checks
-bun run type-check                    # Both frontend and backend
-bun run type-check:errors             # With detailed analysis
+# Check types
+cd frontend && bun run build
 
-# Individual checks
-bun run type-check:frontend           # TypeScript only
-bun run type-check:backend            # Python only
+# Count errors
+bun run build 2>&1 | grep "error TS" | wc -l
 
-# Error analysis
-bun run type-check:errors:frontend    # TS error breakdown
-bun run type-check:errors:backend     # Python error breakdown
+# Group errors
+bun run build 2>&1 | grep "error TS" | \
+  sed 's/.*\(TS[0-9]*\).*/\1/' | sort | uniq -c | sort -nr
 
-# During development
-cd apps/frontend && bun run type-check    # Quick frontend check
-cd apps/backend && uv run pyright         # Quick backend check
+# Find error in specific file
+bun run build 2>&1 | grep "path/to/file.tsx"
+```
+
+### Priority Decision Tree
+```
+Is build broken? → Fix immediately (Critical)
+   ↓ No
+Affects shared code? → Fix today (High)
+   ↓ No
+Component-specific? → Fix this week (Medium)
+   ↓ No
+Cosmetic/warnings? → Fix anytime (Low)
 ```
 
 ---
 
-## Additional Resources
+## 🎉 Expected Results
 
-### TypeScript
+After applying this methodology:
+- ✅ Build passes without type errors
+- ✅ 90% reduction in high-priority errors
+- ✅ Reusable patterns established
+- ✅ Team can maintain type safety
 
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
-- [TypeScript Deep Dive](https://basarat.gitbook.io/typescript/)
-- [Next.js TypeScript](https://nextjs.org/docs/app/building-your-application/configuring/typescript)
-
-### Python
-
-- [Pyright Documentation](https://github.com/microsoft/pyright/blob/main/docs/configuration.md)
-- [FastAPI Type Hints](https://fastapi.tiangolo.com/python-types/)
-- [Pydantic Documentation](https://docs.pydantic.dev/)
-- [PEP 484 - Type Hints](https://peps.python.org/pep-0484/)
-
-### Monorepo
-
-- [Monorepo Type Safety](https://turbo.build/repo/docs/handbook/linting/typescript)
-- [Shared Types in Monorepos](https://vercel.com/blog/turborepo-typescript-shared-packages)
+**Time investment**: 3-4 hours for typical codebase  
+**Long-term benefit**: Catch bugs early, better IDE support
 
 ---
 
-_This methodology provides a systematic approach for type checking across the entire Resume-Matcher stack while maintaining development velocity and code quality._
+_This methodology focuses on **rapid bulk fixing** through classification, prioritization, and batch processing._

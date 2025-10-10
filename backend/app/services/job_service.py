@@ -1,9 +1,6 @@
-import json
 import logging
 import uuid
 from typing import Any
-
-from pydantic import ValidationError
 
 from app.services.supabase.database import SupabaseDatabaseService
 
@@ -49,9 +46,11 @@ class JobService:
 
             # Insert job using cv-match's Supabase service
             service = SupabaseDatabaseService("jobs", dict)
-            result = await service.create(job_data_entry)
+            await service.create(job_data_entry)
 
-            await self._extract_and_store_structured_job(job_id=job_id, job_description_text=job_description)
+            await self._extract_and_store_structured_job(
+                job_id=job_id, job_description_text=job_description
+            )
             logger.info(f"Job ID: {job_id}")
             job_ids.append(job_id)
 
@@ -77,12 +76,16 @@ class JobService:
         processed_job_data = {
             "job_id": job_id,
             "job_title": structured_job.get("job_title"),
-            "company_profile": structured_job.get("company_profile") if structured_job.get("company_profile") else None,
+            "company_profile": structured_job.get("company_profile")
+            if structured_job.get("company_profile")
+            else None,
             "location": structured_job.get("location") if structured_job.get("location") else None,
             "date_posted": structured_job.get("date_posted"),
             "employment_type": structured_job.get("employment_type"),
             "job_summary": structured_job.get("job_summary"),
-            "key_responsibilities": {"key_responsibilities": structured_job.get("key_responsibilities", [])}
+            "key_responsibilities": {
+                "key_responsibilities": structured_job.get("key_responsibilities", [])
+            }
             if structured_job.get("key_responsibilities")
             else None,
             "qualifications": structured_job.get("qualifications", [])
@@ -94,7 +97,9 @@ class JobService:
             "application_info": structured_job.get("application_info", [])
             if structured_job.get("application_info")
             else None,
-            "extracted_keywords": {"extracted_keywords": structured_job.get("extracted_keywords", [])}
+            "extracted_keywords": {
+                "extracted_keywords": structured_job.get("extracted_keywords", [])
+            }
             if structured_job.get("extracted_keywords")
             else None,
         }
@@ -123,7 +128,7 @@ class JobService:
             "qualifications": ["Qualification 1", "Qualification 2"],
             "compensation_and_benfits": ["Competitive salary", "Benefits"],
             "application_info": ["Apply via email"],
-            "extracted_keywords": ["keyword1", "keyword2"]
+            "extracted_keywords": ["keyword1", "keyword2"],
         }
 
     async def get_job_with_processed_data(self, job_id: str) -> dict | None:

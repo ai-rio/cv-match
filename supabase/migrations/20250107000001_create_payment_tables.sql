@@ -36,6 +36,7 @@ CREATE INDEX IF NOT EXISTS idx_payment_history_status ON public.payment_history(
 CREATE INDEX IF NOT EXISTS idx_payment_history_created_at ON public.payment_history(created_at);
 
 -- RLS Policy: Users can manage their own payment history
+DROP POLICY IF EXISTS "Users can manage own payment_history" ON public.payment_history;
 CREATE POLICY "Users can manage own payment_history"
   ON public.payment_history
   FOR ALL
@@ -75,6 +76,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON public.subscriptions(stat
 CREATE INDEX IF NOT EXISTS idx_subscriptions_current_period_end ON public.subscriptions(current_period_end);
 
 -- RLS Policy: Users can manage their own subscriptions
+DROP POLICY IF EXISTS "Users can manage own subscriptions" ON public.subscriptions;
 CREATE POLICY "Users can manage own subscriptions"
   ON public.subscriptions
   FOR ALL
@@ -111,6 +113,7 @@ CREATE INDEX IF NOT EXISTS idx_stripe_webhook_events_processed ON public.stripe_
 CREATE INDEX IF NOT EXISTS idx_stripe_webhook_events_created_at ON public.stripe_webhook_events(created_at);
 
 -- RLS Policy: Only authenticated users can read webhook events
+DROP POLICY IF EXISTS "Authenticated users can read webhook_events" ON public.stripe_webhook_events;
 CREATE POLICY "Authenticated users can read webhook_events"
   ON public.stripe_webhook_events
   FOR SELECT
@@ -143,6 +146,7 @@ CREATE INDEX IF NOT EXISTS idx_user_payment_profiles_stripe_customer_id ON publi
 CREATE INDEX IF NOT EXISTS idx_user_payment_profiles_plan_type ON public.user_payment_profiles(plan_type);
 
 -- RLS Policy: Users can manage their own payment profile
+DROP POLICY IF EXISTS "Users can manage own payment_profile" ON public.user_payment_profiles;
 CREATE POLICY "Users can manage own payment_profile"
   ON public.user_payment_profiles
   FOR ALL
@@ -162,16 +166,19 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create triggers for updated_at
+DROP TRIGGER IF EXISTS handle_payment_history_updated_at ON public.payment_history;
 CREATE TRIGGER handle_payment_history_updated_at
     BEFORE UPDATE ON public.payment_history
     FOR EACH ROW
     EXECUTE FUNCTION public.handle_updated_at();
 
+DROP TRIGGER IF EXISTS handle_subscriptions_updated_at ON public.subscriptions;
 CREATE TRIGGER handle_subscriptions_updated_at
     BEFORE UPDATE ON public.subscriptions
     FOR EACH ROW
     EXECUTE FUNCTION public.handle_updated_at();
 
+DROP TRIGGER IF EXISTS handle_user_payment_profiles_updated_at ON public.user_payment_profiles;
 CREATE TRIGGER handle_user_payment_profiles_updated_at
     BEFORE UPDATE ON public.user_payment_profiles
     FOR EACH ROW
