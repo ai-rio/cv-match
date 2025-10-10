@@ -16,86 +16,88 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/client';
 
-// Mock translation object - will be replaced with next-intl later
+// Portuguese translations
 const translations = {
-  title: 'AI Resume Optimization',
+  title: 'Otimização de Currículo com IA',
   subtitle:
-    'Transform your resume to perfectly match your target job description with AI-powered optimization',
+    'Transforme seu currículo para corresponder perfeitamente à descrição da vaga desejada com otimização alimentada por IA',
   steps: {
-    upload: 'Upload Resume',
-    jobDetails: 'Job Details',
-    payment: 'Payment',
-    processing: 'Processing',
-    results: 'Results',
+    upload: 'Enviar Currículo',
+    jobDetails: 'Detalhes da Vaga',
+    payment: 'Pagamento',
+    processing: 'Processando',
+    results: 'Resultados',
   },
   upload: {
-    title: 'Upload Your Resume',
-    subtitle: 'Upload your current resume in PDF or DOCX format to begin the optimization process',
-    dragDrop: 'Drag and drop your resume here',
-    formats: 'PDF or DOCX (max 2MB)',
-    button: 'Choose File',
-    uploading: 'Uploading...',
-    invalidType: 'Invalid file type. Please use PDF or DOCX.',
-    tooLarge: 'File too large. Maximum size is 2MB.',
-    charCount: (current: number, max: number) => `${current}/${max} characters`,
+    title: 'Envie seu Currículo',
+    subtitle:
+      'Envie seu currículo atual em formato PDF ou DOCX para começar o processo de otimização',
+    dragDrop: 'Arraste e solte seu currículo aqui',
+    formats: 'PDF ou DOCX (máx 2MB)',
+    button: 'Escolher Arquivo',
+    uploading: 'Enviando...',
+    invalidType: 'Tipo de arquivo inválido. Use PDF ou DOCX.',
+    tooLarge: 'Arquivo muito grande. Tamanho máximo é 2MB.',
+    charCount: (current: number, max: number) => `${current}/${max} caracteres`,
   },
   jobDescription: {
-    title: 'Job Details',
-    subtitle: 'Enter the details of the job you want to apply for',
-    jobTitle: 'Job Title',
-    company: 'Company',
-    description: 'Job Description',
-    jobTitlePlaceholder: 'e.g. Senior Software Engineer',
-    companyPlaceholder: 'e.g. Google',
-    descriptionPlaceholder: 'Paste the complete job description here...',
-    minChars: 'Minimum: 50 characters',
-    maxChars: 'Maximum: 5000 characters',
+    title: 'Detalhes da Vaga',
+    subtitle: 'Digite os detalhes da vaga que você deseja se candidatar',
+    jobTitle: 'Cargo',
+    company: 'Empresa',
+    description: 'Descrição da Vaga',
+    jobTitlePlaceholder: 'ex: Desenvolvedor Python Sênior',
+    companyPlaceholder: 'ex: TechCorp Brasil',
+    descriptionPlaceholder: 'Cole aqui a descrição completa da vaga...',
+    minChars: 'Mínimo: 50 caracteres',
+    maxChars: 'Máximo: 5000 caracteres',
     charCount: (current: number, max: number) => `${current}/${max}`,
-    submit: 'Continue to Payment',
-    startOptimization: 'Start Optimization',
+    submit: 'Continuar para Pagamento',
+    startOptimization: 'Iniciar Otimização',
   },
   payment: {
-    title: 'Payment',
-    subtitle: 'Complete your purchase to unlock AI resume optimization',
-    orderSummary: 'Order Summary',
-    resume: 'Resume:',
-    position: 'Position:',
+    title: 'Pagamento',
+    subtitle: 'Complete sua compra para desbloquear a otimização de currículo com IA',
+    orderSummary: 'Resumo do Pedido',
+    resume: 'Currículo:',
+    position: 'Posição:',
     total: 'Total:',
-    processing: 'Processing payment...',
-    securePayment: 'Secure payment processed by Stripe',
+    processing: 'Processando pagamento...',
+    securePayment: 'Pagamento seguro processado por Stripe',
   },
   processing: {
-    title: 'Optimizing Your Resume',
-    subtitle: 'Our AI is analyzing and optimizing your resume. This usually takes 2-3 minutes.',
-    extracting: 'Extracting text from resume',
-    analyzing: 'Analyzing job requirements',
-    optimizing: 'AI-powered optimization in progress',
-    generating: 'Generating optimized document',
+    title: 'Otimizando seu Currículo',
+    subtitle:
+      'Nossa IA está analisando e otimizando seu currículo. Isso geralmente leva 2-3 minutos.',
+    extracting: 'Extraindo texto do currículo',
+    analyzing: 'Analisando requisitos da vaga',
+    optimizing: 'Otimização com IA em andamento',
+    generating: 'Gerando documento otimizado',
   },
   results: {
-    title: 'Your Optimized Resume',
-    subtitle: 'Your resume has been optimized and is ready for download',
-    download: 'Download Optimized Resume',
-    viewOptimized: 'View Optimized Content',
-    matchScore: 'Match Score',
-    improvements: 'Key Improvements',
-    keywords: 'Keywords Added',
-    downloadAnother: 'Optimize Another Resume',
-    goToDashboard: 'Go to Dashboard',
+    title: 'Seu Currículo Otimizado',
+    subtitle: 'Seu currículo foi otimizado e está pronto para download',
+    download: 'Baixar Currículo Otimizado',
+    viewOptimized: 'Visualizar Conteúdo Otimizado',
+    matchScore: 'Score de Compatibilidade',
+    improvements: 'Melhorias Principais',
+    keywords: 'Palavras-chave Adicionadas',
+    downloadAnother: 'Otimizar Outro Currículo',
+    goToDashboard: 'Ir para Dashboard',
   },
   errors: {
-    notAuthenticated: 'You must be logged in to continue.',
-    paymentFailed: 'Payment failed. Please try again.',
-    optimizationFailed: 'Optimization failed. Please try again.',
-    downloadFailed: 'Download failed. Please try again.',
+    notAuthenticated: 'Você precisa estar autenticado para continuar.',
+    paymentFailed: 'Pagamento falhou. Tente novamente.',
+    optimizationFailed: 'Otimização falhou. Tente novamente.',
+    downloadFailed: 'Download falhou. Tente novamente.',
   },
   common: {
-    loading: 'Loading...',
-    error: 'Error',
-    back: 'Back',
-    next: 'Next',
-    startOver: 'Start Over',
-    tryAgain: 'Try Again',
+    loading: 'Carregando...',
+    error: 'Erro',
+    back: 'Voltar',
+    next: 'Próximo',
+    startOver: 'Recomeçar',
+    tryAgain: 'Tentar Novamente',
   },
 };
 
@@ -150,37 +152,46 @@ function OptimizePageContent() {
 
   const startOptimization = useCallback(async () => {
     if (!resumeData || !jobDescription) {
-      setError('Missing resume or job description data');
+      setError('Dados do currículo ou da vaga ausentes');
       return;
     }
 
     try {
-      // TODO: Replace with actual CV-Match API call
-      // const response = await fetch('/api/optimizations/start', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     resume_id: resumeData.id,
-      //     job_description: jobDescription.description,
-      //     job_title: jobDescription.jobTitle,
-      //     company: jobDescription.company,
-      //   }),
-      // });
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-      // if (!response.ok) {
-      //   throw new Error('Failed to start optimization');
-      // }
+      // Get Supabase session for auth token
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-      // const data = await response.json();
-      // setOptimizationId(data.optimization_id);
+      if (!session) {
+        throw new Error('Você precisa estar autenticado');
+      }
 
-      // For now, simulate the process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setOptimizationId('mock-optimization-id');
+      const response = await fetch(`${API_URL}/api/optimizations/start`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resume_id: resumeData.id,
+          job_title: jobDescription.jobTitle,
+          company: jobDescription.company,
+          job_description: jobDescription.description,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Erro ao iniciar otimização');
+      }
+
+      const data = await response.json();
+      setOptimizationId(data.optimization_id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to start optimization');
+      setError(err instanceof Error ? err.message : 'Erro ao iniciar otimização');
       setCurrentStep('payment');
       throw err;
     }
@@ -237,34 +248,41 @@ function OptimizePageContent() {
     if (!optimizationId) return;
 
     try {
-      // TODO: Replace with actual CV-Match API call
-      // const response = await fetch(`/api/optimizations/${optimizationId}/download`);
-      // if (!response.ok) throw new Error('Download failed');
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-      // const blob = await response.blob();
-      // const url = window.URL.createObjectURL(blob);
-      // const a = document.createElement('a');
-      // a.href = url;
-      // a.download = `optimized-resume-${Date.now()}.docx`;
-      // document.body.appendChild(a);
-      // a.click();
-      // document.body.removeChild(a);
-      // window.URL.revokeObjectURL(url);
+      // Get Supabase session for auth token
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-      // For now, simulate the download
-      const blob = new Blob(['Mock optimized resume content'], {
-        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      if (!session) {
+        throw new Error('Você precisa estar autenticado');
+      }
+
+      const response = await fetch(`${API_URL}/api/optimizations/${optimizationId}/download`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
-      const url = URL.createObjectURL(blob);
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Erro ao baixar arquivo');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `optimized-resume-${Date.now()}.docx`;
+      a.download = `curriculo_otimizado_${Date.now()}.docx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Download failed');
+      setError(err instanceof Error ? err.message : 'Erro ao baixar arquivo');
     }
   }, [optimizationId]);
 
@@ -543,7 +561,7 @@ function ResumeUploadComponent({
     return null;
   };
 
-  const handleFile = (file: File) => {
+  const handleFile = async (file: File) => {
     setError(null);
 
     const validationError = validateFile(file);
@@ -552,22 +570,60 @@ function ResumeUploadComponent({
       return;
     }
 
-    // Simulate upload progress
-    setUploadProgress(0);
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 100);
+    try {
+      setUploadProgress(0);
 
-    setTimeout(() => {
-      setUploadedFile(file);
-      onUploadSuccess('mock-resume-id', file.name);
-    }, 1000);
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+      // Get Supabase session for auth token
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error('Você precisa estar autenticado');
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const xhr = new XMLHttpRequest();
+
+      // Track upload progress
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const progress = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress(progress);
+        }
+      });
+
+      // Handle completion
+      return new Promise<void>((resolve, reject) => {
+        xhr.onload = async () => {
+          if (xhr.status === 200) {
+            const data = JSON.parse(xhr.responseText);
+            setUploadedFile(file);
+            onUploadSuccess(data.resume_id, file.name);
+            resolve();
+          } else {
+            const error = JSON.parse(xhr.responseText);
+            reject(new Error(error.detail || 'Erro ao enviar currículo'));
+          }
+        };
+
+        xhr.onerror = () => {
+          reject(new Error('Erro de conexão ao enviar arquivo'));
+        };
+
+        xhr.open('POST', `${API_URL}/api/resumes/upload`);
+        xhr.setRequestHeader('Authorization', `Bearer ${session.access_token}`);
+        xhr.send(formData);
+      });
+    } catch (err: any) {
+      setError(err.message);
+      setUploadProgress(0);
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -820,12 +876,44 @@ function PaymentFlow({
   const handlePayment = async () => {
     setIsProcessing(true);
     try {
-      // TODO: Replace with actual Stripe integration
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      onSuccess();
-    } catch (error) {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+      // Get Supabase session for auth token
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error('Você precisa estar autenticado');
+      }
+
+      const response = await fetch(`${API_URL}/api/payments/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tier_id: tier.id,
+          price: tier.price,
+          currency: 'brl', // Using Brazilian Real for the market
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Erro ao processar pagamento');
+      }
+
+      const data = await response.json();
+
+      // Redirect to Stripe Checkout
+      window.location.href = data.checkout_url;
+    } catch (error: any) {
       // Payment error will be handled by the parent component
       console.error('Payment failed:', error);
+      throw error;
     } finally {
       setIsProcessing(false);
     }

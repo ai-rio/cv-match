@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/client';
 
 // Mock translation object - will be replaced with next-intl later
 const translations = {
@@ -58,37 +59,35 @@ export default function ResultsPage() {
 
     const fetchStatus = async () => {
       try {
-        // TODO: Replace with actual CV-Match API endpoint
-        // For now, simulate the API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-        // Mock data for development
-        const mockStatus: ResumeImprovementStatus = {
-          id: improvementId,
-          resume_id: 'mock-resume-id',
-          job_id: 'mock-job-id',
-          user_id: 'mock-user-id',
-          status: Math.random() > 0.5 ? 'completed' : 'processing',
-          optimized_content:
-            Math.random() > 0.5 ? 'Este é o conteúdo otimizado do currículo...' : null,
-          docx_storage_path: Math.random() > 0.5 ? 'optimized-resumes/mock-file.docx' : null,
-          match_percentage: Math.random() > 0.5 ? 85 : null,
-          suggestions:
-            Math.random() > 0.5
-              ? ['Adicione mais palavras-chave técnicas', 'Quantifique suas conquistas']
-              : null,
-          keywords: Math.random() > 0.5 ? ['React', 'TypeScript', 'Node.js', 'AWS'] : null,
-          error_message: null,
-          created_at: new Date().toISOString(),
-          processing_started_at: new Date().toISOString(),
-          processing_completed_at: Math.random() > 0.5 ? new Date().toISOString() : null,
-        };
+        // Get Supabase session for auth token
+        const supabase = createClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-        setStatus(mockStatus);
+        if (!session) {
+          throw new Error('Você precisa estar autenticado');
+        }
+
+        const response = await fetch(`${API_URL}/api/optimizations/${improvementId}`, {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.detail || 'Erro ao carregar resultados');
+        }
+
+        const data: ResumeImprovementStatus = await response.json();
+        setStatus(data);
         setLoading(false);
 
         // Stop polling if completed or failed
-        if (mockStatus.status === 'completed' || mockStatus.status === 'failed') {
+        if (data.status === 'completed' || data.status === 'failed') {
           // Will be cleared in useEffect cleanup
         }
       } catch (err: unknown) {
@@ -115,16 +114,31 @@ export default function ResultsPage() {
     setDownloading(true);
 
     try {
-      // TODO: Replace with actual CV-Match API endpoint
-      // This would be a new endpoint like GET /api/resumes/:id/download
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-      // For now, simulate the download
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Get Supabase session for auth token
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-      // Simulate file download
-      const blob = new Blob(['Mock optimized resume content'], {
-        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      if (!session) {
+        throw new Error('Você precisa estar autenticado');
+      }
+
+      const response = await fetch(`${API_URL}/api/optimizations/${improvementId}/download`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Erro ao baixar arquivo');
+      }
+
+      const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -133,8 +147,8 @@ export default function ResultsPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch {
-      setError('Erro ao baixar arquivo. Por favor, tente novamente.');
+    } catch (err: any) {
+      setError(err.message || 'Erro ao baixar arquivo. Por favor, tente novamente.');
     } finally {
       setDownloading(false);
     }
