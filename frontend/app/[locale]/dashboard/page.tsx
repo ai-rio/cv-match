@@ -45,26 +45,21 @@ function DashboardContent() {
       if (!user || !token) return;
 
       try {
-        // TODO: Replace with actual API calls
-        // Load user's optimizations
-        // const optimizationsResponse = await fetch('/api/user/optimizations', {
-        //   headers: {
-        //     'Authorization': `Bearer ${token}`,
-        //   },
-        // });
-        // const optimizationsData = await optimizationsResponse.json();
-        // setOptimizations(optimizationsData);
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-        // Load user statistics
-        // const statsResponse = await fetch('/api/user/stats', {
-        //   headers: {
-        //     'Authorization': `Bearer ${token}`,
-        //   },
-        // });
-        // const statsData = await statsResponse.json();
-        // setStats(statsData);
+        // Load user's credits from API
+        const creditsResponse = await fetch(`${API_URL}/api/optimizations/credits/check`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-        // Mock data for development
+        let creditsData = { credits: 0, free_used: 0, free_limit: 3, purchased: 0 };
+        if (creditsResponse.ok) {
+          creditsData = await creditsResponse.json();
+        }
+
+        // Mock data for optimizations
         setOptimizations([
           {
             id: '1',
@@ -86,6 +81,40 @@ function DashboardContent() {
           },
         ]);
 
+        // Update stats with real credit data
+        const totalCredits = creditsData.credits || 0;
+        const freeUsed = creditsData.free_used || 0;
+        const freeLimit = creditsData.free_limit || 3;
+        const purchased = creditsData.purchased || 0;
+
+        setStats({
+          optimizations_used: freeUsed + (purchased - (totalCredits - (freeLimit - freeUsed))),
+          free_optimizations_limit: freeLimit,
+          free_optimizations_used: freeUsed,
+          purchased_optimizations: totalCredits - (freeLimit - freeUsed),
+          success_rate: 95,
+          avg_match_score: 82,
+          total_applications: 5,
+        });
+      } catch (error) {
+        // TODO: Implement proper error logging
+        // eslint-disable-next-line no-console
+        console.error('Error loading dashboard data:', error);
+
+        // Fallback to mock data
+        setOptimizations([
+          {
+            id: '1',
+            resume_name: 'Software_Engineer_Resume.pdf',
+            job_title: 'Senior Software Engineer',
+            company: 'Tech Company',
+            status: 'completed',
+            match_score: 85,
+            created_at: new Date(Date.now() - 86400000).toISOString(),
+            optimized_resume_url: '/mock-download',
+          },
+        ]);
+
         setStats({
           optimizations_used: 2,
           free_optimizations_limit: 3,
@@ -95,10 +124,6 @@ function DashboardContent() {
           avg_match_score: 82,
           total_applications: 5,
         });
-      } catch (error) {
-        // TODO: Implement proper error logging
-        // eslint-disable-next-line no-console
-        console.error('Error loading dashboard data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -336,24 +361,39 @@ function DashboardContent() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">{t('credits.freeUsed')}</span>
-                    <span className="font-medium">
-                      {stats.free_optimizations_used} / {stats.free_optimizations_limit}
-                    </span>
+                  {/* Total Available Credits */}
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-3xl font-bold text-blue-600">
+                      {stats.free_optimizations_limit -
+                        stats.free_optimizations_used +
+                        stats.purchased_optimizations}
+                    </div>
+                    <div className="text-sm text-gray-600">créditos disponíveis</div>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full"
-                      style={{
-                        width: `${(stats.free_optimizations_used / stats.free_optimizations_limit) * 100}%`,
-                      }}
-                    />
+
+                  {/* Credit Breakdown */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">{t('credits.freeUsed')}</span>
+                      <span className="font-medium">
+                        {stats.free_optimizations_used} / {stats.free_optimizations_limit}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-green-600 h-2 rounded-full"
+                        style={{
+                          width: `${(stats.free_optimizations_used / stats.free_optimizations_limit) * 100}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">{t('credits.purchased')}</span>
+                      <span className="font-medium">{stats.purchased_optimizations}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">{t('credits.purchased')}</span>
-                    <span className="font-medium">{stats.purchased_optimizations}</span>
-                  </div>
+
+                  {/* Action Buttons */}
                   <div className="pt-4 space-y-2">
                     <Button className="w-full" onClick={() => router.push('/pricing')}>
                       {t('credits.buyMore')}
@@ -361,9 +401,9 @@ function DashboardContent() {
                     <Button
                       variant="outline"
                       className="w-full"
-                      onClick={() => router.push('/pricing')}
+                      onClick={() => router.push('/optimize')}
                     >
-                      {t('credits.upgradeToPro')}
+                      Usar Crédito
                     </Button>
                   </div>
                 </div>

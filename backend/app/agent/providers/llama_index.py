@@ -2,8 +2,13 @@ import logging
 from typing import Any
 
 from fastapi.concurrency import run_in_threadpool
-from llama_index.core.base.embeddings.base import BaseEmbedding
-from llama_index.core.base.llms.base import BaseLLM
+try:
+    from llama_index.core.base.embeddings.base import BaseEmbedding
+    from llama_index.core.base.llms.base import BaseLLM
+except ImportError:
+    # Optional dependency - mark as unavailable for type checking
+    BaseEmbedding = None  # type: ignore
+    BaseLLM = None  # type: ignore
 
 from ...core.config import settings
 from ..exceptions import ProviderError

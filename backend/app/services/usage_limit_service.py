@@ -148,6 +148,7 @@ class UsageLimitService:
                 free_optimizations_used=total_used,
                 free_optimizations_limit=free_limit,
                 remaining_free_optimizations=remaining_free,
+                tier=subscription_tier,
                 reason=reason,
                 upgrade_prompt=upgrade_prompt,
             )
@@ -176,9 +177,9 @@ class UsageLimitService:
             UsageLimitError: If there's an error retrieving stats
         """
         try:
-            # Get user profile
-            profile = await self.get_user_profile(user_id)
-            is_pro = profile.get("is_pro", False)
+            # Get user credits (which includes is_pro status)
+            credits = await self.get_user_credits(user_id)
+            is_pro = credits.get("is_pro", False)
 
             # Get current month usage
             current_usage = await self.usage_tracking_service.get_current_month_usage(user_id)
@@ -223,6 +224,10 @@ class UsageLimitService:
         """
         Deduct credits from user account atomically.
 
+        This method uses a database-level atomic operation to prevent race conditions.
+        It checks and updates credits in a single operation using PostgreSQL's
+        atomic update with a condition to ensure sufficient credits.
+
         Args:
             user_id: The user ID to deduct credits from
             amount: Amount of credits to deduct
@@ -235,7 +240,81 @@ class UsageLimitService:
             UsageLimitError: If there's an error deducting credits
         """
         try:
-            # Get current credits
+            # Use atomic database operation to prevent race conditions
+            # This updates credits only if sufficient credits are available
+            rpc_params = {
+                "p_user_id": str(user_id),
+                "p_amount": amount
+            }
+
+            # Call a PostgreSQL function for atomic credit deduction
+            # This prevents race conditions by doing the check and update in one transaction
+            try:
+                result = self.db.client.rpc("deduct_credits_atomically", rpc_params).execute()
+            except Exception as rpc_error:
+                # RPC function might not exist, use fallback
+                logger.warning(f"Atomic credit deduction RPC not available, using fallback: {str(rpc_error)}")
+                return await self.deduct_credits_fallback(user_id, amount, operation_id)
+
+            if not result.data or not result.data[0].get("success", False):
+                # Check if it's insufficient credits or another error
+                if result.data and result.data[0].get("reason") == "insufficient_credits":
+                    logger.warning(f"Insufficient credits for user {user_id}")
+                    return False
+                else:
+                    error_msg = result.data[0].get("error", "Unknown error") if result.data else "No response"
+                    logger.warning(f"Atomic deduction failed, using fallback: {error_msg}")
+                    return await self.deduct_credits_fallback(user_id, amount, operation_id)
+
+            new_credits = result.data[0].get("new_balance", 0)
+
+            # Record credit transaction after successful deduction
+            transaction_data = {
+                "user_id": str(user_id),
+                "amount": -amount,  # Negative for deduction
+                "type": "debit",
+                "source": "optimization",
+                "description": f"Credit deduction for operation {operation_id}",
+                "operation_id": operation_id,
+                "balance_after": new_credits
+            }
+
+            # Insert transaction record - this is done after the atomic credit deduction
+            transaction_result = self.db.client.table("credit_transactions").insert(transaction_data).execute()
+            if not transaction_result.data:
+                # Log warning but don't fail the operation - credits were already deducted
+                logger.warning(f"Failed to record credit transaction for user {user_id}, operation {operation_id}")
+
+            logger.info(f"Deducted {amount} credits from user {user_id}, remaining: {new_credits}")
+            return True
+
+        except UsageLimitError:
+            raise
+        except Exception as e:
+            logger.error(f"Error deducting credits for user {user_id}: {str(e)}")
+            raise UsageLimitError(f"Failed to deduct credits: {str(e)}")
+
+    async def deduct_credits_fallback(self, user_id: UUID, amount: int, operation_id: str) -> bool:
+        """
+        Fallback method for credit deduction using standard operations.
+
+        This is used if the atomic RPC function is not available.
+        It's less optimal than the atomic method but provides better error handling
+        than the basic implementation.
+
+        Args:
+            user_id: The user ID to deduct credits from
+            amount: Amount of credits to deduct
+            operation_id: ID of the operation being performed
+
+        Returns:
+            True if credits were deducted successfully, False if insufficient credits
+
+        Raises:
+            UsageLimitError: If there's an error deducting credits
+        """
+        try:
+            # Ensure user record exists
             credits = await self.get_user_credits(user_id)
             current_credits = credits.get("credits_remaining", 0)
 
@@ -243,34 +322,50 @@ class UsageLimitService:
                 logger.warning(f"Insufficient credits for user {user_id}: {current_credits} < {amount}")
                 return False
 
-            # Deduct credits
-            new_credits = current_credits - amount
+            # Use optimistic locking with a version check to prevent race conditions
+            # Update with a condition that ensures credits haven't changed since we read them
             result = self.db.client.table("user_credits").update({
-                "credits_remaining": new_credits
-            }).eq("user_id", str(user_id)).execute()
+                "credits_remaining": current_credits - amount,
+                "updated_at": "now()"
+            }).eq("user_id", str(user_id)).eq("credits_remaining", current_credits).execute()
 
             if not result.data:
-                raise UsageLimitError("Failed to update user credits")
+                # If no rows were updated, it means either:
+                # 1. The user doesn't exist (shouldn't happen due to get_user_credits)
+                # 2. The credits changed between our read and update (race condition)
+                # 3. Another concurrent operation deducted credits
+                logger.warning(f"Concurrent credit modification detected for user {user_id}, retrying...")
+
+                # Retry once after a brief delay
+                import asyncio
+                await asyncio.sleep(0.05)  # 50ms delay
+
+                # Try the atomic method as a fallback
+                return await self.deduct_credits(user_id, amount, operation_id)
+
+            new_credits = current_credits - amount
 
             # Record credit transaction
             transaction_data = {
                 "user_id": str(user_id),
-                "amount": -amount,  # Negative for deduction
+                "amount": -amount,
                 "type": "debit",
                 "source": "optimization",
                 "description": f"Credit deduction for operation {operation_id}",
-                "operation_id": operation_id
+                "operation_id": operation_id,
+                "balance_after": new_credits
             }
+
             self.db.client.table("credit_transactions").insert(transaction_data).execute()
 
             logger.info(f"Deducted {amount} credits from user {user_id}, remaining: {new_credits}")
             return True
 
         except Exception as e:
-            logger.error(f"Error deducting credits for user {user_id}: {str(e)}")
+            logger.error(f"Error in fallback credit deduction for user {user_id}: {str(e)}")
             raise UsageLimitError(f"Failed to deduct credits: {str(e)}")
 
-    async def add_credits(self, user_id: UUID, amount: int, source: str, description: str = None) -> bool:
+    async def add_credits(self, user_id: UUID, amount: int, source: str, description: str | None = None) -> bool:
         """
         Add credits to user account.
 

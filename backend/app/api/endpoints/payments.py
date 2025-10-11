@@ -4,12 +4,22 @@ Handles checkout sessions, payment processing, and subscription management.
 """
 
 import logging
+from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr
 
+from app.core.auth import get_current_user
+from app.core.database import SupabaseSession
 from app.services.stripe_service import stripe_service
+from app.services.usage_limit_service import UsageLimitService
+from app.config.pricing import pricing_config
+
+# Database dependency
+async def get_db() -> SupabaseSession:
+    """Get database session."""
+    return SupabaseSession()
 
 logger = logging.getLogger(__name__)
 
@@ -19,9 +29,7 @@ router = APIRouter(prefix="/payments", tags=["Payments"])
 class CreateCheckoutSessionRequest(BaseModel):
     """Request model for creating a checkout session."""
 
-    user_id: str
-    user_email: EmailStr
-    plan_type: str = "pro"  # free, pro, enterprise, lifetime
+    tier: str = "basic"  # basic, pro, enterprise
     success_url: str | None = None
     cancel_url: str | None = None
     metadata: dict[str, str] | None = None
@@ -45,34 +53,63 @@ class CreateCustomerRequest(BaseModel):
     address: dict[str, str] | None = None
 
 
-@router.post("/create-checkout-session")
-async def create_checkout_session(request: CreateCheckoutSessionRequest) -> JSONResponse:
+@router.post("/create-checkout")
+async def create_checkout_session(
+    request: CreateCheckoutSessionRequest,
+    current_user: dict = Depends(get_current_user),
+    db: SupabaseSession = Depends(get_db)
+) -> JSONResponse:
     """
     Create a Stripe checkout session for Brazilian market.
 
     This endpoint creates a checkout session with Brazilian Real (BRL) currency
     and appropriate pricing tiers for the Brazilian market.
 
-    Plans available:
-    - free: R$ 0,00 (5 análises por mês)
-    - pro: R$ 29,90/mês (análises ilimitadas, IA avançada)
-    - enterprise: R$ 99,90/mês (recrutamento ilimitado, dashboard)
-    - lifetime: R$ 297,00 (acesso vitalício)
+    Credit Tiers available:
+    - basic: 10 credits (R$ 29,90)
+    - pro: 50 credits (R$ 79,00)
+    - enterprise: 1000 credits (R$ 99,90)
 
     Args:
         request: Checkout session creation request
+        current_user: Currently authenticated user
+        db: Database session
 
     Returns:
         Checkout session data with URL and session ID
     """
     try:
+        # Validate tier using centralized pricing config
+        tier = pricing_config.get_tier(request.tier)
+        if not tier:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid tier. Must be one of: {list(pricing_config.tiers.keys())}"
+            )
+
+        # Get credits and plan type from pricing config
+        credits = tier.credits
+        plan_type = pricing_config.get_stripe_plan_type(request.tier)
+
+        # Prepare metadata
+        metadata = {
+            "user_id": current_user["id"],
+            "credits": str(credits),
+            "tier": request.tier,
+            "price": str(tier.price),
+            "currency": tier.currency,
+        }
+        if request.metadata:
+            metadata.update(request.metadata)
+
+        # Create checkout session
         result = await stripe_service.create_checkout_session(
-            user_id=request.user_id,
-            user_email=request.user_email,
-            plan_type=request.plan_type,
+            user_id=current_user["id"],
+            user_email=current_user["email"],
+            plan_type=plan_type,
             success_url=request.success_url,
             cancel_url=request.cancel_url,
-            metadata=request.metadata,
+            metadata=metadata,
         )
 
         if result["success"]:
@@ -82,9 +119,10 @@ async def create_checkout_session(request: CreateCheckoutSessionRequest) -> JSON
                     "success": True,
                     "session_id": result["session_id"],
                     "checkout_url": result["checkout_url"],
-                    "plan_type": result["plan_type"],
+                    "tier": request.tier,
+                    "credits": credits,
                     "currency": result["currency"],
-                    "amount": result["amount"],
+                    "amount": tier.price,  # Use consistent pricing from config
                 },
             )
         else:
@@ -235,15 +273,15 @@ async def get_brazilian_pricing() -> JSONResponse:
         Available pricing tiers for Brazilian market
     """
     try:
-        pricing = stripe_service._get_brazilian_pricing()
+        tiers = pricing_config.get_all_tiers()
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={
                 "success": True,
-                "pricing": pricing,
-                "currency": "brl",
-                "country": "BR",
-                "locale": "pt-BR",
+                "pricing": tiers,
+                "currency": pricing_config.currency,
+                "country": pricing_config.country,
+                "locale": pricing_config.locale,
             },
         )
     except Exception as e:
@@ -277,6 +315,7 @@ async def payments_health_check() -> JSONResponse:
                 "currency": stripe_service.default_currency,
                 "country": stripe_service.default_country,
                 "locale": stripe_service.default_locale,
+                "pricing_config_loaded": len(pricing_config.tiers) > 0,
             },
         )
     except Exception as e:

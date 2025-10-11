@@ -22,43 +22,37 @@ export interface HealthCheckResponse {
   timestamp: string;
 }
 
-// LLM API Types (Extended from services/llm.ts)
-export interface LLMGenerateRequest {
+// LLM API Types (Match backend exactly)
+export interface LLMUsage {
+  prompt_tokens: number;
+  completion_tokens: number | null;
+  total_tokens: number;
+}
+
+export interface TextGenerationRequest {
   prompt: string;
   model?: string;
   max_tokens?: number;
   temperature?: number;
   provider?: 'openai' | 'anthropic';
-  stream?: boolean;
 }
 
-export interface LLMGenerateResponse {
+export interface TextGenerationResponse {
   text: string;
   model: string;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number | null;
-    total_tokens: number;
-  };
-  finish_reason?: string;
-  created?: number;
+  usage: LLMUsage;
 }
 
-export interface LLMEmbeddingRequest {
+export interface EmbeddingRequest {
   text: string;
   model?: string;
   provider?: 'openai' | 'anthropic';
 }
 
-export interface LLMEmbeddingResponse {
+export interface EmbeddingResponse {
   embedding: number[];
   model: string;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number | null;
-    total_tokens: number;
-  };
-  dimensions?: number;
+  usage: LLMUsage;
 }
 
 // Resume/CV API Types

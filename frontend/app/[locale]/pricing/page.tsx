@@ -1,15 +1,155 @@
 'use client';
 
-import { Check, Star } from 'lucide-react';
+import { formatBRLPrice, getPricingTier } from '@cv-match/shared-pricing-config';
+import { Check, Loader2, Star, X } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/client';
 
 export default function PricingPage() {
   const t = useTranslations('pricing');
+  const [processingTier, setProcessingTier] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handlePurchase = async (tierId: string) => {
+    if (tierId === 'free') {
+      // For free tier, redirect to signup
+      window.location.href = '/auth/signup';
+      return;
+    }
+
+    setProcessingTier(tierId);
+    setError(null); // Clear any previous errors
+
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const tier = getPricingTier(tierId);
+
+      if (!tier) {
+        throw new Error('Plano inválido');
+      }
+
+      // Get Supabase session for auth token
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        // Redirect to login if not authenticated
+        window.location.href = `/auth/login?callbackUrl=/pricing`;
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/api/payments/create-checkout`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tier: tier.id,
+          success_url: window.location.origin + '/payment/success',
+          cancel_url: window.location.origin + '/payment/canceled',
+          metadata: {
+            tier_id: tier.id,
+            credits: tier.credits.toString(),
+            price: tier.price.toString(),
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Erro ao processar pagamento');
+      }
+
+      const data = await response.json();
+
+      // Redirect to Stripe Checkout
+      window.location.href = data.checkout_url;
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Erro ao processar pagamento. Tente novamente.';
+      console.error('Payment failed:', error);
+      setError(errorMessage);
+    } finally {
+      setProcessingTier(null);
+    }
+  };
+
+  const renderPricingCard = (tierId: string) => {
+    const tier = getPricingTier(tierId);
+    if (!tier) return null;
+
+    const isProcessing = processingTier === tierId;
+    const isPopular = tier.popular;
+
+    return (
+      <Card key={tier.id} className={`relative ${isPopular ? 'border-primary-200 shadow-lg' : ''}`}>
+        {isPopular && (
+          <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+            <Badge className="bg-primary-600 text-white">Popular</Badge>
+          </div>
+        )}
+        <CardHeader className={isPopular ? 'text-center' : ''}>
+          <CardTitle className="text-xl">{tier.name}</CardTitle>
+          <CardDescription>{tier.description}</CardDescription>
+          <div className="mt-4">
+            {tier.price === 0 ? (
+              <span className="text-4xl font-bold text-gray-900">Gratuito</span>
+            ) : (
+              <>
+                <span
+                  className={`text-4xl font-bold ${isPopular ? 'text-primary-600' : 'text-blue-600'}`}
+                >
+                  {formatBRLPrice(tier.price)}
+                </span>
+                <span className="text-gray-600">/pacote</span>
+              </>
+            )}
+            <div
+              className={`text-sm font-medium mt-2 ${isPopular ? 'text-primary-600' : 'text-blue-600'}`}
+            >
+              {tier.credits} créditos
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-3">
+            {tier.features.map((feature, index) => (
+              <li key={index} className="flex items-center">
+                <Check className="h-4 w-4 text-green-500 mr-3" />
+                <span className="text-sm text-gray-700">{feature}</span>
+              </li>
+            ))}
+          </ul>
+          <Button
+            className={`w-full mt-8 ${isPopular ? '' : ''}`}
+            variant={tier.id === 'free' ? 'outline' : 'default'}
+            onClick={() => handlePurchase(tier.id)}
+            disabled={isProcessing}
+          >
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Processando...
+              </>
+            ) : tier.id === 'free' ? (
+              t('plans.free.button')
+            ) : (
+              `Comprar Plano ${tier.name}`
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -91,99 +231,43 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {/* Error Display */}
+        {error && (
+          <div className="mb-8">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <Check className="h-5 w-5 text-red-400" />
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">Erro no pagamento</h3>
+                  <div className="mt-2 text-sm text-red-700">
+                    <p>{error}</p>
+                  </div>
+                </div>
+                <div className="ml-auto pl-3">
+                  <div className="-mx-1.5 -my-1.5">
+                    <button
+                      onClick={() => setError(null)}
+                      className="inline-flex bg-red-50 rounded-md p-1.5 text-red-500 hover:bg-red-100"
+                    >
+                      <span className="sr-only">Dismiss</span>
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Pricing Plans */}
         <div className="mb-16">
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:gap-12">
-            {/* Free Plan */}
-            <Card className="relative">
-              <CardHeader>
-                <CardTitle className="text-xl">{t('plans.free.name')}</CardTitle>
-                <CardDescription>{t('plans.free.description')}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold text-gray-900">{t('plans.free.price')}</span>
-                  <span className="text-gray-600">{t('plans.free.period')}</span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  <li className="flex items-center">
-                    <Check className="h-4 w-4 text-green-500 mr-3" />
-                    <span className="text-sm text-gray-700">
-                      {t('plans.free.features.basicAnalysis')}
-                    </span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-4 w-4 text-green-500 mr-3" />
-                    <span className="text-sm text-gray-700">
-                      {t('plans.free.features.limitedOptimizations')}
-                    </span>
-                  </li>
-                </ul>
-                <Button className="w-full mt-8" variant="outline" asChild>
-                  <Link href="/signup">{t('plans.free.button')}</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Pro Plan */}
-            <Card className="relative border-primary-200 shadow-lg">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-primary-600 text-white">Popular</Badge>
-              </div>
-              <CardHeader className="text-center">
-                <CardTitle className="text-xl">{t('plans.pro.name')}</CardTitle>
-                <CardDescription>{t('plans.pro.description')}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold text-primary-600">
-                    {t('plans.pro.price')}
-                  </span>
-                  <span className="text-gray-600">{t('plans.pro.period')}</span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  <li className="flex items-center">
-                    <Check className="h-4 w-4 text-green-500 mr-3" />
-                    <span className="text-sm text-gray-700">
-                      {t('plans.pro.features.unlimitedOptimizations')}
-                    </span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-4 w-4 text-green-500 mr-3" />
-                    <span className="text-sm text-gray-700">
-                      {t('plans.pro.features.advancedAnalysis')}
-                    </span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-4 w-4 text-green-500 mr-3" />
-                    <span className="text-sm text-gray-700">
-                      {t('plans.pro.features.professionalTemplates')}
-                    </span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-4 w-4 text-green-500 mr-3" />
-                    <span className="text-sm text-gray-700">
-                      {t('plans.pro.features.prioritySupport')}
-                    </span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-4 w-4 text-green-500 mr-3" />
-                    <span className="text-sm text-gray-700">
-                      {t('plans.pro.features.multipleFormats')}
-                    </span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-4 w-4 text-green-500 mr-3" />
-                    <span className="text-sm text-gray-700">
-                      {t('plans.pro.features.brazilianMarket')}
-                    </span>
-                  </li>
-                </ul>
-                <Button className="w-full mt-8" asChild>
-                  <Link href="/signup">{t('plans.pro.button')}</Link>
-                </Button>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {renderPricingCard('free')}
+            {renderPricingCard('basic')}
+            {renderPricingCard('pro')}
+            {renderPricingCard('enterprise')}
           </div>
         </div>
 

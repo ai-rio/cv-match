@@ -6,9 +6,11 @@ import logging
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.core.auth import get_current_user
+from app.core.database import SupabaseSession
+from app.middleware.credit_check import check_credits, require_pro_or_credits
 from app.models.optimization import (
     OptimizationDetailResponse,
     OptimizationListResponse,
@@ -20,6 +22,12 @@ from app.services.job_service import JobService
 from app.services.resume_service import ResumeService
 from app.services.score_improvement_service import ScoreImprovementService
 from app.services.supabase.database import SupabaseDatabaseService
+from app.services.usage_limit_service import UsageLimitService
+
+# Database dependency
+async def get_db() -> SupabaseSession:
+    """Get database session."""
+    return SupabaseSession()
 
 logger = logging.getLogger(__name__)
 
@@ -179,25 +187,30 @@ class ExtendedScoreImprovementService(ScoreImprovementService):
 
 @router.post("/start", response_model=OptimizationResponse, status_code=201)
 async def start_optimization(
-    request: StartOptimizationRequest, current_user: dict = Depends(get_current_user)
+    request: StartOptimizationRequest,
+    current_user: dict = Depends(check_credits),
+    db: SupabaseSession = Depends(get_db)
 ) -> OptimizationResponse:
     """
     Start resume optimization process.
 
-    This endpoint creates a job description entry and initiates the
-    optimization workflow for a resume.
+    This endpoint checks user credits, creates a job description entry,
+    initiates the optimization workflow, and atomically deducts credits.
 
     Args:
         request: Optimization request data
-        current_user: Currently authenticated user
+        current_user: Currently authenticated user with credit info
+        db: Database session
 
     Returns:
         OptimizationResponse with optimization information
 
     Raises:
-        HTTPException: If optimization creation fails
+        HTTPException: If optimization creation fails or insufficient credits
     """
     try:
+        from uuid import UUID
+
         # Verify resume exists and belongs to user
         resume_service = ResumeService()
         resume_data = await resume_service.get_resume_with_processed_data(request.resume_id)
@@ -223,7 +236,41 @@ async def start_optimization(
             status=OptimizationStatus.PENDING_PAYMENT,
         )
 
-        logger.info(f"Optimization {result['id']} created for user {current_user['id']}")
+        # Initialize usage limit service and deduct credits atomically
+        usage_limit_service = UsageLimitService(db)
+        user_id = UUID(current_user["id"])
+
+        # Determine credit cost (1 credit for non-pro users, 0 for pro users)
+        credit_cost = 0 if current_user.get("is_pro", False) else 1
+
+        if credit_cost > 0:
+            # Deduct credits atomically
+            credit_deducted = await usage_limit_service.deduct_credits(
+                user_id=user_id,
+                amount=credit_cost,
+                operation_id=result["id"]
+            )
+
+            if not credit_deducted:
+                # Rollback optimization creation if credit deduction failed
+                logger.error(f"Failed to deduct credits for user {current_user['id']}")
+                await optimization_service.update_optimization_status(
+                    optimization_id=result["id"],
+                    status=OptimizationStatus.FAILED,
+                    results={"error_message": "Failed to deduct credits"}
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                    detail="Failed to deduct credits. Please check your credit balance."
+                )
+
+        # Update status to processing since credits have been deducted
+        await optimization_service.update_optimization_status(
+            optimization_id=result["id"],
+            status=OptimizationStatus.PROCESSING
+        )
+
+        logger.info(f"Optimization {result['id']} started for user {current_user['id']}, {credit_cost} credits deducted")
 
         return OptimizationResponse(
             id=result["id"],
@@ -232,7 +279,7 @@ async def start_optimization(
             match_score=None,
             improvements=[],
             keywords=[],
-            status=OptimizationStatus(result["status"]),
+            status=OptimizationStatus.PROCESSING,
             created_at=result["created_at"],
             completed_at=None,
             error_message=None,
@@ -370,17 +417,21 @@ async def list_optimizations(
 
 @router.post("/{optimization_id}/process", response_model=OptimizationDetailResponse)
 async def process_optimization(
-    optimization_id: str, current_user: dict = Depends(get_current_user)
+    optimization_id: str,
+    current_user: dict = Depends(require_pro_or_credits),
+    db: SupabaseSession = Depends(get_db)
 ) -> OptimizationDetailResponse:
     """
     Process an optimization (perform the actual analysis).
 
     This endpoint would typically be called after payment confirmation
-    to start the actual resume optimization process.
+    to start the actual resume optimization process. It uses a more
+    permissive credit check that allows Pro users or users with credits.
 
     Args:
         optimization_id: Optimization ID
-        current_user: Currently authenticated user
+        current_user: Currently authenticated user with credit info
+        db: Database session
 
     Returns:
         OptimizationDetailResponse with processing results
@@ -491,3 +542,51 @@ async def process_optimization(
         raise HTTPException(
             status_code=500, detail=f"Failed to process optimization: {str(e)}"
         ) from e
+
+
+@router.get("/credits/check")
+async def check_user_credits(
+    current_user: dict = Depends(get_current_user),
+    db: SupabaseSession = Depends(get_db)
+):
+    """
+    Check user's current credit balance and status.
+
+    Args:
+        current_user: Currently authenticated user
+        db: Database session
+
+    Returns:
+        User credit information
+    """
+    try:
+        from uuid import UUID
+
+        usage_limit_service = UsageLimitService(db)
+        user_id = UUID(current_user["id"])
+
+        # Get user credits
+        credits_data = await usage_limit_service.get_user_credits(user_id)
+
+        # Get usage stats
+        usage_stats = await usage_limit_service.get_usage_stats(user_id)
+
+        return {
+            "user_id": current_user["id"],
+            "credits_remaining": credits_data.get("credits_remaining", 0),
+            "total_credits": credits_data.get("total_credits", 0),
+            "subscription_tier": credits_data.get("subscription_tier", "free"),
+            "is_pro": credits_data.get("is_pro", False),
+            "usage_stats": {
+                "free_optimizations_used": usage_stats.free_optimizations_used,
+                "paid_optimizations_used": usage_stats.paid_optimizations_used,
+                "total_optimizations_this_month": usage_stats.total_optimizations_this_month,
+                "can_optimize": usage_stats.can_optimize
+            }
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to check credits for user {current_user['id']}: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve credit information"
+        )

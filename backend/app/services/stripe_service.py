@@ -42,7 +42,7 @@ class StripeService:
         self,
         user_id: str,
         user_email: str,
-        plan_type: str = "pro",
+        plan_type: str = "basic",
         success_url: str | None = None,
         cancel_url: str | None = None,
         metadata: dict[str, str] | None = None,
@@ -53,7 +53,7 @@ class StripeService:
         Args:
             user_id: User identifier
             user_email: User email address
-            plan_type: Plan type (free, pro, enterprise)
+            plan_type: Plan type (basic, pro, enterprise)
             success_url: URL to redirect to on success
             cancel_url: URL to redirect to on cancellation
             metadata: Additional metadata
@@ -61,19 +61,19 @@ class StripeService:
         Returns:
             Checkout session data
         """
-        # Brazilian pricing configuration
-        pricing_config = self._get_brazilian_pricing()
+        # Import here to avoid circular imports
+        from app.config.pricing import pricing_config
 
-        if plan_type not in pricing_config:
+        # Get pricing configuration
+        pricing_tier = pricing_config.get_tier(plan_type)
+        if not pricing_tier:
             raise ValueError(f"Invalid plan type: {plan_type}")
-
-        plan_config = pricing_config[plan_type]
 
         # Default URLs for Brazilian market
         if not success_url:
-            success_url = os.getenv("FRONTEND_URL", "http://localhost:3000") + "/sucesso"
+            success_url = os.getenv("FRONTEND_URL", "http://localhost:3000") + "/payment/success"
         if not cancel_url:
-            cancel_url = os.getenv("FRONTEND_URL", "http://localhost:3000") + "/cancelar"
+            cancel_url = os.getenv("FRONTEND_URL", "http://localhost:3000") + "/payment/canceled"
 
         # Prepare metadata
         session_metadata = {
@@ -83,6 +83,7 @@ class StripeService:
             "market": "brazil",
             "language": "pt-br",
             "currency": "brl",
+            "credits": str(pricing_tier.credits),
         }
 
         if metadata:
@@ -92,63 +93,46 @@ class StripeService:
             # Create checkout session with Brazilian configuration
             session_params = {
                 "payment_method_types": ["card"],  # Start with cards, add PIX later
-                "mode": "subscription" if plan_type in ["pro", "enterprise"] else "payment",
+                "mode": "payment",  # One-time payment for credit packages
                 "currency": self.default_currency,
                 "customer_email": user_email,
                 "success_url": success_url,
                 "cancel_url": cancel_url,
                 "metadata": session_metadata,
                 "locale": self.default_locale,
-                "billing_address_collection": "required",
+                "billing_address_collection": "auto",
                 "shipping_address_collection": {"allowed_countries": [self.default_country]},
             }
 
             # Add price based on plan type
-            if plan_type == "free":
+            if pricing_tier.price == 0:
                 # Free plan - no payment required
                 return {
                     "success": True,
                     "session_id": None,
                     "checkout_url": None,
-                    "plan_type": "free",
+                    "plan_type": plan_type,
                     "message": "Free plan activated",
                 }
-            elif plan_type in ["pro", "enterprise"]:
-                # Create recurring price for subscription plans
-                session_params.update(
-                    {
-                        "line_items": [
-                            {
-                                "price_data": {
-                                    "currency": self.default_currency,
-                                    "unit_amount": plan_config["price"],
-                                    "product_data": {
-                                        "name": plan_config["name"],
-                                        "description": plan_config["description"],
-                                        "images": [],
-                                        "metadata": {"market": "brazil", "language": "pt-br"},
-                                    },
-                                    "recurring": {"interval": "month", "interval_count": 1},
-                                },
-                                "quantity": 1,
-                            }
-                        ]
-                    }
-                )
             else:
-                # One-time payment for lifetime plan
+                # Create one-time payment for credit packages
                 session_params.update(
                     {
-                        "line_items": [
+                        "line_items": [  # type: ignore
                             {
                                 "price_data": {
                                     "currency": self.default_currency,
-                                    "unit_amount": plan_config["price"],
+                                    "unit_amount": pricing_tier.price,
                                     "product_data": {
-                                        "name": plan_config["name"],
-                                        "description": plan_config["description"],
+                                        "name": pricing_tier.name,
+                                        "description": pricing_tier.description,
                                         "images": [],
-                                        "metadata": {"market": "brazil", "language": "pt-br"},
+                                        "metadata": {
+                                            "market": "brazil",
+                                            "language": "pt-br",
+                                            "credits": str(pricing_tier.credits),
+                                            "plan": plan_type,
+                                        },
                                     },
                                 },
                                 "quantity": 1,
@@ -158,7 +142,7 @@ class StripeService:
                 )
 
             # Create the checkout session
-            session = stripe.checkout.Session.create(**session_params)
+            session = stripe.checkout.Session.create(session_params)  # type: ignore
 
             return {
                 "success": True,
@@ -166,7 +150,8 @@ class StripeService:
                 "checkout_url": session.url,
                 "plan_type": plan_type,
                 "currency": self.default_currency,
-                "amount": plan_config["price"],
+                "amount": pricing_tier.price,
+                "credits": pricing_tier.credits,
             }
 
         except StripeError as e:
@@ -329,62 +314,6 @@ class StripeService:
                 "error": f"Webhook verification failed: {str(e)}",
                 "error_type": "verification_error",
             }
-
-    def _get_brazilian_pricing(self) -> dict[str, dict[str, Any]]:
-        """
-        Get Brazilian pricing configuration.
-
-        Returns:
-            Pricing configuration for Brazilian market
-        """
-        return {
-            "free": {
-                "name": "Plano Grátis",
-                "description": "Análise básica de currículo",
-                "price": 0,
-                "currency": "brl",
-                "features": ["5 análises por mês", "Matching básico", "Download em PDF"],
-            },
-            "pro": {
-                "name": "Plano Profissional",
-                "description": "Análise avançada com IA para o mercado brasileiro",
-                "price": 2990,  # R$ 29,90
-                "currency": "brl",
-                "features": [
-                    "Análises ilimitadas",
-                    "Matching avançado com IA",
-                    "Templates brasileiros",
-                    "Suporte prioritário",
-                    "Análise de compatibilidade com vagas",
-                ],
-            },
-            "enterprise": {
-                "name": "Plano Empresarial",
-                "description": "Solução completa para recrutamento no Brasil",
-                "price": 9990,  # R$ 99,90
-                "currency": "brl",
-                "features": [
-                    "Recrutamento ilimitado",
-                    "Dashboard avançado",
-                    "API de integração",
-                    "Múltiplos usuários",
-                    "Relatórios detalhados",
-                    "Suporte dedicado",
-                ],
-            },
-            "lifetime": {
-                "name": "Acesso Vitalício",
-                "description": "Acesso vitalício ao plano profissional",
-                "price": 29700,  # R$ 297,00
-                "currency": "brl",
-                "features": [
-                    "Todos os recursos do plano Pro",
-                    "Acesso vitalício",
-                    "Atualizações gratuitas",
-                    "Suporte prioritário vitalício",
-                ],
-            },
-        }
 
     async def get_test_payment_methods(self) -> dict[str, Any]:
         """

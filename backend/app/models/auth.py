@@ -8,6 +8,10 @@ class UserProfile(BaseModel):
     email: EmailStr
     full_name: str | None = None
     avatar_url: str | None = None
+    subscription_tier: str | None = None  # 'free', 'premium', 'enterprise'
+    credits_remaining: int | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
 
 
 class TokenResponse(BaseModel):

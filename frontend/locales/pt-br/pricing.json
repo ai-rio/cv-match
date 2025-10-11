@@ -7,7 +7,7 @@
     "highlight": "Conquiste seu Emprego dos Sonhos",
     "subtitle": "Pare de ser rejeitado por sistemas ATS. Nossa ferramenta com IA ajuda você a criar o currículo perfeito que passa pela triagem automatizada e garante entrevistas.",
     "getStarted": "Começar Gratuitamente",
-    "buyLifetime": "Comprar Acesso Vitalício (R$29)"
+    "buyLifetime": "Comprar Acesso Vitalício (R$297)"
   },
   "socialProof": {
     "resumesOptimized": "Currículos Otimizados",
@@ -35,16 +35,16 @@
     "subtitle": "Tudo o que você precisa saber sobre nossos planos",
     "questions": [
       {
-        "question": "Qual é a diferença entre os planos Gratuito e Pro?",
-        "answer": "O plano Gratuito inclui 1 otimização por mês com recursos básicos. O plano Pro oferece otimizações ilimitadas, modelos de IA avançados, modelos profissionais e suporte prioritário."
+        "question": "Qual é a diferença entre os planos Gratuito e Básico?",
+        "answer": "O plano Gratuito inclui 3 otimizações gratuitas. O plano Básico oferece 10 otimizações, análise avançada com IA e exportação em PDF e DOCX."
       },
       {
-        "question": "Posso cancelar minha assinatura a qualquer momento?",
-        "answer": "Sim! Você pode cancelar sua assinatura mensal a qualquer momento. O plano Pro Vitalício é um pagamento único e não pode ser cancelado."
+        "question": "Como funcionam os créditos?",
+        "answer": "Cada otimização de currículo consome 1 crédito. Os créditos são válidos por 12 meses e podem ser usados em qualquer momento."
       },
       {
         "question": "Quais formatos de arquivo são suportados?",
-        "answer": "Suportamos PDF, DOCX e arquivos de texto. Você pode baixar seus currículos otimizados em formato .txt (plano Gratuito) ou .docx (plano Pro)."
+        "answer": "Suportamos PDF, DOCX e arquivos de texto. Você pode baixar seus currículos otimizados em formato .txt (plano Gratuito) ou .docx (planos pagos)."
       },
       {
         "question": "Como funciona a otimização com IA?",
@@ -58,7 +58,7 @@
   },
   "trust": {
     "moneyBack": "Garantia de devolução de dinheiro em 30 dias",
-    "cancelAnytime": "Cancele a qualquer momento",
+    "cancelAnytime": "Créditos válidos por 12 meses",
     "securePayment": "Pagamento seguro via Stripe",
     "brazilianPayment": "Pagamentos com PIX e Boleto disponíveis"
   },
@@ -66,7 +66,7 @@
     "title": "Pronto para Conquistar seu Emprego dos Sonhos?",
     "subtitle": "Junte-se a milhares de candidatos que otimizaram seus currículos com CV-Match",
     "button": "Começar Gratuitamente",
-    "note": "Não é necessário cartão de crédito • 1 otimização gratuita por mês"
+    "note": "Não é necessário cartão de crédito • 3 otimizações gratuitas"
   },
   "whatsIncluded": "O que está incluído",
   "currentPlan": {
@@ -80,7 +80,7 @@
     },
     "upgrade": {
       "lifetime": "Atualizar para Pro Vitalício",
-      "monthly": "Iniciar Plano Mensal"
+      "monthly": "Comprar Mais Créditos"
     },
     "billing": "Histórico de Cobrança",
     "cancel": "Cancelar Plano",
@@ -94,24 +94,65 @@
       "price": "Gratuito",
       "period": "",
       "button": "Começar Gratuitamente",
+      "credits": "3 créditos",
       "features": {
         "basicAnalysis": "Pontuação básica de compatibilidade ATS",
-        "limitedOptimizations": "1 otimização por mês"
+        "limitedOptimizations": "3 otimizações gratuitas"
+      }
+    },
+    "basic": {
+      "name": "Básico",
+      "description": "Ideal para quem busca oportunidades ocasionalmente",
+      "price": "R$ 29,90",
+      "period": "/pacote",
+      "button": "Comprar Plano Básico",
+      "credits": "10 créditos",
+      "features": {
+        "basicAnalysis": "Pontuação básica de compatibilidade ATS",
+        "tenOptimizations": "10 otimizações de currículo",
+        "advancedAnalysis": "Análise avançada com IA",
+        "downloadFormats": "Exportação em PDF e DOCX"
       }
     },
     "pro": {
       "name": "Pro",
-      "description": "Otimizações ilimitadas e recursos avançados",
-      "price": "R$29",
-      "period": "/mês",
-      "button": "Começar com Pro",
+      "description": "Para quem busca muitas oportunidades ou recrutadores",
+      "price": "R$ 79,00",
+      "period": "/pacote",
+      "button": "Comprar Plano Pro",
+      "credits": "50 créditos",
       "features": {
-        "unlimitedOptimizations": "Otimizações ilimitadas",
+        "unlimitedOptimizations": "50 otimizações de currículo",
         "advancedAnalysis": "Análise avançada com IA",
         "professionalTemplates": "Modelos de currículo profissionais",
         "prioritySupport": "Suporte prioritário",
         "multipleFormats": "Exportação em múltiplos formatos",
-        "brazilianMarket": "Foco no mercado brasileiro"
+        "brazilianMarket": "Foco no mercado brasileiro",
+        "detailedAnalysis": "Análise detalhada de compatibilidade",
+        "keywordOptimization": "Otimização de palavras-chave"
+      }
+    },
+    "enterprise": {
+      "name": "Empresarial",
+      "description": "Solução completa para recrutamento no Brasil",
+      "price": "R$ 99,90",
+      "period": "/pacote",
+      "button": "Comprar Plano Empresarial",
+      "credits": "1000 créditos",
+      "features": {
+        "unlimitedOptimizations": "1000 otimizações de currículo",
+        "advancedAnalysis": "Análise avançada com IA",
+        "professionalTemplates": "Modelos de currículo profissionais",
+        "prioritySupport": "Suporte dedicado",
+        "multipleFormats": "Exportação em múltiplos formatos",
+        "brazilianMarket": "Foco no mercado brasileiro",
+        "detailedAnalysis": "Análise detalhada de compatibilidade",
+        "keywordOptimization": "Otimização de palavras-chave",
+        "apiAccess": "API de integração",
+        "dashboard": "Dashboard avançado",
+        "multiUser": "Múltiplos usuários",
+        "reports": "Relatórios detalhados",
+        "lgpdCompliance": "LGPD Compliance completo"
       }
     }
   },

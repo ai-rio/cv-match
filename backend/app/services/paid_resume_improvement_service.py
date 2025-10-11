@@ -10,7 +10,7 @@ from typing import Any
 from uuid import UUID
 
 from app.core.database import SupabaseSession
-from app.services.usage_limit_service import UsageLimitService
+from app.services.usage_limit_service import UsageLimitError, UsageLimitService
 
 logger = logging.getLogger(__name__)
 

@@ -1,0 +1,27 @@
+{
+  "name": "@cv-match/shared-pricing-config",
+  "version": "1.0.0",
+  "description": "Shared pricing configuration for CV-Match frontend and backend",
+  "main": "pricing-config.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./pricing-config.ts",
+      "import": "./pricing-config.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "pricing-config.ts",
+    "dist"
+  ]
+}

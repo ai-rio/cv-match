@@ -6,10 +6,13 @@ Handles payment webhooks with Brazilian market support and idempotency.
 import logging
 from datetime import UTC, datetime
 from typing import Any
+from uuid import UUID
 
 from supabase import create_client
 
 from app.core.config import settings
+from app.services.usage_limit_service import UsageLimitService
+from app.core.database import SupabaseSession
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +23,8 @@ class WebhookService:
     def __init__(self):
         """Initialize webhook service."""
         self.supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
+        self.db = SupabaseSession()
+        self.usage_limit_service = UsageLimitService(self.db)
 
     def _safe_fromtimestamp(self, timestamp: Any) -> str | None:
         """Safely convert timestamp to ISO string."""
@@ -117,7 +122,7 @@ class WebhookService:
         """
         try:
             existing_event = await self._get_by_field(
-                "stripe_webhook_events", field_name="stripe_event_id", field_value=stripe_event_id
+                "payment_events", field_name="event_id", field_value=stripe_event_id
             )
             return existing_event is not None and existing_event.get("processed", False)
         except Exception as e:
@@ -141,16 +146,37 @@ class WebhookService:
             Logging result
         """
         try:
+            # Extract user_id and payment details from event data
+            user_id = None
+            stripe_customer_id = None
+            stripe_session_id = None
+            amount = None
+            currency = "brl"
+            status = "pending"
+
+            if event_type == "checkout.session.completed":
+                user_id = data.get("metadata", {}).get("user_id")
+                stripe_customer_id = data.get("customer")
+                stripe_session_id = data.get("id")
+                amount = data.get("amount_total", 0)
+                currency = data.get("currency", "brl")
+                status = data.get("payment_status", "unknown")
+
             event_log = {
-                "stripe_event_id": stripe_event_id,
+                "event_id": stripe_event_id,
                 "event_type": event_type,
+                "user_id": user_id,
+                "stripe_customer_id": stripe_customer_id,
+                "stripe_session_id": stripe_session_id,
+                "amount": amount,
+                "currency": currency,
+                "status": status,
+                "payload": data,
                 "processed": processed,
-                "processing_started_at": datetime.now(UTC).isoformat(),
-                "data": data,
                 "created_at": datetime.now(UTC).isoformat(),
             }
 
-            result = await self._create("stripe_webhook_events", event_log)
+            result = await self._create("payment_events", event_log)
             return {
                 "success": True,
                 "webhook_event_id": result.get("id"),
@@ -201,6 +227,9 @@ class WebhookService:
         """
         Process checkout.session.completed event.
 
+        This method handles successful payments and adds credits to user accounts
+        based on the plan purchased.
+
         Args:
             session_data: Checkout session data
 
@@ -219,25 +248,26 @@ class WebhookService:
             if not user_payment_profile:
                 return {"success": False, "error": f"User payment profile {user_id} not found"}
 
-            # Create payment history record
-            payment_record = {
-                "user_id": user_id,
-                "stripe_payment_id": session_data.get("payment_intent"),
-                "stripe_checkout_session_id": session_data.get("id"),
-                "stripe_customer_id": session_data.get("customer"),
-                "amount": session_data.get("amount_total", 0),
-                "currency": session_data.get("currency", "brl"),
-                "status": "completed",
-                "payment_type": (
-                    "subscription_setup" if session_data.get("subscription") else "one_time"
-                ),
-                "description": self._get_payment_description(session_data),
-                "metadata": session_data.get("metadata", {}),
-                "created_at": datetime.now(UTC).isoformat(),
-                "updated_at": datetime.now(UTC).isoformat(),
-            }
+            # Extract payment details
+            amount = session_data.get("amount_total", 0)
+            currency = session_data.get("currency", "brl")
+            plan_type = session_data.get("metadata", {}).get("plan", "unknown")
 
-            payment_result = await self._create("payment_history", payment_record)
+            # Add credits based on plan type
+            credits_added = 0
+            if plan_type in ["pro", "basic"]:
+                credits_added = 50 if plan_type == "pro" else 10
+                try:
+                    await self.usage_limit_service.add_credits(
+                        user_id=UUID(user_id),
+                        amount=credits_added,
+                        source="payment",
+                        description=f"Credits from {plan_type} plan purchase"
+                    )
+                    logger.info(f"Added {credits_added} credits to user {user_id} for {plan_type} plan")
+                except Exception as e:
+                    logger.error(f"Failed to add credits to user {user_id}: {str(e)}")
+                    return {"success": False, "error": f"Failed to add credits: {str(e)}"}
 
             # Update user payment profile with Stripe customer ID if not set
             if not user_payment_profile.get("stripe_customer_id") and session_data.get("customer"):
@@ -251,6 +281,26 @@ class WebhookService:
                     # If update fails due to duplicate customer ID, it's already set - continue
                     logger.warning(f"Could not update stripe_customer_id (may already exist): {e}")
 
+            # Create payment history record
+            payment_record = {
+                "user_id": user_id,
+                "stripe_payment_id": session_data.get("payment_intent"),
+                "stripe_checkout_session_id": session_data.get("id"),
+                "stripe_customer_id": session_data.get("customer"),
+                "amount": amount,
+                "currency": currency,
+                "status": "completed",
+                "payment_type": (
+                    "subscription_setup" if session_data.get("subscription") else "one_time"
+                ),
+                "description": self._get_payment_description(session_data),
+                "metadata": session_data.get("metadata", {}),
+                "created_at": datetime.now(UTC).isoformat(),
+                "updated_at": datetime.now(UTC).isoformat(),
+            }
+
+            payment_result = await self._create("payment_history", payment_record)
+
             # If it's a subscription, create subscription record
             if session_data.get("subscription"):
                 await self._create_subscription_record(session_data, user_id)
@@ -259,8 +309,10 @@ class WebhookService:
                 "success": True,
                 "payment_id": payment_result.get("id"),
                 "user_id": user_id,
-                "amount": session_data.get("amount_total"),
-                "currency": session_data.get("currency"),
+                "amount": amount,
+                "currency": currency,
+                "credits_added": credits_added,
+                "plan_type": plan_type,
             }
 
         except Exception as e:
@@ -435,6 +487,29 @@ class WebhookService:
             if not user_id:
                 return {"success": False, "error": "User ID not found"}
 
+            # Add credits for subscription renewals
+            amount_paid = invoice_data.get("amount_paid", 0)
+            if amount_paid > 0:
+                # Determine credits based on amount (assuming standard pricing)
+                if amount_paid >= 2990:  # R$ 29,90 - Pro plan
+                    credits_to_add = 50
+                elif amount_paid >= 990:  # R$ 9,90 - Basic plan
+                    credits_to_add = 10
+                else:
+                    credits_to_add = 0
+
+                if credits_to_add > 0:
+                    try:
+                        await self.usage_limit_service.add_credits(
+                            user_id=UUID(user_id),
+                            amount=credits_to_add,
+                            source="subscription_renewal",
+                            description=f"Monthly credits from subscription renewal"
+                        )
+                        logger.info(f"Added {credits_to_add} credits to user {user_id} for subscription renewal")
+                    except Exception as e:
+                        logger.error(f"Failed to add credits for subscription renewal: {str(e)}")
+
             # Create payment history record
             payment_record = {
                 "user_id": user_id,
@@ -516,12 +591,37 @@ class WebhookService:
             if not user_id:
                 return {"success": False, "error": "User ID not found in payment intent metadata"}
 
+            # Add credits for one-time payments
+            amount = intent_data.get("amount", 0)
+            if amount >= 29900:  # R$ 297,00 - Lifetime plan
+                credits_to_add = 1000  # Enterprise tier equivalent
+            elif amount >= 9990:  # R$ 99,90 - Enterprise monthly
+                credits_to_add = 1000
+            elif amount >= 2990:  # R$ 29,90 - Pro plan
+                credits_to_add = 50
+            elif amount >= 990:  # R$ 9,90 - Basic plan
+                credits_to_add = 10
+            else:
+                credits_to_add = 0
+
+            if credits_to_add > 0:
+                try:
+                    await self.usage_limit_service.add_credits(
+                        user_id=UUID(user_id),
+                        amount=credits_to_add,
+                        source="payment",
+                        description=f"Credits from one-time payment of R$ {amount/100:.2f}"
+                    )
+                    logger.info(f"Added {credits_to_add} credits to user {user_id} for one-time payment")
+                except Exception as e:
+                    logger.error(f"Failed to add credits for one-time payment: {str(e)}")
+
             # Create payment history record
             payment_record = {
                 "user_id": user_id,
                 "stripe_payment_id": intent_data.get("id"),
                 "stripe_customer_id": intent_data.get("customer"),
-                "amount": intent_data.get("amount", 0),
+                "amount": amount,
                 "currency": intent_data.get("currency", "brl"),
                 "status": "completed",
                 "payment_type": "one_time",
@@ -537,7 +637,8 @@ class WebhookService:
                 "success": True,
                 "payment_id": payment_result.get("id"),
                 "user_id": user_id,
-                "amount": intent_data.get("amount"),
+                "amount": amount,
+                "credits_added": credits_to_add,
             }
 
         except Exception as e:
@@ -636,7 +737,6 @@ class WebhookService:
         try:
             update_data = {
                 "processed": True,
-                "processing_completed_at": datetime.now(UTC).isoformat(),
                 "processed_at": datetime.now(UTC).isoformat(),
                 "processing_time_ms": processing_time_ms,
             }
@@ -646,11 +746,11 @@ class WebhookService:
 
             # Find and update the event
             existing_event = await self._get_by_field(
-                "stripe_webhook_events", "stripe_event_id", stripe_event_id
+                "payment_events", "event_id", stripe_event_id
             )
 
             if existing_event:
-                await self._update("stripe_webhook_events", existing_event["id"], update_data)
+                await self._update("payment_events", existing_event["id"], update_data)
         except Exception as e:
             logger.error(f"Error marking event as processed: {str(e)}")
 
@@ -687,6 +787,7 @@ class WebhookService:
             "enterprise": "Plano Empresarial",
             "lifetime": "Acesso Vitalício",
             "free": "Plano Grátis",
+            "basic": "Plano Básico",
         }
 
         plan_name = plan_names.get(plan, f"Plano {plan}")

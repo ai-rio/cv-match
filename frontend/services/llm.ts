@@ -16,42 +16,16 @@ const API_URL =
     ? process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
     : 'http://backend:8000'; // When running server-side in Docker, use the service name
 
-// Type definitions
-export interface TextGenerationRequest {
-  prompt: string;
-  model?: string;
-  max_tokens?: number;
-  temperature?: number;
-  provider?: 'openai' | 'anthropic';
-  [key: string]: unknown; // Allow additional properties
-}
+// Import types from central type definitions
+import {
+  EmbeddingRequest,
+  EmbeddingResponse,
+  TextGenerationRequest,
+  TextGenerationResponse,
+} from '../types/api';
 
-export interface TextGenerationResponse {
-  text: string;
-  model: string;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number | null;
-    total_tokens: number;
-  };
-}
-
-export interface EmbeddingRequest {
-  text: string;
-  model?: string;
-  provider?: 'openai' | 'anthropic';
-  [key: string]: unknown; // Allow additional properties
-}
-
-export interface EmbeddingResponse {
-  embedding: number[];
-  model: string;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number | null;
-    total_tokens: number;
-  };
-}
+// Re-export types for convenience
+export type { EmbeddingRequest, EmbeddingResponse, TextGenerationRequest, TextGenerationResponse };
 
 // Helper to get authentication token
 async function getAuthToken() {
@@ -105,9 +79,9 @@ async function apiRequest<T = unknown>(
 export async function generateText(
   request: TextGenerationRequest
 ): Promise<TextGenerationResponse> {
-  return apiRequest('/api/llm/generate', 'POST', request);
+  return apiRequest('/api/llm/generate', 'POST', request as unknown as Record<string, unknown>);
 }
 
 export async function createEmbedding(request: EmbeddingRequest): Promise<EmbeddingResponse> {
-  return apiRequest('/api/llm/embedding', 'POST', request);
+  return apiRequest('/api/llm/embedding', 'POST', request as unknown as Record<string, unknown>);
 }

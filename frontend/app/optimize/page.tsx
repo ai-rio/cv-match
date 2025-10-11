@@ -113,20 +113,20 @@ interface JobDescriptionData {
 }
 
 const OPTIMIZATION_TIER = {
-  id: 'ai-optimization',
-  name: 'AI Resume Optimization',
-  price: 1999, // $19.99 in cents
-  currency: 'USD',
+  id: 'basic-credit',
+  name: 'Pacote de Créditos Básico',
+  price: 1900, // R$19 in cents
+  currency: 'BRL',
   interval: 'lifetime' as const,
-  description: 'One-time AI-powered resume optimization to match your target job description',
+  description: '10 créditos para otimização de currículo com IA',
   features: [
-    'AI-powered resume optimization',
-    'ATS-friendly formatting',
-    'Keyword optimization',
-    'Professional enhancement',
-    'Side-by-side comparison',
-    'Download optimized .docx file',
-    'Results in 2-3 minutes',
+    '10 otimizações de currículo com IA',
+    'Formatação compatível com ATS',
+    'Otimização de palavras-chave',
+    'Aprimoramento profissional',
+    'Download em formato .docx',
+    'Resultados em 2-3 minutos',
+    'Créditos não expiram',
   ],
   isFree: false,
 };
@@ -216,14 +216,41 @@ function OptimizePageContent() {
           return;
         }
 
-        // TODO: Check if user can optimize (has credits or is pro)
-        // For now, proceed to payment
+        // Check if user has available credits
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          setError(translations.errors.notAuthenticated);
+          router.push('/auth/login');
+          return;
+        }
+
+        const creditsResponse = await fetch(`${API_URL}/api/optimizations/credits/check`, {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
+
+        if (creditsResponse.ok) {
+          const creditsData = await creditsResponse.json();
+          if (creditsData.credits > 0) {
+            // User has credits, proceed to optimization
+            setCurrentStep('processing');
+            await startOptimization();
+            return;
+          }
+        }
+
+        // No credits available, proceed to payment
         setCurrentStep('payment');
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to check usage limits');
       }
     },
-    [router]
+    [router, startOptimization]
   );
 
   const handlePaymentSuccess = useCallback(async () => {
@@ -487,7 +514,7 @@ function OptimizePageContent() {
                   <div className="border-t pt-4">
                     <div className="flex items-center justify-between text-lg font-bold">
                       <span>{translations.payment.total}</span>
-                      <span>${(OPTIMIZATION_TIER.price / 100).toFixed(2)} USD</span>
+                      <span>R${(OPTIMIZATION_TIER.price / 100).toFixed(2)}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -888,7 +915,7 @@ function PaymentFlow({
         throw new Error('Você precisa estar autenticado');
       }
 
-      const response = await fetch(`${API_URL}/api/payments/create-checkout-session`, {
+      const response = await fetch(`${API_URL}/api/payments/create-checkout`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -931,7 +958,7 @@ function PaymentFlow({
             <h3 className="text-xl font-semibold">{tier.name}</h3>
             <p className="text-gray-600">{tier.description}</p>
           </div>
-          <div className="text-3xl font-bold mb-6">${(tier.price / 100).toFixed(2)}</div>
+          <div className="text-3xl font-bold mb-6">R${(tier.price / 100).toFixed(2)}</div>
 
           <div className="text-left mb-6">
             <h4 className="font-medium mb-2">Features:</h4>
@@ -952,7 +979,7 @@ function PaymentFlow({
                 {translations.payment.processing}
               </>
             ) : (
-              `Pay $${(tier.price / 100).toFixed(2)} USD`
+              `Pagar R$${(tier.price / 100).toFixed(2)}`
             )}
           </Button>
         </div>

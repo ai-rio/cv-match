@@ -36,6 +36,15 @@ class Settings(BaseSettings):
     QDRANT_API_KEY: str = ""
     QDRANT_COLLECTION_NAME: str = "default_collection"
 
+    # Stripe Configuration
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_PUBLISHABLE_KEY: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
+    STRIPE_WEBHOOK_URL: str = ""
+
+    # Frontend Configuration
+    FRONTEND_URL: str = "http://localhost:3000"
+
     # Security Settings
     # Input Sanitization
     MAX_PROMPT_LENGTH: int = 10000

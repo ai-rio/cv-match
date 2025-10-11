@@ -2,7 +2,7 @@
 Pydantic models for usage tracking services.
 """
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 from uuid import UUID
 
@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 class UsageTrackingBase(BaseModel):
     """Base model for usage tracking."""
     user_id: UUID
-    month_date: datetime
+    month_date: date
     free_optimizations_used: int = Field(default=0, ge=0)
     paid_optimizations_used: int = Field(default=0, ge=0)
 
@@ -39,6 +39,7 @@ class UsageLimitCheckResponse(BaseModel):
     free_optimizations_used: int
     free_optimizations_limit: int
     remaining_free_optimizations: int
+    tier: str = "free"  # User's subscription tier
     reason: Optional[str] = None
     upgrade_prompt: Optional[str] = None
 
@@ -46,7 +47,7 @@ class UsageLimitCheckResponse(BaseModel):
 class UsageStatsResponse(BaseModel):
     """Response model for usage statistics."""
     user_id: UUID
-    current_month_date: datetime
+    current_month_date: date
     free_optimizations_used: int
     paid_optimizations_used: int
     free_optimizations_limit: int
@@ -76,3 +77,13 @@ class CreditTransaction(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UserCreditsResponse(BaseModel):
+    """Response model for user credits endpoint."""
+    credits_remaining: int = Field(..., description="Number of credits remaining")
+    tier: str = Field(..., description="User's subscription tier")
+    can_optimize: bool = Field(..., description="Whether user can perform optimizations")
+    upgrade_prompt: Optional[str] = Field(None, description="Upgrade prompt for users with insufficient credits")
+    is_pro: bool = Field(..., description="Whether user has Pro status")
+    total_credits: int = Field(..., description="Total credits ever purchased/earned")
