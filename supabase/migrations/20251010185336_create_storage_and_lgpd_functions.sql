@@ -260,8 +260,7 @@ COMMENT ON FUNCTION public.permanent_delete_user_data IS 'Permanently deletes al
 -- =====================================================
 
 -- Storage bucket comments are managed by Supabase
-COMMENT ON COLUMN storage.buckets.file_size_limit IS 'Maximum file size in bytes';
-COMMENT ON COLUMN storage.buckets.allowed_mime_types IS 'Array of allowed MIME types for uploads';
+-- Note: Cannot add comments to storage.buckets table as it's managed by Supabase
 
 -- =====================================================
 -- GRANTS AND PERMISSIONS
