@@ -85,3 +85,13 @@ class DatabaseOperations:
         """
         result = self.db.client.table(table).delete().eq(id_column, id_value).execute()
         return bool(result.data)
+
+
+def get_supabase_client() -> Client:
+    """
+    Get a Supabase client instance.
+
+    Returns:
+        Supabase client instance
+    """
+    return create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)

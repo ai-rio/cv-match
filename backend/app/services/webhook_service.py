@@ -333,15 +333,39 @@ class WebhookService:
         """
         try:
             user_id = subscription_data.get("metadata", {}).get("user_id")
+            tier_id = subscription_data.get("metadata", {}).get("tier_id")
+
             if not user_id:
                 return {"success": False, "error": "User ID not found in subscription metadata"}
 
-            subscription_record = await self._create_subscription_record(subscription_data, user_id)
+            # Use subscription service to create subscription record
+            from app.services.subscription_service import subscription_service
+            from app.models.subscription import SubscriptionCreate
+
+            # Extract price ID from subscription items
+            price_id = None
+            if subscription_data.get("items", {}).get("data"):
+                price_id = subscription_data["items"]["data"][0].get("price", {}).get("id")
+
+            # Create subscription using service
+            subscription_create = SubscriptionCreate(
+                user_id=user_id,
+                tier_id=tier_id or "flow_pro",  # Default if not specified
+                status=subscription_data.get("status", "active"),
+                stripe_subscription_id=subscription_data.get("id"),
+                stripe_customer_id=subscription_data.get("customer"),
+                stripe_price_id=price_id,
+            )
+
+            subscription_details = await subscription_service.create_subscription(subscription_create)
+
+            logger.info(f"Created subscription {subscription_details.id} for user {user_id}")
 
             return {
                 "success": True,
-                "subscription_id": subscription_record.get("id"),
+                "subscription_id": subscription_details.id,
                 "user_id": user_id,
+                "tier_id": tier_id,
                 "status": subscription_data.get("status"),
             }
 
@@ -366,7 +390,11 @@ class WebhookService:
             if not stripe_subscription_id:
                 return {"success": False, "error": "Subscription ID not found"}
 
-            # Find existing subscription
+            # Use subscription service to handle updates
+            from app.services.subscription_service import subscription_service
+            from app.models.subscription import SubscriptionUpdate
+
+            # Find existing subscription to get local ID
             existing_sub = await self._get_by_field(
                 "subscriptions", "stripe_subscription_id", stripe_subscription_id
             )
@@ -377,36 +405,33 @@ class WebhookService:
                     "error": f"Subscription {stripe_subscription_id} not found",
                 }
 
+            # Check for tier changes
+            new_price_id = None
+            if subscription_data.get("items", {}).get("data"):
+                new_price_id = subscription_data["items"]["data"][0].get("price", {}).get("id")
+
+            # Determine tier_id from price_id or metadata
+            tier_id = subscription_data.get("metadata", {}).get("tier_id")
+
             # Update subscription
-            current_period_start = subscription_data.get("current_period_start")
-            current_period_end = subscription_data.get("current_period_end")
+            update_data = SubscriptionUpdate(
+                status=subscription_data.get("status"),
+                stripe_price_id=new_price_id,
+                tier_id=tier_id,
+                cancel_at_period_end=subscription_data.get("cancel_at_period_end", False),
+            )
 
-            update_data = {
-                "status": subscription_data.get("status"),
-                "current_period_start": (
-                    datetime.fromtimestamp(current_period_start).isoformat()
-                    if current_period_start is not None
-                    else None
-                ),
-                "current_period_end": (
-                    datetime.fromtimestamp(current_period_end).isoformat()
-                    if current_period_end is not None
-                    else None
-                ),
-                "cancel_at_period_end": subscription_data.get("cancel_at_period_end", False),
-                "updated_at": datetime.now(UTC).isoformat(),
-            }
+            subscription_details = await subscription_service.update_subscription(
+                existing_sub["id"], update_data
+            )
 
-            canceled_at = subscription_data.get("canceled_at")
-            if canceled_at is not None:
-                update_data["canceled_at"] = datetime.fromtimestamp(canceled_at).isoformat()
-
-            await self._update("subscriptions", existing_sub["id"], update_data)
+            logger.info(f"Updated subscription {existing_sub['id']}: status={subscription_data.get('status')}")
 
             return {
                 "success": True,
                 "subscription_id": existing_sub["id"],
                 "status": subscription_data.get("status"),
+                "tier_id": tier_id,
             }
 
         except Exception as e:
@@ -430,23 +455,22 @@ class WebhookService:
             if not stripe_subscription_id:
                 return {"success": False, "error": "Subscription ID not found"}
 
-            # Find and update existing subscription
+            # Use subscription service to handle cancellation
+            from app.services.subscription_service import subscription_service
+
+            # Find existing subscription to get local ID
             existing_sub = await self._get_by_field(
                 "subscriptions", "stripe_subscription_id", stripe_subscription_id
             )
 
             if existing_sub:
-                await self._update(
-                    "subscriptions",
-                    existing_sub["id"],
-                    {
-                        "status": "canceled",
-                        "canceled_at": datetime.fromtimestamp(
-                            subscription_data.get("canceled_at", datetime.now(UTC).timestamp())
-                        ).isoformat(),
-                        "updated_at": datetime.now(UTC).isoformat(),
-                    },
+                # Cancel subscription immediately (deleted in Stripe)
+                subscription_details = await subscription_service.cancel_subscription(
+                    existing_sub["id"], immediate=True
                 )
+
+                logger.info(f"Canceled subscription {existing_sub['id']} (deleted in Stripe)")
+
                 return {
                     "success": True,
                     "subscription_id": existing_sub["id"],
@@ -476,10 +500,12 @@ class WebhookService:
         """
         try:
             user_id = invoice_data.get("metadata", {}).get("user_id")
-            if not user_id and invoice_data.get("subscription"):
+            subscription_id = invoice_data.get("subscription")
+
+            if not user_id and subscription_id:
                 # Try to get user_id from subscription
                 subscription = await self._get_by_field(
-                    "subscriptions", "stripe_subscription_id", invoice_data.get("subscription")
+                    "subscriptions", "stripe_subscription_id", subscription_id
                 )
                 if subscription:
                     user_id = subscription.get("user_id")
@@ -487,39 +513,33 @@ class WebhookService:
             if not user_id:
                 return {"success": False, "error": "User ID not found"}
 
-            # Add credits for subscription renewals
-            amount_paid = invoice_data.get("amount_paid", 0)
-            if amount_paid > 0:
-                # Determine credits based on amount (assuming standard pricing)
-                if amount_paid >= 2990:  # R$ 29,90 - Pro plan
-                    credits_to_add = 50
-                elif amount_paid >= 990:  # R$ 9,90 - Basic plan
-                    credits_to_add = 10
-                else:
-                    credits_to_add = 0
+            # Process subscription renewal if it's a subscription invoice
+            if subscription_id:
+                # Find local subscription
+                local_subscription = await self._get_by_field(
+                    "subscriptions", "stripe_subscription_id", subscription_id
+                )
 
-                if credits_to_add > 0:
+                if local_subscription:
+                    # Use subscription service to process renewal
+                    from app.services.subscription_service import subscription_service
+
                     try:
-                        await self.usage_limit_service.add_credits(
-                            user_id=UUID(user_id),
-                            amount=credits_to_add,
-                            source="subscription_renewal",
-                            description=f"Monthly credits from subscription renewal"
-                        )
-                        logger.info(f"Added {credits_to_add} credits to user {user_id} for subscription renewal")
+                        await subscription_service.process_period_renewal(local_subscription["id"])
+                        logger.info(f"Processed renewal for subscription {local_subscription['id']}")
                     except Exception as e:
-                        logger.error(f"Failed to add credits for subscription renewal: {str(e)}")
+                        logger.error(f"Failed to process subscription renewal: {str(e)}")
 
             # Create payment history record
             payment_record = {
                 "user_id": user_id,
                 "stripe_payment_id": invoice_data.get("payment_intent"),
-                "stripe_subscription_id": invoice_data.get("subscription"),
+                "stripe_subscription_id": subscription_id,
                 "amount": invoice_data.get("amount_paid", 0),
                 "currency": invoice_data.get("currency", "brl"),
                 "status": "completed",
-                "payment_type": "subscription_payment",
-                "description": f"Pagamento da assinatura - {invoice_data.get('id')}",
+                "payment_type": "subscription_payment" if subscription_id else "one_time",
+                "description": f"Pagamento da assinatura - {invoice_data.get('id')}" if subscription_id else f"Pagamento único - {invoice_data.get('id')}",
                 "metadata": invoice_data.get("metadata", {}),
                 "created_at": datetime.now(UTC).isoformat(),
                 "updated_at": datetime.now(UTC).isoformat(),
@@ -532,6 +552,7 @@ class WebhookService:
                 "payment_history_id": payment_result.get("id"),
                 "user_id": user_id,
                 "amount": invoice_data.get("amount_paid"),
+                "subscription_renewed": bool(local_subscription),
             }
 
         except Exception as e:
@@ -553,17 +574,23 @@ class WebhookService:
             if not subscription_id:
                 return {"success": False, "error": "Subscription ID not found in invoice"}
 
-            # Find and update subscription status
+            # Find and update subscription status using subscription service
             subscription = await self._get_by_field(
                 "subscriptions", "stripe_subscription_id", subscription_id
             )
 
             if subscription:
-                await self._update(
-                    "subscriptions",
+                from app.services.subscription_service import subscription_service
+                from app.models.subscription import SubscriptionUpdate
+
+                # Update subscription status to past_due
+                await subscription_service.update_subscription(
                     subscription["id"],
-                    {"status": "past_due", "updated_at": datetime.now(UTC).isoformat()},
+                    SubscriptionUpdate(status="past_due")
                 )
+
+                logger.warning(f"Subscription {subscription['id']} marked as past_due due to payment failure")
+
                 return {
                     "success": True,
                     "subscription_id": subscription["id"],
