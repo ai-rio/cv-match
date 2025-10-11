@@ -121,4 +121,4 @@ git checkout -b feature/p1-payment-integration
 
 **Ready to execute!** 🎉
 
-See: ../p1-agent-swarm-strategy.md for detailed strategy
+See: [../p1-agent-swarm-strategy.md](../p1-agent-swarm-strategy.md) for detailed strategy
