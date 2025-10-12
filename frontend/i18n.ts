@@ -26,6 +26,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     'errors',
     'usage',
     'blog',
+    'subscriptions',
   ];
 
   // Load each namespace with fallback to pt-br

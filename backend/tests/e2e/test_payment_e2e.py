@@ -266,7 +266,7 @@ class TestPaymentE2E:
             "payment_type": "subscription",
             "created_at": datetime.now(UTC).isoformat()
         }]):
-            from app.services.payment_verification_service import payment_verification_service
+            from app.services.payment_verification import payment_verification_service
             history = await payment_verification_service.get_user_payment_history(self.test_user_id)
 
         assert history["success"] is True

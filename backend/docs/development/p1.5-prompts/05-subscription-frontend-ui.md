@@ -24,7 +24,7 @@ Create the frontend UI for subscription management including pricing page, subsc
 ### 1. Shadcn Components
 ```bash
 cd frontend
-npx shadcn-ui@latest add card badge tabs dialog button alert
+bux shadcn-ui@latest add card badge tabs dialog button alert
 ```
 
 ### 2. Check Shadcn Blocks
@@ -453,7 +453,7 @@ grep -r "Assinar\|Cancelar" components/pricing --include="*.tsx"
 
 **Solution**:
 ```bash
-npx shadcn-ui@latest add card badge tabs dialog button
+bux shadcn-ui@latest add card badge tabs dialog button
 ```
 
 ### Issue 2: Translation Keys Not Found

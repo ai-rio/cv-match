@@ -1,0 +1,76 @@
+{
+  "title": "Escolha seu plano",
+  "subtitle": "Preços simples e transparentes",
+  "tabs": {
+    "credits": "Créditos (Flex)",
+    "subscriptions": "Assinaturas (Flow)"
+  },
+  "flow_starter": {
+    "name": "Flow Starter",
+    "description": "Perfeito para começar sua busca de emprego",
+    "price": "R$ 29,90",
+    "period": "por mês",
+    "analyses": "{count} otimizações/mês",
+    "cta": "Assinar Agora",
+    "features": [
+      "10 otimizações de currículo por mês",
+      "Análise básica com IA",
+      "Exportação em PDF e DOCX",
+      "Suporte por e-mail"
+    ]
+  },
+  "flow_pro": {
+    "name": "Flow Pro",
+    "description": "Ideal para busca ativa de emprego",
+    "price": "R$ 49,90",
+    "period": "por mês",
+    "analyses": "{count} otimizações/mês",
+    "popular": "Mais Popular",
+    "cta": "Assinar Agora",
+    "features": [
+      "25 otimizações de currículo por mês",
+      "Análise avançada com IA",
+      "Modelos profissionais",
+      "Suporte prioritário",
+      "Exportação em múltiplos formatos",
+      "Otimização de palavras-chave"
+    ]
+  },
+  "flow_business": {
+    "name": "Flow Business",
+    "description": "Para recrutadores e profissionais liberais",
+    "price": "R$ 99,90",
+    "period": "por mês",
+    "analyses": "{count} otimizações/mês",
+    "cta": "Assinar Agora",
+    "features": [
+      "100 otimizações de currículo por mês",
+      "Análise empresarial com IA",
+      "Acesso a API",
+      "Suporte dedicado",
+      "Dashboard avançado",
+      "Relatórios detalhados",
+      "Múltiplos usuários",
+      "LGPD Compliance completo"
+    ]
+  },
+  "manage": {
+    "title": "Gerenciar Assinatura",
+    "current_plan": "Plano atual",
+    "usage": "Uso este mês",
+    "analyses_used": "{used} de {total} otimizações usadas",
+    "rollover": "{count} créditos acumulados",
+    "next_billing": "Próxima cobrança",
+    "upgrade": "Alterar plano",
+    "cancel": "Cancelar assinatura"
+  },
+  "cancel_dialog": {
+    "title": "Cancelar Assinatura",
+    "description": "Tem certeza que deseja cancelar sua assinatura?",
+    "consequences": "Ao cancelar:",
+    "lose_access": "Você perderá acesso às otimizações mensais",
+    "keep_until": "Seu acesso continuará até {date}",
+    "keep": "Manter assinatura",
+    "confirm": "Confirmar cancelamento"
+  }
+}

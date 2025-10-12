@@ -19,7 +19,7 @@ from app.services.stripe_service import stripe_service
 from app.core.auth import get_current_user
 from app.config.pricing import pricing_config
 
-router = APIRouter(prefix="/api/subscriptions", tags=["subscriptions"])
+router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
 logger = logging.getLogger(__name__)
 
 

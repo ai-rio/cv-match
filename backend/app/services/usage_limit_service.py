@@ -7,6 +7,7 @@ It integrates with user profiles to determine Pro status and checks monthly usag
 
 import logging
 from datetime import date
+from typing import Any
 from uuid import UUID
 
 from app.core.database import SupabaseSession
@@ -60,7 +61,7 @@ class UsageLimitService:
         self.db = db
         self.usage_tracking_service = UsageTrackingService(db)
 
-    async def get_user_credits(self, user_id: UUID) -> dict:
+    async def get_user_credits(self, user_id: UUID) -> dict[str, Any]:
         """
         Get user credit information.
 

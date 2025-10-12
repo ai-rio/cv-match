@@ -3,7 +3,7 @@
 echo "📝 Validating commit message..."
 
 # Run commitlint
-cd frontend && npx commitlint --edit $1 --config commitlint.config.cjs || {
+cd frontend && bux commitlint --edit $1 --config commitlint.config.cjs || {
     echo ""
     echo "❌ Commit message validation failed!"
     echo ""

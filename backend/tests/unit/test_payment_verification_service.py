@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.services.payment_verification_service import (
+from app.services.payment_verification import (
     PaymentVerificationService,
     payment_verification_service,
 )

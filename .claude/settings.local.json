@@ -77,7 +77,16 @@
       "Bash(uv sync:*)",
       "Bash(uv run:*)",
       "Bash(pip3 install:*)",
-      "mcp__serena__think_about_whether_you_are_done"
+      "mcp__serena__think_about_whether_you_are_done",
+      "Bash(bun eslint:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx eslint:*)",
+      "Bash(./node_modules/.bin/tsc:*)",
+      "Bash(./node_modules/.bin/eslint .)",
+      "Bash(npm install:*)",
+      "Bash(tsc:*)",
+      "Bash(npx typescript:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": [],

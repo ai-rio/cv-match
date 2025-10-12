@@ -2,7 +2,6 @@
 
 import { CheckCircle } from 'lucide-react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/client';
 
 export default function PaymentSuccess() {
-  const t = useTranslations('payment');
   const [credits, setCredits] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 

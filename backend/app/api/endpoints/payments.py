@@ -21,6 +21,26 @@ async def get_db() -> SupabaseSession:
     """Get database session."""
     return SupabaseSession()
 
+# Credit tiers configuration
+CREDIT_TIERS = {
+    "basic": 10,
+    "pro": 50,
+    "enterprise": 1000,
+}
+
+def get_credits_for_tier(tier: str) -> int:
+    """Get credits for a given tier."""
+    return CREDIT_TIERS.get(tier, 10)  # Default to 10 for unknown tiers
+
+def get_price_id_for_tier(tier: str) -> str:
+    """Get Stripe price ID for a given tier."""
+    # Map to Stripe plan types
+    return {
+        "basic": "pro",       # Basic maps to pro in Stripe
+        "pro": "pro",
+        "enterprise": "enterprise",
+    }.get(tier, "pro")  # Default to pro
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/payments", tags=["Payments"])

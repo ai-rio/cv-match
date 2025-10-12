@@ -206,7 +206,7 @@ git push --no-verify
 ### Lint-staged Issues:
 ```bash
 # Debug lint-staged configuration
-npx lint-staged --verbose
+bux lint-staged --verbose
 
 # Check configuration
 cat .lintstagedrc.js

@@ -5,6 +5,7 @@ API endpoints for resume optimization workflow.
 import logging
 import uuid
 from datetime import datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -40,7 +41,7 @@ class ExtendedJobService(JobService):
 
     async def create_job_description(
         self, user_id: str, title: str, company: str, description: str
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Create a job description entry for optimization.
 
@@ -83,7 +84,7 @@ class ExtendedScoreImprovementService(ScoreImprovementService):
 
     async def create_optimization(
         self, user_id: str, resume_id: str, job_description_id: str, status: OptimizationStatus
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Create an optimization record.
 
@@ -119,7 +120,7 @@ class ExtendedScoreImprovementService(ScoreImprovementService):
             "created_at": result.get("created_at", datetime.utcnow()),
         }
 
-    async def get_optimization(self, optimization_id: str, user_id: str) -> dict | None:
+    async def get_optimization(self, optimization_id: str, user_id: str) -> dict[str, Any] | None:
         """
         Get optimization by ID for a specific user.
 
@@ -141,7 +142,7 @@ class ExtendedScoreImprovementService(ScoreImprovementService):
 
     async def list_optimizations(
         self, user_id: str, limit: int = 10, offset: int = 0
-    ) -> list[dict]:
+    ) -> list[dict[str, Any]]:
         """
         List optimizations for a specific user.
 
@@ -161,8 +162,8 @@ class ExtendedScoreImprovementService(ScoreImprovementService):
         return [opt for opt in optimizations if opt.get("user_id") == user_id]
 
     async def update_optimization_status(
-        self, optimization_id: str, status: OptimizationStatus, results: dict | None = None
-    ) -> dict:
+        self, optimization_id: str, status: OptimizationStatus, results: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """
         Update optimization status and results.
 

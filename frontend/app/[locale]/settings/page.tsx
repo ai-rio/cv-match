@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
+import { SubscriptionDashboard } from '@/components/account/SubscriptionDashboard';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -273,33 +274,7 @@ export default function SettingsPage() {
             {/* Billing Tab */}
             <TabsContent value="billing">
               <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{t('billing.currentPlan')}</CardTitle>
-                    <CardDescription>Manage your subscription and usage</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between mb-6">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold">Free Plan</h3>
-                          <Badge variant="secondary">Active</Badge>
-                        </div>
-                        <p className="text-sm text-gray-600 mt-1">1 optimization per month</p>
-                      </div>
-                      <Button>{t('billing.upgrade')}</Button>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">{t('billing.usage')}</span>
-                        <span className="text-sm font-medium">0 of 1 used</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: '0%' }} />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <SubscriptionDashboard />
 
                 <Card>
                   <CardHeader>

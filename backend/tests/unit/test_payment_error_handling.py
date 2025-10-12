@@ -13,7 +13,7 @@ import stripe
 
 from app.services.stripe_service import StripeService
 from app.services.usage_limit_service import UsageLimitService, UsageLimitError
-from app.services.payment_verification_service import PaymentVerificationService
+from app.services.payment_verification import PaymentVerificationService
 from app.services.webhook_service import WebhookService
 from app.core.database import SupabaseSession
 

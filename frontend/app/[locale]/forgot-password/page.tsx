@@ -1,15 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { useState } from 'react';
 
 import { supabase } from '@/services/supabase';
 
 export default function ForgotPassword() {
-  const t = useTranslations('common');
-  const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
 

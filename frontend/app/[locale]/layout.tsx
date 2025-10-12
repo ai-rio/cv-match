@@ -4,9 +4,8 @@ import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 
+import Navigation from '@/components/Navigation';
 import { AuthProvider } from '@/contexts/AuthContext';
-
-import Navigation from '../../components/Navigation';
 
 interface LocaleLayoutProps {
   children: React.ReactNode;
