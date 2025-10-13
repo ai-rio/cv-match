@@ -4,20 +4,21 @@ echo "🚀 Pre-commit Checks Starting..."
 
 # Check for staged frontend files and run lint-staged
 if git diff --cached --name-only | grep -q "^frontend/"; then
-    echo "⚠️ Frontend ESLint temporarily disabled - skipping frontend checks"
-    echo "💡 Note: frontend checks will be re-enabled once ESLint config is fixed"
-    # cd frontend && bun run lint-staged || {
-    #     echo "❌ Lint-staged failed - fix critical issues before committing"
-    #     exit 1
-    # }
-    # cd ..
+    echo "📝 Running frontend checks..."
 
-    # echo "📝 Running TypeScript type checking..."
-    # cd frontend && bun run type-check || {
-    #     echo "❌ TypeScript type checking failed - fix type errors before committing"
-    #     exit 1
-    # }
-    # cd ..
+    echo "  📝 Running ESLint..."
+    cd frontend && bun run lint || {
+        echo "❌ ESLint failed - fix errors before committing"
+        exit 1
+    }
+    cd ..
+
+    echo "  📝 Running TypeScript type checking..."
+    cd frontend && bun run type-check || {
+        echo "❌ TypeScript type checking failed - fix type errors before committing"
+        exit 1
+    }
+    cd ..
 fi
 
 # Check for staged Python files and run linting and type checking
