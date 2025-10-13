@@ -10,7 +10,7 @@ import logging
 import os
 import re
 import uuid
-from typing import Any, List, Optional, Set, Union
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -22,9 +22,9 @@ class ValidationResult(BaseModel):
 
     is_valid: bool
     sanitized_input: Any
-    warnings: List[str] = []
-    errors: List[str] = []
-    blocked_patterns: List[str] = []
+    warnings: list[str] = []
+    errors: list[str] = []
+    blocked_patterns: list[str] = []
     metadata: dict = {}
 
 
@@ -43,52 +43,52 @@ class InjectionPatterns:
 
     # NoSQL Injection patterns
     NOSQL_INJECTION = [
-        r'\$where|\$ne|\$gt|\$lt|\$in|\$nin|\$exists|\$regex',
-        r'\{.*\$.*\}',
-        r'\$or|\$and|\$not|\$nor',
+        r"\$where|\$ne|\$gt|\$lt|\$in|\$nin|\$exists|\$regex",
+        r"\{.*\$.*\}",
+        r"\$or|\$and|\$not|\$nor",
     ]
 
     # XSS patterns
     XSS_PATTERNS = [
-        r'<script[^>]*>.*?</script>',
-        r'javascript:',
-        r'vbscript:',
-        r'onload\s*=',
-        r'onerror\s*=',
-        r'onclick\s*=',
-        r'onmouseover\s*=',
-        r'onfocus\s*=',
-        r'onblur\s*=',
-        r'<iframe[^>]*>.*?</iframe>',
-        r'<object[^>]*>.*?</object>',
-        r'<embed[^>]*>.*?</embed>',
+        r"<script[^>]*>.*?</script>",
+        r"javascript:",
+        r"vbscript:",
+        r"onload\s*=",
+        r"onerror\s*=",
+        r"onclick\s*=",
+        r"onmouseover\s*=",
+        r"onfocus\s*=",
+        r"onblur\s*=",
+        r"<iframe[^>]*>.*?</iframe>",
+        r"<object[^>]*>.*?</object>",
+        r"<embed[^>]*>.*?</embed>",
     ]
 
     # Command injection patterns
     COMMAND_INJECTION = [
-        r';|\||&|`|\$\(',
-        r'rm\s+-rf|del\s+/f/s/q',
-        r'cat\s+/etc/passwd|type\s+c:\\windows\\system32\\drivers\\etc\\hosts',
-        r'nc\s+-l|netcat\s+-l',
-        r'wget\s+|curl\s+',
-        r'eval\s*\(|exec\s*\(',
-        r'system\s*\(|passthru\s*\(',
-        r'shell_exec\s*\(',
+        r";|\||&|`|\$\(",
+        r"rm\s+-rf|del\s+/f/s/q",
+        r"cat\s+/etc/passwd|type\s+c:\\windows\\system32\\drivers\\etc\\hosts",
+        r"nc\s+-l|netcat\s+-l",
+        r"wget\s+|curl\s+",
+        r"eval\s*\(|exec\s*\(",
+        r"system\s*\(|passthru\s*\(",
+        r"shell_exec\s*\(",
     ]
 
     # Path traversal patterns
     PATH_TRAVERSAL = [
-        r'\.\./|\.\.\\',
-        r'%2e%2e%2f|%2e%2e%5c',
-        r'\x2e\x2e\x2f|\x2e\x2e\x5c',
-        r'\.\.%c0%af|\.\.%c1%9c',
+        r"\.\./|\.\.\\",
+        r"%2e%2e%2f|%2e%2e%5c",
+        r"\x2e\x2e\x2f|\x2e\x2e\x5c",
+        r"\.\.%c0%af|\.\.%c1%9c",
     ]
 
     # LDAP injection patterns
     LDAP_INJECTION = [
-        r'\*\)|\(\*',
-        r'\)\(.*\*\)|\(\|.*\)',
-        r'&\(|\)&',
+        r"\*\)|\(\*",
+        r"\)\(.*\*\)|\(\|.*\)",
+        r"&\(|\)&",
     ]
 
 
@@ -105,7 +105,7 @@ class InputValidator:
         self.compiled_patterns = {}
 
         for category, patterns in self.injection_patterns.__dict__.items():
-            if not category.startswith('_') and isinstance(patterns, list):
+            if not category.startswith("_") and isinstance(patterns, list):
                 self.compiled_patterns[category.lower()] = [
                     re.compile(pattern, re.IGNORECASE | re.MULTILINE | re.DOTALL)
                     for pattern in patterns
@@ -137,15 +137,11 @@ class InputValidator:
                 is_valid=False,
                 sanitized_input="",
                 errors=["Input must be a string"],
-                blocked_patterns=["invalid_type"]
+                blocked_patterns=["invalid_type"],
             )
 
         result = ValidationResult(
-            is_valid=True,
-            sanitized_input=input_str,
-            warnings=[],
-            errors=[],
-            blocked_patterns=[]
+            is_valid=True, sanitized_input=input_str, warnings=[], errors=[], blocked_patterns=[]
         )
 
         # Length validation
@@ -154,8 +150,8 @@ class InputValidator:
             result.warnings.append(f"Input truncated to {max_length} characters")
 
         # Null byte check
-        if '\x00' in result.sanitized_input:
-            result.sanitized_input = result.sanitized_input.replace('\x00', '')
+        if "\x00" in result.sanitized_input:
+            result.sanitized_input = result.sanitized_input.replace("\x00", "")
             result.warnings.append("Null bytes removed from input")
 
         # Check for injection patterns
@@ -175,12 +171,14 @@ class InputValidator:
         # Final validation based on input type
         self._validate_by_type(result.sanitized_input, input_type, result)
 
-        result.metadata.update({
-            "original_length": len(input_str),
-            "final_length": len(result.sanitized_input),
-            "input_type": input_type,
-            "patterns_detected": len(result.blocked_patterns),
-        })
+        result.metadata.update(
+            {
+                "original_length": len(input_str),
+                "final_length": len(result.sanitized_input),
+                "input_type": input_type,
+                "patterns_detected": len(result.blocked_patterns),
+            }
+        )
 
         return result
 
@@ -205,24 +203,24 @@ class InputValidator:
         """Sanitize HTML content."""
         # Remove dangerous HTML tags and attributes
         dangerous_patterns = [
-            r'<script[^>]*>.*?</script>',
-            r'<iframe[^>]*>.*?</iframe>',
-            r'<object[^>]*>.*?</object>',
-            r'<embed[^>]*>.*?</embed>',
-            r'<applet[^>]*>.*?</applet>',
-            r'<meta[^>]*>',
-            r'<link[^>]*>',
-            r'<style[^>]*>.*?</style>',
+            r"<script[^>]*>.*?</script>",
+            r"<iframe[^>]*>.*?</iframe>",
+            r"<object[^>]*>.*?</object>",
+            r"<embed[^>]*>.*?</embed>",
+            r"<applet[^>]*>.*?</applet>",
+            r"<meta[^>]*>",
+            r"<link[^>]*>",
+            r"<style[^>]*>.*?</style>",
             r'on\w+\s*=\s*["\'][^"\']*["\']',
-            r'javascript:',
-            r'vbscript:',
+            r"javascript:",
+            r"vbscript:",
         ]
 
         sanitized = text
         for pattern in dangerous_patterns:
             matches = re.findall(pattern, sanitized, re.IGNORECASE | re.DOTALL)
             if matches:
-                result.warnings.append(f"Dangerous HTML content removed")
+                result.warnings.append("Dangerous HTML content removed")
                 result.blocked_patterns.append("html_injection")
                 sanitized = re.sub(pattern, "[REMOVED]", sanitized, flags=re.IGNORECASE | re.DOTALL)
 
@@ -233,8 +231,8 @@ class InputValidator:
         # Remove suspicious URLs
         url_patterns = [
             r'(https?://|www\.)[^\s<>"]+',
-            r'localhost:\d+|127\.0\.0\.1:\d+',
-            r'(bit\.ly|tinyurl\.com|t\.co)/[^\s]+',
+            r"localhost:\d+|127\.0\.0\.1:\d+",
+            r"(bit\.ly|tinyurl\.com|t\.co)/[^\s]+",
         ]
 
         sanitized = text
@@ -250,13 +248,13 @@ class InputValidator:
     def _apply_content_filtering(self, text: str) -> str:
         """Apply additional content filtering."""
         # Remove excessive whitespace
-        text = re.sub(r'\s+', ' ', text)
+        text = re.sub(r"\s+", " ", text)
 
         # Remove control characters (except newline, tab, carriage return)
-        text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', text)
+        text = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]", "", text)
 
         # Normalize Unicode
-        text = text.encode('utf-8', errors='ignore').decode('utf-8')
+        text = text.encode("utf-8", errors="ignore").decode("utf-8")
 
         return text.strip()
 
@@ -284,7 +282,7 @@ class InputValidator:
 
     def _validate_email_format(self, email: str) -> bool:
         """Validate email format."""
-        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         return bool(re.match(email_pattern, email))
 
     def _validate_name_format(self, name: str) -> bool:
@@ -304,7 +302,7 @@ class InputValidator:
     def _validate_phone_format(self, phone: str) -> bool:
         """Validate phone format (Brazilian and international)."""
         # Remove all non-digit characters
-        digits_only = re.sub(r'\D', '', phone)
+        digits_only = re.sub(r"\D", "", phone)
 
         # Brazilian phone: 10-11 digits (with DDD)
         # International phone: 7-15 digits
@@ -313,7 +311,7 @@ class InputValidator:
     def validate_dict(
         self,
         input_dict: dict,
-        allowed_keys: Optional[Set[str]] = None,
+        allowed_keys: set[str] | None = None,
         max_items: int = 50,
         max_key_length: int = 50,
         max_value_length: int = 1000,
@@ -336,15 +334,11 @@ class InputValidator:
                 is_valid=False,
                 sanitized_input={},
                 errors=["Input must be a dictionary"],
-                blocked_patterns=["invalid_type"]
+                blocked_patterns=["invalid_type"],
             )
 
         result = ValidationResult(
-            is_valid=True,
-            sanitized_input={},
-            warnings=[],
-            errors=[],
-            blocked_patterns=[]
+            is_valid=True, sanitized_input={}, warnings=[], errors=[], blocked_patterns=[]
         )
 
         # Check item count
@@ -376,9 +370,7 @@ class InputValidator:
 
                 # Validate string values for injection
                 string_result = self.validate_string(
-                    value,
-                    input_type="general",
-                    max_length=max_value_length
+                    value, input_type="general", max_length=max_value_length
                 )
 
                 if not string_result.is_valid:
@@ -386,7 +378,9 @@ class InputValidator:
                     result.blocked_patterns.extend(string_result.blocked_patterns)
                     result.is_valid = False
                 else:
-                    result.warnings.extend([f"Key {key}: {warning}" for warning in string_result.warnings])
+                    result.warnings.extend(
+                        [f"Key {key}: {warning}" for warning in string_result.warnings]
+                    )
                     value = string_result.sanitized_input
 
             elif isinstance(value, (dict, list)):
@@ -397,13 +391,11 @@ class InputValidator:
                         allowed_keys,
                         max_items=max_items,
                         max_key_length=max_key_length,
-                        max_value_length=max_value_length
+                        max_value_length=max_value_length,
                     )
                 else:  # list
                     nested_result = self.validate_list(
-                        value,
-                        max_items=max_items,
-                        max_item_length=max_value_length
+                        value, max_items=max_items, max_item_length=max_value_length
                     )
 
                 if not nested_result.is_valid:
@@ -411,16 +403,20 @@ class InputValidator:
                     result.blocked_patterns.extend(nested_result.blocked_patterns)
                     result.is_valid = False
                 else:
-                    result.warnings.extend([f"Key {key}: {warning}" for warning in nested_result.warnings])
+                    result.warnings.extend(
+                        [f"Key {key}: {warning}" for warning in nested_result.warnings]
+                    )
                     value = nested_result.sanitized_input
 
             # Add validated key-value pair
             result.sanitized_input[key] = value
 
-        result.metadata.update({
-            "item_count": len(result.sanitized_input),
-            "original_item_count": len(input_dict),
-        })
+        result.metadata.update(
+            {
+                "item_count": len(result.sanitized_input),
+                "original_item_count": len(input_dict),
+            }
+        )
 
         return result
 
@@ -446,15 +442,11 @@ class InputValidator:
                 is_valid=False,
                 sanitized_input=[],
                 errors=["Input must be a list"],
-                blocked_patterns=["invalid_type"]
+                blocked_patterns=["invalid_type"],
             )
 
         result = ValidationResult(
-            is_valid=True,
-            sanitized_input=[],
-            warnings=[],
-            errors=[],
-            blocked_patterns=[]
+            is_valid=True, sanitized_input=[], warnings=[], errors=[], blocked_patterns=[]
         )
 
         # Check item count
@@ -468,9 +460,7 @@ class InputValidator:
             if isinstance(item, str):
                 # Validate string items
                 string_result = self.validate_string(
-                    item,
-                    input_type="general",
-                    max_length=max_item_length
+                    item, input_type="general", max_length=max_item_length
                 )
 
                 if not string_result.is_valid:
@@ -478,16 +468,15 @@ class InputValidator:
                     result.blocked_patterns.extend(string_result.blocked_patterns)
                     result.is_valid = False
                 else:
-                    result.warnings.extend([f"Item {i}: {warning}" for warning in string_result.warnings])
+                    result.warnings.extend(
+                        [f"Item {i}: {warning}" for warning in string_result.warnings]
+                    )
                     result.sanitized_input.append(string_result.sanitized_input)
 
             elif isinstance(item, dict):
                 # Validate dictionary items
                 dict_result = self.validate_dict(
-                    item,
-                    max_items=max_items,
-                    max_key_length=50,
-                    max_value_length=max_item_length
+                    item, max_items=max_items, max_key_length=50, max_value_length=max_item_length
                 )
 
                 if not dict_result.is_valid:
@@ -495,17 +484,21 @@ class InputValidator:
                     result.blocked_patterns.extend(dict_result.blocked_patterns)
                     result.is_valid = False
                 else:
-                    result.warnings.extend([f"Item {i}: {warning}" for warning in dict_result.warnings])
+                    result.warnings.extend(
+                        [f"Item {i}: {warning}" for warning in dict_result.warnings]
+                    )
                     result.sanitized_input.append(dict_result.sanitized_input)
 
             else:
                 # Other types, just add as-is
                 result.sanitized_input.append(item)
 
-        result.metadata.update({
-            "item_count": len(result.sanitized_input),
-            "original_item_count": len(input_list),
-        })
+        result.metadata.update(
+            {
+                "item_count": len(result.sanitized_input),
+                "original_item_count": len(input_list),
+            }
+        )
 
         return result
 
@@ -541,7 +534,7 @@ def validate_string(
 
 def validate_dict(
     input_dict: dict,
-    allowed_keys: Optional[Set[str]] = None,
+    allowed_keys: set[str] | None = None,
     max_items: int = 50,
     max_key_length: int = 50,
     max_value_length: int = 1000,
@@ -601,18 +594,18 @@ def sanitize_filename(filename: str) -> str:
         Sanitized filename
     """
     # Remove dangerous characters
-    sanitized = re.sub(r'[<>:"/\\|?*]', '', filename)
+    sanitized = re.sub(r'[<>:"/\\|?*]', "", filename)
 
     # Remove null bytes and control characters
-    sanitized = re.sub(r'[\x00-\x1f\x7f]', '', sanitized)
+    sanitized = re.sub(r"[\x00-\x1f\x7f]", "", sanitized)
 
     # Remove path traversal
-    sanitized = sanitized.replace('..', '').replace('/', '').replace('\\', '')
+    sanitized = sanitized.replace("..", "").replace("/", "").replace("\\", "")
 
     # Limit length
     if len(sanitized) > 255:
         name, ext = os.path.splitext(sanitized)
-        sanitized = name[:255-len(ext)] + ext
+        sanitized = name[: 255 - len(ext)] + ext
 
     # Ensure it's not empty
     if not sanitized:
@@ -631,4 +624,4 @@ def generate_safe_hash(content: str) -> str:
     Returns:
         SHA-256 hash
     """
-    return hashlib.sha256(content.encode('utf-8')).hexdigest()
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()

@@ -10,11 +10,10 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 
 from app.core.auth import get_current_user
 from app.models.resume import ResumeListResponse, ResumeResponse, ResumeUploadResponse
-from app.models.secure import SecureFileUploadRequest, SecureValidationResponse
 from app.services.resume_service import ResumeService
 from app.services.supabase.database import SupabaseDatabaseService
-from app.utils.file_security import validate_file_security, FileSecurityConfig
-from app.utils.validation import validate_string, sanitize_filename
+from app.utils.file_security import FileSecurityConfig, validate_file_security
+from app.utils.validation import sanitize_filename, validate_string
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +59,7 @@ async def upload_resume(
 
         if not filename_validation.is_valid:
             raise HTTPException(
-                status_code=400,
-                detail=f"Invalid filename: {'; '.join(filename_validation.errors)}"
+                status_code=400, detail=f"Invalid filename: {'; '.join(filename_validation.errors)}"
             )
 
         # Read file content
@@ -79,7 +77,7 @@ async def upload_resume(
             file_content=file_content,
             filename=filename_validation.sanitized_input,
             content_type=file.content_type,
-            config=file_security_config
+            config=file_security_config,
         )
 
         if not security_result.is_safe:
@@ -95,8 +93,8 @@ async def upload_resume(
                     "error": "File security validation failed",
                     "details": security_result.errors,
                     "warnings": security_result.warnings,
-                    "blocked_patterns": security_result.blocked_patterns
-                }
+                    "blocked_patterns": security_result.blocked_patterns,
+                },
             )
 
         # Log successful security validation
@@ -185,7 +183,9 @@ async def get_resume(
         # CRITICAL SECURITY: Verify user ownership
         resume_user_id = raw_resume.get("user_id")
         if not resume_user_id or resume_user_id != current_user["id"]:
-            logger.warning(f"User {current_user['id']} attempted to access resume {resume_id} owned by {resume_user_id}")
+            logger.warning(
+                f"User {current_user['id']} attempted to access resume {resume_id} owned by {resume_user_id}"
+            )
             raise HTTPException(status_code=403, detail="Access denied: Resume not found")
 
         return ResumeResponse(
@@ -234,7 +234,7 @@ async def list_resumes(
         filters = {"user_id": current_user["id"]}
         try:
             resumes_data = await service.list(limit=limit, offset=offset, filters=filters)
-        except Exception as e:
+        except Exception:
             # Handle the case where model_class is dict (won't work with model_class(**item))
             # For now, use raw Supabase client
             query = service.supabase.table("resumes").select("*").eq("user_id", current_user["id"])
@@ -263,7 +263,9 @@ async def list_resumes(
                 )
             else:
                 # Log potential security issue if RLS policies are bypassed
-                logger.error(f"SECURITY VIOLATION: User {current_user['id']} received resume {resume_dict.get('resume_id')} owned by {resume_dict.get('user_id')}")
+                logger.error(
+                    f"SECURITY VIOLATION: User {current_user['id']} received resume {resume_dict.get('resume_id')} owned by {resume_dict.get('user_id')}"
+                )
 
         return ResumeListResponse(resumes=resumes, total=len(resumes), limit=limit, offset=offset)
 
@@ -296,14 +298,18 @@ async def delete_resume(resume_id: str, current_user: dict = Depends(get_current
         raw_resume = resume_data.get("raw_resume", {})
         resume_user_id = raw_resume.get("user_id")
         if not resume_user_id or resume_user_id != current_user["id"]:
-            logger.warning(f"User {current_user['id']} attempted to delete resume {resume_id} owned by {resume_user_id}")
+            logger.warning(
+                f"User {current_user['id']} attempted to delete resume {resume_id} owned by {resume_user_id}"
+            )
             raise HTTPException(status_code=403, detail="Access denied: Resume not found")
 
         # Delete resume using database service (by resume_id field)
         service = SupabaseDatabaseService("resumes", dict)
         try:
             # Delete by resume_id field, not id
-            response = service.supabase.table("resumes").delete().eq("resume_id", resume_id).execute()
+            response = (
+                service.supabase.table("resumes").delete().eq("resume_id", resume_id).execute()
+            )
             if not response.data:
                 raise HTTPException(status_code=404, detail="Resume not found")
         except Exception as e:

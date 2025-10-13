@@ -6,8 +6,8 @@ import uuid
 from markitdown import MarkItDown
 
 from app.agent.manager import AgentManager
-from app.services.supabase.database import SupabaseDatabaseService
 from app.core.exceptions import ProviderError
+from app.services.supabase.database import SupabaseDatabaseService
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,12 @@ class ResumeService:
             )
 
     async def convert_and_store_resume(
-        self, file_bytes: bytes, file_type: str, filename: str, content_type: str = "md", user_id: str = None
+        self,
+        file_bytes: bytes,
+        file_type: str,
+        filename: str,
+        content_type: str = "md",
+        user_id: str = None,
     ):
         """
         Converts resume file (PDF/DOCX) to text using MarkItDown and stores it in the database.
@@ -188,7 +193,9 @@ class ResumeService:
             return None
 
         except Exception as e:
-            logger.error(f"Error extracting/storing structured resume for resume_id {resume_id}: {e}")
+            logger.error(
+                f"Error extracting/storing structured resume for resume_id {resume_id}: {e}"
+            )
             # Don't fail the entire upload if structured extraction fails
             # Just log the error and continue with raw resume storage
             pass
@@ -249,7 +256,7 @@ class ResumeService:
                     if json_end != -1:
                         json_str = response[json_start:json_end].strip()
                         # Remove 'json' if present at start
-                        if json_str.startswith('json'):
+                        if json_str.startswith("json"):
                             json_str = json_str[4:].strip()
                         return json.loads(json_str)
 
@@ -280,7 +287,9 @@ class ResumeService:
         # Use resume_id field instead of id for fetching
         try:
             # Try to get by resume_id field
-            response = service.supabase.table("resumes").select("*").eq("resume_id", resume_id).execute()
+            response = (
+                service.supabase.table("resumes").select("*").eq("resume_id", resume_id).execute()
+            )
             if response.data:
                 resume = response.data[0]
             else:

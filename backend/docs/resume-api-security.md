@@ -173,16 +173,19 @@ async def delete_resume(
 ## Security Layers
 
 ### Layer 1: Database-Level Protection (RLS)
+
 - **Primary Security**: RLS policies prevent cross-user data access at database level
 - **Enforcement**: Automatically applied to all database queries
 - **Scope**: `auth.uid() = user_id` ensures users only see their own data
 
 ### Layer 2: Application-Level Authorization
+
 - **Secondary Security**: Explicit user ownership checks in all endpoints
 - **Validation**: Server-side validation of user permissions
 - **Logging**: Security violations are logged for monitoring
 
 ### Layer 3: Service Layer Validation
+
 - **Tertiary Security**: ResumeService requires user_id for all operations
 - **Data Integrity**: Ensures all stored data has proper user association
 - **Error Handling**: Graceful handling of authorization failures
@@ -190,6 +193,7 @@ async def delete_resume(
 ## Error Handling
 
 ### Access Denied (403)
+
 ```json
 {
   "detail": "Access denied: Resume not found"
@@ -199,6 +203,7 @@ async def delete_resume(
 **Security Note**: Error messages do not reveal if a resume exists or belongs to another user.
 
 ### Not Found (404)
+
 ```json
 {
   "detail": "Resume not found"
@@ -221,11 +226,13 @@ All endpoints return appropriate security headers:
 ## Logging and Monitoring
 
 ### Security Events Logged
+
 - Failed access attempts (wrong user trying to access data)
 - Security violations (RLS bypass attempts)
 - Successful user operations (for audit trails)
 
 ### Log Format
+
 ```python
 logger.warning(
     f"User {current_user['id']} attempted to access resume {resume_id} "
@@ -246,7 +253,9 @@ This security implementation addresses key LGPD requirements:
 ## Testing
 
 ### Authorization Tests
+
 Comprehensive test suite covers:
+
 - Users can access their own resumes ✅
 - Users cannot access other users' resumes ✅
 - Users can only list their own resumes ✅
@@ -255,6 +264,7 @@ Comprehensive test suite covers:
 - Defense in depth verification ✅
 
 ### Running Tests
+
 ```bash
 # Run authorization tests
 python test_authorization.py
@@ -268,6 +278,7 @@ make test-backend
 To apply these security fixes:
 
 1. **Database Migration**: Apply the user authorization migration
+
    ```bash
    # Apply migration to add user_id and RLS policies
    supabase db push
@@ -285,6 +296,7 @@ To apply these security fixes:
 ## Security Best Practices
 
 ### Do's
+
 - ✅ Always validate user ownership
 - ✅ Use RLS policies for database-level security
 - ✅ Log security violations
@@ -293,6 +305,7 @@ To apply these security fixes:
 - ✅ Validate user input at all layers
 
 ### Don'ts
+
 - ❌ Never trust client-side data
 - ❌ Don't leak information in error messages
 - ❌ Don't rely on a single security layer
@@ -301,12 +314,14 @@ To apply these security fixes:
 ## Monitoring and Alerting
 
 ### Security Metrics to Monitor
+
 - Failed access attempts per user
 - Cross-user access attempts
 - Unusual data access patterns
 - RLS policy violations
 
 ### Alert Thresholds
+
 - > 5 failed access attempts from same user in 1 minute
 - Any cross-user access attempt (should be 0)
 - RLS policy violations (should be 0)

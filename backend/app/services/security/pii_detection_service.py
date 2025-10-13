@@ -10,9 +10,9 @@ Critical for CV-Match Brazilian market deployment - PII exposure is illegal unde
 
 import logging
 import re
-from typing import Any, Dict, List, Optional, Set, Tuple
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -24,7 +24,7 @@ class PIIType(Enum):
 
     # Brazilian specific PII
     CPF = "cpf"  # Cadastro de Pessoas Físicas (Brazilian tax ID)
-    RG = "rg"    # Registro Geral (Brazilian ID)
+    RG = "rg"  # Registro Geral (Brazilian ID)
     CNPJ = "cnpj"  # Cadastro Nacional da Pessoa Jurídica
 
     # Standard PII
@@ -53,7 +53,7 @@ class PIIPattern:
     regex: str
     description: str
     confidence: float  # 0.0 to 1.0
-    examples: List[str]
+    examples: list[str]
     masking_strategy: str = "partial"
 
 
@@ -61,26 +61,28 @@ class PIIDetectionResult(BaseModel):
     """Result of PII detection."""
 
     has_pii: bool
-    pii_types_found: List[PIIType] = Field(default_factory=list)
-    detected_instances: Dict[PIIType, List[Dict[str, Any]]] = Field(default_factory=dict)
+    pii_types_found: list[PIIType] = Field(default_factory=list)
+    detected_instances: dict[PIIType, list[dict[str, Any]]] = Field(default_factory=dict)
     confidence_score: float = 0.0
-    masked_text: Optional[str] = None
-    scan_duration_ms: Optional[float] = None
+    masked_text: str | None = None
+    scan_duration_ms: float | None = None
 
 
 class PIIMaskingStrategy:
     """Strategies for masking detected PII."""
 
     @staticmethod
-    def partial_mask(value: str, mask_char: str = "*", show_first: int = 2, show_last: int = 2) -> str:
+    def partial_mask(
+        value: str, mask_char: str = "*", show_first: int = 2, show_last: int = 2
+    ) -> str:
         """Partially mask a value showing only first and last characters."""
         if len(value) <= show_first + show_last:
             return mask_char * len(value)
 
         return (
-            value[:show_first] +
-            mask_char * (len(value) - show_first - show_last) +
-            value[-show_last:]
+            value[:show_first]
+            + mask_char * (len(value) - show_first - show_last)
+            + value[-show_last:]
         )
 
     @staticmethod
@@ -106,16 +108,12 @@ class PIIMaskingStrategy:
     def phone_mask(phone: str) -> str:
         """Mask phone number while preserving format."""
         # Remove non-numeric characters
-        digits = re.sub(r'\D', '', phone)
+        digits = re.sub(r"\D", "", phone)
         if len(digits) <= 4:
             return "*" * len(phone)
 
         # Keep first 2 and last 2 digits
-        return (
-            phone[:2] +
-            "*" * (len(phone) - 4) +
-            phone[-2:]
-        )
+        return phone[:2] + "*" * (len(phone) - 4) + phone[-2:]
 
 
 class PIIDetectionService:
@@ -135,29 +133,27 @@ class PIIDetectionService:
         # CPF Pattern: XXX.XXX.XXX-XX or XXXXXXXXXXX
         self.brazilian_patterns = {
             PIIType.CPF: PIIPattern(
-                regex=r'\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b',
+                regex=r"\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b",
                 description="Brazilian CPF (Cadastro de Pessoas Físicas)",
                 confidence=0.95,
                 examples=["123.456.789-01", "12345678901", "111.222.333-44"],
-                masking_strategy="partial"
+                masking_strategy="partial",
             ),
-
             # RG Pattern: XX.XXX.XXX-X or XXXXXXXXXX
             PIIType.RG: PIIPattern(
-                regex=r'\b\d{1,2}\.?\d{3}\.?\d{3}-?[A-Z0-9]?\b',
+                regex=r"\b\d{1,2}\.?\d{3}\.?\d{3}-?[A-Z0-9]?\b",
                 description="Brazilian RG (Registro Geral)",
                 confidence=0.85,
                 examples=["12.345.678-9", "123456789", "MG-12.345.678"],
-                masking_strategy="partial"
+                masking_strategy="partial",
             ),
-
             # CNPJ Pattern: XX.XXX.XXX/XXXX-XX or XXXXXXXXXXXXXX
             PIIType.CNPJ: PIIPattern(
-                regex=r'\b\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}\b',
+                regex=r"\b\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}\b",
                 description="Brazilian CNPJ (Cadastro Nacional da Pessoa Jurídica)",
                 confidence=0.95,
                 examples=["12.345.678/0001-95", "12345678000195"],
-                masking_strategy="partial"
+                masking_strategy="partial",
             ),
         }
 
@@ -166,27 +162,25 @@ class PIIDetectionService:
 
         self.standard_patterns = {
             PIIType.EMAIL: PIIPattern(
-                regex=r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b',
+                regex=r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
                 description="Email address",
                 confidence=0.98,
                 examples=["user@example.com", "joao.silva@empresa.com.br"],
-                masking_strategy="email"
+                masking_strategy="email",
             ),
-
             PIIType.PHONE: PIIPattern(
-                regex=r'\b(?:\+?55\s?)?(?:\(?\d{2}\)?[-\s]?)?\d{4,5}[-\s]?\d{4}\b',
+                regex=r"\b(?:\+?55\s?)?(?:\(?\d{2}\)?[-\s]?)?\d{4,5}[-\s]?\d{4}\b",
                 description="Phone number (Brazilian format)",
                 confidence=0.90,
                 examples=["+55 11 98765-4321", "(11) 98765-4321", "11987654321"],
-                masking_strategy="phone"
+                masking_strategy="phone",
             ),
-
             PIIType.PASSPORT: PIIPattern(
-                regex=r'\b[A-Z]{2}\d{7}\b',
+                regex=r"\b[A-Z]{2}\d{7}\b",
                 description="Passport number",
                 confidence=0.75,
                 examples=["AB1234567", "CD9876543"],
-                masking_strategy="partial"
+                masking_strategy="partial",
             ),
         }
 
@@ -195,19 +189,18 @@ class PIIDetectionService:
 
         self.financial_patterns = {
             PIIType.CREDIT_CARD: PIIPattern(
-                regex=r'\b(?:\d{4}[-\s]?){3}\d{4}\b',
+                regex=r"\b(?:\d{4}[-\s]?){3}\d{4}\b",
                 description="Credit card number",
                 confidence=0.95,
                 examples=["4111 1111 1111 1111", "4111-1111-1111-1111", "4111111111111111"],
-                masking_strategy="partial"
+                masking_strategy="partial",
             ),
-
             PIIType.BANK_ACCOUNT: PIIPattern(
-                regex=r'\b(?:\d{6,7}-?\d{1,2}-?\d{1,6})\b',
+                regex=r"\b(?:\d{6,7}-?\d{1,2}-?\d{1,6})\b",
                 description="Brazilian bank account",
                 confidence=0.80,
                 examples=["12345-6", "123456-7", "12345-6-X"],
-                masking_strategy="partial"
+                masking_strategy="partial",
             ),
         }
 
@@ -216,23 +209,22 @@ class PIIDetectionService:
 
         self.location_patterns = {
             PIIType.POSTAL_CODE: PIIPattern(
-                regex=r'\b\d{5}-?\d{3}\b',
+                regex=r"\b\d{5}-?\d{3}\b",
                 description="Brazilian CEP (Código de Endereçamento Postal)",
                 confidence=0.90,
                 examples=["01310-100", "01310100"],
-                masking_strategy="partial"
+                masking_strategy="partial",
             ),
-
             PIIType.ADDRESS: PIIPattern(
-                regex=r'\b(?:Rua|Avenida|Alameda|Travessa|Praia|Praça)\s+[^,]+,\s*\d+[^,]*',
+                regex=r"\b(?:Rua|Avenida|Alameda|Travessa|Praia|Praça)\s+[^,]+,\s*\d+[^,]*",
                 description="Street address",
                 confidence=0.70,
                 examples=["Rua das Flores, 123", "Avenida Paulista, 1000"],
-                masking_strategy="partial"
+                masking_strategy="partial",
             ),
         }
 
-    def _get_all_patterns(self) -> Dict[PIIType, PIIPattern]:
+    def _get_all_patterns(self) -> dict[PIIType, PIIPattern]:
         """Get all PII patterns."""
         patterns = {}
         patterns.update(self.brazilian_patterns)
@@ -252,11 +244,12 @@ class PIIDetectionService:
             PIIDetectionResult with detected PII information
         """
         import time
+
         start_time = time.time()
 
         patterns = self._get_all_patterns()
-        detected_instances: Dict[PIIType, List[Dict[str, Any]]] = {}
-        pii_types_found: List[PIIType] = []
+        detected_instances: dict[PIIType, list[dict[str, Any]]] = {}
+        pii_types_found: list[PIIType] = []
 
         for pii_type, pattern in patterns.items():
             matches = re.finditer(pattern.regex, text, re.IGNORECASE | re.MULTILINE)
@@ -269,7 +262,7 @@ class PIIDetectionService:
                         "start": match.start(),
                         "end": match.end(),
                         "confidence": pattern.confidence,
-                        "description": pattern.description
+                        "description": pattern.description,
                     }
                     instances.append(instance)
 
@@ -291,10 +284,12 @@ class PIIDetectionService:
             detected_instances=detected_instances,
             confidence_score=confidence_score,
             masked_text=masked_text,
-            scan_duration_ms=scan_duration
+            scan_duration_ms=scan_duration,
         )
 
-    def mask_text(self, text: str, detected_instances: Optional[Dict[PIIType, List[Dict[str, Any]]]] = None) -> str:
+    def mask_text(
+        self, text: str, detected_instances: dict[PIIType, list[dict[str, Any]]] | None = None
+    ) -> str:
         """
         Apply masking to detected PII in text.
 
@@ -347,7 +342,9 @@ class PIIDetectionService:
         else:
             return self.masking_strategy.partial_mask(value, show_first=1, show_last=1)
 
-    def _calculate_confidence_score(self, detected_instances: Dict[PIIType, List[Dict[str, Any]]]) -> float:
+    def _calculate_confidence_score(
+        self, detected_instances: dict[PIIType, list[dict[str, Any]]]
+    ) -> float:
         """Calculate overall confidence score for detected PII."""
         if not detected_instances:
             return 0.0
@@ -362,7 +359,7 @@ class PIIDetectionService:
 
         return min(total_confidence / total_instances, 1.0) if total_instances > 0 else 0.0
 
-    def get_pii_summary(self, text: str) -> Dict[str, Any]:
+    def get_pii_summary(self, text: str) -> dict[str, Any]:
         """
         Get a summary of PII detected in text.
 
@@ -378,10 +375,12 @@ class PIIDetectionService:
             "has_pii": result.has_pii,
             "total_pii_types": len(result.pii_types_found),
             "pii_types": [pii_type.value for pii_type in result.pii_types_found],
-            "total_instances": sum(len(instances) for instances in result.detected_instances.values()),
+            "total_instances": sum(
+                len(instances) for instances in result.detected_instances.values()
+            ),
             "confidence_score": result.confidence_score,
             "scan_duration_ms": result.scan_duration_ms,
-            "lgpd_compliant": not result.has_pii or result.confidence_score < 0.8
+            "lgpd_compliant": not result.has_pii or result.confidence_score < 0.8,
         }
 
         # Add breakdown by type
@@ -390,7 +389,7 @@ class PIIDetectionService:
 
         return summary
 
-    def validate_lgpd_compliance(self, text: str) -> Dict[str, Any]:
+    def validate_lgpd_compliance(self, text: str) -> dict[str, Any]:
         """
         Validate if text complies with LGPD requirements.
 
@@ -404,7 +403,9 @@ class PIIDetectionService:
 
         # LGPD compliance rules
         critical_pii_types = [PIIType.CPF, PIIType.RG, PIIType.EMAIL]
-        has_critical_pii = any(pii_type in result.pii_types_found for pii_type in critical_pii_types)
+        has_critical_pii = any(
+            pii_type in result.pii_types_found for pii_type in critical_pii_types
+        )
 
         compliance_issues = []
         if has_critical_pii:
@@ -420,7 +421,7 @@ class PIIDetectionService:
             "requires_masking": result.has_pii,
             "recommended_action": "mask_pii" if result.has_pii else "proceed",
             "pii_detected": result.has_pii,
-            "critical_pii_detected": has_critical_pii
+            "critical_pii_detected": has_critical_pii,
         }
 
 
@@ -454,7 +455,7 @@ def mask_pii(text: str) -> str:
     return pii_detector.mask_text(text)
 
 
-def validate_lgpd_compliance(text: str) -> Dict[str, Any]:
+def validate_lgpd_compliance(text: str) -> dict[str, Any]:
     """
     Convenience function to validate LGPD compliance.
 

@@ -7,7 +7,6 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from app.api.router import api_router
 from app.core.config import settings
 from app.core.sentry import get_sentry_config, init_sentry
-from app.services.security import SecurityMiddleware
 from app.middleware.security import create_security_middleware
 
 # Initialize Sentry first (before other imports)

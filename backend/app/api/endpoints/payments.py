@@ -12,9 +12,8 @@ from pydantic import BaseModel, EmailStr
 from app.config.pricing import pricing_config
 from app.core.auth import get_current_user
 from app.core.database import SupabaseSession
-from app.models.secure import SecurePaymentRequest, SecureMetadataRequest, SecureUUIDRequest
 from app.services.stripe_service import stripe_service
-from app.utils.validation import validate_string, validate_dict, validate_uuid
+from app.utils.validation import validate_dict, validate_string
 
 
 # Database dependency
@@ -122,34 +121,37 @@ async def create_checkout_session(
         tier_validation = validate_string(request.tier, input_type="general", max_length=20)
         if not tier_validation.is_valid:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid tier format"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid tier format"
             )
 
         # Validate URLs if provided
         if request.success_url:
-            url_validation = validate_string(request.success_url, input_type="general", max_length=500)
+            url_validation = validate_string(
+                request.success_url, input_type="general", max_length=500
+            )
             if not url_validation.is_valid:
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Invalid success URL format"
+                    status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid success URL format"
                 )
 
         if request.cancel_url:
-            url_validation = validate_string(request.cancel_url, input_type="general", max_length=500)
+            url_validation = validate_string(
+                request.cancel_url, input_type="general", max_length=500
+            )
             if not url_validation.is_valid:
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Invalid cancel URL format"
+                    status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid cancel URL format"
                 )
 
         # Validate metadata if provided
         if request.metadata:
-            metadata_validation = validate_dict(request.metadata, max_items=20, max_value_length=200)
+            metadata_validation = validate_dict(
+                request.metadata, max_items=20, max_value_length=200
+            )
             if not metadata_validation.is_valid:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid metadata: {'; '.join(metadata_validation.errors)}"
+                    detail=f"Invalid metadata: {'; '.join(metadata_validation.errors)}",
                 )
 
         # Get credits and plan type from pricing config
@@ -201,7 +203,7 @@ async def create_checkout_session(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error creating checkout session",
-        )
+        ) from e
 
 
 @router.post("/create-payment-intent")
@@ -248,7 +250,7 @@ async def create_payment_intent(request: CreatePaymentIntentRequest) -> JSONResp
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error creating payment intent",
-        )
+        ) from e
 
 
 @router.post("/create-customer")
@@ -290,7 +292,7 @@ async def create_customer(request: CreateCustomerRequest) -> JSONResponse:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error creating customer",
-        )
+        ) from e
 
 
 @router.get("/retrieve-session/{session_id}")
@@ -326,7 +328,7 @@ async def retrieve_checkout_session(session_id: str) -> JSONResponse:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error retrieving session",
-        )
+        ) from e
 
 
 @router.get("/pricing")
@@ -354,7 +356,7 @@ async def get_brazilian_pricing() -> JSONResponse:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error getting pricing",
-        )
+        ) from e
 
 
 @router.get("/health")

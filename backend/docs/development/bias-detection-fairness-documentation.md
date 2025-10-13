@@ -1,4 +1,5 @@
 # Bias Detection and Algorithmic Fairness Documentation
+
 ## Phase 0.5 Security Implementation - Brazilian Legal Compliance
 
 ### 🚨 **CRITICAL SECURITY IMPLEMENTATION**
@@ -6,6 +7,7 @@
 This document describes the comprehensive bias detection and algorithmic fairness system implemented to address critical security vulnerabilities identified in Phase 0.5 of the CV-Match platform.
 
 ### Table of Contents
+
 1. [Executive Summary](#executive-summary)
 2. [Legal Framework](#legal-framework)
 3. [System Architecture](#system-architecture)
@@ -22,10 +24,13 @@ This document describes the comprehensive bias detection and algorithmic fairnes
 ## Executive Summary
 
 ### **Problem Identified**
+
 The CV-Match AI scoring system had **ZERO** bias detection and anti-discrimination measures, creating serious ethical and legal liabilities under Brazilian law.
 
 ### **Solution Implemented**
+
 Comprehensive bias detection and fairness system with:
+
 - ✅ **Anti-discrimination rules** in all AI prompts
 - ✅ **PII detection and masking** for protected characteristics
 - ✅ **Real-time bias monitoring** with alerts
@@ -34,6 +39,7 @@ Comprehensive bias detection and fairness system with:
 - ✅ **Brazilian legal compliance** with all relevant laws
 
 ### **Impact**
+
 - **Legal Compliance**: Full compliance with Brazilian anti-discrimination laws
 - **Risk Mitigation**: Elimination of discriminatory AI practices
 - **Transparency**: Complete audit trails and explanations
@@ -44,21 +50,25 @@ Comprehensive bias detection and fairness system with:
 ## Legal Framework
 
 ### **Brazilian Constitution (1988)**
+
 - **Art. 3º, IV**: Promote the well-being of all, without prejudice
 - **Art. 5º, I**: Equality before the law without distinction
 
 ### **Anti-Discrimination Laws**
+
 - **Lei nº 9.029/95**: Prohibition of discrimination in employment
 - **Lei nº 12.288/2010**: Racial Equality Statute
 - **Lei nº 7.853/89**: Rights for persons with disabilities
 - **Lei das Cotas**: Affirmative action requirements
 
 ### **Data Protection (LGPD)**
+
 - **Lei nº 13.709/2018**: Personal data protection
 - **Automated Decisions**: Right to explanation and human review
 - **Data Minimization**: PII detection and masking
 
 ### **Protected Characteristics**
+
 ```python
 protected_characteristics = {
     "age": "idade",
@@ -120,6 +130,7 @@ Fairness Analysis → Human Review (if needed) → Transparent Output
 ### **Core Features**
 
 #### **1. PII Detection**
+
 ```python
 pii_patterns = {
     "cpf": [r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b"],
@@ -132,6 +143,7 @@ pii_patterns = {
 ```
 
 #### **2. Protected Characteristics Detection**
+
 ```python
 protected_patterns = {
     "age": [r"\b\d{2}\s*(anos|anos de idade)\b"],
@@ -145,6 +157,7 @@ protected_patterns = {
 ```
 
 #### **3. Bias Risk Assessment**
+
 ```python
 def calculate_bias_risk_score(self, protected_chars, bias_keywords, pii_detected):
     char_risk = len(protected_chars) * 0.3
@@ -157,6 +170,7 @@ def calculate_bias_risk_score(self, protected_chars, bias_keywords, pii_detected
 ### **Usage Examples**
 
 #### **Basic Bias Analysis**
+
 ```python
 from app.services.bias_detection_service import bias_detection_service
 
@@ -171,6 +185,7 @@ print(f"Requires human review: {bias_result.requires_human_review}")
 ```
 
 #### **Anti-Discrimination Prompt Generation**
+
 ```python
 anti_discrimination_prompt = bias_detection_service.create_anti_discrimination_prompt("scoring")
 # Returns comprehensive anti-bias instructions for AI prompts
@@ -185,24 +200,28 @@ anti_discrimination_prompt = bias_detection_service.create_anti_discrimination_p
 ### **Algorithmic Fairness Metrics**
 
 #### **1. Demographic Parity**
+
 ```python
 # Measures equal treatment across demographic groups
 demographic_parity = 1.0 - abs(max_group_avg - min_group_avg)
 ```
 
 #### **2. Equal Opportunity**
+
 ```python
 # Measures equal true positive rates across groups
 equal_opportunity = demographic_parity  # Simplified implementation
 ```
 
 #### **3. Disparate Impact Ratio**
+
 ```python
 # Measures ratio of positive outcomes between groups
 disparate_impact = min_group_avg / max_group_avg if max_group_avg > 0 else 0.0
 ```
 
 #### **4. Overall Fairness Score**
+
 ```python
 overall_fairness = (
     demographic_parity * 0.3 +
@@ -213,6 +232,7 @@ overall_fairness = (
 ```
 
 ### **Fairness Thresholds**
+
 ```python
 fairness_thresholds = {
     "min_overall_fairness": 0.8,      # 80% minimum fairness
@@ -226,6 +246,7 @@ fairness_thresholds = {
 ### **Monitoring Workflow**
 
 #### **Real-time Monitoring**
+
 ```python
 # Calculate fairness metrics for processing event
 metrics = fairness_service.calculate_fairness_metrics(
@@ -240,6 +261,7 @@ if metrics.overall_fairness_score < 0.8:
 ```
 
 #### **Incident Tracking**
+
 ```python
 incident = BiasIncident(
     incident_id="inc_456",
@@ -261,6 +283,7 @@ incident = BiasIncident(
 ### **Review Workflow**
 
 #### **1. Review Request Creation**
+
 ```python
 def create_human_review_request(self, processing_id, ai_result, bias_analysis, original_text, reason):
     priority = self._determine_priority(bias_analysis)
@@ -277,6 +300,7 @@ def create_human_review_request(self, processing_id, ai_result, bias_analysis, o
 ```
 
 #### **2. Priority Determination**
+
 ```python
 def _determine_priority(self, bias_analysis):
     confidence_score = bias_analysis.get("confidence_score", 0.0)
@@ -293,6 +317,7 @@ def _determine_priority(self, bias_analysis):
 ```
 
 #### **3. Review Completion**
+
 ```python
 def complete_review(self, request_id, reviewer_id, approved, review_notes):
     review_request = self.pending_reviews.pop(request_id)
@@ -304,6 +329,7 @@ def complete_review(self, request_id, reviewer_id, approved, review_notes):
 ```
 
 ### **Escalation Procedures**
+
 ```python
 def escalate_review(self, request_id, escalation_reason):
     review_request = self.pending_reviews[request_id]
@@ -321,6 +347,7 @@ def escalate_review(self, request_id, escalation_reason):
 ### **Core Endpoints**
 
 #### **1. Bias Analysis**
+
 ```http
 POST /api/transparency/bias-analysis
 Content-Type: application/json
@@ -345,6 +372,7 @@ Response:
 ```
 
 #### **2. Human Review Request**
+
 ```http
 POST /api/transparency/human-review/request
 Content-Type: application/json
@@ -367,6 +395,7 @@ Response:
 ```
 
 #### **3. Fairness Metrics**
+
 ```http
 GET /api/transparency/fairness-metrics?processing_id=proc_123&start_date=2023-01-01
 
@@ -390,6 +419,7 @@ Response:
 ```
 
 #### **4. Compliance Status**
+
 ```http
 GET /api/transparency/compliance-status
 
@@ -426,6 +456,7 @@ Response:
 ### **✅ Brazilian Legal Compliance Checklist**
 
 #### **Anti-Discrimination Laws**
+
 - ✅ **Constituição Federal Art. 3º, IV**: Equality promotion
 - ✅ **Lei nº 9.029/95**: Employment discrimination prohibition
 - ✅ **Lei nº 12.288/2010**: Racial equality measures
@@ -433,12 +464,14 @@ Response:
 - ✅ **Lei das Cotas**: Affirmative action support
 
 #### **Data Protection (LGPD)**
+
 - ✅ **Art. 20**: Right to explanation for automated decisions
 - ✅ **Art. 18**: Right to review automated decisions
 - ✅ **Art. 7**: Data minimization principle
 - ✅ **Art. 6**: Purpose limitation principle
 
 #### **Human Oversight Requirements**
+
 - ✅ **Human Review**: Required for high-risk decisions
 - ✅ **Appeal Process**: Available for all AI decisions
 - ✅ **Transparency**: Detailed explanations provided
@@ -447,6 +480,7 @@ Response:
 ### **Compliance Testing**
 
 #### **1. Bias Detection Testing**
+
 ```python
 def test_bias_detection():
     # Test with various biased inputs
@@ -463,6 +497,7 @@ def test_bias_detection():
 ```
 
 #### **2. Fairness Metrics Testing**
+
 ```python
 def test_fairness_metrics():
     scores_by_group = {
@@ -481,6 +516,7 @@ def test_fairness_metrics():
 ## Testing and Validation
 
 ### **Unit Tests**
+
 - ✅ PII detection accuracy
 - ✅ Protected characteristics identification
 - ✅ Bias risk calculation
@@ -489,6 +525,7 @@ def test_fairness_metrics():
 - ✅ API endpoint functionality
 
 ### **Integration Tests**
+
 - ✅ End-to-end bias detection pipeline
 - ✅ AI scoring with bias prevention
 - ✅ Human oversight integration
@@ -496,12 +533,14 @@ def test_fairness_metrics():
 - ✅ Compliance verification
 
 ### **Performance Tests**
+
 - ✅ Bias detection speed (< 100ms per analysis)
 - ✅ Fairness metrics calculation (< 50ms)
 - ✅ Human review request creation (< 200ms)
 - ✅ Report generation (< 2 seconds)
 
 ### **Security Tests**
+
 - ✅ PII masking effectiveness
 - ✅ Anti-discrimination rule enforcement
 - ✅ Human review authorization
@@ -513,24 +552,28 @@ def test_fairness_metrics():
 ## Maintenance and Monitoring
 
 ### **Daily Monitoring**
+
 - **Bias Detection Alerts**: Immediate notification of critical bias
 - **Fairness Metrics**: Daily fairness score monitoring
 - **Human Review Queue**: Monitor pending reviews and SLA compliance
 - **Incident Tracking**: Track and resolve bias incidents
 
 ### **Weekly Reviews**
+
 - **Fairness Reports**: Generate comprehensive fairness reports
 - **Compliance Status**: Verify legal compliance status
 - **Performance Metrics**: Review system performance and accuracy
 - **Human Review Quality**: Assess review quality and consistency
 
 ### **Monthly Audits**
+
 - **Algorithm Audits**: Comprehensive bias and fairness audits
 - **Legal Compliance**: Full compliance verification
 - **System Updates**: Update bias detection rules and patterns
 - **Training**: Review and update anti-bias training materials
 
 ### **Continuous Improvement**
+
 - **Pattern Updates**: Regularly update PII and bias detection patterns
 - **Threshold Tuning**: Adjust fairness thresholds based on performance
 - **User Feedback**: Incorporate user feedback on bias detection
@@ -569,6 +612,7 @@ def test_fairness_metrics():
 ### **🛡️ SECURITY LEVEL: COMPLIANT & PROTECTED**
 
 The CV-Match platform now provides:
+
 - **Full Brazilian legal compliance**
 - **Comprehensive bias prevention**
 - **Human oversight for critical decisions**

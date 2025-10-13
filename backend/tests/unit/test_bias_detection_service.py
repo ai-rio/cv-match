@@ -3,13 +3,15 @@ Comprehensive Unit Tests for Bias Detection Service
 Phase 0.5 Security Implementation - Brazilian Legal Compliance
 """
 
-import pytest
 from datetime import datetime
+
+import pytest
+
 from app.services.bias_detection_service import (
+    BiasDetectionResult,
     BiasDetectionService,
     BiasSeverity,
-    BiasDetectionResult,
-    FairnessMetrics
+    FairnessMetrics,
 )
 
 
@@ -23,9 +25,9 @@ class TestBiasDetectionService:
     def test_initialization(self):
         """Test service initialization."""
         assert self.bias_service is not None
-        assert hasattr(self.bias_service, 'protected_characteristics')
-        assert hasattr(self.bias_service, 'pii_patterns')
-        assert hasattr(self.bias_service, 'bias_keywords')
+        assert hasattr(self.bias_service, "protected_characteristics")
+        assert hasattr(self.bias_service, "pii_patterns")
+        assert hasattr(self.bias_service, "bias_keywords")
         assert len(self.bias_service.protected_characteristics) > 0
 
     def test_pii_detection_cpf(self):
@@ -159,7 +161,7 @@ class TestBiasDetectionService:
         )
 
         assert 0 <= risk_score <= 1
-        assert severity in [s for s in BiasSeverity]
+        assert severity in list(BiasSeverity)
         assert risk_score > 0.5  # Should be medium-high risk
 
     def test_bias_risk_score_low_risk(self):
@@ -182,7 +184,7 @@ class TestBiasDetectionService:
             "age_bias": ["jovem", "velho"],
             "gender_bias": ["homem", "mulher"],
             "racial_bias": ["aparência"],
-            "discriminatory": ["brasileiro", "nacionalidade"]
+            "discriminatory": ["brasileiro", "nacionalidade"],
         }
         pii_detected = {"cpf": ["123.456.789-00"], "email": ["test@email.com"]}
 
@@ -206,14 +208,14 @@ class TestBiasDetectionService:
         result = self.bias_service.analyze_text_bias(text, "resume")
 
         assert isinstance(result, BiasDetectionResult)
-        assert result.has_bias == True
+        assert result.has_bias
         assert result.severity in [s for s in BiasSeverity]
         assert len(result.detected_characteristics) > 0
         assert len(result.pii_detected) > 0
         assert result.confidence_score > 0
         assert len(result.explanation) > 0
         assert len(result.recommendations) > 0
-        assert result.requires_human_review == True
+        assert result.requires_human_review
 
     def test_analyze_text_bias_no_bias(self):
         """Test text bias analysis with no bias detected."""
@@ -226,12 +228,12 @@ class TestBiasDetectionService:
         result = self.bias_service.analyze_text_bias(text, "resume")
 
         assert isinstance(result, BiasDetectionResult)
-        assert result.has_bias == False
+        assert not result.has_bias
         assert result.severity == BiasSeverity.LOW
         assert len(result.detected_characteristics) == 0
         assert len(result.pii_detected) == 0
         assert result.confidence_score < 0.5
-        assert result.requires_human_review == False
+        assert not result.requires_human_review
 
     def test_should_block_processing_critical(self):
         """Test processing blocking for critical bias."""
@@ -243,11 +245,11 @@ class TestBiasDetectionService:
             explanation="Critical bias detected",
             recommendations=["Remove personal info"],
             pii_detected={"cpf": ["123.456.789-00"]},
-            requires_human_review=True
+            requires_human_review=True,
         )
 
         should_block = self.bias_service.should_block_processing(bias_result)
-        assert should_block == True
+        assert should_block
 
     def test_should_block_processing_high_with_pii(self):
         """Test processing blocking for high bias with PII."""
@@ -259,11 +261,11 @@ class TestBiasDetectionService:
             explanation="High bias detected",
             recommendations=["Remove age info"],
             pii_detected={"cpf": ["123.456.789-00"]},
-            requires_human_review=True
+            requires_human_review=True,
         )
 
         should_block = self.bias_service.should_block_processing(bias_result)
-        assert should_block == True
+        assert should_block
 
     def test_should_block_processing_medium(self):
         """Test processing not blocked for medium bias."""
@@ -275,11 +277,11 @@ class TestBiasDetectionService:
             explanation="Medium bias detected",
             recommendations=["Review age references"],
             pii_detected={},
-            requires_human_review=False
+            requires_human_review=False,
         )
 
         should_block = self.bias_service.should_block_processing(bias_result)
-        assert should_block == False
+        assert not should_block
 
     def test_create_anti_discrimination_prompt_scoring(self):
         """Test anti-discrimination prompt creation for scoring."""
@@ -317,12 +319,10 @@ class TestBiasDetectionService:
             explanation="Bias detected in resume",
             recommendations=["Remove age", "Use neutral language"],
             pii_detected={"cpf": ["123.456.789-00"]},
-            requires_human_review=True
+            requires_human_review=True,
         )
 
-        report = self.bias_service.create_bias_report(
-            bias_result, "Sample resume text", "proc_123"
-        )
+        report = self.bias_service.create_bias_report(bias_result, "Sample resume text", "proc_123")
 
         assert "processing_id" in report
         assert report["processing_id"] == "proc_123"
@@ -336,10 +336,7 @@ class TestBiasDetectionService:
 
     def test_calculate_fairness_metrics_basic(self):
         """Test basic fairness metrics calculation."""
-        scores_by_group = {
-            "group_a": [0.8, 0.7, 0.9],
-            "group_b": [0.6, 0.8, 0.7]
-        }
+        scores_by_group = {"group_a": [0.8, 0.7, 0.9], "group_b": [0.6, 0.8, 0.7]}
 
         metrics = self.bias_service.calculate_fairness_metrics(scores_by_group)
 
@@ -363,10 +360,7 @@ class TestBiasDetectionService:
 
     def test_calculate_fairness_metrics_perfect_fairness(self):
         """Test fairness metrics with perfectly fair distribution."""
-        scores_by_group = {
-            "group_a": [0.8, 0.8, 0.8],
-            "group_b": [0.8, 0.8, 0.8]
-        }
+        scores_by_group = {"group_a": [0.8, 0.8, 0.8], "group_b": [0.8, 0.8, 0.8]}
 
         metrics = self.bias_service.calculate_fairness_metrics(scores_by_group)
 
@@ -403,7 +397,7 @@ class TestBiasDetectionService:
         result = self.bias_service.analyze_text_bias("", "resume")
 
         assert isinstance(result, BiasDetectionResult)
-        assert result.has_bias == False
+        assert not result.has_bias
         assert result.severity == BiasSeverity.LOW
         assert len(result.detected_characteristics) == 0
 
@@ -416,7 +410,9 @@ class TestBiasDetectionService:
 
         assert isinstance(result, BiasDetectionResult)
         # Should still detect bias even in long text
-        assert "age" in result.detected_characteristics or "gender" in result.detected_characteristics
+        assert (
+            "age" in result.detected_characteristics or "gender" in result.detected_characteristics
+        )
 
     def test_context_based_analysis(self):
         """Test bias analysis in different contexts."""
@@ -427,9 +423,9 @@ class TestBiasDetectionService:
         general_result = self.bias_service.analyze_text_bias(text, "general")
 
         # All should detect bias
-        assert resume_result.has_bias == True
-        assert job_result.has_bias == True
-        assert general_result.has_bias == True
+        assert resume_result.has_bias
+        assert job_result.has_bias
+        assert general_result.has_bias
 
     def test_unicode_and_special_characters(self):
         """Test bias analysis with Unicode and special characters."""

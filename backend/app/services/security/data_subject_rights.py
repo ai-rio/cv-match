@@ -14,17 +14,15 @@ are mandatory under LGPD.
 """
 
 import logging
-import json
-from datetime import datetime, timezone, timedelta
-from typing import Any, Dict, List, Optional, Union
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime, timedelta
 from enum import Enum
+from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from app.services.supabase.database import SupabaseDatabaseService
 from app.services.security.consent_manager import consent_manager
-from app.services.security.pii_detection_service import scan_for_pii, mask_pii
+from app.services.supabase.database import SupabaseDatabaseService
 
 logger = logging.getLogger(__name__)
 
@@ -32,12 +30,12 @@ logger = logging.getLogger(__name__)
 class DataSubjectRightType(Enum):
     """Types of data subject rights under LGPD."""
 
-    ACCESS = "access"                    # Right to access personal data
-    CORRECTION = "correction"            # Right to correct incorrect data
-    DELETION = "deletion"                # Right to deletion (right to be forgotten)
-    PORTABILITY = "portability"          # Right to data portability
-    INFORMATION = "information"          # Right to information about processing
-    REVIEW = "review"                    # Right to review automated decisions
+    ACCESS = "access"  # Right to access personal data
+    CORRECTION = "correction"  # Right to correct incorrect data
+    DELETION = "deletion"  # Right to deletion (right to be forgotten)
+    PORTABILITY = "portability"  # Right to data portability
+    INFORMATION = "information"  # Right to information about processing
+    REVIEW = "review"  # Right to review automated decisions
     CONSENT_WITHDRAWAL = "consent_withdrawal"  # Right to withdraw consent
 
 
@@ -56,20 +54,20 @@ class DataAccessRequest(BaseModel):
 
     user_id: str
     request_type: DataSubjectRightType
-    justification: Optional[str] = None
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
+    justification: str | None = None
+    ip_address: str | None = None
+    user_agent: str | None = None
 
 
 class DataCorrectionRequest(BaseModel):
     """Request for data correction."""
 
     user_id: str
-    field_corrections: Dict[str, Any]
+    field_corrections: dict[str, Any]
     justification: str
-    supporting_documents: Optional[List[str]] = None
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
+    supporting_documents: list[str] | None = None
+    ip_address: str | None = None
+    user_agent: str | None = None
 
 
 class DataDeletionRequest(BaseModel):
@@ -77,11 +75,11 @@ class DataDeletionRequest(BaseModel):
 
     user_id: str
     deletion_scope: str  # 'all', 'specific_data', 'account_only'
-    specific_data_types: Optional[List[str]] = None
+    specific_data_types: list[str] | None = None
     justification: str
     retain_legal_required: bool = True
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
+    ip_address: str | None = None
+    user_agent: str | None = None
 
 
 class DataPortabilityRequest(BaseModel):
@@ -90,8 +88,8 @@ class DataPortabilityRequest(BaseModel):
     user_id: str
     format_preference: str = "json"  # 'json', 'csv', 'xml'
     include_deleted: bool = False
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
+    ip_address: str | None = None
+    user_agent: str | None = None
 
 
 @dataclass
@@ -102,14 +100,14 @@ class DataSubjectRequest:
     user_id: str
     request_type: DataSubjectRightType
     status: RequestStatus
-    request_data: Dict[str, Any]
+    request_data: dict[str, Any]
     created_at: datetime
-    processed_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    processor_notes: Optional[str] = None
-    rejection_reason: Optional[str] = None
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
+    processed_at: datetime | None = None
+    completed_at: datetime | None = None
+    processor_notes: str | None = None
+    rejection_reason: str | None = None
+    ip_address: str | None = None
+    user_agent: str | None = None
 
 
 class DataSubjectRightsResponse(BaseModel):
@@ -118,10 +116,10 @@ class DataSubjectRightsResponse(BaseModel):
     request_id: str
     request_type: str
     status: str
-    processed_data: Optional[Dict[str, Any]] = None
-    download_url: Optional[str] = None
-    expires_at: Optional[datetime] = None
-    message: Optional[str] = None
+    processed_data: dict[str, Any] | None = None
+    download_url: str | None = None
+    expires_at: datetime | None = None
+    message: str | None = None
 
 
 class DataSubjectRightsManager:
@@ -136,10 +134,7 @@ class DataSubjectRightsManager:
         self.job_descriptions_db = SupabaseDatabaseService("job_descriptions", dict)
         self.usage_tracking_db = SupabaseDatabaseService("usage_tracking", dict)
 
-    async def create_data_access_request(
-        self,
-        request: DataAccessRequest
-    ) -> str:
+    async def create_data_access_request(self, request: DataAccessRequest) -> str:
         """
         Create a data access request.
 
@@ -154,12 +149,10 @@ class DataSubjectRightsManager:
                 "user_id": request.user_id,
                 "request_type": request.request_type.value,
                 "status": RequestStatus.PENDING.value,
-                "request_data": {
-                    "justification": request.justification
-                },
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "request_data": {"justification": request.justification},
+                "created_at": datetime.now(UTC).isoformat(),
                 "ip_address": request.ip_address,
-                "user_agent": request.user_agent
+                "user_agent": request.user_agent,
             }
 
             result = await self.requests_db.create(request_data)
@@ -193,8 +186,8 @@ class DataSubjectRightsManager:
                 request_id,
                 {
                     "status": RequestStatus.PROCESSING.value,
-                    "processed_at": datetime.now(timezone.utc).isoformat()
-                }
+                    "processed_at": datetime.now(UTC).isoformat(),
+                },
             )
 
             # Collect all user data
@@ -206,7 +199,7 @@ class DataSubjectRightsManager:
                 request_type=request["request_type"],
                 status="completed",
                 processed_data=user_data,
-                message="Data access request processed successfully"
+                message="Data access request processed successfully",
             )
 
             # Update request status
@@ -214,9 +207,9 @@ class DataSubjectRightsManager:
                 request_id,
                 {
                     "status": RequestStatus.COMPLETED.value,
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                    "processor_notes": f"Data export completed. {len(user_data)} data categories included."
-                }
+                    "completed_at": datetime.now(UTC).isoformat(),
+                    "processor_notes": f"Data export completed. {len(user_data)} data categories included.",
+                },
             )
 
             return response
@@ -227,16 +220,13 @@ class DataSubjectRightsManager:
                 request_id,
                 {
                     "status": RequestStatus.REJECTED.value,
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                    "rejection_reason": f"Processing error: {str(e)}"
-                }
+                    "completed_at": datetime.now(UTC).isoformat(),
+                    "rejection_reason": f"Processing error: {str(e)}",
+                },
             )
             raise
 
-    async def create_data_correction_request(
-        self,
-        request: DataCorrectionRequest
-    ) -> str:
+    async def create_data_correction_request(self, request: DataCorrectionRequest) -> str:
         """
         Create a data correction request.
 
@@ -254,11 +244,11 @@ class DataSubjectRightsManager:
                 "request_data": {
                     "field_corrections": request.field_corrections,
                     "justification": request.justification,
-                    "supporting_documents": request.supporting_documents
+                    "supporting_documents": request.supporting_documents,
                 },
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 "ip_address": request.ip_address,
-                "user_agent": request.user_agent
+                "user_agent": request.user_agent,
             }
 
             result = await self.requests_db.create(request_data)
@@ -292,14 +282,13 @@ class DataSubjectRightsManager:
                 request_id,
                 {
                     "status": RequestStatus.PROCESSING.value,
-                    "processed_at": datetime.now(timezone.utc).isoformat()
-                }
+                    "processed_at": datetime.now(UTC).isoformat(),
+                },
             )
 
             # Apply corrections
             corrections_applied = await self._apply_data_corrections(
-                request["user_id"],
-                request["request_data"]["field_corrections"]
+                request["user_id"], request["request_data"]["field_corrections"]
             )
 
             # Create response
@@ -308,7 +297,7 @@ class DataSubjectRightsManager:
                 request_type=request["request_type"],
                 status="completed",
                 processed_data=corrections_applied,
-                message=f"Data correction completed. {len(corrections_applied)} fields updated."
+                message=f"Data correction completed. {len(corrections_applied)} fields updated.",
             )
 
             # Update request status
@@ -316,9 +305,9 @@ class DataSubjectRightsManager:
                 request_id,
                 {
                     "status": RequestStatus.COMPLETED.value,
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                    "processor_notes": f"Applied corrections to {len(corrections_applied)} fields."
-                }
+                    "completed_at": datetime.now(UTC).isoformat(),
+                    "processor_notes": f"Applied corrections to {len(corrections_applied)} fields.",
+                },
             )
 
             return response
@@ -329,16 +318,13 @@ class DataSubjectRightsManager:
                 request_id,
                 {
                     "status": RequestStatus.REJECTED.value,
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                    "rejection_reason": f"Processing error: {str(e)}"
-                }
+                    "completed_at": datetime.now(UTC).isoformat(),
+                    "rejection_reason": f"Processing error: {str(e)}",
+                },
             )
             raise
 
-    async def create_data_deletion_request(
-        self,
-        request: DataDeletionRequest
-    ) -> str:
+    async def create_data_deletion_request(self, request: DataDeletionRequest) -> str:
         """
         Create a data deletion request (right to be forgotten).
 
@@ -357,11 +343,11 @@ class DataSubjectRightsManager:
                     "deletion_scope": request.deletion_scope,
                     "specific_data_types": request.specific_data_types,
                     "justification": request.justification,
-                    "retain_legal_required": request.retain_legal_required
+                    "retain_legal_required": request.retain_legal_required,
                 },
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 "ip_address": request.ip_address,
-                "user_agent": request.user_agent
+                "user_agent": request.user_agent,
             }
 
             result = await self.requests_db.create(request_data)
@@ -395,14 +381,13 @@ class DataSubjectRightsManager:
                 request_id,
                 {
                     "status": RequestStatus.PROCESSING.value,
-                    "processed_at": datetime.now(timezone.utc).isoformat()
-                }
+                    "processed_at": datetime.now(UTC).isoformat(),
+                },
             )
 
             # Apply deletions
             deletion_results = await self._apply_data_deletions(
-                request["user_id"],
-                request["request_data"]
+                request["user_id"], request["request_data"]
             )
 
             # Create response
@@ -411,7 +396,7 @@ class DataSubjectRightsManager:
                 request_type=request["request_type"],
                 status="completed",
                 processed_data=deletion_results,
-                message="Data deletion request processed successfully"
+                message="Data deletion request processed successfully",
             )
 
             # Update request status
@@ -419,9 +404,9 @@ class DataSubjectRightsManager:
                 request_id,
                 {
                     "status": RequestStatus.COMPLETED.value,
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                    "processor_notes": f"Data deletion completed per scope: {request['request_data']['deletion_scope']}"
-                }
+                    "completed_at": datetime.now(UTC).isoformat(),
+                    "processor_notes": f"Data deletion completed per scope: {request['request_data']['deletion_scope']}",
+                },
             )
 
             return response
@@ -432,16 +417,13 @@ class DataSubjectRightsManager:
                 request_id,
                 {
                     "status": RequestStatus.REJECTED.value,
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                    "rejection_reason": f"Processing error: {str(e)}"
-                }
+                    "completed_at": datetime.now(UTC).isoformat(),
+                    "rejection_reason": f"Processing error: {str(e)}",
+                },
             )
             raise
 
-    async def create_data_portability_request(
-        self,
-        request: DataPortabilityRequest
-    ) -> str:
+    async def create_data_portability_request(self, request: DataPortabilityRequest) -> str:
         """
         Create a data portability request.
 
@@ -458,17 +440,19 @@ class DataSubjectRightsManager:
                 "status": RequestStatus.PENDING.value,
                 "request_data": {
                     "format_preference": request.format_preference,
-                    "include_deleted": request.include_deleted
+                    "include_deleted": request.include_deleted,
                 },
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 "ip_address": request.ip_address,
-                "user_agent": request.user_agent
+                "user_agent": request.user_agent,
             }
 
             result = await self.requests_db.create(request_data)
             request_id = result["id"]
 
-            logger.info(f"Data portability request created: {request_id} for user {request.user_id}")
+            logger.info(
+                f"Data portability request created: {request_id} for user {request.user_id}"
+            )
             return request_id
 
         except Exception as e:
@@ -496,14 +480,13 @@ class DataSubjectRightsManager:
                 request_id,
                 {
                     "status": RequestStatus.PROCESSING.value,
-                    "processed_at": datetime.now(timezone.utc).isoformat()
-                }
+                    "processed_at": datetime.now(UTC).isoformat(),
+                },
             )
 
             # Collect portable data
             portable_data = await self._collect_portable_data(
-                request["user_id"],
-                request["request_data"]
+                request["user_id"], request["request_data"]
             )
 
             # Create response
@@ -513,7 +496,7 @@ class DataSubjectRightsManager:
                 status="completed",
                 processed_data=portable_data,
                 message="Data portability request processed successfully",
-                expires_at=datetime.now(timezone.utc) + timedelta(days=7)  # Data expires in 7 days
+                expires_at=datetime.now(UTC) + timedelta(days=7),  # Data expires in 7 days
             )
 
             # Update request status
@@ -521,9 +504,9 @@ class DataSubjectRightsManager:
                 request_id,
                 {
                     "status": RequestStatus.COMPLETED.value,
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                    "processor_notes": f"Portable data exported in {request['request_data']['format_preference']} format."
-                }
+                    "completed_at": datetime.now(UTC).isoformat(),
+                    "processor_notes": f"Portable data exported in {request['request_data']['format_preference']} format.",
+                },
             )
 
             return response
@@ -534,19 +517,19 @@ class DataSubjectRightsManager:
                 request_id,
                 {
                     "status": RequestStatus.REJECTED.value,
-                    "completed_at": datetime.now(timezone.utc).isoformat(),
-                    "rejection_reason": f"Processing error: {str(e)}"
-                }
+                    "completed_at": datetime.now(UTC).isoformat(),
+                    "rejection_reason": f"Processing error: {str(e)}",
+                },
             )
             raise
 
-    async def _collect_user_data(self, user_id: str) -> Dict[str, Any]:
+    async def _collect_user_data(self, user_id: str) -> dict[str, Any]:
         """Collect all user data for access requests."""
         try:
             user_data = {
                 "user_id": user_id,
-                "export_date": datetime.now(timezone.utc).isoformat(),
-                "data_categories": {}
+                "export_date": datetime.now(UTC).isoformat(),
+                "data_categories": {},
             }
 
             # Profile data
@@ -602,7 +585,9 @@ class DataSubjectRightsManager:
             logger.error(f"Failed to collect user data: {e}")
             raise
 
-    async def _apply_data_corrections(self, user_id: str, corrections: Dict[str, Any]) -> Dict[str, Any]:
+    async def _apply_data_corrections(
+        self, user_id: str, corrections: dict[str, Any]
+    ) -> dict[str, Any]:
         """Apply data corrections to user profile."""
         try:
             applied_corrections = {}
@@ -622,7 +607,9 @@ class DataSubjectRightsManager:
             logger.error(f"Failed to apply data corrections: {e}")
             raise
 
-    async def _apply_data_deletions(self, user_id: str, deletion_request: Dict[str, Any]) -> Dict[str, Any]:
+    async def _apply_data_deletions(
+        self, user_id: str, deletion_request: dict[str, Any]
+    ) -> dict[str, Any]:
         """Apply data deletions according to request scope."""
         try:
             deletion_scope = deletion_request.get("deletion_scope", "all")
@@ -640,7 +627,9 @@ class DataSubjectRightsManager:
                 else:
                     # Soft deletion retaining required legal data
                     await self._soft_delete_user_data(user_id)
-                    deletion_results["deleted_data"]["all"] = "Soft deletion performed, legal data retained"
+                    deletion_results["deleted_data"]["all"] = (
+                        "Soft deletion performed, legal data retained"
+                    )
 
             elif deletion_scope == "specific_data":
                 # Delete specific data types
@@ -648,31 +637,31 @@ class DataSubjectRightsManager:
                     if data_type == "optimizations":
                         await self.optimizations_db.update_many(
                             filters={"user_id": user_id},
-                            data={"deleted_at": datetime.now(timezone.utc).isoformat()}
+                            data={"deleted_at": datetime.now(UTC).isoformat()},
                         )
-                        deletion_results["deleted_data"][data_type] = "Optimization records soft deleted"
+                        deletion_results["deleted_data"][data_type] = (
+                            "Optimization records soft deleted"
+                        )
                     elif data_type == "resumes":
                         await self.resumes_db.update_many(
                             filters={"user_id": user_id},
-                            data={"deleted_at": datetime.now(timezone.utc).isoformat()}
+                            data={"deleted_at": datetime.now(UTC).isoformat()},
                         )
                         deletion_results["deleted_data"][data_type] = "Resume records soft deleted"
                     elif data_type == "job_descriptions":
                         await self.job_descriptions_db.update_many(
                             filters={"user_id": user_id},
-                            data={"deleted_at": datetime.now(timezone.utc).isoformat()}
+                            data={"deleted_at": datetime.now(UTC).isoformat()},
                         )
-                        deletion_results["deleted_data"][data_type] = "Job description records soft deleted"
+                        deletion_results["deleted_data"][data_type] = (
+                            "Job description records soft deleted"
+                        )
 
             elif deletion_scope == "account_only":
                 # Delete account but keep some data for legal purposes
                 await self.profiles_db.update(
                     user_id,
-                    {
-                        "deleted_at": datetime.now(timezone.utc).isoformat(),
-                        "full_name": None,
-                        "email": None
-                    }
+                    {"deleted_at": datetime.now(UTC).isoformat(), "full_name": None, "email": None},
                 )
                 deletion_results["deleted_data"]["account"] = "Account soft deleted"
 
@@ -682,7 +671,9 @@ class DataSubjectRightsManager:
             logger.error(f"Failed to apply data deletions: {e}")
             raise
 
-    async def _collect_portable_data(self, user_id: str, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _collect_portable_data(
+        self, user_id: str, request_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """Collect user data in portable format."""
         try:
             format_preference = request_data.get("format_preference", "json")
@@ -704,11 +695,11 @@ class DataSubjectRightsManager:
                 "format": format_preference,
                 "data": portable_data,
                 "metadata": {
-                    "export_date": datetime.now(timezone.utc).isoformat(),
+                    "export_date": datetime.now(UTC).isoformat(),
                     "user_id": user_id,
                     "includes_deleted": include_deleted,
-                    "lgpd_compliant": True
-                }
+                    "lgpd_compliant": True,
+                },
             }
 
         except Exception as e:
@@ -735,28 +726,21 @@ class DataSubjectRightsManager:
         """Soft delete user data while retaining legal records."""
         try:
             # Soft delete all user data
-            timestamp = datetime.now(timezone.utc).isoformat()
+            timestamp = datetime.now(UTC).isoformat()
 
             await self.usage_tracking_db.update_many(
-                filters={"user_id": user_id},
-                data={"deleted_at": timestamp}
+                filters={"user_id": user_id}, data={"deleted_at": timestamp}
             )
             await self.job_descriptions_db.update_many(
-                filters={"user_id": user_id},
-                data={"deleted_at": timestamp}
+                filters={"user_id": user_id}, data={"deleted_at": timestamp}
             )
             await self.resumes_db.update_many(
-                filters={"user_id": user_id},
-                data={"deleted_at": timestamp}
+                filters={"user_id": user_id}, data={"deleted_at": timestamp}
             )
             await self.optimizations_db.update_many(
-                filters={"user_id": user_id},
-                data={"deleted_at": timestamp}
+                filters={"user_id": user_id}, data={"deleted_at": timestamp}
             )
-            await self.profiles_db.update(
-                user_id,
-                {"deleted_at": timestamp}
-            )
+            await self.profiles_db.update(user_id, {"deleted_at": timestamp})
 
             logger.info(f"Soft deletion completed for user {user_id}")
 
@@ -764,7 +748,7 @@ class DataSubjectRightsManager:
             logger.error(f"Failed soft deletion for user {user_id}: {e}")
             raise
 
-    def _convert_to_csv_format(self, user_data: Dict[str, Any]) -> Dict[str, List[Dict[str, Any]]]:
+    def _convert_to_csv_format(self, user_data: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
         """Convert user data to CSV-friendly format."""
         csv_data = {}
 
@@ -793,14 +777,14 @@ async def create_data_access_request(user_id: str, justification: str = None) ->
         Request ID
     """
     request = DataAccessRequest(
-        user_id=user_id,
-        request_type=DataSubjectRightType.ACCESS,
-        justification=justification
+        user_id=user_id, request_type=DataSubjectRightType.ACCESS, justification=justification
     )
     return await data_subject_rights_manager.create_data_access_request(request)
 
 
-async def create_data_deletion_request(user_id: str, scope: str = "all", justification: str = "User request") -> str:
+async def create_data_deletion_request(
+    user_id: str, scope: str = "all", justification: str = "User request"
+) -> str:
     """
     Convenience function to create data deletion request.
 
@@ -813,8 +797,6 @@ async def create_data_deletion_request(user_id: str, scope: str = "all", justifi
         Request ID
     """
     request = DataDeletionRequest(
-        user_id=user_id,
-        deletion_scope=scope,
-        justification=justification
+        user_id=user_id, deletion_scope=scope, justification=justification
     )
     return await data_subject_rights_manager.create_data_deletion_request(request)

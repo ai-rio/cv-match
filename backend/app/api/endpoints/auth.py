@@ -19,6 +19,7 @@ class LoginRequest(BaseModel):
 
 class SecureLoginResponse(BaseModel):
     """Enhanced login response with security metadata."""
+
     access_token: str
     token_type: str
     user_id: str
@@ -36,26 +37,26 @@ async def login(
     try:
         # Validate input for security
         email_validation = validate_string(login_data.email, input_type="email", max_length=254)
-        password_validation = validate_string(login_data.password, input_type="general", max_length=128)
+        password_validation = validate_string(
+            login_data.password, input_type="general", max_length=128
+        )
 
         if not email_validation.is_valid or not password_validation.is_valid:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid input format"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid input format"
             )
 
         supabase_token = await auth_service.sign_in_with_email_password(
-            email_validation.sanitized_input,
-            password_validation.sanitized_input
+            email_validation.sanitized_input, password_validation.sanitized_input
         )
         return TokenResponse(access_token=supabase_token, token_type="bearer")
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Login failed",
-        )
+        ) from err
 
 
 @router.post("/secure-login", response_model=SecureLoginResponse)
@@ -73,59 +74,62 @@ async def secure_login(
         # Input validation is handled by SecureLoginRequest Pydantic model
         # Additional server-side validation for defense in depth
         email_validation = validate_string(login_data.email, input_type="email", max_length=254)
-        password_validation = validate_string(login_data.password, input_type="general", max_length=128)
+        password_validation = validate_string(
+            login_data.password, input_type="general", max_length=128
+        )
 
         if not email_validation.is_valid:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid email format: {'; '.join(email_validation.errors)}"
+                detail=f"Invalid email format: {'; '.join(email_validation.errors)}",
             )
 
         if not password_validation.is_valid:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid password format: {'; '.join(password_validation.errors)}"
+                detail=f"Invalid password format: {'; '.join(password_validation.errors)}",
             )
 
         # Log login attempt
         import logging
+
         logger = logging.getLogger(__name__)
         logger.info(f"Login attempt for email: {email_validation.sanitized_input}")
 
         # Attempt authentication
         supabase_token = await auth_service.sign_in_with_email_password(
-            email_validation.sanitized_input,
-            password_validation.sanitized_input
+            email_validation.sanitized_input, password_validation.sanitized_input
         )
 
         # Get user info for response
         user = await auth_service.get_user(supabase_token)
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Authentication failed"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed"
             )
 
         from datetime import datetime
+
         return SecureLoginResponse(
             access_token=supabase_token,
             token_type="bearer",
             user_id=user.get("id", ""),
             email=user.get("email", ""),
             login_time=datetime.utcnow().isoformat(),
-            requires_mfa=False  # TODO: Implement MFA when needed
+            requires_mfa=False,  # TODO: Implement MFA when needed
         )
 
     except HTTPException:
         raise
     except Exception as e:
         import logging
+
         logger = logging.getLogger(__name__)
         logger.error(f"Secure login failed: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication failed",
-        )
+        ) from e
 
 
 @router.get("/me", response_model=UserProfile)
@@ -153,7 +157,7 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid authentication credentials: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
 
 
 @router.post("/provider-token", response_model=TokenResponse)
@@ -168,4 +172,4 @@ async def exchange_provider_token(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to authenticate with provider: {str(e)}",
-        )
+        ) from e

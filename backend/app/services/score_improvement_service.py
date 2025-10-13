@@ -8,15 +8,15 @@ Phase 0.5 Security Implementation - Brazilian Legal Compliance
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
 import uuid
 from datetime import datetime
+from typing import Any
 
 import numpy as np
 
 from ..agent.manager import AgentManager, EmbeddingManager
 from ..core.exceptions import ProviderError
-from .bias_detection_service import bias_detection_service, BiasDetectionResult, BiasSeverity
+from .bias_detection_service import BiasDetectionResult, bias_detection_service
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +116,9 @@ Responda em JSON válido:
 
         SECURITY ENHANCEMENT: Includes anti-discrimination rules and focuses only on professional aspects.
         """
-        anti_discrimination_rules = self.bias_service.create_anti_discrimination_prompt("improvement")
+        anti_discrimination_rules = self.bias_service.create_anti_discrimination_prompt(
+            "improvement"
+        )
         improvements_text = "\n".join([f"- {imp}" for imp in improvements])
 
         return f"""
@@ -199,10 +201,9 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
 
         return processed_text, bias_result
 
-    def _enhance_score_result_with_bias_analysis(self,
-                                                result: dict[str, Any],
-                                                bias_analysis: BiasDetectionResult,
-                                                processing_id: str) -> dict[str, Any]:
+    def _enhance_score_result_with_bias_analysis(
+        self, result: dict[str, Any], bias_analysis: BiasDetectionResult, processing_id: str
+    ) -> dict[str, Any]:
         """
         Enhance scoring result with bias analysis information.
         """
@@ -213,7 +214,7 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
             "detected_characteristics": bias_analysis.detected_characteristics,
             "pii_detected": bias_analysis.pii_detected,
             "requires_human_review": bias_analysis.requires_human_review,
-            "confidence_score": bias_analysis.confidence_score
+            "confidence_score": bias_analysis.confidence_score,
         }
 
         # Add compliance information
@@ -221,7 +222,7 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
             "legal_basis": ["Constituição Federal Art. 3º, IV", "Lei nº 9.029/95", "LGPD"],
             "anti_discrimination_applied": True,
             "fairness_score": 1.0 - bias_analysis.confidence_score,  # Inverse of bias risk
-            "requires_oversight": bias_analysis.requires_human_review
+            "requires_oversight": bias_analysis.requires_human_review,
         }
 
         # Add processing metadata for audit trail
@@ -229,7 +230,7 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
             "processing_id": processing_id,
             "timestamp": datetime.utcnow().isoformat(),
             "bias_detection_enabled": True,
-            "anti_discrimination_rules_applied": True
+            "anti_discrimination_rules_applied": True,
         }
 
         return result
@@ -294,7 +295,7 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
                 "criterios_avaliacao": "Erro no processamento - análise manual necessária",
                 "alerta_viés": True,
                 "requer_revisao_humana": True,
-                "observacoes_compliance": "Erro técnico na análise"
+                "observacoes_compliance": "Erro técnico na análise",
             }
 
     async def calculate_match_score(self, resume_text: str, job_description: str) -> dict[str, Any]:
@@ -314,11 +315,15 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
 
         try:
             # Step 1: Bias analysis preprocessing
-            processed_resume, resume_bias_analysis = self._preprocess_text_bias_analysis(resume_text)
+            processed_resume, resume_bias_analysis = self._preprocess_text_bias_analysis(
+                resume_text
+            )
             processed_job, job_bias_analysis = self._preprocess_text_bias_analysis(job_description)
 
-            logger.info(f"Processing {processing_id}: Resume bias={resume_bias_analysis.has_bias}, "
-                       f"Job bias={job_bias_analysis.has_bias}")
+            logger.info(
+                f"Processing {processing_id}: Resume bias={resume_bias_analysis.has_bias}, "
+                f"Job bias={job_bias_analysis.has_bias}"
+            )
 
             # Step 2: Build enhanced prompt with anti-discrimination rules
             prompt = self._build_score_prompt(processed_resume, processed_job)
@@ -356,8 +361,10 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
             if resume_bias_analysis.requires_human_review:
                 logger.warning(f"Processing {processing_id} requires human review due to bias risk")
 
-            logger.info(f"Score calculated {processing_id}: {result.get('score_compatibilidade', 0)} "
-                       f"(bias_risk: {resume_bias_analysis.confidence_score:.2f})")
+            logger.info(
+                f"Score calculated {processing_id}: {result.get('score_compatibilidade', 0)} "
+                f"(bias_risk: {resume_bias_analysis.confidence_score:.2f})"
+            )
 
             return result
 
@@ -386,7 +393,9 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
 
         try:
             # Step 1: Bias analysis preprocessing
-            processed_resume, resume_bias_analysis = self._preprocess_text_bias_analysis(resume_text)
+            processed_resume, resume_bias_analysis = self._preprocess_text_bias_analysis(
+                resume_text
+            )
             processed_job, job_bias_analysis = self._preprocess_text_bias_analysis(job_description)
 
             # Step 2: Build enhanced improvement prompt
@@ -427,7 +436,7 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
                 result["improved_resume_bias_analysis"] = {
                     "has_bias": improved_bias_analysis.has_bias,
                     "severity": improved_bias_analysis.severity.value,
-                    "requires_human_review": improved_bias_analysis.requires_human_review
+                    "requires_human_review": improved_bias_analysis.requires_human_review,
                 }
 
             # Step 7: Add compliance metadata
@@ -436,7 +445,7 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
                 "timestamp": datetime.utcnow().isoformat(),
                 "bias_detection_enabled": True,
                 "original_bias_risk": resume_bias_analysis.confidence_score,
-                "improvement_compliance_verified": True
+                "improvement_compliance_verified": True,
             }
 
             logger.info(f"Resume improvement generated {processing_id}")
@@ -471,8 +480,8 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
 
             # Check if human review is required before proceeding
             requires_human_review = (
-                score_analysis.get("bias_analysis", {}).get("requires_human_review", False) or
-                current_score < 40  # Low scores may indicate discrimination
+                score_analysis.get("bias_analysis", {}).get("requires_human_review", False)
+                or current_score < 40  # Low scores may indicate discrimination
             )
 
             result = {
@@ -481,12 +490,16 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
                 "analysis": score_analysis,
                 "improvements_generated": False,
                 "requires_human_review": requires_human_review,
-                "compliance_status": "COMPLIANT" if not requires_human_review else "REVIEW_REQUIRED"
+                "compliance_status": "COMPLIANT"
+                if not requires_human_review
+                else "REVIEW_REQUIRED",
             }
 
             # Step 3: Generate improvements only if appropriate
             if current_score < 80 and improvements and not requires_human_review:
-                logger.info(f"Generating improvements for score {current_score} (ID: {processing_id})")
+                logger.info(
+                    f"Generating improvements for score {current_score} (ID: {processing_id})"
+                )
 
                 # Step 4: Generate improved resume
                 improvement_result = await self.improve_resume(
@@ -502,14 +515,20 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
                         "new_embedding_similarity": improvement_result.get(
                             "new_embedding_similarity"
                         ),
-                        "improvement_compliance": improvement_result.get("compliance_verificado", False),
-                        "removed_personal_info": improvement_result.get("informacoes_removidas", [])
+                        "improvement_compliance": improvement_result.get(
+                            "compliance_verificado", False
+                        ),
+                        "removed_personal_info": improvement_result.get(
+                            "informacoes_removidas", []
+                        ),
                     }
                 )
 
             elif requires_human_review:
                 logger.warning(f"Skipping improvements for {processing_id} - human review required")
-                result["skip_reason"] = "Human review required due to bias risk or compliance concerns"
+                result["skip_reason"] = (
+                    "Human review required due to bias risk or compliance concerns"
+                )
 
             # Step 5: Add final compliance summary
             result["compliance_summary"] = {
@@ -517,7 +536,7 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
                 "bias_detection_completed": True,
                 "fairness_measures_active": True,
                 "lgpd_compliant": True,
-                "brazilian_law_compliant": True
+                "brazilian_law_compliant": True,
             }
 
             return result
@@ -546,7 +565,9 @@ anti-discriminação e focar exclusivamente em qualificações profissionais rel
             context_map = {"resume": "currículo", "job": "vaga de emprego", "general": "texto"}
             context_text = context_map.get(context, "texto")
 
-            anti_discrimination_rules = self.bias_service.create_anti_discrimination_prompt("scoring")
+            anti_discrimination_rules = self.bias_service.create_anti_discrimination_prompt(
+                "scoring"
+            )
 
             prompt = f"""
 {anti_discrimination_rules}
@@ -587,7 +608,7 @@ Retorne apenas uma lista JSON de palavras-chave profissionais:
             words = processed_text.lower().split()
             filtered_words = []
             for word in words:
-                if len(word) > 3 and word not in ['idade', 'anos', 'gênero', 'sexo', 'raça']:
+                if len(word) > 3 and word not in ["idade", "anos", "gênero", "sexo", "raça"]:
                     filtered_words.append(word.strip())
             return filtered_words[:20]
 

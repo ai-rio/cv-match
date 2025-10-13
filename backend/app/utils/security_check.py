@@ -6,11 +6,11 @@ are properly set up and working as expected.
 """
 
 import logging
-from typing import Dict, List, Any
+from typing import Any
+
 from fastapi import FastAPI
 
 from app.core.config import settings
-from app.middleware.security import SecurityMiddleware
 from app.services.security.input_sanitizer import default_sanitizer
 
 logger = logging.getLogger(__name__)
@@ -23,16 +23,18 @@ class SecurityCheckResult:
         self.passed = 0
         self.failed = 0
         self.warnings = 0
-        self.results: List[Dict[str, Any]] = []
+        self.results: list[dict[str, Any]] = []
 
-    def add_result(self, name: str, status: str, message: str, details: Dict[str, Any] = None):
+    def add_result(self, name: str, status: str, message: str, details: dict[str, Any] = None):
         """Add a security check result."""
-        self.results.append({
-            "name": name,
-            "status": status,  # "PASS", "FAIL", "WARN"
-            "message": message,
-            "details": details or {}
-        })
+        self.results.append(
+            {
+                "name": name,
+                "status": status,  # "PASS", "FAIL", "WARN"
+                "message": message,
+                "details": details or {},
+            }
+        )
 
         if status == "PASS":
             self.passed += 1
@@ -41,14 +43,14 @@ class SecurityCheckResult:
         else:
             self.warnings += 1
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Get summary of security check results."""
         return {
             "total_checks": len(self.results),
             "passed": self.passed,
             "failed": self.failed,
             "warnings": self.warnings,
-            "overall_status": "PASS" if self.failed == 0 else "FAIL"
+            "overall_status": "PASS" if self.failed == 0 else "FAIL",
         }
 
 
@@ -106,28 +108,25 @@ class SecurityChecker:
                     "block_system_prompts": config.block_system_prompts,
                     "block_role_instructions": config.block_role_instructions,
                     "block_code_execution": config.block_code_execution,
-                }
+                },
             )
         except Exception as e:
             self.result.add_result(
                 "Input Validation Configuration",
                 "FAIL",
-                f"Input sanitizer configuration error: {str(e)}"
+                f"Input sanitizer configuration error: {str(e)}",
             )
 
         # Check Pydantic models
         try:
-            from app.models.secure import SecureLoginRequest, SecureFileUploadRequest
+            from app.models.secure import SecureFileUploadRequest, SecureLoginRequest
+
             self.result.add_result(
-                "Secure Pydantic Models",
-                "PASS",
-                "Secure Pydantic models are available"
+                "Secure Pydantic Models", "PASS", "Secure Pydantic models are available"
             )
         except ImportError as e:
             self.result.add_result(
-                "Secure Pydantic Models",
-                "FAIL",
-                f"Secure Pydantic models not available: {str(e)}"
+                "Secure Pydantic Models", "FAIL", f"Secure Pydantic models not available: {str(e)}"
             )
 
     def _check_rate_limiting(self):
@@ -140,14 +139,10 @@ class SecurityChecker:
                 {
                     "rate_limit_per_user": settings.RATE_LIMIT_PER_USER,
                     "rate_limit_per_ip": settings.RATE_LIMIT_PER_IP,
-                }
+                },
             )
         else:
-            self.result.add_result(
-                "Rate Limiting",
-                "WARN",
-                "Rate limiting is disabled"
-            )
+            self.result.add_result("Rate Limiting", "WARN", "Rate limiting is disabled")
 
     def _check_security_headers(self):
         """Check security headers configuration."""
@@ -164,34 +159,30 @@ class SecurityChecker:
         try:
             # Try to find security middleware in app middleware stack
             has_security_middleware = any(
-                isinstance(middleware.cls, type) and
-                "SecurityMiddleware" in str(middleware.cls)
+                isinstance(middleware.cls, type) and "SecurityMiddleware" in str(middleware.cls)
                 for middleware in self.app.user_middleware
             )
 
             if has_security_middleware:
                 self.result.add_result(
-                    "Security Headers Middleware",
-                    "PASS",
-                    "Security middleware is configured"
+                    "Security Headers Middleware", "PASS", "Security middleware is configured"
                 )
             else:
                 self.result.add_result(
-                    "Security Headers Middleware",
-                    "WARN",
-                    "Security middleware not found in stack"
+                    "Security Headers Middleware", "WARN", "Security middleware not found in stack"
                 )
         except Exception as e:
             self.result.add_result(
                 "Security Headers Middleware",
                 "FAIL",
-                f"Error checking security middleware: {str(e)}"
+                f"Error checking security middleware: {str(e)}",
             )
 
     def _check_file_upload_security(self):
         """Check file upload security configuration."""
         try:
             from app.utils.file_security import FileSecurityConfig, default_validator
+
             config = default_validator.config
 
             security_features = {
@@ -207,19 +198,15 @@ class SecurityChecker:
                 "File Upload Security",
                 "PASS",
                 "File upload security is configured",
-                security_features
+                security_features,
             )
         except ImportError as e:
             self.result.add_result(
-                "File Upload Security",
-                "FAIL",
-                f"File security utilities not available: {str(e)}"
+                "File Upload Security", "FAIL", f"File security utilities not available: {str(e)}"
             )
         except Exception as e:
             self.result.add_result(
-                "File Upload Security",
-                "FAIL",
-                f"File security configuration error: {str(e)}"
+                "File Upload Security", "FAIL", f"File security configuration error: {str(e)}"
             )
 
     def _check_cors_configuration(self):
@@ -233,9 +220,9 @@ class SecurityChecker:
                 if "CORSMiddleware" in str(middleware.cls):
                     cors_configured = True
                     # Try to extract CORS configuration
-                    if hasattr(middleware, 'kwargs'):
+                    if hasattr(middleware, "kwargs"):
                         options = middleware.kwargs
-                        allowed_origins = options.get('allow_origins', [])
+                        allowed_origins = options.get("allow_origins", [])
                     break
 
             if cors_configured:
@@ -243,19 +230,13 @@ class SecurityChecker:
                     "CORS Configuration",
                     "PASS",
                     "CORS middleware is configured",
-                    {"allowed_origins": allowed_origins}
+                    {"allowed_origins": allowed_origins},
                 )
             else:
-                self.result.add_result(
-                    "CORS Configuration",
-                    "WARN",
-                    "CORS middleware not found"
-                )
+                self.result.add_result("CORS Configuration", "WARN", "CORS middleware not found")
         except Exception as e:
             self.result.add_result(
-                "CORS Configuration",
-                "FAIL",
-                f"Error checking CORS configuration: {str(e)}"
+                "CORS Configuration", "FAIL", f"Error checking CORS configuration: {str(e)}"
             )
 
     def _check_logging_configuration(self):
@@ -265,14 +246,10 @@ class SecurityChecker:
                 "Security Logging",
                 "PASS",
                 "Security logging is enabled",
-                {"log_level": settings.SECURITY_LOG_LEVEL}
+                {"log_level": settings.SECURITY_LOG_LEVEL},
             )
         else:
-            self.result.add_result(
-                "Security Logging",
-                "WARN",
-                "Security logging is disabled"
-            )
+            self.result.add_result("Security Logging", "WARN", "Security logging is disabled")
 
     def _check_environment_variables(self):
         """Check security-related environment variables."""
@@ -298,7 +275,7 @@ class SecurityChecker:
             "Environment Variables",
             "PASS" if all(security_env_vars.values()) else "WARN",
             "Security environment variables checked",
-            {**security_env_vars, **sensitive_config}
+            {**security_env_vars, **sensitive_config},
         )
 
     def _check_middleware_configuration(self):
@@ -310,8 +287,7 @@ class SecurityChecker:
             middleware_types.append(str(middleware.cls))
 
         security_middleware_count = sum(
-            1 for mtype in middleware_types
-            if "Security" in mtype or "security" in mtype.lower()
+            1 for mtype in middleware_types if "Security" in mtype or "security" in mtype.lower()
         )
 
         self.result.add_result(
@@ -321,12 +297,12 @@ class SecurityChecker:
             {
                 "total_middleware": middleware_count,
                 "security_middleware": security_middleware_count,
-                "middleware_types": middleware_types
-            }
+                "middleware_types": middleware_types,
+            },
         )
 
 
-def run_security_checks(app: FastAPI) -> Dict[str, Any]:
+def run_security_checks(app: FastAPI) -> dict[str, Any]:
     """
     Run comprehensive security configuration checks.
 
@@ -343,11 +319,11 @@ def run_security_checks(app: FastAPI) -> Dict[str, Any]:
         "timestamp": logger.info("Security checks completed"),
         "summary": result.get_summary(),
         "detailed_results": result.results,
-        "recommendations": _generate_recommendations(result)
+        "recommendations": _generate_recommendations(result),
     }
 
 
-def _generate_recommendations(result: SecurityCheckResult) -> List[str]:
+def _generate_recommendations(result: SecurityCheckResult) -> list[str]:
     """Generate security recommendations based on check results."""
     recommendations = []
 
@@ -362,21 +338,15 @@ def _generate_recommendations(result: SecurityCheckResult) -> List[str]:
                     "Configure comprehensive file upload security with malware scanning"
                 )
             elif "Rate Limiting" in check_result["name"]:
-                recommendations.append(
-                    "Enable rate limiting to prevent abuse and DoS attacks"
-                )
+                recommendations.append("Enable rate limiting to prevent abuse and DoS attacks")
             elif "Security Headers" in check_result["name"]:
                 recommendations.append(
                     "Configure security headers to prevent XSS, clickjacking, and other attacks"
                 )
             elif "CORS" in check_result["name"]:
-                recommendations.append(
-                    "Configure CORS to restrict cross-origin requests"
-                )
+                recommendations.append("Configure CORS to restrict cross-origin requests")
             elif "Logging" in check_result["name"]:
-                recommendations.append(
-                    "Enable security logging to monitor and detect attacks"
-                )
+                recommendations.append("Enable security logging to monitor and detect attacks")
 
         elif check_result["status"] == "WARN":
             if "Rate Limiting" in check_result["name"]:
@@ -384,9 +354,7 @@ def _generate_recommendations(result: SecurityCheckResult) -> List[str]:
                     "Consider enabling rate limiting for production environments"
                 )
             elif "Logging" in check_result["name"]:
-                recommendations.append(
-                    "Consider enabling security logging for better monitoring"
-                )
+                recommendations.append("Consider enabling security logging for better monitoring")
 
     # Add general recommendations
     if not recommendations:
@@ -395,48 +363,46 @@ def _generate_recommendations(result: SecurityCheckResult) -> List[str]:
         )
 
     # Add production recommendations
-    recommendations.extend([
-        "Regularly update dependencies and security patches",
-        "Implement automated security testing in CI/CD pipeline",
-        "Monitor security logs for suspicious activity",
-        "Conduct regular security assessments and penetration testing"
-    ])
+    recommendations.extend(
+        [
+            "Regularly update dependencies and security patches",
+            "Implement automated security testing in CI/CD pipeline",
+            "Monitor security logs for suspicious activity",
+            "Conduct regular security assessments and penetration testing",
+        ]
+    )
 
     return recommendations
 
 
-def print_security_report(check_results: Dict[str, Any]):
+def print_security_report(check_results: dict[str, Any]):
     """Print a formatted security report."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("CV-MATCH SECURITY CONFIGURATION REPORT")
-    print("="*60)
+    print("=" * 60)
 
     summary = check_results["summary"]
-    print(f"\nSUMMARY:")
+    print("\nSUMMARY:")
     print(f"  Total Checks: {summary['total_checks']}")
     print(f"  Passed: {summary['passed']}")
     print(f"  Failed: {summary['failed']}")
     print(f"  Warnings: {summary['warnings']}")
     print(f"  Overall Status: {summary['overall_status']}")
 
-    print(f"\nDETAILED RESULTS:")
+    print("\nDETAILED RESULTS:")
     for result in check_results["detailed_results"]:
-        status_symbol = {
-            "PASS": "✓",
-            "FAIL": "✗",
-            "WARN": "⚠"
-        }.get(result["status"], "?")
+        status_symbol = {"PASS": "✓", "FAIL": "✗", "WARN": "⚠"}.get(result["status"], "?")
 
         print(f"  {status_symbol} {result['name']}: {result['message']}")
         if result["details"]:
             for key, value in result["details"].items():
                 print(f"    - {key}: {value}")
 
-    print(f"\nRECOMMENDATIONS:")
+    print("\nRECOMMENDATIONS:")
     for i, rec in enumerate(check_results["recommendations"], 1):
         print(f"  {i}. {rec}")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
 
 
 if __name__ == "__main__":

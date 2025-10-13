@@ -3,15 +3,17 @@ Comprehensive Unit Tests for Fairness Monitoring Service
 Phase 0.5 Security Implementation - Brazilian Legal Compliance
 """
 
-import pytest
 from datetime import datetime, timedelta
+
+import pytest
+
 from app.services.fairness_monitoring_service import (
-    FairnessMonitoringService,
-    ReviewStatus,
-    ReviewPriority,
+    BiasIncident,
     FairnessMetrics,
+    FairnessMonitoringService,
     HumanReviewRequest,
-    BiasIncident
+    ReviewPriority,
+    ReviewStatus,
 )
 
 
@@ -25,11 +27,11 @@ class TestFairnessMonitoringService:
     def test_initialization(self):
         """Test service initialization."""
         assert self.fairness_service is not None
-        assert hasattr(self.fairness_service, 'pending_reviews')
-        assert hasattr(self.fairness_service, 'completed_reviews')
-        assert hasattr(self.fairness_service, 'bias_incidents')
-        assert hasattr(self.fairness_service, 'fairness_history')
-        assert hasattr(self.fairness_service, 'fairness_thresholds')
+        assert hasattr(self.fairness_service, "pending_reviews")
+        assert hasattr(self.fairness_service, "completed_reviews")
+        assert hasattr(self.fairness_service, "bias_incidents")
+        assert hasattr(self.fairness_service, "fairness_history")
+        assert hasattr(self.fairness_service, "fairness_thresholds")
 
     def test_fairness_thresholds_initialization(self):
         """Test fairness thresholds initialization."""
@@ -49,7 +51,7 @@ class TestFairnessMonitoringService:
         scores_by_group = {
             "group_a": [0.8, 0.8, 0.8],
             "group_b": [0.8, 0.8, 0.8],
-            "group_c": [0.8, 0.8, 0.8]
+            "group_c": [0.8, 0.8, 0.8],
         }
         bias_analysis = {"confidence_score": 0.1}
 
@@ -72,7 +74,7 @@ class TestFairnessMonitoringService:
         """Test fairness metrics calculation with disparity."""
         scores_by_group = {
             "group_a": [0.9, 0.8, 0.85],  # avg = 0.85
-            "group_b": [0.6, 0.7, 0.65]   # avg = 0.65
+            "group_b": [0.6, 0.7, 0.65],  # avg = 0.65
         }
         bias_analysis = {"confidence_score": 0.3}
 
@@ -103,9 +105,7 @@ class TestFairnessMonitoringService:
 
     def test_calculate_fairness_metrics_single_group(self):
         """Test fairness metrics with single group."""
-        scores_by_group = {
-            "group_a": [0.8, 0.7, 0.9]
-        }
+        scores_by_group = {"group_a": [0.8, 0.7, 0.9]}
         bias_analysis = {"confidence_score": 0.1}
 
         metrics = self.fairness_service.calculate_fairness_metrics(
@@ -171,11 +171,7 @@ class TestFairnessMonitoringService:
         # Create some review requests
         for i in range(3):
             self.fairness_service.create_human_review_request(
-                f"proc_{i}",
-                {"score": 50},
-                {"confidence_score": 0.5},
-                "text",
-                f"reason_{i}"
+                f"proc_{i}", {"score": 50}, {"confidence_score": 0.5}, "text", f"reason_{i}"
             )
 
         pending = self.fairness_service.get_pending_reviews()
@@ -185,18 +181,10 @@ class TestFairnessMonitoringService:
         """Test getting pending reviews filtered by priority."""
         # Create reviews with different priorities
         self.fairness_service.create_human_review_request(
-            "proc_low",
-            {"score": 80},
-            {"confidence_score": 0.2},
-            "text",
-            "low priority"
+            "proc_low", {"score": 80}, {"confidence_score": 0.2}, "text", "low priority"
         )
         self.fairness_service.create_human_review_request(
-            "proc_high",
-            {"score": 30},
-            {"confidence_score": 0.8},
-            "text",
-            "high priority"
+            "proc_high", {"score": 30}, {"confidence_score": 0.8}, "text", "high priority"
         )
 
         high_priority = self.fairness_service.get_pending_reviews(ReviewPriority.HIGH)
@@ -213,30 +201,18 @@ class TestFairnessMonitoringService:
 
         # Create reviews with different priorities and timestamps
         time.sleep(0.01)
-        id1 = self.fairness_service.create_human_review_request(
-            "proc_1",
-            {"score": 50},
-            {"confidence_score": 0.3},
-            "text",
-            "low priority"
+        self.fairness_service.create_human_review_request(
+            "proc_1", {"score": 50}, {"confidence_score": 0.3}, "text", "low priority"
         )
 
         time.sleep(0.01)
-        id2 = self.fairness_service.create_human_review_request(
-            "proc_2",
-            {"score": 30},
-            {"confidence_score": 0.7},
-            "text",
-            "high priority"
+        self.fairness_service.create_human_review_request(
+            "proc_2", {"score": 30}, {"confidence_score": 0.7}, "text", "high priority"
         )
 
         time.sleep(0.01)
-        id3 = self.fairness_service.create_human_review_request(
-            "proc_3",
-            {"score": 20},
-            {"confidence_score": 0.9},
-            "text",
-            "critical priority"
+        self.fairness_service.create_human_review_request(
+            "proc_3", {"score": 20}, {"confidence_score": 0.9}, "text", "critical priority"
         )
 
         pending = self.fairness_service.get_pending_reviews()
@@ -251,11 +227,7 @@ class TestFairnessMonitoringService:
         """Test successful review completion."""
         # Create a review request
         request_id = self.fairness_service.create_human_review_request(
-            "proc_complete",
-            {"score": 50},
-            {"confidence_score": 0.6},
-            "text",
-            "test review"
+            "proc_complete", {"score": 50}, {"confidence_score": 0.6}, "text", "test review"
         )
 
         # Complete the review
@@ -263,7 +235,7 @@ class TestFairnessMonitoringService:
             request_id, "reviewer_123", True, "No bias issues found"
         )
 
-        assert success == True
+        assert success
         assert request_id not in self.fairness_service.pending_reviews
         assert len(self.fairness_service.completed_reviews) == 1
 
@@ -277,11 +249,7 @@ class TestFairnessMonitoringService:
     def test_complete_review_rejection(self):
         """Test review completion with rejection."""
         request_id = self.fairness_service.create_human_review_request(
-            "proc_reject",
-            {"score": 50},
-            {"confidence_score": 0.6},
-            "text",
-            "test review"
+            "proc_reject", {"score": 50}, {"confidence_score": 0.6}, "text", "test review"
         )
 
         # Reject the review
@@ -289,7 +257,7 @@ class TestFairnessMonitoringService:
             request_id, "reviewer_456", False, "Bias concerns detected"
         )
 
-        assert success == True
+        assert success
 
         completed_review = self.fairness_service.completed_reviews[0]
         assert completed_review.status == ReviewStatus.REJECTED
@@ -304,35 +272,29 @@ class TestFairnessMonitoringService:
             "nonexistent_id", "reviewer_123", True, "test"
         )
 
-        assert success == False
+        assert not success
 
     def test_escalate_review(self):
         """Test review escalation."""
         request_id = self.fairness_service.create_human_review_request(
-            "proc_escalate",
-            {"score": 50},
-            {"confidence_score": 0.5},
-            "text",
-            "normal priority"
+            "proc_escalate", {"score": 50}, {"confidence_score": 0.5}, "text", "normal priority"
         )
 
         success = self.fairness_service.escalate_review(
             request_id, "Escalation due to user complaint"
         )
 
-        assert success == True
+        assert success
 
         review = self.fairness_service.pending_reviews[request_id]
         assert review.priority == ReviewPriority.CRITICAL
-        assert review.escalated == True
+        assert review.escalated
 
     def test_escalate_review_not_found(self):
         """Test escalating a review that doesn't exist."""
-        success = self.fairness_service.escalate_review(
-            "nonexistent_id", "test escalation"
-        )
+        success = self.fairness_service.escalate_review("nonexistent_id", "test escalation")
 
-        assert success == False
+        assert not success
 
     def test_generate_fairness_report(self):
         """Test fairness report generation."""
@@ -342,10 +304,7 @@ class TestFairnessMonitoringService:
 
         # Add some fairness metrics
         for i in range(5):
-            scores_by_group = {
-                "group_a": [0.8 + i * 0.02],
-                "group_b": [0.7 + i * 0.03]
-            }
+            scores_by_group = {"group_a": [0.8 + i * 0.02], "group_b": [0.7 + i * 0.03]}
             self.fairness_service.calculate_fairness_metrics(
                 f"proc_{i}", scores_by_group, {"confidence_score": 0.1}
             )
@@ -360,7 +319,7 @@ class TestFairnessMonitoringService:
             detected_patterns={},
             impact_assessment="Test incident",
             resolution_status="open",
-            preventive_actions=[]
+            preventive_actions=[],
         )
         self.fairness_service.bias_incidents.append(incident)
 
@@ -409,7 +368,7 @@ class TestFairnessMonitoringService:
                 detected_patterns={},
                 impact_assessment=f"Incident {i}",
                 resolution_status="open",
-                preventive_actions=[]
+                preventive_actions=[],
             )
             for i in range(3)
         ]
@@ -431,7 +390,7 @@ class TestFairnessMonitoringService:
             detected_patterns={},
             impact_assessment="High severity",
             resolution_status="open",
-            preventive_actions=[]
+            preventive_actions=[],
         )
 
         medium_incident = BiasIncident(
@@ -443,7 +402,7 @@ class TestFairnessMonitoringService:
             detected_patterns={},
             impact_assessment="Medium severity",
             resolution_status="open",
-            preventive_actions=[]
+            preventive_actions=[],
         )
 
         self.fairness_service.bias_incidents.extend([high_incident, medium_incident])
@@ -473,7 +432,7 @@ class TestFairnessMonitoringService:
             detected_patterns={},
             impact_assessment="Old incident",
             resolution_status="open",
-            preventive_actions=[]
+            preventive_actions=[],
         )
 
         recent_incident = BiasIncident(
@@ -485,7 +444,7 @@ class TestFairnessMonitoringService:
             detected_patterns={},
             impact_assessment="Recent incident",
             resolution_status="open",
-            preventive_actions=[]
+            preventive_actions=[],
         )
 
         self.fairness_service.bias_incidents.extend([old_incident, recent_incident])
@@ -521,7 +480,7 @@ class TestFairnessMonitoringService:
             detected_patterns={},
             impact_assessment="Test incident",
             resolution_status="resolved",
-            preventive_actions=[]
+            preventive_actions=[],
         )
         self.fairness_service.bias_incidents.append(incident)
 
@@ -536,7 +495,7 @@ class TestFairnessMonitoringService:
         assert "human_reviews" in summary
         assert "compliance_information" in summary
 
-        assert summary["algorithmic_decision"]["bias_detection_applied"] == True
+        assert summary["algorithmic_decision"]["bias_detection_applied"]
         assert summary["fairness_metrics"]["processing_id"] == processing_id
         assert len(summary["bias_incidents"]) == 1
 
@@ -555,7 +514,7 @@ class TestFairnessMonitoringService:
         # Create metrics with low fairness scores
         scores_by_group = {
             "group_a": [0.9, 0.9, 0.9],  # avg = 0.9
-            "group_b": [0.3, 0.3, 0.3]   # avg = 0.3 (major disparity)
+            "group_b": [0.3, 0.3, 0.3],  # avg = 0.3 (major disparity)
         }
         bias_analysis = {"confidence_score": 0.7}
 
@@ -591,7 +550,7 @@ class TestFairnessMonitoringService:
             status=ReviewStatus.APPROVED,
             reviewer_id="reviewer_1",
             review_notes="approved",
-            resolution_timestamp=now
+            resolution_timestamp=now,
         )
 
         # Review 2: completed in 4 hours
@@ -607,7 +566,7 @@ class TestFairnessMonitoringService:
             status=ReviewStatus.APPROVED,
             reviewer_id="reviewer_2",
             review_notes="approved",
-            resolution_timestamp=now
+            resolution_timestamp=now,
         )
 
         self.fairness_service.completed_reviews.extend([review1, review2])
@@ -658,7 +617,7 @@ class TestFairnessMonitoringService:
                 detected_patterns={},
                 impact_assessment="Poor performance incident",
                 resolution_status="open",
-                preventive_actions=[]
+                preventive_actions=[],
             )
             self.fairness_service.bias_incidents.append(incident)
 
@@ -669,7 +628,7 @@ class TestFairnessMonitoringService:
                 {"score": 30},
                 {"confidence_score": 0.8},
                 "text",
-                "high priority"
+                "high priority",
             )
 
         start_date = datetime.utcnow() - timedelta(days=7)

@@ -10,10 +10,10 @@ is mandatory under LGPD Article 15.
 """
 
 import logging
-from datetime import datetime, timezone, timedelta
-from typing import Any, Dict, List, Optional, Tuple
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime, timedelta
 from enum import Enum
+from typing import Any
 
 from pydantic import BaseModel, Field, validator
 
@@ -25,15 +25,15 @@ logger = logging.getLogger(__name__)
 class RetentionPeriod(Enum):
     """Standard retention periods for different data types."""
 
-    IMMEDIATE = "immediate"            # Delete immediately
-    THIRTY_DAYS = "30_days"           # 30 days
-    NINETY_DAYS = "90_days"           # 90 days
-    SIX_MONTHS = "6_months"           # 6 months
-    ONE_YEAR = "1_year"              # 1 year
-    TWO_YEARS = "2_years"            # 2 years
-    FIVE_YEARS = "5_years"           # 5 years (LGPD default)
-    SEVEN_YEARS = "7_years"          # 7 years (financial records)
-    TEN_YEARS = "10_years"           # 10 years
+    IMMEDIATE = "immediate"  # Delete immediately
+    THIRTY_DAYS = "30_days"  # 30 days
+    NINETY_DAYS = "90_days"  # 90 days
+    SIX_MONTHS = "6_months"  # 6 months
+    ONE_YEAR = "1_year"  # 1 year
+    TWO_YEARS = "2_years"  # 2 years
+    FIVE_YEARS = "5_years"  # 5 years (LGPD default)
+    SEVEN_YEARS = "7_years"  # 7 years (financial records)
+    TEN_YEARS = "10_years"  # 10 years
 
 
 class DataCategory(Enum):
@@ -61,9 +61,9 @@ class RetentionPolicy(BaseModel):
     deletion_method: str = "soft_delete"  # "soft_delete", "permanent_delete", "anonymize"
     requires_user_consent: bool = False
     auto_cleanup: bool = True
-    exceptions: List[str] = Field(default_factory=list)
+    exceptions: list[str] = Field(default_factory=list)
 
-    @validator('retention_days')
+    @validator("retention_days")
     def validate_retention_days(cls, v, values):
         if v <= 0:
             raise ValueError("Retention days must be positive")
@@ -77,11 +77,11 @@ class RetentionTask:
     id: str
     data_category: DataCategory
     scheduled_date: datetime
-    completed_date: Optional[datetime] = None
+    completed_date: datetime | None = None
     status: str = "pending"  # "pending", "running", "completed", "failed"
     records_processed: int = 0
     records_deleted: int = 0
-    errors: List[str] = None
+    errors: list[str] = None
 
     def __post_init__(self):
         if self.errors is None:
@@ -99,7 +99,7 @@ class RetentionCleanupResult(BaseModel):
     errors_encountered: int
     duration_seconds: float
     cleanup_date: datetime
-    next_cleanup_date: Optional[datetime] = None
+    next_cleanup_date: datetime | None = None
 
 
 class RetentionManager:
@@ -129,7 +129,7 @@ class RetentionManager:
                 legal_basis="LGPD Art. 15 - Standard retention period",
                 deletion_method="soft_delete",
                 requires_user_consent=False,
-                auto_cleanup=True
+                auto_cleanup=True,
             ),
             RetentionPolicy(
                 data_category=DataCategory.RESUME_DATA,
@@ -138,7 +138,7 @@ class RetentionManager:
                 legal_basis="User consent and service necessity",
                 deletion_method="soft_delete",
                 requires_user_consent=True,
-                auto_cleanup=True
+                auto_cleanup=True,
             ),
             RetentionPolicy(
                 data_category=DataCategory.JOB_DESCRIPTIONS,
@@ -147,7 +147,7 @@ class RetentionManager:
                 legal_basis="Service usage pattern",
                 deletion_method="soft_delete",
                 requires_user_consent=False,
-                auto_cleanup=True
+                auto_cleanup=True,
             ),
             RetentionPolicy(
                 data_category=DataCategory.OPTIMIZATION_RESULTS,
@@ -156,7 +156,7 @@ class RetentionManager:
                 legal_basis="Service delivery records",
                 deletion_method="soft_delete",
                 requires_user_consent=True,
-                auto_cleanup=True
+                auto_cleanup=True,
             ),
             RetentionPolicy(
                 data_category=DataCategory.USAGE_ANALYTICS,
@@ -165,7 +165,7 @@ class RetentionManager:
                 legal_basis="Legitimate interest for service improvement",
                 deletion_method="anonymize",
                 requires_user_consent=False,
-                auto_cleanup=True
+                auto_cleanup=True,
             ),
             RetentionPolicy(
                 data_category=DataCategory.CONSENT_RECORDS,
@@ -174,7 +174,7 @@ class RetentionManager:
                 legal_basis="Legal requirement for consent records",
                 deletion_method="permanent_delete",
                 requires_user_consent=False,
-                auto_cleanup=False  # Manual review required
+                auto_cleanup=False,  # Manual review required
             ),
             RetentionPolicy(
                 data_category=DataCategory.PAYMENT_RECORDS,
@@ -183,7 +183,7 @@ class RetentionManager:
                 legal_basis="Tax and legal requirements",
                 deletion_method="permanent_delete",
                 requires_user_consent=False,
-                auto_cleanup=False  # Manual review required
+                auto_cleanup=False,  # Manual review required
             ),
             RetentionPolicy(
                 data_category=DataCategory.AUDIT_LOGS,
@@ -192,8 +192,8 @@ class RetentionManager:
                 legal_basis="Security and compliance monitoring",
                 deletion_method="permanent_delete",
                 requires_user_consent=False,
-                auto_cleanup=True
-            )
+                auto_cleanup=True,
+            ),
         ]
 
     async def create_retention_policy(self, policy: RetentionPolicy) -> str:
@@ -208,7 +208,7 @@ class RetentionManager:
         """
         try:
             policy_data = asdict(policy)
-            policy_data["created_at"] = datetime.now(timezone.utc).isoformat()
+            policy_data["created_at"] = datetime.now(UTC).isoformat()
 
             result = await self.policies_db.create(policy_data)
             policy_id = result["id"]
@@ -220,7 +220,7 @@ class RetentionManager:
             logger.error(f"Failed to create retention policy: {e}")
             raise
 
-    async def get_retention_policies(self) -> List[RetentionPolicy]:
+    async def get_retention_policies(self) -> list[RetentionPolicy]:
         """
         Get all active retention policies.
 
@@ -279,10 +279,10 @@ class RetentionManager:
             # Schedule cleanup
             task_data = {
                 "data_category": data_category.value,
-                "scheduled_date": datetime.now(timezone.utc).isoformat(),
+                "scheduled_date": datetime.now(UTC).isoformat(),
                 "status": "pending",
                 "retention_policy": asdict(policy),
-                "created_at": datetime.now(timezone.utc).isoformat()
+                "created_at": datetime.now(UTC).isoformat(),
             }
 
             result = await self.tasks_db.create(task_data)
@@ -313,20 +313,16 @@ class RetentionManager:
 
             # Update task status
             await self.tasks_db.update(
-                task_id,
-                {
-                    "status": "running",
-                    "started_at": datetime.now(timezone.utc).isoformat()
-                }
+                task_id, {"status": "running", "started_at": datetime.now(UTC).isoformat()}
             )
 
             # Execute cleanup based on data category
             data_category = DataCategory(task["data_category"])
             policy = RetentionPolicy(**task["retention_policy"])
 
-            start_time = datetime.now(timezone.utc)
+            start_time = datetime.now(UTC)
             result = await self._execute_cleanup_for_category(data_category, policy)
-            end_time = datetime.now(timezone.utc)
+            end_time = datetime.now(UTC)
 
             # Create cleanup result
             cleanup_result = RetentionCleanupResult(
@@ -338,13 +334,13 @@ class RetentionManager:
                 errors_encountered=len(result.get("errors", [])),
                 duration_seconds=(end_time - start_time).total_seconds(),
                 cleanup_date=end_time,
-                next_cleanup_date=end_time + timedelta(days=30)  # Schedule next cleanup
+                next_cleanup_date=end_time + timedelta(days=30),  # Schedule next cleanup
             )
 
             # Store result
             result_data = cleanup_result.dict()
             result_data["task_id"] = task_id
-            result_data["created_at"] = datetime.now(timezone.utc).isoformat()
+            result_data["created_at"] = datetime.now(UTC).isoformat()
             await self.results_db.create(result_data)
 
             # Update task status
@@ -352,14 +348,16 @@ class RetentionManager:
                 task_id,
                 {
                     "status": "completed",
-                    "completed_date": datetime.now(timezone.utc).isoformat(),
+                    "completed_date": datetime.now(UTC).isoformat(),
                     "records_processed": result["scanned"],
                     "records_deleted": result["deleted"],
-                    "errors": result.get("errors", [])
-                }
+                    "errors": result.get("errors", []),
+                },
             )
 
-            logger.info(f"Retention cleanup completed: {task_id} - {result['deleted']} records deleted")
+            logger.info(
+                f"Retention cleanup completed: {task_id} - {result['deleted']} records deleted"
+            )
             return cleanup_result
 
         except Exception as e:
@@ -368,20 +366,18 @@ class RetentionManager:
                 task_id,
                 {
                     "status": "failed",
-                    "completed_date": datetime.now(timezone.utc).isoformat(),
-                    "errors": [str(e)]
-                }
+                    "completed_date": datetime.now(UTC).isoformat(),
+                    "errors": [str(e)],
+                },
             )
             raise
 
     async def _execute_cleanup_for_category(
-        self,
-        data_category: DataCategory,
-        policy: RetentionPolicy
-    ) -> Dict[str, Any]:
+        self, data_category: DataCategory, policy: RetentionPolicy
+    ) -> dict[str, Any]:
         """Execute cleanup for a specific data category."""
         try:
-            cutoff_date = datetime.now(timezone.utc) - timedelta(days=policy.retention_days)
+            cutoff_date = datetime.now(UTC) - timedelta(days=policy.retention_days)
             errors = []
 
             if data_category == DataCategory.USER_PROFILE:
@@ -395,7 +391,12 @@ class RetentionManager:
             elif data_category == DataCategory.USAGE_ANALYTICS:
                 result = await self._cleanup_usage_analytics(cutoff_date, policy)
             else:
-                result = {"scanned": 0, "deleted": 0, "retained": 0, "errors": ["Unsupported data category"]}
+                result = {
+                    "scanned": 0,
+                    "deleted": 0,
+                    "retained": 0,
+                    "errors": ["Unsupported data category"],
+                }
 
             return result
 
@@ -404,17 +405,15 @@ class RetentionManager:
             return {"scanned": 0, "deleted": 0, "retained": 0, "errors": [str(e)]}
 
     async def _cleanup_profiles(
-        self,
-        cutoff_date: datetime,
-        policy: RetentionPolicy
-    ) -> Dict[str, Any]:
+        self, cutoff_date: datetime, policy: RetentionPolicy
+    ) -> dict[str, Any]:
         """Cleanup user profiles past retention period."""
         try:
             # Get profiles past retention date
             profiles_to_delete = await self.profiles_db.list(
                 filters={
                     "created_at__lt": cutoff_date.isoformat(),
-                    "deleted_at": "null"  # Only active profiles
+                    "deleted_at": "null",  # Only active profiles
                 }
             )
 
@@ -425,8 +424,7 @@ class RetentionManager:
                 try:
                     if policy.deletion_method == "soft_delete":
                         await self.profiles_db.update(
-                            profile["id"],
-                            {"deleted_at": datetime.now(timezone.utc).isoformat()}
+                            profile["id"], {"deleted_at": datetime.now(UTC).isoformat()}
                         )
                     elif policy.deletion_method == "permanent_delete":
                         await self.profiles_db.delete(profile["id"])
@@ -440,7 +438,7 @@ class RetentionManager:
                 "scanned": len(profiles_to_delete),
                 "deleted": deleted_count,
                 "retained": len(profiles_to_delete) - deleted_count,
-                "errors": errors
+                "errors": errors,
             }
 
         except Exception as e:
@@ -448,18 +446,13 @@ class RetentionManager:
             return {"scanned": 0, "deleted": 0, "retained": 0, "errors": [str(e)]}
 
     async def _cleanup_resumes(
-        self,
-        cutoff_date: datetime,
-        policy: RetentionPolicy
-    ) -> Dict[str, Any]:
+        self, cutoff_date: datetime, policy: RetentionPolicy
+    ) -> dict[str, Any]:
         """Cleanup resume data past retention period."""
         try:
             # Get resumes past retention date
             resumes_to_delete = await self.resumes_db.list(
-                filters={
-                    "created_at__lt": cutoff_date.isoformat(),
-                    "deleted_at": "null"
-                }
+                filters={"created_at__lt": cutoff_date.isoformat(), "deleted_at": "null"}
             )
 
             deleted_count = 0
@@ -469,8 +462,7 @@ class RetentionManager:
                 try:
                     if policy.deletion_method == "soft_delete":
                         await self.resumes_db.update(
-                            resume["id"],
-                            {"deleted_at": datetime.now(timezone.utc).isoformat()}
+                            resume["id"], {"deleted_at": datetime.now(UTC).isoformat()}
                         )
                     elif policy.deletion_method == "permanent_delete":
                         await self.resumes_db.delete(resume["id"])
@@ -484,7 +476,7 @@ class RetentionManager:
                 "scanned": len(resumes_to_delete),
                 "deleted": deleted_count,
                 "retained": len(resumes_to_delete) - deleted_count,
-                "errors": errors
+                "errors": errors,
             }
 
         except Exception as e:
@@ -492,17 +484,12 @@ class RetentionManager:
             return {"scanned": 0, "deleted": 0, "retained": 0, "errors": [str(e)]}
 
     async def _cleanup_job_descriptions(
-        self,
-        cutoff_date: datetime,
-        policy: RetentionPolicy
-    ) -> Dict[str, Any]:
+        self, cutoff_date: datetime, policy: RetentionPolicy
+    ) -> dict[str, Any]:
         """Cleanup job descriptions past retention period."""
         try:
             job_descriptions_to_delete = await self.job_descriptions_db.list(
-                filters={
-                    "created_at__lt": cutoff_date.isoformat(),
-                    "deleted_at": "null"
-                }
+                filters={"created_at__lt": cutoff_date.isoformat(), "deleted_at": "null"}
             )
 
             deleted_count = 0
@@ -512,8 +499,7 @@ class RetentionManager:
                 try:
                     if policy.deletion_method == "soft_delete":
                         await self.job_descriptions_db.update(
-                            job_desc["id"],
-                            {"deleted_at": datetime.now(timezone.utc).isoformat()}
+                            job_desc["id"], {"deleted_at": datetime.now(UTC).isoformat()}
                         )
                     elif policy.deletion_method == "permanent_delete":
                         await self.job_descriptions_db.delete(job_desc["id"])
@@ -527,7 +513,7 @@ class RetentionManager:
                 "scanned": len(job_descriptions_to_delete),
                 "deleted": deleted_count,
                 "retained": len(job_descriptions_to_delete) - deleted_count,
-                "errors": errors
+                "errors": errors,
             }
 
         except Exception as e:
@@ -535,17 +521,12 @@ class RetentionManager:
             return {"scanned": 0, "deleted": 0, "retained": 0, "errors": [str(e)]}
 
     async def _cleanup_optimizations(
-        self,
-        cutoff_date: datetime,
-        policy: RetentionPolicy
-    ) -> Dict[str, Any]:
+        self, cutoff_date: datetime, policy: RetentionPolicy
+    ) -> dict[str, Any]:
         """Cleanup optimization results past retention period."""
         try:
             optimizations_to_delete = await self.optimizations_db.list(
-                filters={
-                    "created_at__lt": cutoff_date.isoformat(),
-                    "deleted_at": "null"
-                }
+                filters={"created_at__lt": cutoff_date.isoformat(), "deleted_at": "null"}
             )
 
             deleted_count = 0
@@ -555,8 +536,7 @@ class RetentionManager:
                 try:
                     if policy.deletion_method == "soft_delete":
                         await self.optimizations_db.update(
-                            optimization["id"],
-                            {"deleted_at": datetime.now(timezone.utc).isoformat()}
+                            optimization["id"], {"deleted_at": datetime.now(UTC).isoformat()}
                         )
                     elif policy.deletion_method == "permanent_delete":
                         await self.optimizations_db.delete(optimization["id"])
@@ -570,7 +550,7 @@ class RetentionManager:
                 "scanned": len(optimizations_to_delete),
                 "deleted": deleted_count,
                 "retained": len(optimizations_to_delete) - deleted_count,
-                "errors": errors
+                "errors": errors,
             }
 
         except Exception as e:
@@ -578,16 +558,12 @@ class RetentionManager:
             return {"scanned": 0, "deleted": 0, "retained": 0, "errors": [str(e)]}
 
     async def _cleanup_usage_analytics(
-        self,
-        cutoff_date: datetime,
-        policy: RetentionPolicy
-    ) -> Dict[str, Any]:
+        self, cutoff_date: datetime, policy: RetentionPolicy
+    ) -> dict[str, Any]:
         """Cleanup usage analytics past retention period."""
         try:
             analytics_to_delete = await self.usage_tracking_db.list(
-                filters={
-                    "created_at__lt": cutoff_date.isoformat()
-                }
+                filters={"created_at__lt": cutoff_date.isoformat()}
             )
 
             deleted_count = 0
@@ -598,14 +574,12 @@ class RetentionManager:
                     if policy.deletion_method == "anonymize":
                         # Anonymize user data
                         await self.usage_tracking_db.update(
-                            analytics["id"],
-                            {"user_id": "anonymized"}
+                            analytics["id"], {"user_id": "anonymized"}
                         )
                         deleted_count += 1
                     elif policy.deletion_method == "soft_delete":
                         await self.usage_tracking_db.update(
-                            analytics["id"],
-                            {"deleted_at": datetime.now(timezone.utc).isoformat()}
+                            analytics["id"], {"deleted_at": datetime.now(UTC).isoformat()}
                         )
                         deleted_count += 1
                     elif policy.deletion_method == "permanent_delete":
@@ -619,14 +593,14 @@ class RetentionManager:
                 "scanned": len(analytics_to_delete),
                 "deleted": deleted_count,
                 "retained": len(analytics_to_delete) - deleted_count,
-                "errors": errors
+                "errors": errors,
             }
 
         except Exception as e:
             logger.error(f"Usage analytics cleanup failed: {e}")
             return {"scanned": 0, "deleted": 0, "retained": 0, "errors": [str(e)]}
 
-    async def get_retention_status(self) -> Dict[str, Any]:
+    async def get_retention_status(self) -> dict[str, Any]:
         """
         Get comprehensive retention status.
 
@@ -640,7 +614,7 @@ class RetentionManager:
                 "policies_by_category": {},
                 "recent_cleanup_results": [],
                 "scheduled_tasks": [],
-                "compliance_status": "compliant"
+                "compliance_status": "compliant",
             }
 
             # Get policy breakdown
@@ -649,19 +623,19 @@ class RetentionManager:
                 if category not in status["policies_by_category"]:
                     status["policies_by_category"][category] = []
 
-                status["policies_by_category"][category].append({
-                    "retention_period": policy.retention_period.value,
-                    "retention_days": policy.retention_days,
-                    "auto_cleanup": policy.auto_cleanup,
-                    "deletion_method": policy.deletion_method
-                })
+                status["policies_by_category"][category].append(
+                    {
+                        "retention_period": policy.retention_period.value,
+                        "retention_days": policy.retention_days,
+                        "auto_cleanup": policy.auto_cleanup,
+                        "deletion_method": policy.deletion_method,
+                    }
+                )
 
             # Get recent cleanup results
             try:
                 recent_results = await self.results_db.list(
-                    filters={},
-                    order_by="created_at",
-                    limit=10
+                    filters={}, order_by="created_at", limit=10
                 )
                 status["recent_cleanup_results"] = recent_results
             except Exception:
@@ -670,8 +644,7 @@ class RetentionManager:
             # Get scheduled tasks
             try:
                 scheduled_tasks = await self.tasks_db.list(
-                    filters={"status": "pending"},
-                    order_by="scheduled_date"
+                    filters={"status": "pending"}, order_by="scheduled_date"
                 )
                 status["scheduled_tasks"] = scheduled_tasks
             except Exception:
@@ -683,7 +656,7 @@ class RetentionManager:
             logger.error(f"Failed to get retention status: {e}")
             return {"error": str(e)}
 
-    async def run_automatic_cleanup(self) -> List[RetentionCleanupResult]:
+    async def run_automatic_cleanup(self) -> list[RetentionCleanupResult]:
         """
         Run automatic cleanup for all policies with auto_cleanup enabled.
 
@@ -701,7 +674,9 @@ class RetentionManager:
                         result = await self.execute_retention_cleanup(task_id)
                         results.append(result)
                     except Exception as e:
-                        logger.error(f"Automatic cleanup failed for {policy.data_category.value}: {e}")
+                        logger.error(
+                            f"Automatic cleanup failed for {policy.data_category.value}: {e}"
+                        )
 
             return results
 
@@ -727,7 +702,7 @@ async def schedule_retention_cleanup(data_category: DataCategory) -> str:
     return await retention_manager.schedule_retention_cleanup(data_category)
 
 
-async def run_automatic_cleanup() -> List[RetentionCleanupResult]:
+async def run_automatic_cleanup() -> list[RetentionCleanupResult]:
     """
     Convenience function to run automatic cleanup.
 

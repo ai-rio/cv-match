@@ -9,27 +9,36 @@ Critical for CV-Match Brazilian market deployment - these endpoints
 are mandatory for LGPD compliance.
 """
 
-from datetime import datetime, timezone, timedelta
-from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from datetime import UTC, datetime, timedelta
+from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel, Field
 
-from app.services.security.pii_detection_service import scan_for_pii, mask_pii, validate_lgpd_compliance
-from app.services.security.consent_manager import (
-    consent_manager, ConsentRequest, ConsentCheckResult, UserConsentStatus
-)
-from app.services.security.data_subject_rights import (
-    data_subject_rights_manager,
-    DataAccessRequest, DataCorrectionRequest, DataDeletionRequest, DataPortabilityRequest,
-    DataSubjectRightsResponse
-)
-from app.services.security.retention_manager import retention_manager, RetentionCleanupResult
-from app.services.security.audit_trail import (
-    audit_trail, log_data_access, log_audit_event, AuditEventType, DataAccessType
-)
-from app.services.supabase.auth import get_current_user
 from app.models.auth import User
+from app.services.security.audit_trail import (
+    AuditEventType,
+    DataAccessType,
+    audit_trail,
+    log_audit_event,
+    log_data_access,
+)
+from app.services.security.consent_manager import ConsentRequest, UserConsentStatus, consent_manager
+from app.services.security.data_subject_rights import (
+    DataAccessRequest,
+    DataDeletionRequest,
+    DataPortabilityRequest,
+    DataSubjectRightsResponse,
+    data_subject_rights_manager,
+)
+from app.services.security.pii_detection_service import (
+    mask_pii,
+    scan_for_pii,
+    validate_lgpd_compliance,
+)
+from app.services.security.retention_manager import retention_manager
+from app.services.supabase.auth import get_current_user
 
 router = APIRouter(prefix="/api/privacy", tags=["privacy"])
 security = HTTPBearer()
@@ -43,10 +52,10 @@ class PIIScanRequest(BaseModel):
 
 class PIIScanResponse(BaseModel):
     has_pii: bool
-    pii_types_found: List[str]
+    pii_types_found: list[str]
     confidence_score: float
-    masked_text: Optional[str] = None
-    scan_duration_ms: Optional[float] = None
+    masked_text: str | None = None
+    scan_duration_ms: float | None = None
     lgpd_compliant: bool
 
 
@@ -54,17 +63,17 @@ class ConsentGrantRequest(BaseModel):
     consent_type_name: str
     granted: bool = True
     legal_basis: str = "consent"
-    purpose: Optional[str] = None
+    purpose: str | None = None
 
 
 class ConsentResponse(BaseModel):
     success: bool
     message: str
-    consent_id: Optional[str] = None
+    consent_id: str | None = None
 
 
 class DataAccessRequestModel(BaseModel):
-    justification: Optional[str] = None
+    justification: str | None = None
 
 
 class DataExportRequest(BaseModel):
@@ -74,7 +83,7 @@ class DataExportRequest(BaseModel):
 
 class DataDeletionRequestModel(BaseModel):
     deletion_scope: str = "all"
-    specific_data_types: Optional[List[str]] = None
+    specific_data_types: list[str] | None = None
     justification: str
     retain_legal_required: bool = True
 
@@ -82,9 +91,9 @@ class DataDeletionRequestModel(BaseModel):
 class ComplianceStatusResponse(BaseModel):
     overall_status: str
     has_all_required_consents: bool
-    missing_consents: List[str]
-    data_retention_status: Dict[str, Any]
-    audit_summary: Dict[str, Any]
+    missing_consents: list[str]
+    data_retention_status: dict[str, Any]
+    audit_summary: dict[str, Any]
     last_updated: datetime
 
 
@@ -92,10 +101,10 @@ class ComplianceStatusResponse(BaseModel):
 # PII Detection and Masking Endpoints
 # =====================================================
 
+
 @router.post("/pii/scan", response_model=PIIScanResponse)
 async def scan_text_for_pii(
-    request: PIIScanRequest,
-    current_user: User = Depends(get_current_user)
+    request: PIIScanRequest, current_user: User = Depends(get_current_user)
 ):
     """
     Scan text for PII and return detection results.
@@ -109,7 +118,7 @@ async def scan_text_for_pii(
             user_id=current_user.id,
             data_category="pii_scan",
             access_type=DataAccessType.VIEW,
-            access_purpose="PII detection and scanning"
+            access_purpose="PII detection and scanning",
         )
 
         # Scan for PII
@@ -136,7 +145,7 @@ async def scan_text_for_pii(
             confidence_score=result.confidence_score,
             masked_text=masked_text,
             scan_duration_ms=result.scan_duration_ms,
-            lgpd_compliant=compliance_result["is_compliant"]
+            lgpd_compliant=compliance_result["is_compliant"],
         )
 
     except Exception as e:
@@ -145,19 +154,16 @@ async def scan_text_for_pii(
             action="PII scan failed",
             user_id=current_user.id,
             success=False,
-            error_message=str(e)
+            error_message=str(e),
         )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to scan text for PII"
-        )
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to scan text for PII"
+        ) from e
 
 
 @router.post("/pii/mask")
 async def mask_text_endpoint(
-    text: str,
-    masking_level: str = "partial",
-    current_user: User = Depends(get_current_user)
+    text: str, masking_level: str = "partial", current_user: User = Depends(get_current_user)
 ):
     """
     Mask PII in text using specified masking level.
@@ -170,24 +176,28 @@ async def mask_text_endpoint(
             user_id=current_user.id,
             data_category="pii_masking",
             access_type=DataAccessType.MODIFY,
-            access_purpose="PII masking"
+            access_purpose="PII masking",
         )
 
         # Apply masking
         masked_text = mask_pii(text)
 
-        return {"masked_text": masked_text, "original_length": len(text), "masked_length": len(masked_text)}
+        return {
+            "masked_text": masked_text,
+            "original_length": len(text),
+            "masked_length": len(masked_text),
+        }
 
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to mask text"
-        )
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to mask text"
+        ) from e
 
 
 # =====================================================
 # Consent Management Endpoints
 # =====================================================
+
 
 @router.get("/consents", response_model=UserConsentStatus)
 async def get_user_consents(current_user: User = Depends(get_current_user)):
@@ -203,15 +213,15 @@ async def get_user_consents(current_user: User = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve consent status"
-        )
+            detail="Failed to retrieve consent status",
+        ) from e
 
 
 @router.post("/consents", response_model=ConsentResponse)
 async def grant_consent(
     request: ConsentGrantRequest,
     http_request: Request,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """
     Grant or revoke consent for a specific purpose.
@@ -231,7 +241,7 @@ async def grant_consent(
             legal_basis=request.legal_basis,
             purpose=request.purpose,
             ip_address=client_ip,
-            user_agent=user_agent
+            user_agent=user_agent,
         )
 
         # Record consent
@@ -239,18 +249,20 @@ async def grant_consent(
 
         # Log audit event
         await log_audit_event(
-            event_type=AuditEventType.CONSENT_GRANTED if request.granted else AuditEventType.CONSENT_REVOKED,
+            event_type=AuditEventType.CONSENT_GRANTED
+            if request.granted
+            else AuditEventType.CONSENT_REVOKED,
             action=f"{'Granted' if request.granted else 'Revoked'} consent for {request.consent_type_name}",
             user_id=current_user.id,
             table_name="user_consents",
             record_id=consent_record.id if consent_record else None,
-            success=True
+            success=True,
         )
 
         return ConsentResponse(
             success=True,
             message=f"Consent {'granted' if request.granted else 'revoked'} successfully",
-            consent_id=consent_record.id if consent_record else None
+            consent_id=consent_record.id if consent_record else None,
         )
 
     except Exception as e:
@@ -259,19 +271,15 @@ async def grant_consent(
             action="Consent recording failed",
             user_id=current_user.id,
             success=False,
-            error_message=str(e)
+            error_message=str(e),
         )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to record consent"
-        )
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to record consent"
+        ) from e
 
 
 @router.get("/consents/{consent_type_name}")
-async def check_consent(
-    consent_type_name: str,
-    current_user: User = Depends(get_current_user)
-):
+async def check_consent(consent_type_name: str, current_user: User = Depends(get_current_user)):
     """
     Check if user has granted specific consent.
 
@@ -284,14 +292,13 @@ async def check_consent(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to check consent status"
-        )
+            detail="Failed to check consent status",
+        ) from e
 
 
 @router.delete("/consents")
 async def revoke_all_consents(
-    justification: str = "User request",
-    current_user: User = Depends(get_current_user)
+    justification: str = "User request", current_user: User = Depends(get_current_user)
 ):
     """
     Revoke all user consents (right to withdrawal).
@@ -307,27 +314,27 @@ async def revoke_all_consents(
             event_type=AuditEventType.CONSENT_REVOKED,
             action="Revoked all consents",
             user_id=current_user.id,
-            success=True
+            success=True,
         )
 
         return {"message": "All consents revoked successfully"}
 
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to revoke consents"
-        )
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to revoke consents"
+        ) from e
 
 
 # =====================================================
 # Data Subject Rights Endpoints
 # =====================================================
 
+
 @router.post("/data-access", response_model=DataSubjectRightsResponse)
 async def request_data_access(
     request: DataAccessRequestModel,
     http_request: Request,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """
     Request access to personal data (LGPD Article 18, I).
@@ -346,7 +353,7 @@ async def request_data_access(
             request_type="access",
             justification=request.justification,
             ip_address=client_ip,
-            user_agent=user_agent
+            user_agent=user_agent,
         )
 
         # Create and process request
@@ -358,7 +365,7 @@ async def request_data_access(
             event_type=AuditEventType.DATA_ACCESS,
             action="User requested data access",
             user_id=current_user.id,
-            success=True
+            success=True,
         )
 
         return result
@@ -366,15 +373,15 @@ async def request_data_access(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to process data access request"
-        )
+            detail="Failed to process data access request",
+        ) from e
 
 
 @router.post("/data-export")
 async def request_data_export(
     request: DataExportRequest,
     http_request: Request,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """
     Request data portability (LGPD Article 18, V).
@@ -393,11 +400,13 @@ async def request_data_export(
             format_preference=request.format_preference,
             include_deleted=request.include_deleted,
             ip_address=client_ip,
-            user_agent=user_agent
+            user_agent=user_agent,
         )
 
         # Create and process request
-        request_id = await data_subject_rights_manager.create_data_portability_request(portability_request)
+        request_id = await data_subject_rights_manager.create_data_portability_request(
+            portability_request
+        )
         result = await data_subject_rights_manager.process_data_portability_request(request_id)
 
         # Log audit event
@@ -405,7 +414,7 @@ async def request_data_export(
             event_type=AuditEventType.DATA_EXPORT,
             action="User requested data export",
             user_id=current_user.id,
-            success=True
+            success=True,
         )
 
         return result
@@ -413,15 +422,15 @@ async def request_data_export(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to process data export request"
-        )
+            detail="Failed to process data export request",
+        ) from e
 
 
 @router.post("/data-deletion")
 async def request_data_deletion(
     request: DataDeletionRequestModel,
     http_request: Request,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """
     Request data deletion (Right to be Forgotten - LGPD Article 18, VI).
@@ -442,11 +451,13 @@ async def request_data_deletion(
             justification=request.justification,
             retain_legal_required=request.retain_legal_required,
             ip_address=client_ip,
-            user_agent=user_agent
+            user_agent=user_agent,
         )
 
         # Create and process request
-        request_id = await data_subject_rights_manager.create_data_deletion_request(deletion_request)
+        request_id = await data_subject_rights_manager.create_data_deletion_request(
+            deletion_request
+        )
         result = await data_subject_rights_manager.process_data_deletion_request(request_id)
 
         # Log audit event
@@ -454,7 +465,7 @@ async def request_data_deletion(
             event_type=AuditEventType.DATA_DELETION,
             action="User requested data deletion",
             user_id=current_user.id,
-            success=True
+            success=True,
         )
 
         return result
@@ -462,13 +473,14 @@ async def request_data_deletion(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to process data deletion request"
-        )
+            detail="Failed to process data deletion request",
+        ) from e
 
 
 # =====================================================
 # Compliance Status Endpoints
 # =====================================================
+
 
 @router.get("/compliance/status", response_model=ComplianceStatusResponse)
 async def get_compliance_status(current_user: User = Depends(get_current_user)):
@@ -487,37 +499,40 @@ async def get_compliance_status(current_user: User = Depends(get_current_user)):
 
         # Get user audit trail summary
         user_audit_logs = await audit_trail.get_user_audit_trail(
-            current_user.id,
-            start_date=datetime.now(timezone.utc) - timedelta(days=30)
+            current_user.id, start_date=datetime.now(UTC) - timedelta(days=30)
         )
 
         audit_summary = {
             "total_events": len(user_audit_logs),
             "event_types": list(set(log.get("event_type") for log in user_audit_logs)),
-            "last_activity": max(log.get("created_at") for log in user_audit_logs) if user_audit_logs else None
+            "last_activity": max(log.get("created_at") for log in user_audit_logs)
+            if user_audit_logs
+            else None,
         }
 
         return ComplianceStatusResponse(
-            overall_status="compliant" if consent_status.has_all_required_consents else "non_compliant",
+            overall_status="compliant"
+            if consent_status.has_all_required_consents
+            else "non_compliant",
             has_all_required_consents=consent_status.has_all_required_consents,
             missing_consents=consent_status.missing_required_consents,
             data_retention_status=retention_status,
             audit_summary=audit_summary,
-            last_updated=datetime.now(timezone.utc)
+            last_updated=datetime.now(UTC),
         )
 
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve compliance status"
-        )
+            detail="Failed to retrieve compliance status",
+        ) from e
 
 
 @router.get("/audit-trail")
 async def get_audit_trail(
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
-    current_user: User = Depends(get_current_user)
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
+    current_user: User = Depends(get_current_user),
 ):
     """
     Get user's audit trail.
@@ -530,13 +545,11 @@ async def get_audit_trail(
             user_id=current_user.id,
             data_category="audit_trail",
             access_type=DataAccessType.VIEW,
-            access_purpose="User requested audit trail"
+            access_purpose="User requested audit trail",
         )
 
         audit_logs = await audit_trail.get_user_audit_trail(
-            user_id=current_user.id,
-            start_date=start_date,
-            end_date=end_date
+            user_id=current_user.id, start_date=start_date, end_date=end_date
         )
 
         return {"audit_logs": audit_logs, "total_count": len(audit_logs)}
@@ -544,13 +557,14 @@ async def get_audit_trail(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve audit trail"
-        )
+            detail="Failed to retrieve audit trail",
+        ) from e
 
 
 # =====================================================
 # Admin Endpoints (for system administrators)
 # =====================================================
+
 
 @router.get("/admin/compliance-overview")
 async def get_compliance_overview(current_user: User = Depends(get_current_user)):
@@ -568,26 +582,25 @@ async def get_compliance_overview(current_user: User = Depends(get_current_user)
 
         # Get data access report
         access_report = await audit_trail.get_data_access_report(
-            start_date=datetime.now(timezone.utc) - timedelta(days=30)
+            start_date=datetime.now(UTC) - timedelta(days=30)
         )
 
         return {
             "compliance_status": compliance_status,
             "data_access_report": access_report,
-            "generated_at": datetime.now(timezone.utc)
+            "generated_at": datetime.now(UTC),
         }
 
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve compliance overview"
-        )
+            detail="Failed to retrieve compliance overview",
+        ) from e
 
 
 @router.post("/admin/retention-cleanup")
 async def trigger_retention_cleanup(
-    data_category: str,
-    current_user: User = Depends(get_current_user)
+    data_category: str, current_user: User = Depends(get_current_user)
 ):
     """
     Trigger retention cleanup for specific data category (admin only).
@@ -606,7 +619,7 @@ async def trigger_retention_cleanup(
         except ValueError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid data category: {data_category}"
+                detail=f"Invalid data category: {data_category}",
             )
 
         # Schedule and execute cleanup
@@ -618,13 +631,13 @@ async def trigger_retention_cleanup(
             event_type=AuditEventType.ADMIN_ACTION,
             action=f"Triggered retention cleanup for {data_category}",
             user_id=current_user.id,
-            success=True
+            success=True,
         )
 
         return {
             "task_id": task_id,
             "cleanup_result": result,
-            "message": "Retention cleanup completed successfully"
+            "message": "Retention cleanup completed successfully",
         }
 
     except Exception as e:
@@ -633,17 +646,18 @@ async def trigger_retention_cleanup(
             action="Retention cleanup failed",
             user_id=current_user.id,
             success=False,
-            error_message=str(e)
+            error_message=str(e),
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to execute retention cleanup"
-        )
+            detail="Failed to execute retention cleanup",
+        ) from e
 
 
 # =====================================================
 # Privacy Policy and Information Endpoints
 # =====================================================
+
 
 @router.get("/privacy-policy")
 async def get_privacy_policy():
@@ -662,25 +676,25 @@ async def get_privacy_policy():
             "sections": [
                 {
                     "title": "Dados Pessoais Coletados",
-                    "content": "Coletamos informações pessoais como nome, email, CPF, e dados profissionais para fornecer nossos serviços."
+                    "content": "Coletamos informações pessoais como nome, email, CPF, e dados profissionais para fornecer nossos serviços.",
                 },
                 {
                     "title": "Finalidade do Tratamento",
-                    "content": "Seus dados são utilizados para otimizar currículos, encontrar vagas compatíveis e melhorar nossos serviços."
+                    "content": "Seus dados são utilizados para otimizar currículos, encontrar vagas compatíveis e melhorar nossos serviços.",
                 },
                 {
                     "title": "Base Legal",
-                    "content": "O tratamento dos dados é baseado em consentimento, execução de contrato e obrigação legal."
+                    "content": "O tratamento dos dados é baseado em consentimento, execução de contrato e obrigação legal.",
                 },
                 {
                     "title": "Direitos do Titular",
-                    "content": "Você tem direito de acesso, correção, portabilidade e eliminação de seus dados conforme LGPD."
+                    "content": "Você tem direito de acesso, correção, portabilidade e eliminação de seus dados conforme LGPD.",
                 },
                 {
                     "title": "Tempo de Armazenamento",
-                    "content": "Seus dados são armazenados pelo período necessário para cumprir as finalidades, em conformidade com a LGPD."
-                }
-            ]
+                    "content": "Seus dados são armazenados pelo período necessário para cumprir as finalidades, em conformidade com a LGPD.",
+                },
+            ],
         }
 
         return privacy_policy
@@ -688,8 +702,8 @@ async def get_privacy_policy():
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve privacy policy"
-        )
+            detail="Failed to retrieve privacy policy",
+        ) from e
 
 
 @router.get("/data-processing-activities")
@@ -710,7 +724,7 @@ async def get_data_processing_activities():
                 "legal_basis": "Consentimento",
                 "data_categories": ["Dados pessoais", "Dados profissionais", "Contato"],
                 "retention_period": "2 anos",
-                "third_party_sharing": False
+                "third_party_sharing": False,
             },
             {
                 "name": "Gerenciamento de Conta",
@@ -719,8 +733,8 @@ async def get_data_processing_activities():
                 "legal_basis": "Execução de contrato",
                 "data_categories": ["Dados de conta", "Contato"],
                 "retention_period": "5 anos",
-                "third_party_sharing": False
-            }
+                "third_party_sharing": False,
+            },
         ]
 
         return {"activities": activities}
@@ -728,5 +742,5 @@ async def get_data_processing_activities():
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve data processing activities"
-        )
+            detail="Failed to retrieve data processing activities",
+        ) from e

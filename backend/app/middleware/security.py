@@ -8,17 +8,13 @@ and request validation.
 
 import logging
 import time
-from typing import Any, Dict, List, Optional
-from urllib.parse import unquote
+from typing import Any
 
 from fastapi import HTTPException, Request, Response, status
-from fastapi.security import HTTPAuthorizationCredentials
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
-from app.core.config import settings
-from app.services.security.input_sanitizer import SanitizationResult
-from app.utils.validation import validate_dict, validate_string
+from app.utils.validation import validate_dict
 
 logger = logging.getLogger(__name__)
 
@@ -52,28 +48,41 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         self.max_request_size = max_request_size
 
         # Rate limiting storage (in production, use Redis)
-        self.rate_limits: Dict[str, List[float]] = {}
-        self.blocked_ips: Dict[str, float] = {}
+        self.rate_limits: dict[str, list[float]] = {}
+        self.blocked_ips: dict[str, float] = {}
 
         # Security configuration
         self.rate_limits_config = {
             "default": {"requests": 100, "window": 60},  # 100 requests per minute
-            "auth": {"requests": 5, "window": 300},      # 5 requests per 5 minutes for auth
+            "auth": {"requests": 5, "window": 300},  # 5 requests per 5 minutes for auth
             "upload": {"requests": 10, "window": 3600},  # 10 uploads per hour
-            "llm": {"requests": 60, "window": 60},       # 60 LLM requests per minute
+            "llm": {"requests": 60, "window": 60},  # 60 LLM requests per minute
         }
 
         # Blocked user agents and patterns
         self.blocked_user_agents = [
-            "sqlmap", "nikto", "nmap", "masscan", "zap", "burp",
-            "sqlninja", "havij", "pangolin", "bbscan", "netsparker"
+            "sqlmap",
+            "nikto",
+            "nmap",
+            "masscan",
+            "zap",
+            "burp",
+            "sqlninja",
+            "havij",
+            "pangolin",
+            "bbscan",
+            "netsparker",
         ]
 
         self.suspicious_patterns = [
-            r"\.\./", r"\.\.\\",           # Path traversal
-            r"<script", r"javascript:",     # XSS
-            r"union.*select", r"drop.*table",  # SQL injection
-            r"cmd\.exe", r"powershell",    # Command injection
+            r"\.\./",
+            r"\.\.\\",  # Path traversal
+            r"<script",
+            r"javascript:",  # XSS
+            r"union.*select",
+            r"drop.*table",  # SQL injection
+            r"cmd\.exe",
+            r"powershell",  # Command injection
         ]
 
     async def dispatch(self, request: Request, call_next):
@@ -87,7 +96,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             return self._create_security_response(
                 "Access denied: IP address blocked",
                 status.HTTP_403_FORBIDDEN,
-                {"blocked_ip": client_ip}
+                {"blocked_ip": client_ip},
             )
 
         # Step 2: Check user agent
@@ -95,7 +104,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             return self._create_security_response(
                 "Access denied: User agent blocked",
                 status.HTTP_403_FORBIDDEN,
-                {"blocked_user_agent": user_agent}
+                {"blocked_user_agent": user_agent},
             )
 
         # Step 3: Check request size
@@ -104,18 +113,14 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             return self._create_security_response(
                 "Request too large",
                 status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                {"max_size": self.max_request_size}
+                {"max_size": self.max_request_size},
             )
 
         # Step 4: Rate limiting
         if self.enable_rate_limiting and not self._check_rate_limit(request, client_ip):
-            await self._log_security_event(
-                request, "RATE_LIMIT_EXCEEDED", {"client_ip": client_ip}
-            )
+            await self._log_security_event(request, "RATE_LIMIT_EXCEEDED", {"client_ip": client_ip})
             return self._create_security_response(
-                "Rate limit exceeded",
-                status.HTTP_429_TOO_MANY_REQUESTS,
-                {"retry_after": "60"}
+                "Rate limit exceeded", status.HTTP_429_TOO_MANY_REQUESTS, {"retry_after": "60"}
             )
 
         # Step 5: Log request for security monitoring
@@ -203,6 +208,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         # Check for suspicious patterns
         for pattern in self.suspicious_patterns:
             import re
+
             if re.search(pattern, user_agent, re.IGNORECASE):
                 return True
 
@@ -292,7 +298,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         return response
 
     async def _log_security_event(
-        self, request: Request, event_type: str, extra_data: Optional[Dict[str, Any]] = None
+        self, request: Request, event_type: str, extra_data: dict[str, Any] | None = None
     ) -> None:
         """Log security-related events."""
         log_data = {
@@ -313,7 +319,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             logger.info(f"Security event: {event_type}", extra=log_data)
 
     def _create_security_response(
-        self, message: str, status_code: int, extra_data: Optional[Dict[str, Any]] = None
+        self, message: str, status_code: int, extra_data: dict[str, Any] | None = None
     ) -> JSONResponse:
         """Create a standardized security error response."""
         content = {
@@ -395,7 +401,7 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
         path = request.url.path
         return any(pattern in path for pattern in skip_patterns)
 
-    async def _validate_json_body(self, body: bytes, request: Request) -> Dict[str, Any]:
+    async def _validate_json_body(self, body: bytes, request: Request) -> dict[str, Any]:
         """Validate JSON request body."""
         try:
             import json
@@ -403,7 +409,7 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
             if not body.strip():
                 return {"valid": True, "errors": []}
 
-            json_data = json.loads(body.decode('utf-8'))
+            json_data = json.loads(body.decode("utf-8"))
 
             # Validate the JSON data structure
             validation_result = validate_dict(json_data, max_items=100, max_value_length=10000)
@@ -463,9 +469,9 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 body = await request.body()
                 if body:
                     # Truncate body if too large
-                    body_str = body.decode('utf-8', errors='ignore')
+                    body_str = body.decode("utf-8", errors="ignore")
                     if len(body_str) > self.max_body_size:
-                        body_str = body_str[:self.max_body_size] + "... [truncated]"
+                        body_str = body_str[: self.max_body_size] + "... [truncated]"
 
                     # Remove sensitive data
                     body_str = self._sanitize_body_for_logging(body_str)
@@ -532,7 +538,9 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
         sanitized_body = body
         for pattern in sensitive_patterns:
-            sanitized_body = re.sub(pattern, r'"\1": "[REDACTED]"', sanitized_body, flags=re.IGNORECASE)
+            sanitized_body = re.sub(
+                pattern, r'"\1": "[REDACTED]"', sanitized_body, flags=re.IGNORECASE
+            )
 
         return sanitized_body
 

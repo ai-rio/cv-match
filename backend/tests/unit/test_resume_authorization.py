@@ -18,21 +18,13 @@ from app.services.resume_service import ResumeService
 @pytest.fixture
 def mock_user_1():
     """Mock user 1 for testing."""
-    return {
-        "id": "user-123",
-        "email": "user1@example.com",
-        "name": "User One"
-    }
+    return {"id": "user-123", "email": "user1@example.com", "name": "User One"}
 
 
 @pytest.fixture
 def mock_user_2():
     """Mock user 2 for testing."""
-    return {
-        "id": "user-456",
-        "email": "user2@example.com",
-        "name": "User Two"
-    }
+    return {"id": "user-456", "email": "user2@example.com", "name": "User Two"}
 
 
 @pytest.fixture
@@ -44,7 +36,7 @@ def mock_resume_data():
         "content_type": "text/markdown",
         "user_id": "user-123",
         "created_at": "2024-01-01T00:00:00Z",
-        "updated_at": None
+        "updated_at": None,
     }
 
 
@@ -69,8 +61,8 @@ class TestResumeUploadAuthorization:
             "raw_resume": {
                 "content": "Sample content",
                 "content_type": "text/markdown",
-                "created_at": "2024-01-01T00:00:00Z"
-            }
+                "created_at": "2024-01-01T00:00:00Z",
+            },
         }
         mock_service_class.return_value = mock_service
 
@@ -89,7 +81,7 @@ class TestResumeUploadAuthorization:
             file_type="application/pdf",
             filename="test.pdf",
             content_type="md",
-            user_id="user-123"  # CRITICAL: User ID must be passed
+            user_id="user-123",  # CRITICAL: User ID must be passed
         )
 
         # Verify response includes user_id
@@ -101,7 +93,9 @@ class TestResumeUploadAuthorization:
     async def test_upload_resume_without_user_id_fails(self, mock_service_class, mock_user_1):
         """Test that resume upload fails if user_id is not provided."""
         mock_service = AsyncMock()
-        mock_service.convert_and_store_resume.side_effect = ValueError("user_id is required for resume storage")
+        mock_service.convert_and_store_resume.side_effect = ValueError(
+            "user_id is required for resume storage"
+        )
         mock_service_class.return_value = mock_service
 
         # Mock file upload
@@ -125,7 +119,7 @@ class TestResumeGetAuthorization:
         mock_service = AsyncMock()
         mock_service.get_resume_with_processed_data.return_value = {
             "resume_id": "resume-123",
-            "raw_resume": mock_resume_data
+            "raw_resume": mock_resume_data,
         }
         mock_service_class.return_value = mock_service
 
@@ -138,12 +132,14 @@ class TestResumeGetAuthorization:
 
     @patch("app.api.endpoints.resumes.ResumeService")
     @pytest.mark.asyncio
-    async def test_get_other_user_resume_forbidden(self, mock_service_class, mock_user_2, mock_resume_data):
+    async def test_get_other_user_resume_forbidden(
+        self, mock_service_class, mock_user_2, mock_resume_data
+    ):
         """Test that user cannot access another user's resume."""
         mock_service = AsyncMock()
         mock_service.get_resume_with_processed_data.return_value = {
             "resume_id": "resume-123",
-            "raw_resume": mock_resume_data  # This resume belongs to user-123
+            "raw_resume": mock_resume_data,  # This resume belongs to user-123
         }
         mock_service_class.return_value = mock_service
 
@@ -171,7 +167,9 @@ class TestResumeGetAuthorization:
 
     @patch("app.api.endpoints.resumes.ResumeService")
     @pytest.mark.asyncio
-    async def test_get_resume_without_user_id_forbidden(self, mock_service_class, mock_user_1, mock_resume_data):
+    async def test_get_resume_without_user_id_forbidden(
+        self, mock_service_class, mock_user_1, mock_resume_data
+    ):
         """Test that resume without user_id cannot be accessed."""
         mock_resume_data_no_user = mock_resume_data.copy()
         mock_resume_data_no_user["user_id"] = None
@@ -179,7 +177,7 @@ class TestResumeGetAuthorization:
         mock_service = AsyncMock()
         mock_service.get_resume_with_processed_data.return_value = {
             "resume_id": "resume-123",
-            "raw_resume": mock_resume_data_no_user
+            "raw_resume": mock_resume_data_no_user,
         }
         mock_service_class.return_value = mock_service
 
@@ -206,20 +204,22 @@ class TestResumeListAuthorization:
                 "content": "Resume 1 content",
                 "content_type": "text/markdown",
                 "user_id": "user-123",  # User 1's resume
-                "created_at": "2024-01-01T00:00:00Z"
+                "created_at": "2024-01-01T00:00:00Z",
             },
             {
                 "resume_id": "resume-2",
                 "content": "Resume 2 content",
                 "content_type": "text/markdown",
                 "user_id": "user-456",  # User 2's resume
-                "created_at": "2024-01-02T00:00:00Z"
-            }
+                "created_at": "2024-01-02T00:00:00Z",
+            },
         ]
 
         # Service should filter by user_id
         mock_service.list.side_effect = Exception("Model class error")
-        mock_service.supabase.table.return_value.select.return_value.eq.return_value.limit.return_value.offset.return_value.execute.return_value = MagicMock(data=[mock_resumes[0]])
+        mock_service.supabase.table.return_value.select.return_value.eq.return_value.limit.return_value.offset.return_value.execute.return_value = MagicMock(
+            data=[mock_resumes[0]]
+        )
         mock_db_service_class.return_value = mock_service
 
         result = await list_resumes(limit=10, offset=0, current_user=mock_user_1)
@@ -231,7 +231,9 @@ class TestResumeListAuthorization:
 
         # Verify database query was filtered by user_id
         mock_service.supabase.table.assert_called_with("resumes")
-        mock_service.supabase.table.return_value.select.return_value.eq.assert_called_with("user_id", "user-123")
+        mock_service.supabase.table.return_value.select.return_value.eq.assert_called_with(
+            "user_id", "user-123"
+        )
 
     @patch("app.services.supabase.database.SupabaseDatabaseService")
     @pytest.mark.asyncio
@@ -246,12 +248,14 @@ class TestResumeListAuthorization:
                 "content": "Wrong resume content",
                 "content_type": "text/markdown",
                 "user_id": "malicious-user",  # Wrong user!
-                "created_at": "2024-01-01T00:00:00Z"
+                "created_at": "2024-01-01T00:00:00Z",
             }
         ]
 
         mock_service.list.side_effect = Exception("Model class error")
-        mock_service.supabase.table.return_value.select.return_value.eq.return_value.limit.return_value.offset.return_value.execute.return_value = MagicMock(data=wrong_resumes)
+        mock_service.supabase.table.return_value.select.return_value.eq.return_value.limit.return_value.offset.return_value.execute.return_value = MagicMock(
+            data=wrong_resumes
+        )
         mock_db_service_class.return_value = mock_service
 
         with patch("app.api.endpoints.resumes.logger") as mock_logger:
@@ -271,17 +275,21 @@ class TestResumeDeleteAuthorization:
     @patch("app.api.endpoints.resumes.ResumeService")
     @patch("app.services.supabase.database.SupabaseDatabaseService")
     @pytest.mark.asyncio
-    async def test_delete_own_resume_success(self, mock_db_service_class, mock_service_class, mock_user_1, mock_resume_data):
+    async def test_delete_own_resume_success(
+        self, mock_db_service_class, mock_service_class, mock_user_1, mock_resume_data
+    ):
         """Test that user can successfully delete their own resume."""
         mock_service = AsyncMock()
         mock_service.get_resume_with_processed_data.return_value = {
             "resume_id": "resume-123",
-            "raw_resume": mock_resume_data
+            "raw_resume": mock_resume_data,
         }
         mock_service_class.return_value = mock_service
 
         mock_db_service = AsyncMock()
-        mock_db_service.supabase.table.return_value.delete.return_value.eq.return_value.execute.return_value = MagicMock(data=[{"id": 1}])
+        mock_db_service.supabase.table.return_value.delete.return_value.eq.return_value.execute.return_value = MagicMock(
+            data=[{"id": 1}]
+        )
         mock_db_service_class.return_value = mock_db_service
 
         # Should not raise exception
@@ -289,12 +297,14 @@ class TestResumeDeleteAuthorization:
 
     @patch("app.api.endpoints.resumes.ResumeService")
     @pytest.mark.asyncio
-    async def test_delete_other_user_resume_forbidden(self, mock_service_class, mock_user_2, mock_resume_data):
+    async def test_delete_other_user_resume_forbidden(
+        self, mock_service_class, mock_user_2, mock_resume_data
+    ):
         """Test that user cannot delete another user's resume."""
         mock_service = AsyncMock()
         mock_service.get_resume_with_processed_data.return_value = {
             "resume_id": "resume-123",
-            "raw_resume": mock_resume_data  # This resume belongs to user-123
+            "raw_resume": mock_resume_data,  # This resume belongs to user-123
         }
         mock_service_class.return_value = mock_service
 
@@ -361,13 +371,15 @@ class TestResumeServiceAuthorization:
 
         mock_service = AsyncMock()
         mock_service.supabase.table.return_value.select.return_value.eq.return_value.execute.return_value = MagicMock(
-            data=[{
-                "resume_id": "test-resume",
-                "content": "test content",
-                "content_type": "text/markdown",
-                "user_id": "user-123",
-                "created_at": "2024-01-01T00:00:00Z"
-            }]
+            data=[
+                {
+                    "resume_id": "test-resume",
+                    "content": "test content",
+                    "content_type": "text/markdown",
+                    "user_id": "user-123",
+                    "created_at": "2024-01-01T00:00:00Z",
+                }
+            ]
         )
         mock_db_service_class.return_value = mock_service
 
@@ -382,14 +394,16 @@ class TestDefenseInDepth:
 
     @patch("app.api.endpoints.resumes.ResumeService")
     @pytest.mark.asyncio
-    async def test_multiple_authorization_checks(self, mock_service_class, mock_user_1, mock_user_2, mock_resume_data):
+    async def test_multiple_authorization_checks(
+        self, mock_service_class, mock_user_1, mock_user_2, mock_resume_data
+    ):
         """Test that multiple authorization checks work together."""
         mock_service = AsyncMock()
 
         # First call returns user 1's resume, second call would return user 2's
         mock_service.get_resume_with_processed_data.return_value = {
             "resume_id": "resume-123",
-            "raw_resume": mock_resume_data
+            "raw_resume": mock_resume_data,
         }
         mock_service_class.return_value = mock_service
 

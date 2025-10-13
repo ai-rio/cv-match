@@ -254,9 +254,8 @@ async def cleanup_test_data():
 async def _cleanup_test_records():
     """Clean up test records from all relevant tables."""
     try:
-        from supabase import create_client
-
         from app.core.config import settings
+        from supabase import create_client
 
         # Create Supabase client
         supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)

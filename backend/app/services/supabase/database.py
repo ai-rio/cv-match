@@ -1,8 +1,7 @@
 from typing import Any, Generic, TypeVar
 
-from supabase import Client, create_client
-
 from app.core.config import settings
+from supabase import Client, create_client
 
 T = TypeVar("T")
 

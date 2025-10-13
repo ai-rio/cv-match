@@ -4,15 +4,14 @@ Authorization Test Runner for CV-Match Phase 0.1 Security Implementation
 Tests that user authorization fixes are working correctly.
 """
 
-import asyncio
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add the backend directory to Python path
 backend_dir = Path(__file__).parent
 sys.path.insert(0, str(backend_dir))
-
-import pytest
 
 
 def run_authorization_tests():
@@ -65,24 +64,42 @@ def check_security_requirements():
     print("-" * 40)
 
     checks = [
-        ("Database schema includes user_id column",
-         "/home/carlos/projects/cv-match/supabase/migrations/20251013000001_add_user_authorization_to_resumes.sql"),
-        ("Resume models include user_id field",
-         "/home/carlos/projects/cv-match/backend/app/models/resume.py"),
-        ("ResumeService requires user_id for storage",
-         "/home/carlos/projects/cv-match/backend/app/services/resume_service.py"),
-        ("Upload endpoint associates resumes with users",
-         "/home/carlos/projects/cv-match/backend/app/api/endpoints/resumes.py"),
-        ("Get endpoint validates user ownership",
-         "/home/carlos/projects/cv-match/backend/app/api/endpoints/resumes.py"),
-        ("List endpoint filters by user_id",
-         "/home/carlos/projects/cv-match/backend/app/api/endpoints/resumes.py"),
-        ("Delete endpoint validates user ownership",
-         "/home/carlos/projects/cv-match/backend/app/api/endpoints/resumes.py"),
-        ("RLS policies implemented",
-         "/home/carlos/projects/cv-match/supabase/migrations/20251013000001_add_user_authorization_to_resumes.sql"),
-        ("Authorization tests created",
-         "/home/carlos/projects/cv-match/backend/tests/unit/test_resume_authorization.py"),
+        (
+            "Database schema includes user_id column",
+            "/home/carlos/projects/cv-match/supabase/migrations/20251013000001_add_user_authorization_to_resumes.sql",
+        ),
+        (
+            "Resume models include user_id field",
+            "/home/carlos/projects/cv-match/backend/app/models/resume.py",
+        ),
+        (
+            "ResumeService requires user_id for storage",
+            "/home/carlos/projects/cv-match/backend/app/services/resume_service.py",
+        ),
+        (
+            "Upload endpoint associates resumes with users",
+            "/home/carlos/projects/cv-match/backend/app/api/endpoints/resumes.py",
+        ),
+        (
+            "Get endpoint validates user ownership",
+            "/home/carlos/projects/cv-match/backend/app/api/endpoints/resumes.py",
+        ),
+        (
+            "List endpoint filters by user_id",
+            "/home/carlos/projects/cv-match/backend/app/api/endpoints/resumes.py",
+        ),
+        (
+            "Delete endpoint validates user ownership",
+            "/home/carlos/projects/cv-match/backend/app/api/endpoints/resumes.py",
+        ),
+        (
+            "RLS policies implemented",
+            "/home/carlos/projects/cv-match/supabase/migrations/20251013000001_add_user_authorization_to_resumes.sql",
+        ),
+        (
+            "Authorization tests created",
+            "/home/carlos/projects/cv-match/backend/tests/unit/test_resume_authorization.py",
+        ),
     ]
 
     for description, file_path in checks:

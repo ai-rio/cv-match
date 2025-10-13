@@ -17,12 +17,14 @@ The CV-Match database contains **CRITICAL SECURITY VULNERABILITIES** that violat
 **LGPD Violation**: Articles 6, 7, 17, 46 (data isolation and access control)
 
 #### Issues Found:
+
 1. **Missing `user_id` column** - No user ownership enforcement
 2. **Inadequate RLS policies** - Only service access policy exists
 3. **No user data isolation** - Any user can access any resume
 4. **No foreign key constraint** - Orphaned data risk
 
 **Current Schema**:
+
 ```sql
 CREATE TABLE public.resumes (
     id BIGSERIAL PRIMARY KEY,
@@ -37,6 +39,7 @@ CREATE TABLE public.resumes (
 ```
 
 **Current RLS Policy**:
+
 ```sql
 -- ❌ ONLY SERVICE ACCESS POLICY - NO USER ISOLATION
 POLICY "Service full access to resumes"
@@ -67,12 +70,14 @@ The following tables have proper user relationships and RLS policies:
 ## LGPD Compliance Violations
 
 ### Violated Articles:
+
 - **Article 6**: Lawfulness, necessity, and transparency of processing
 - **Article 7**: Legitimate interest basis for processing
 - **Article 17**: Right to erasure ('right to be forgotten')
 - **Article 46**: Security measures for data protection
 
 ### Risk Assessment:
+
 - **Data Leakage Risk**: EXTREME - Any user can access any resume
 - **Regulatory Fines**: Up to R$50 million or 2% of annual turnover
 - **Business Impact**: Unable to legally operate in Brazil
@@ -89,6 +94,7 @@ The following tables have proper user relationships and RLS policies:
 5. **Create database security documentation**
 
 ### Migration Strategy:
+
 - **Zero-downtime migration** - Table is currently empty (0 records)
 - **Backward compatible changes** - All changes are additive
 - **Rollback capability** - Migration scripts include rollback procedures
@@ -96,6 +102,7 @@ The following tables have proper user relationships and RLS policies:
 ## Security Requirements for Fix
 
 ### Must-Have Fixes:
+
 - [ ] Add `user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE` to resumes
 - [ ] Create user-specific RLS policies for resumes table
 - [ ] Add indexes for performance (user_id, created_at)
@@ -104,11 +111,13 @@ The following tables have proper user relationships and RLS policies:
 - [ ] Add user_id to stripe_webhook_events
 
 ### Performance Requirements:
+
 - [ ] Query performance impact < 20%
 - [ ] Index optimization for user-based queries
 - [ ] Efficient foreign key constraints
 
 ### Security Requirements:
+
 - [ ] Complete user data isolation
 - [ ] Administrative access controls
 - [ ] Audit trail for all data access
@@ -117,18 +126,21 @@ The following tables have proper user relationships and RLS policies:
 ## Recommended Implementation Plan
 
 ### Phase 1: Schema Fixes (Immediate - 2 hours)
+
 1. Create migration for resumes table user_id column
 2. Add foreign key constraints
 3. Create proper indexes
 4. Add validation constraints
 
 ### Phase 2: RLS Implementation (Immediate - 1 hour)
+
 1. Enable RLS on resumes table (already enabled)
 2. Create user-specific access policies
 3. Add administrative access policies
 4. Test policy isolation
 
 ### Phase 3: Additional Security (Immediate - 1 hour)
+
 1. Add user_id to stripe_webhook_events
 2. Create audit logging triggers
 3. Document security procedures
@@ -137,12 +149,14 @@ The following tables have proper user relationships and RLS policies:
 ## Testing Requirements
 
 ### Security Testing:
+
 - [ ] Verify cross-user data access is blocked
 - [ ] Test RLS policies with different user contexts
 - [ ] Validate foreign key constraints
 - [ ] Test administrative access controls
 
 ### Performance Testing:
+
 - [ ] Benchmark query performance with new indexes
 - [ ] Test concurrent user access
 - [ ] Verify no performance regression

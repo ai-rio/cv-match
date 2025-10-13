@@ -9,11 +9,9 @@ Critical for LGPD compliance in the Brazilian market.
 import hashlib
 import logging
 import re
-from typing import Any, Dict, List, Optional, Union
 from dataclasses import dataclass
 from enum import Enum
-
-from pydantic import BaseModel
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +19,10 @@ logger = logging.getLogger(__name__)
 class MaskingLevel(Enum):
     """Levels of PII masking."""
 
-    NONE = "none"          # No masking (development only)
-    PARTIAL = "partial"    # Partial masking (show some characters)
-    FULL = "full"         # Full masking (complete replacement)
-    HASH = "hash"         # Hash the value (irreversible)
+    NONE = "none"  # No masking (development only)
+    PARTIAL = "partial"  # Partial masking (show some characters)
+    FULL = "full"  # Full masking (complete replacement)
+    HASH = "hash"  # Hash the value (irreversible)
 
 
 @dataclass
@@ -54,25 +52,25 @@ class PIIMasker:
 
         self.brazilian_rules = {
             "cpf": MaskingRule(
-                pattern=r'\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b',
+                pattern=r"\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b",
                 mask_char="*",
                 show_first=2,
                 show_last=2,
-                preserve_format=True
+                preserve_format=True,
             ),
             "rg": MaskingRule(
-                pattern=r'\b\d{1,2}\.?\d{3}\.?\d{3}-?[A-Z0-9]?\b',
+                pattern=r"\b\d{1,2}\.?\d{3}\.?\d{3}-?[A-Z0-9]?\b",
                 mask_char="*",
                 show_first=1,
                 show_last=1,
-                preserve_format=True
+                preserve_format=True,
             ),
             "cnpj": MaskingRule(
-                pattern=r'\b\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}\b',
+                pattern=r"\b\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}\b",
                 mask_char="*",
                 show_first=2,
                 show_last=2,
-                preserve_format=True
+                preserve_format=True,
             ),
         }
 
@@ -81,25 +79,25 @@ class PIIMasker:
 
         self.standard_rules = {
             "email": MaskingRule(
-                pattern=r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b',
+                pattern=r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
                 mask_char="*",
                 show_first=1,
                 show_last=1,
-                preserve_format=True
+                preserve_format=True,
             ),
             "phone": MaskingRule(
-                pattern=r'\b(?:\+?55\s?)?(?:\(?\d{2}\)?[-\s]?)?\d{4,5}[-\s]?\d{4}\b',
+                pattern=r"\b(?:\+?55\s?)?(?:\(?\d{2}\)?[-\s]?)?\d{4,5}[-\s]?\d{4}\b",
                 mask_char="*",
                 show_first=2,
                 show_last=2,
-                preserve_format=True
+                preserve_format=True,
             ),
             "cep": MaskingRule(
-                pattern=r'\b\d{5}-?\d{3}\b',
+                pattern=r"\b\d{5}-?\d{3}\b",
                 mask_char="*",
                 show_first=2,
                 show_last=1,
-                preserve_format=True
+                preserve_format=True,
             ),
         }
 
@@ -108,18 +106,18 @@ class PIIMasker:
 
         self.financial_rules = {
             "credit_card": MaskingRule(
-                pattern=r'\b(?:\d{4}[-\s]?){3}\d{4}\b',
+                pattern=r"\b(?:\d{4}[-\s]?){3}\d{4}\b",
                 mask_char="*",
                 show_first=4,
                 show_last=4,
-                preserve_format=True
+                preserve_format=True,
             ),
             "bank_account": MaskingRule(
-                pattern=r'\b\d{6,}-?\d{1,}-?\d{1,}\b',
+                pattern=r"\b\d{6,}-?\d{1,}-?\d{1,}\b",
                 mask_char="*",
                 show_first=2,
                 show_last=1,
-                preserve_format=True
+                preserve_format=True,
             ),
         }
 
@@ -128,18 +126,18 @@ class PIIMasker:
 
         self.context_rules = {
             "address": MaskingRule(
-                pattern=r'\b(?:Rua|Avenida|Alameda|Travessa|Praia|Praça)\s+[^,\n]+,\s*\d+[^,\n]*',
+                pattern=r"\b(?:Rua|Avenida|Alameda|Travessa|Praia|Praça)\s+[^,\n]+,\s*\d+[^,\n]*",
                 mask_char="*",
                 show_first=0,
                 show_last=0,
-                preserve_format=False
+                preserve_format=False,
             ),
             "full_name": MaskingRule(
-                pattern=r'\b[A-Z][a-z]+\s+[A-Z][a-z]+\s*(?:[A-Z][a-z]+)?\b',
+                pattern=r"\b[A-Z][a-z]+\s+[A-Z][a-z]+\s*(?:[A-Z][a-z]+)?\b",
                 mask_char="*",
                 show_first=1,
                 show_last=1,
-                preserve_format=False
+                preserve_format=False,
             ),
         }
 
@@ -204,7 +202,7 @@ class PIIMasker:
 
         def mask_match(match: re.Match) -> str:
             original = match.group()
-            return hashlib.sha256(original.encode()).hexdigest()[:len(original)]
+            return hashlib.sha256(original.encode()).hexdigest()[: len(original)]
 
         return re.sub(rule.pattern, mask_match, text, flags=re.IGNORECASE | re.MULTILINE)
 
@@ -223,9 +221,9 @@ class PIIMasker:
 
         # Mask digits
         masked_digits = (
-            digits[:rule.show_first] +
-            [rule.mask_char] * (len(digits) - rule.show_first - rule.show_last) +
-            digits[-rule.show_last:]
+            digits[: rule.show_first]
+            + [rule.mask_char] * (len(digits) - rule.show_first - rule.show_last)
+            + digits[-rule.show_last :]
         )
 
         # Reconstruct with original format
@@ -241,7 +239,7 @@ class PIIMasker:
             else:
                 result.append(char)
 
-        return ''.join(result)
+        return "".join(result)
 
     def _mask_simple(self, value: str, rule: MaskingRule) -> str:
         """Simple masking without format preservation."""
@@ -250,12 +248,14 @@ class PIIMasker:
             return rule.mask_char * len(value)
 
         return (
-            value[:rule.show_first] +
-            rule.mask_char * (len(value) - rule.show_first - rule.show_last) +
-            value[-rule.show_last:]
+            value[: rule.show_first]
+            + rule.mask_char * (len(value) - rule.show_first - rule.show_last)
+            + value[-rule.show_last :]
         )
 
-    def mask_dict(self, data: Dict[str, Any], masking_level: MaskingLevel = MaskingLevel.PARTIAL) -> Dict[str, Any]:
+    def mask_dict(
+        self, data: dict[str, Any], masking_level: MaskingLevel = MaskingLevel.PARTIAL
+    ) -> dict[str, Any]:
         """
         Recursively mask PII in dictionary values.
 
@@ -274,7 +274,7 @@ class PIIMasker:
         for key, value in data.items():
             if isinstance(value, str):
                 # Check if key suggests sensitive data
-                sensitive_keys = ['email', 'cpf', 'rg', 'cnpj', 'phone', 'cep', 'address', 'name']
+                sensitive_keys = ["email", "cpf", "rg", "cnpj", "phone", "cep", "address", "name"]
                 if any(sensitive_key in key.lower() for sensitive_key in sensitive_keys):
                     masked_data[key] = self.mask_text(value, masking_level)
                 else:
@@ -283,8 +283,11 @@ class PIIMasker:
                 masked_data[key] = self.mask_dict(value, masking_level)
             elif isinstance(value, list):
                 masked_data[key] = [
-                    self.mask_dict(item, masking_level) if isinstance(item, dict) else
-                    self.mask_text(item, masking_level) if isinstance(item, str) else item
+                    self.mask_dict(item, masking_level)
+                    if isinstance(item, dict)
+                    else self.mask_text(item, masking_level)
+                    if isinstance(item, str)
+                    else item
                     for item in value
                 ]
             else:
@@ -292,7 +295,9 @@ class PIIMasker:
 
         return masked_data
 
-    def mask_log_message(self, message: str, masking_level: MaskingLevel = MaskingLevel.PARTIAL) -> str:
+    def mask_log_message(
+        self, message: str, masking_level: MaskingLevel = MaskingLevel.PARTIAL
+    ) -> str:
         """
         Mask PII in log messages.
 
@@ -305,7 +310,9 @@ class PIIMasker:
         """
         return self.mask_text(message, masking_level)
 
-    def create_safe_error_message(self, error: Exception, masking_level: MaskingLevel = MaskingLevel.PARTIAL) -> str:
+    def create_safe_error_message(
+        self, error: Exception, masking_level: MaskingLevel = MaskingLevel.PARTIAL
+    ) -> str:
         """
         Create a safe error message with PII masked.
 
@@ -322,7 +329,9 @@ class PIIMasker:
         # Add context without revealing sensitive details
         return f"Error occurred: {masked_message}"
 
-    def mask_json_response(self, data: Dict[str, Any], masking_level: MaskingLevel = MaskingLevel.PARTIAL) -> Dict[str, Any]:
+    def mask_json_response(
+        self, data: dict[str, Any], masking_level: MaskingLevel = MaskingLevel.PARTIAL
+    ) -> dict[str, Any]:
         """
         Mask PII in JSON response data.
 
@@ -335,7 +344,7 @@ class PIIMasker:
         """
         return self.mask_dict(data, masking_level)
 
-    def validate_masking(self, original: str, masked: str) -> Dict[str, Any]:
+    def validate_masking(self, original: str, masked: str) -> dict[str, Any]:
         """
         Validate that masking was applied correctly.
 
@@ -352,11 +361,7 @@ class PIIMasker:
         all_rules.update(self.standard_rules)
         all_rules.update(self.financial_rules)
 
-        validation_results = {
-            "is_masked": False,
-            "remaining_pii": [],
-            "masking_quality": "poor"
-        }
+        validation_results = {"is_masked": False, "remaining_pii": [], "masking_quality": "poor"}
 
         for rule_name, rule in all_rules.items():
             original_matches = re.findall(rule.pattern, original, re.IGNORECASE | re.MULTILINE)
@@ -406,7 +411,9 @@ def mask_log_message(message: str) -> str:
     return pii_masker.mask_log_message(message)
 
 
-def mask_dict(data: Dict[str, Any], masking_level: MaskingLevel = MaskingLevel.PARTIAL) -> Dict[str, Any]:
+def mask_dict(
+    data: dict[str, Any], masking_level: MaskingLevel = MaskingLevel.PARTIAL
+) -> dict[str, Any]:
     """
     Convenience function to mask PII in dictionary.
 

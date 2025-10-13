@@ -12,27 +12,45 @@ This test suite validates all LGPD compliance components including:
 Critical for ensuring CV-Match is compliant with Brazilian LGPD requirements.
 """
 
-import pytest
-from datetime import datetime, timezone, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
 import json
+from datetime import UTC, datetime, timedelta, timezone
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from app.services.security.pii_detection_service import (
-    PIIDetectionService, PIIType, scan_for_pii, mask_pii, validate_lgpd_compliance
+import pytest
+
+from app.services.security.audit_trail import (
+    AuditEvent,
+    AuditEventType,
+    AuditTrailService,
+    ComplianceEvent,
+    DataAccessEvent,
 )
 from app.services.security.consent_manager import (
-    ConsentManager, ConsentRequest, ConsentCheckResult, UserConsentStatus
+    ConsentCheckResult,
+    ConsentManager,
+    ConsentRequest,
+    UserConsentStatus,
 )
 from app.services.security.data_subject_rights import (
-    DataSubjectRightsManager, DataSubjectRightType, DataAccessRequest, DataDeletionRequest
+    DataAccessRequest,
+    DataDeletionRequest,
+    DataSubjectRightsManager,
+    DataSubjectRightType,
+)
+from app.services.security.pii_detection_service import (
+    PIIDetectionService,
+    PIIType,
+    mask_pii,
+    scan_for_pii,
+    validate_lgpd_compliance,
 )
 from app.services.security.retention_manager import (
-    RetentionManager, RetentionPolicy, DataCategory, RetentionPeriod
+    DataCategory,
+    RetentionManager,
+    RetentionPeriod,
+    RetentionPolicy,
 )
-from app.services.security.audit_trail import (
-    AuditTrailService, AuditEvent, DataAccessEvent, ComplianceEvent
-)
-from app.utils.pii_masker import PIIMasker, MaskingLevel
+from app.utils.pii_masker import MaskingLevel, PIIMasker
 
 
 class TestPIIDetection:
@@ -132,7 +150,9 @@ class TestPIIDetection:
     @pytest.mark.asyncio
     async def test_multiple_pii_detection(self, pii_service):
         """Test detection of multiple PII types in one text."""
-        text = "Meu nome é João, CPF 123.456.789-01, email joao@example.com, telefone (11) 98765-4321"
+        text = (
+            "Meu nome é João, CPF 123.456.789-01, email joao@example.com, telefone (11) 98765-4321"
+        )
         result = pii_service.scan_text(text)
 
         assert PIIType.CPF in result.pii_types_found
@@ -208,7 +228,7 @@ class TestPIIMasking:
             "name": "João Silva",
             "email": "joao@example.com",
             "cpf": "123.456.789-01",
-            "phone": "11987654321"
+            "phone": "11987654321",
         }
 
         masked_data = masker.mask_dict(data, MaskingLevel.PARTIAL)
@@ -237,6 +257,7 @@ class TestConsentManagement:
         """Test consent recording."""
         # Mock available consent types
         from app.services.security.consent_manager import ConsentType
+
         consent_types = [
             ConsentType(
                 id="1",
@@ -245,22 +266,23 @@ class TestConsentManagement:
                 category="data_processing",
                 is_required=True,
                 version=1,
-                is_active=True
+                is_active=True,
             )
         ]
         consent_manager_mock.get_available_consent_types.return_value = consent_types
 
         # Mock consent creation
         from app.services.security.consent_manager import UserConsent
+
         consent_record = UserConsent(
             id="consent_123",
             user_id="user_123",
             consent_type_id="1",
             granted=True,
-            granted_at=datetime.now(timezone.utc),
+            granted_at=datetime.now(UTC),
             consent_version=1,
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc)
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
         )
         consent_manager_mock.record_user_consent.return_value = consent_record
 
@@ -269,7 +291,7 @@ class TestConsentManagement:
             consent_type_name="data_processing",
             granted=True,
             legal_basis="consent",
-            purpose="Service provision"
+            purpose="Service provision",
         )
 
         result = await consent_manager_mock.record_user_consent("user_123", consent_request)
@@ -285,9 +307,9 @@ class TestConsentManagement:
         consent_check = ConsentCheckResult(
             has_consent=True,
             consent_type="data_processing",
-            granted_at=datetime.now(timezone.utc),
+            granted_at=datetime.now(UTC),
             is_required=True,
-            legal_basis="consent"
+            legal_basis="consent",
         )
         consent_manager_mock.check_user_consent.return_value = consent_check
 
@@ -308,7 +330,7 @@ class TestConsentManagement:
             missing_required_consents=[],
             granted_optional_consents=[],
             revoked_consents=[],
-            last_updated=datetime.now(timezone.utc)
+            last_updated=datetime.now(UTC),
         )
         consent_manager_mock.get_user_consent_status.return_value = consent_status
 
@@ -340,12 +362,13 @@ class TestDataSubjectRights:
 
         # Mock request processing
         from app.services.security.data_subject_rights import DataSubjectRightsResponse
+
         response = DataSubjectRightsResponse(
             request_id="request_123",
             request_type="access",
             status="completed",
             processed_data={"user_id": "user_123", "data": "test"},
-            message="Data access request processed successfully"
+            message="Data access request processed successfully",
         )
         rights_manager_mock.process_data_access_request.return_value = response
 
@@ -353,7 +376,7 @@ class TestDataSubjectRights:
         access_request = DataAccessRequest(
             user_id="user_123",
             request_type=DataSubjectRightType.ACCESS,
-            justification="User wants to access their data"
+            justification="User wants to access their data",
         )
 
         request_id = await rights_manager_mock.create_data_access_request(access_request)
@@ -371,12 +394,13 @@ class TestDataSubjectRights:
 
         # Mock request processing
         from app.services.security.data_subject_rights import DataSubjectRightsResponse
+
         response = DataSubjectRightsResponse(
             request_id="request_456",
             request_type="deletion",
             status="completed",
             processed_data={"deleted_data": {"all": "Complete deletion performed"}},
-            message="Data deletion request processed successfully"
+            message="Data deletion request processed successfully",
         )
         rights_manager_mock.process_data_deletion_request.return_value = response
 
@@ -384,7 +408,7 @@ class TestDataSubjectRights:
         deletion_request = DataDeletionRequest(
             user_id="user_123",
             deletion_scope="all",
-            justification="User exercising right to be forgotten"
+            justification="User exercising right to be forgotten",
         )
 
         request_id = await rights_manager_mock.create_data_deletion_request(deletion_request)
@@ -420,7 +444,7 @@ class TestDataRetention:
             legal_basis="LGPD Art. 15",
             deletion_method="soft_delete",
             requires_user_consent=False,
-            auto_cleanup=True
+            auto_cleanup=True,
         )
 
         result = await retention_manager_mock.create_retention_policy(policy)
@@ -434,6 +458,7 @@ class TestDataRetention:
 
         # Mock cleanup execution
         from app.services.security.retention_manager import RetentionCleanupResult
+
         cleanup_result = RetentionCleanupResult(
             data_category="user_profile",
             retention_policy="5_years (1825 days)",
@@ -442,7 +467,7 @@ class TestDataRetention:
             records_retained=90,
             errors_encountered=0,
             duration_seconds=30.5,
-            cleanup_date=datetime.now(timezone.utc)
+            cleanup_date=datetime.now(UTC),
         )
         retention_manager_mock.execute_retention_cleanup.return_value = cleanup_result
 
@@ -481,7 +506,7 @@ class TestAuditTrail:
             user_id="user_123",
             table_name="profiles",
             record_id="profile_123",
-            success=True
+            success=True,
         )
 
         result = await audit_trail_mock.log_audit_event(event)
@@ -498,7 +523,7 @@ class TestAuditTrail:
             data_category="user_profile",
             access_type="view",
             access_purpose="User requested data access",
-            consent_verified=True
+            consent_verified=True,
         )
 
         result = await audit_trail_mock.log_data_access(access_event)
@@ -514,7 +539,7 @@ class TestAuditTrail:
             compliance_type="lgpd",
             check_type="consent_validation",
             status="compliant",
-            details={"user_id": "user_123", "consents_checked": 5}
+            details={"user_id": "user_123", "consents_checked": 5},
         )
 
         result = await audit_trail_mock.log_compliance_event(compliance_event)
@@ -558,7 +583,7 @@ class TestIntegration:
             consent_type_name="data_processing",
             granted=True,
             legal_basis="consent",
-            purpose="Service provision"
+            purpose="Service provision",
         )
 
         # Validate consent request structure
@@ -568,9 +593,7 @@ class TestIntegration:
 
         # Simulate data access request
         access_request = DataAccessRequest(
-            user_id="test_user",
-            request_type="access",
-            justification="User exercising LGPD rights"
+            user_id="test_user", request_type="access", justification="User exercising LGPD rights"
         )
 
         # Validate access request structure
@@ -588,7 +611,7 @@ class TestIntegration:
             legal_basis="User consent and service necessity",
             deletion_method="soft_delete",
             requires_user_consent=True,
-            auto_cleanup=True
+            auto_cleanup=True,
         )
 
         # Validate policy structure
@@ -601,7 +624,7 @@ class TestIntegration:
             user_id="test_user",
             deletion_scope="all",
             justification="User exercising right to be forgotten",
-            retain_legal_required=True
+            retain_legal_required=True,
         )
 
         # Validate deletion request
@@ -618,21 +641,21 @@ class TestIntegration:
                 event_type=AuditEventType.CONSENT_GRANTED,
                 action="User granted data processing consent",
                 user_id="test_user",
-                success=True
+                success=True,
             ),
             AuditEvent(
                 event_type=AuditEventType.DATA_ACCESS,
                 action="User accessed personal data",
                 user_id="test_user",
                 table_name="profiles",
-                success=True
+                success=True,
             ),
             AuditEvent(
                 event_type=AuditEventType.DATA_DELETION,
                 action="User requested data deletion",
                 user_id="test_user",
-                success=True
-            )
+                success=True,
+            ),
         ]
 
         # Validate all events have required fields
@@ -655,6 +678,7 @@ class TestPerformance:
         large_text = " ".join([pii_text] * 1000)  # Repeat 1000 times
 
         import time
+
         start_time = time.time()
 
         result = scan_for_pii(large_text)
@@ -674,6 +698,7 @@ class TestPerformance:
         large_text = " ".join([pii_text] * 1000)  # Repeat 1000 times
 
         import time
+
         start_time = time.time()
 
         masked_text = mask_pii(large_text)

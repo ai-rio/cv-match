@@ -10,14 +10,14 @@ is mandatory under LGPD.
 """
 
 import logging
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Union
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
+from typing import Any
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, validator
 
+from app.services.security.pii_detection_service import mask_pii
 from app.services.supabase.database import SupabaseDatabaseService
-from app.services.security.pii_detection_service import scan_for_pii, mask_pii
 
 logger = logging.getLogger(__name__)
 
@@ -42,12 +42,12 @@ class UserConsent(BaseModel):
     consent_type_id: str
     granted: bool
     granted_at: datetime
-    revoked_at: Optional[datetime] = None
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
+    revoked_at: datetime | None = None
+    ip_address: str | None = None
+    user_agent: str | None = None
     consent_version: int
-    legal_basis: Optional[str] = None
-    purpose: Optional[str] = None
+    legal_basis: str | None = None
+    purpose: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -58,15 +58,19 @@ class ConsentRequest(BaseModel):
     consent_type_name: str
     granted: bool
     legal_basis: str = "consent"
-    purpose: Optional[str] = None
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
+    purpose: str | None = None
+    ip_address: str | None = None
+    user_agent: str | None = None
 
-    @validator('legal_basis')
+    @validator("legal_basis")
     def validate_legal_basis(cls, v):
         valid_bases = [
-            'consent', 'contract', 'legal_obligation', 'vital_interests',
-            'public_task', 'legitimate_interests'
+            "consent",
+            "contract",
+            "legal_obligation",
+            "vital_interests",
+            "public_task",
+            "legitimate_interests",
         ]
         if v not in valid_bases:
             raise ValueError(f"Legal basis must be one of: {valid_bases}")
@@ -78,10 +82,10 @@ class ConsentCheckResult(BaseModel):
 
     has_consent: bool
     consent_type: str
-    granted_at: Optional[datetime] = None
-    revoked_at: Optional[datetime] = None
+    granted_at: datetime | None = None
+    revoked_at: datetime | None = None
     is_required: bool = False
-    legal_basis: Optional[str] = None
+    legal_basis: str | None = None
 
 
 class UserConsentStatus(BaseModel):
@@ -89,10 +93,10 @@ class UserConsentStatus(BaseModel):
 
     user_id: str
     has_all_required_consents: bool
-    consents: List[Dict[str, Any]]
-    missing_required_consents: List[str]
-    granted_optional_consents: List[str]
-    revoked_consents: List[str]
+    consents: list[dict[str, Any]]
+    missing_required_consents: list[str]
+    granted_optional_consents: list[str]
+    revoked_consents: list[str]
     last_updated: datetime
 
 
@@ -104,11 +108,11 @@ class ConsentAuditEvent:
     consent_type: str
     action: str  # 'granted', 'revoked', 'updated'
     timestamp: datetime
-    ip_address: Optional[str]
-    user_agent: Optional[str]
-    previous_value: Optional[bool]
+    ip_address: str | None
+    user_agent: str | None
+    previous_value: bool | None
     new_value: bool
-    reason: Optional[str]
+    reason: str | None
 
 
 class ConsentManager:
@@ -120,7 +124,7 @@ class ConsentManager:
         self.user_consents_db = SupabaseDatabaseService("user_consents", UserConsent)
         self.history_db = SupabaseDatabaseService("consent_history", dict)
 
-    async def get_available_consent_types(self) -> List[ConsentType]:
+    async def get_available_consent_types(self) -> list[ConsentType]:
         """
         Get all available consent types.
 
@@ -135,10 +139,8 @@ class ConsentManager:
             raise
 
     async def record_user_consent(
-        self,
-        user_id: str,
-        consent_request: ConsentRequest
-    ) -> Optional[UserConsent]:
+        self, user_id: str, consent_request: ConsentRequest
+    ) -> UserConsent | None:
         """
         Record user consent with audit trail.
 
@@ -164,7 +166,9 @@ class ConsentManager:
 
             # Check if this is a required consent and user is revoking it
             if consent_type.is_required and not consent_request.granted:
-                raise ValueError(f"Cannot revoke required consent '{consent_type.consent_type_name}'")
+                raise ValueError(
+                    f"Cannot revoke required consent '{consent_type.consent_type_name}'"
+                )
 
             # Revoke any existing consent first
             await self._revoke_existing_consent(user_id, consent_type.id)
@@ -175,14 +179,14 @@ class ConsentManager:
                     "user_id": user_id,
                     "consent_type_id": consent_type.id,
                     "granted": True,
-                    "granted_at": datetime.now(timezone.utc).isoformat(),
+                    "granted_at": datetime.now(UTC).isoformat(),
                     "ip_address": consent_request.ip_address,
                     "user_agent": consent_request.user_agent,
                     "consent_version": consent_type.version,
                     "legal_basis": consent_request.legal_basis,
                     "purpose": consent_request.purpose,
-                    "created_at": datetime.now(timezone.utc).isoformat(),
-                    "updated_at": datetime.now(timezone.utc).isoformat()
+                    "created_at": datetime.now(UTC).isoformat(),
+                    "updated_at": datetime.now(UTC).isoformat(),
                 }
 
                 # Create consent record
@@ -197,7 +201,7 @@ class ConsentManager:
                     new_value=True,
                     ip_address=consent_request.ip_address,
                     user_agent=consent_request.user_agent,
-                    reason=consent_request.purpose
+                    reason=consent_request.purpose,
                 )
 
                 logger.info(f"Consent granted for user {user_id}: {consent_type.name}")
@@ -214,19 +218,14 @@ class ConsentManager:
         try:
             # Find existing active consent
             existing_consents = await self.user_consents_db.list(
-                filters={
-                    "user_id": user_id,
-                    "consent_type_id": consent_type_id,
-                    "granted": True
-                }
+                filters={"user_id": user_id, "consent_type_id": consent_type_id, "granted": True}
             )
 
             for consent in existing_consents:
                 if consent.get("revoked_at") is None:
                     # Revoke the consent
                     await self.user_consents_db.update(
-                        consent["id"],
-                        {"revoked_at": datetime.now(timezone.utc).isoformat()}
+                        consent["id"], {"revoked_at": datetime.now(UTC).isoformat()}
                     )
 
                     # Log audit event
@@ -237,7 +236,7 @@ class ConsentManager:
                         action="revoked",
                         previous_value=True,
                         new_value=False,
-                        reason="New consent provided"
+                        reason="New consent provided",
                     )
 
         except Exception as e:
@@ -251,11 +250,7 @@ class ConsentManager:
         except Exception:
             return "unknown"
 
-    async def check_user_consent(
-        self,
-        user_id: str,
-        consent_type_name: str
-    ) -> ConsentCheckResult:
+    async def check_user_consent(self, user_id: str, consent_type_name: str) -> ConsentCheckResult:
         """
         Check if user has valid consent for a specific type.
 
@@ -281,11 +276,7 @@ class ConsentManager:
 
             # Check for active consent
             user_consents = await self.user_consents_db.list(
-                filters={
-                    "user_id": user_id,
-                    "consent_type_id": consent_type.id,
-                    "granted": True
-                }
+                filters={"user_id": user_id, "consent_type_id": consent_type.id, "granted": True}
             )
 
             active_consent = None
@@ -299,10 +290,14 @@ class ConsentManager:
             return ConsentCheckResult(
                 has_consent=has_consent,
                 consent_type=consent_type_name,
-                granted_at=datetime.fromisoformat(active_consent["granted_at"]).replace(tzinfo=timezone.utc) if active_consent else None,
-                revoked_at=datetime.fromisoformat(active_consent["revoked_at"]).replace(tzinfo=timezone.utc) if active_consent and active_consent.get("revoked_at") else None,
+                granted_at=datetime.fromisoformat(active_consent["granted_at"]).replace(tzinfo=UTC)
+                if active_consent
+                else None,
+                revoked_at=datetime.fromisoformat(active_consent["revoked_at"]).replace(tzinfo=UTC)
+                if active_consent and active_consent.get("revoked_at")
+                else None,
                 is_required=consent_type.is_required,
-                legal_basis=active_consent.get("legal_basis") if active_consent else None
+                legal_basis=active_consent.get("legal_basis") if active_consent else None,
             )
 
         except Exception as e:
@@ -352,16 +347,20 @@ class ConsentManager:
             consent_details = []
             for consent_type in consent_types:
                 user_consent = consent_lookup.get(consent_type.name)
-                consent_details.append({
-                    "name": consent_type.name,
-                    "description": consent_type.description,
-                    "category": consent_type.category,
-                    "is_required": consent_type.is_required,
-                    "granted": user_consent is not None and user_consent.get("revoked_at") is None and user_consent["granted"],
-                    "granted_at": user_consent.get("granted_at") if user_consent else None,
-                    "revoked_at": user_consent.get("revoked_at") if user_consent else None,
-                    "legal_basis": user_consent.get("legal_basis") if user_consent else None
-                })
+                consent_details.append(
+                    {
+                        "name": consent_type.name,
+                        "description": consent_type.description,
+                        "category": consent_type.category,
+                        "is_required": consent_type.is_required,
+                        "granted": user_consent is not None
+                        and user_consent.get("revoked_at") is None
+                        and user_consent["granted"],
+                        "granted_at": user_consent.get("granted_at") if user_consent else None,
+                        "revoked_at": user_consent.get("revoked_at") if user_consent else None,
+                        "legal_basis": user_consent.get("legal_basis") if user_consent else None,
+                    }
+                )
 
             return UserConsentStatus(
                 user_id=user_id,
@@ -370,7 +369,7 @@ class ConsentManager:
                 missing_required_consents=missing_required,
                 granted_optional_consents=granted_optional,
                 revoked_consents=revoked_consents,
-                last_updated=datetime.now(timezone.utc)
+                last_updated=datetime.now(UTC),
             )
 
         except Exception as e:
@@ -393,19 +392,20 @@ class ConsentManager:
             for consent in user_consents:
                 if consent.get("revoked_at") is None:
                     await self.user_consents_db.update(
-                        consent["id"],
-                        {"revoked_at": datetime.now(timezone.utc).isoformat()}
+                        consent["id"], {"revoked_at": datetime.now(UTC).isoformat()}
                     )
 
                     # Log audit event
-                    consent_type_name = await self._get_consent_type_name(consent["consent_type_id"])
+                    consent_type_name = await self._get_consent_type_name(
+                        consent["consent_type_id"]
+                    )
                     await self._log_consent_event(
                         user_id=user_id,
                         consent_type_name=consent_type_name,
                         action="revoked",
                         previous_value=True,
                         new_value=False,
-                        reason=reason
+                        reason=reason,
                     )
 
             logger.info(f"All consents revoked for user {user_id}: {reason}")
@@ -420,10 +420,10 @@ class ConsentManager:
         consent_type_name: str,
         action: str,
         new_value: bool,
-        ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None,
-        previous_value: Optional[bool] = None,
-        reason: Optional[str] = None
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+        previous_value: bool | None = None,
+        reason: str | None = None,
     ) -> None:
         """Log consent audit event."""
         try:
@@ -432,12 +432,12 @@ class ConsentManager:
                 "action": action,
                 "previous_value": previous_value,
                 "new_value": new_value,
-                "changed_at": datetime.now(timezone.utc).isoformat(),
+                "changed_at": datetime.now(UTC).isoformat(),
                 "changed_by": user_id,
                 "ip_address": ip_address,
                 "user_agent": user_agent,
                 "reason": reason,
-                "created_at": datetime.now(timezone.utc).isoformat()
+                "created_at": datetime.now(UTC).isoformat(),
             }
 
             await self.history_db.create(audit_data)
@@ -445,7 +445,7 @@ class ConsentManager:
         except Exception as e:
             logger.error(f"Failed to log consent event: {e}")
 
-    async def export_user_consents(self, user_id: str) -> Dict[str, Any]:
+    async def export_user_consents(self, user_id: str) -> dict[str, Any]:
         """
         Export user consent data for LGPD data portability.
 
@@ -459,16 +459,14 @@ class ConsentManager:
             consent_status = await self.get_user_consent_status(user_id)
 
             # Get consent history
-            history_records = await self.history_db.list(
-                filters={"changed_by": user_id}
-            )
+            history_records = await self.history_db.list(filters={"changed_by": user_id})
 
             export_data = {
                 "user_id": user_id,
-                "export_date": datetime.now(timezone.utc).isoformat(),
+                "export_date": datetime.now(UTC).isoformat(),
                 "consent_status": asdict(consent_status),
                 "consent_history": history_records,
-                "data_processing_activities": []  # TODO: Implement when needed
+                "data_processing_activities": [],  # TODO: Implement when needed
             }
 
             # Mask any PII in the export
@@ -478,18 +476,14 @@ class ConsentManager:
             return {
                 "export_data": export_data,
                 "masked_export": masked_export,
-                "contains_pii": export_json != masked_export
+                "contains_pii": export_json != masked_export,
             }
 
         except Exception as e:
             logger.error(f"Failed to export consents for user {user_id}: {e}")
             raise
 
-    async def validate_processing_activity(
-        self,
-        user_id: str,
-        activity_type: str
-    ) -> bool:
+    async def validate_processing_activity(self, user_id: str, activity_type: str) -> bool:
         """
         Validate if user has consent for a specific processing activity.
 
@@ -507,7 +501,7 @@ class ConsentManager:
                 "marketing": ["marketing"],
                 "analytics": ["analytics"],
                 "account_management": ["data_processing"],
-                "data_sharing": ["data_sharing"]
+                "data_sharing": ["data_sharing"],
             }
 
             required_consents = activity_consent_map.get(activity_type, [])
@@ -533,7 +527,7 @@ class ConsentManager:
 consent_manager = ConsentManager()
 
 
-async def record_user_consent(user_id: str, consent_request: ConsentRequest) -> Optional[UserConsent]:
+async def record_user_consent(user_id: str, consent_request: ConsentRequest) -> UserConsent | None:
     """
     Convenience function to record user consent.
 

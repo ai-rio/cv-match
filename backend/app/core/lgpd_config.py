@@ -9,7 +9,8 @@ Critical for CV-Match Brazilian market deployment.
 """
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Any
+
 from pydantic import BaseSettings, Field
 
 logger = logging.getLogger(__name__)
@@ -26,14 +27,22 @@ class LGPDSettings(BaseSettings):
     pii_confidence_threshold: float = Field(0.7, description="Minimum confidence for PII detection")
 
     # Consent Management Settings
-    consent_required_for_all_processing: bool = Field(True, description="Require consent for all data processing")
+    consent_required_for_all_processing: bool = Field(
+        True, description="Require consent for all data processing"
+    )
     consent_auto_cleanup: bool = Field(True, description="Automatically clean up expired consents")
     consent_retention_years: int = Field(7, description="Years to retain consent records")
 
     # Data Retention Settings
-    retention_auto_cleanup: bool = Field(True, description="Enable automatic data retention cleanup")
-    retention_cleanup_frequency_hours: int = Field(24, description="Hours between retention cleanup runs")
-    retention_default_period_days: int = Field(1825, description="Default retention period (5 years)")
+    retention_auto_cleanup: bool = Field(
+        True, description="Enable automatic data retention cleanup"
+    )
+    retention_cleanup_frequency_hours: int = Field(
+        24, description="Hours between retention cleanup runs"
+    )
+    retention_default_period_days: int = Field(
+        1825, description="Default retention period (5 years)"
+    )
 
     # Audit Trail Settings
     audit_all_data_access: bool = Field(True, description="Audit all data access events")
@@ -43,8 +52,12 @@ class LGPDSettings(BaseSettings):
     # Data Subject Rights Settings
     data_export_enabled: bool = Field(True, description="Enable data export functionality")
     data_deletion_enabled: bool = Field(True, description="Enable data deletion functionality")
-    data_access_response_hours: int = Field(30, description="Hours to respond to data access requests")
-    data_deletion_response_hours: int = Field(30, description="Hours to respond to deletion requests")
+    data_access_response_hours: int = Field(
+        30, description="Hours to respond to data access requests"
+    )
+    data_deletion_response_hours: int = Field(
+        30, description="Hours to respond to deletion requests"
+    )
 
     # Compliance Monitoring Settings
     compliance_auto_checks: bool = Field(True, description="Enable automatic compliance checks")
@@ -53,8 +66,12 @@ class LGPDSettings(BaseSettings):
 
     # Brazilian Market Specific Settings
     lgpd_brazil_compliant: bool = Field(True, description="Ensure LGPD Brazil compliance")
-    brazilian_pii_patterns: bool = Field(True, description="Enable Brazilian PII patterns (CPF, RG, etc.)")
-    portuguese_localization: bool = Field(True, description="Enable Portuguese localization for compliance texts")
+    brazilian_pii_patterns: bool = Field(
+        True, description="Enable Brazilian PII patterns (CPF, RG, etc.)"
+    )
+    portuguese_localization: bool = Field(
+        True, description="Enable Portuguese localization for compliance texts"
+    )
 
     # Security Settings
     encrypt_pii_at_rest: bool = Field(True, description="Encrypt PII at rest")
@@ -69,7 +86,7 @@ class LGPDSettings(BaseSettings):
 class LGPDConfigManager:
     """Manager for LGPD configuration and validation."""
 
-    def __init__(self, settings: Optional[LGPDSettings] = None):
+    def __init__(self, settings: LGPDSettings | None = None):
         """
         Initialize LGPD configuration manager.
 
@@ -103,7 +120,9 @@ class LGPDConfigManager:
 
         # Validate Brazilian market settings
         if self.settings.lgpd_brazil_compliant and not self.settings.brazilian_pii_patterns:
-            validation_errors.append("Brazilian PII patterns must be enabled for LGPD Brazil compliance")
+            validation_errors.append(
+                "Brazilian PII patterns must be enabled for LGPD Brazil compliance"
+            )
 
         if validation_errors:
             error_msg = "LGPD Configuration validation failed: " + "; ".join(validation_errors)
@@ -112,7 +131,7 @@ class LGPDConfigManager:
 
         logger.info("LGPD configuration validation passed")
 
-    def get_config_dict(self) -> Dict[str, Any]:
+    def get_config_dict(self) -> dict[str, Any]:
         """
         Get configuration as dictionary.
 
@@ -136,14 +155,15 @@ class LGPDConfigManager:
             "consent_management": self.settings.consent_required_for_all_processing,
             "data_retention": self.settings.retention_auto_cleanup,
             "audit_trail": self.settings.audit_all_data_access,
-            "data_subject_rights": self.settings.data_export_enabled and self.settings.data_deletion_enabled,
+            "data_subject_rights": self.settings.data_export_enabled
+            and self.settings.data_deletion_enabled,
             "compliance_monitoring": self.settings.compliance_auto_checks,
             "brazilian_compliance": self.settings.lgpd_brazil_compliant,
         }
 
         return feature_mapping.get(feature, False)
 
-    def get_brazilian_pii_config(self) -> Dict[str, Any]:
+    def get_brazilian_pii_config(self) -> dict[str, Any]:
         """
         Get Brazilian PII configuration.
 
@@ -156,28 +176,28 @@ class LGPDConfigManager:
                 "cpf": {
                     "pattern": r"\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b",
                     "description": "Brazilian CPF",
-                    "confidence": 0.95
+                    "confidence": 0.95,
                 },
                 "rg": {
                     "pattern": r"\b\d{1,2}\.?\d{3}\.?\d{3}-?[A-Z0-9]?\b",
                     "description": "Brazilian RG",
-                    "confidence": 0.85
+                    "confidence": 0.85,
                 },
                 "cnpj": {
                     "pattern": r"\b\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}\b",
                     "description": "Brazilian CNPJ",
-                    "confidence": 0.95
+                    "confidence": 0.95,
                 },
                 "cep": {
                     "pattern": r"\b\d{5}-?\d{3}\b",
                     "description": "Brazilian CEP",
-                    "confidence": 0.90
-                }
+                    "confidence": 0.90,
+                },
             },
-            "masking_level": "partial" if self.settings.pii_mask_by_default else "none"
+            "masking_level": "partial" if self.settings.pii_mask_by_default else "none",
         }
 
-    def get_retention_config(self) -> Dict[str, Any]:
+    def get_retention_config(self) -> dict[str, Any]:
         """
         Get data retention configuration.
 
@@ -195,11 +215,11 @@ class LGPDConfigManager:
                 "optimization_results": 730,  # 2 years
                 "usage_analytics": 365,  # 1 year
                 "consent_records": self.settings.consent_retention_years * 365,
-                "audit_logs": self.settings.audit_retention_days
-            }
+                "audit_logs": self.settings.audit_retention_days,
+            },
         }
 
-    def get_compliance_config(self) -> Dict[str, Any]:
+    def get_compliance_config(self) -> dict[str, Any]:
         """
         Get compliance monitoring configuration.
 
@@ -212,16 +232,8 @@ class LGPDConfigManager:
             "report_frequency_days": self.settings.compliance_report_frequency_days,
             "lgpd_brazil": self.settings.lgpd_brazil_compliant,
             "portuguese_localization": self.settings.portuguese_localization,
-            "required_consents": [
-                "data_processing",
-                "ai_processing",
-                "cookies"
-            ],
-            "optional_consents": [
-                "marketing",
-                "analytics",
-                "data_sharing"
-            ]
+            "required_consents": ["data_processing", "ai_processing", "cookies"],
+            "optional_consents": ["marketing", "analytics", "data_sharing"],
         }
 
 
@@ -280,7 +292,7 @@ def validate_lgpd_configuration() -> bool:
 
 
 # Startup configuration check
-def initialize_lgpd_system() -> Dict[str, Any]:
+def initialize_lgpd_system() -> dict[str, Any]:
     """
     Initialize LGPD compliance system.
 
@@ -295,7 +307,12 @@ def initialize_lgpd_system() -> Dict[str, Any]:
             return {"status": "error", "message": "Configuration validation failed"}
 
         # Check required features for Brazilian market
-        required_features = ["pii_detection", "consent_management", "audit_trail", "brazilian_compliance"]
+        required_features = [
+            "pii_detection",
+            "consent_management",
+            "audit_trail",
+            "brazilian_compliance",
+        ]
         missing_features = []
 
         for feature in required_features:
@@ -306,7 +323,7 @@ def initialize_lgpd_system() -> Dict[str, Any]:
             logger.error(f"Missing required LGPD features: {missing_features}")
             return {
                 "status": "error",
-                "message": f"Missing required features: {', '.join(missing_features)}"
+                "message": f"Missing required features: {', '.join(missing_features)}",
             }
 
         # Log successful initialization
@@ -320,17 +337,19 @@ def initialize_lgpd_system() -> Dict[str, Any]:
             "message": "LGPD compliance system initialized successfully",
             "brazilian_compliant": lgpd_settings.lgpd_brazil_compliant,
             "enabled_features": [
-                feature for feature in [
-                    "pii_detection", "consent_management", "data_retention",
-                    "audit_trail", "data_subject_rights", "compliance_monitoring"
+                feature
+                for feature in [
+                    "pii_detection",
+                    "consent_management",
+                    "data_retention",
+                    "audit_trail",
+                    "data_subject_rights",
+                    "compliance_monitoring",
                 ]
                 if is_lgpd_feature_enabled(feature)
-            ]
+            ],
         }
 
     except Exception as e:
         logger.error(f"Failed to initialize LGPD system: {e}")
-        return {
-            "status": "error",
-            "message": f"Initialization failed: {str(e)}"
-        }
+        return {"status": "error", "message": f"Initialization failed: {str(e)}"}

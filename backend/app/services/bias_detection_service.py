@@ -9,13 +9,12 @@ This service addresses critical security vulnerabilities identified in Phase 0.5
 - Provides transparency and human oversight mechanisms
 """
 
-import json
 import logging
 import re
-from typing import Any, Dict, List, Optional, Set, Tuple
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Any
 
 from ..core.exceptions import ProviderError
 
@@ -24,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 class BiasSeverity(Enum):
     """Severity levels for bias detection."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -33,19 +33,21 @@ class BiasSeverity(Enum):
 @dataclass
 class BiasDetectionResult:
     """Result of bias analysis."""
+
     has_bias: bool
     severity: BiasSeverity
-    detected_characteristics: List[str]
+    detected_characteristics: list[str]
     confidence_score: float
     explanation: str
-    recommendations: List[str]
-    pii_detected: Dict[str, List[str]]
+    recommendations: list[str]
+    pii_detected: dict[str, list[str]]
     requires_human_review: bool
 
 
 @dataclass
 class FairnessMetrics:
     """Algorithmic fairness metrics."""
+
     demographic_parity: float
     equal_opportunity: float
     predictive_equality: float
@@ -79,7 +81,7 @@ class BiasDetectionService:
 
         logger.info("BiasDetectionService initialized with Brazilian legal compliance")
 
-    def _initialize_protected_characteristics(self) -> Dict[str, Dict[str, Any]]:
+    def _initialize_protected_characteristics(self) -> dict[str, dict[str, Any]]:
         """Initialize protected characteristics for Brazilian context."""
         return {
             "age": {
@@ -88,139 +90,153 @@ class BiasDetectionService:
                     r"\b\d{2}\s*(anos|anos de idade)\b",
                     r"\b(idade|anos)\s*:?\s*\d{2}\b",
                     r"\b(nascido em|nascida em)\s*\d{4}\b",
-                    r"\b(\d{4})\b.*\b(nascimento|nasc)\b"
+                    r"\b(\d{4})\b.*\b(nascimento|nasc)\b",
                 ],
                 "high_risk_keywords": ["jovem", "velho", "experiente demais", "muito jovem"],
-                "legal_basis": "Constituição Federal Art. 3º, IV; Lei nº 9.029/95"
+                "legal_basis": "Constituição Federal Art. 3º, IV; Lei nº 9.029/95",
             },
             "gender": {
                 "pt_br": "gênero",
                 "patterns": [
                     r"\b(masculino|feminino|homem|mulher|ele|ela)\b",
-                    r"\b(gênero|sexo)\s*:?\s*(masculino|feminino)\b"
+                    r"\b(gênero|sexo)\s*:?\s*(masculino|feminino)\b",
                 ],
                 "high_risk_keywords": ["homem", "mulher", "masculino", "feminino"],
-                "legal_basis": "Constituição Federal Art. 5º, I; Lei nº 9.029/95"
+                "legal_basis": "Constituição Federal Art. 5º, I; Lei nº 9.029/95",
             },
             "race_ethnicity": {
                 "pt_br": "raça/etnia",
                 "patterns": [
                     r"\b(branco|preto|pardo|amarelo|indígena)\b",
                     r"\b(raça|etnia|cor)\s*:?\s*(\w+)\b",
-                    r"\b(negro|afrodescendente|indígena)\b"
+                    r"\b(negro|afrodescendente|indígena)\b",
                 ],
                 "high_risk_keywords": ["cor", "raça", "etnia", "negro", "branco"],
-                "legal_basis": "Constituição Federal Art. 3º, IV; Lei nº 12.288/2010 (Estatuto da Igualdade Racial)"
+                "legal_basis": "Constituição Federal Art. 3º, IV; Lei nº 12.288/2010 (Estatuto da Igualdade Racial)",
             },
             "disability": {
                 "pt_br": "deficiência",
                 "patterns": [
                     r"\b(deficiente|pcd|pne|deficiência)\b",
                     r"\b(necessidades especiais|acessibilidade)\b",
-                    r"\b(cadeirante|surdo|cego|autista)\b"
+                    r"\b(cadeirante|surdo|cego|autista)\b",
                 ],
                 "high_risk_keywords": ["deficiente", "pcd", "deficiência"],
-                "legal_basis": "Lei nº 7.853/89; Lei nº 8.112/90 (Cotas para PCD)"
+                "legal_basis": "Lei nº 7.853/89; Lei nº 8.112/90 (Cotas para PCD)",
             },
             "marital_status": {
                 "pt_br": "estado civil",
                 "patterns": [
                     r"\b(solteiro|casado|divorciado|viúvo|separado)\b",
-                    r"\b(estado civil)\s*:?\s*(\w+)\b"
+                    r"\b(estado civil)\s*:?\s*(\w+)\b",
                 ],
                 "high_risk_keywords": ["casado", "solteiro", "filhos"],
-                "legal_basis": "Constituição Federal Art. 5º, I"
+                "legal_basis": "Constituição Federal Art. 5º, I",
             },
             "religion": {
                 "pt_br": "religião",
                 "patterns": [
                     r"\b(católico|protestante|evangélico|espírita|judeu|muçulmano)\b",
-                    r"\b(religião|crença)\s*:?\s*(\w+)\b"
+                    r"\b(religião|crença)\s*:?\s*(\w+)\b",
                 ],
                 "high_risk_keywords": ["religião", "igreja", "crença"],
-                "legal_basis": "Constituição Federal Art. 5º, VI"
+                "legal_basis": "Constituição Federal Art. 5º, VI",
             },
             "employment_gaps": {
                 "pt_br": "intervalos de emprego",
                 "patterns": [
                     r"\b(parada|pausa|intervalo)\s*(de\s*)?\d{1,2}\s*(meses|anos)\b",
-                    r"\b(desempregado|desocupado)\s*(desde\s*)?\d{4}\b"
+                    r"\b(desempregado|desocupado)\s*(desde\s*)?\d{4}\b",
                 ],
                 "high_risk_keywords": ["desempregado", "gap", "parou"],
-                "legal_basis": "Lei nº 9.029/95 - não discriminação por situação empregatícia"
+                "legal_basis": "Lei nº 9.029/95 - não discriminação por situação empregatícia",
             },
             "regional_origin": {
                 "pt_br": "origem regional",
                 "patterns": [
                     r"\b(nordestino|sulista|norteiro|centro-oeste)\b",
-                    r"\b(favela|comunidade|periferia)\b"
+                    r"\b(favela|comunidade|periferia)\b",
                 ],
                 "high_risk_keywords": ["favela", "periferia", "nordeste"],
-                "legal_basis": "Constituição Federal Art. 3º, IV"
+                "legal_basis": "Constituição Federal Art. 3º, IV",
             },
             "social_background": {
                 "pt_br": "background social",
                 "patterns": [
                     r"\b(escola pública|escola particular)\b",
-                    r"\b(bolsista|bolsa)\s*(de\s*)?(estudos)\b"
+                    r"\b(bolsista|bolsa)\s*(de\s*)?(estudos)\b",
                 ],
                 "high_risk_keywords": ["escola pública", "pobre", "rico"],
-                "legal_basis": "Constituição Federal Art. 3º, III"
-            }
+                "legal_basis": "Constituição Federal Art. 3º, III",
+            },
         }
 
-    def _initialize_pii_patterns(self) -> Dict[str, List[str]]:
+    def _initialize_pii_patterns(self) -> dict[str, list[str]]:
         """Initialize PII detection patterns."""
         return {
             "cpf": [r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b"],
             "rg": [r"\b\d{1,2}\.\d{3}\.\d{3}-\d{1}\b"],
-            "phone": [
-                r"\b\(\d{2}\)\s*\d{4,5}-\d{4}\b",
-                r"\b\d{2}\s*\d{4,5}-\d{4}\b"
-            ],
+            "phone": [r"\b\(\d{2}\)\s*\d{4,5}-\d{4}\b", r"\b\d{2}\s*\d{4,5}-\d{4}\b"],
             "email": [r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"],
             "address": [
                 r"\b(rua|avenida|alameda|travessa)\s+[\w\s]+,\s*\d+[\w\s]*\b",
-                r"\b(cep|código postal)\s*:?\s*\d{5}-\d{3}\b"
+                r"\b(cep|código postal)\s*:?\s*\d{5}-\d{3}\b",
             ],
-            "birth_date": [
-                r"\b\d{2}/\d{2}/\d{4}\b",
-                r"\b\d{4}-\d{2}-\d{2}\b"
-            ]
+            "birth_date": [r"\b\d{2}/\d{2}/\d{4}\b", r"\b\d{4}-\d{2}-\d{2}\b"],
         }
 
-    def _initialize_bias_keywords(self) -> Dict[str, List[str]]:
+    def _initialize_bias_keywords(self) -> dict[str, list[str]]:
         """Initialize keywords that indicate potential bias."""
         return {
             "age_bias": [
-                "jovem demais", "muito velho", "muito jovem", "idade avançada",
-                "aposentado", "pré-aposentadoria", "geração X", "geração Y", "millennial"
+                "jovem demais",
+                "muito velho",
+                "muito jovem",
+                "idade avançada",
+                "aposentado",
+                "pré-aposentadoria",
+                "geração X",
+                "geração Y",
+                "millennial",
             ],
             "gender_bias": [
-                "homem para", "mulher para", "masculino", "feminino",
-                "sexo masculino", "sexo feminino", "força física", "delicadeza"
+                "homem para",
+                "mulher para",
+                "masculino",
+                "feminino",
+                "sexo masculino",
+                "sexo feminino",
+                "força física",
+                "delicadeza",
             ],
             "racial_bias": [
-                "boa aparência", "boa aparência profissional", "sorriso bonito",
-                "aparência cuidada", "boa aparência pessoal"
+                "boa aparência",
+                "boa aparência profissional",
+                "sorriso bonito",
+                "aparência cuidada",
+                "boa aparência pessoal",
             ],
             "discriminatory": [
-                "brasileiro", "não brasileiro", "nacionalidade", "natural de",
-                "carga horária exclusiva", "disponibilidade para viagens frequentes"
-            ]
+                "brasileiro",
+                "não brasileiro",
+                "nacionalidade",
+                "natural de",
+                "carga horária exclusiva",
+                "disponibilidade para viagens frequentes",
+            ],
         }
 
-    def _initialize_fairness_thresholds(self) -> Dict[str, float]:
+    def _initialize_fairness_thresholds(self) -> dict[str, float]:
         """Initialize fairness thresholds for bias detection."""
         return {
             "min_fairness_score": 0.8,
             "max_disparate_impact": 0.2,
             "min_demographic_parity": 0.7,
             "min_equal_opportunity": 0.7,
-            "bias_confidence_threshold": 0.7
+            "bias_confidence_threshold": 0.7,
         }
 
-    def detect_pii(self, text: str) -> Dict[str, List[str]]:
+    def detect_pii(self, text: str) -> dict[str, list[str]]:
         """
         Detect Personally Identifiable Information in text.
 
@@ -243,7 +259,7 @@ class BiasDetectionService:
 
         return detected_pii
 
-    def detect_protected_characteristics(self, text: str) -> List[str]:
+    def detect_protected_characteristics(self, text: str) -> list[str]:
         """
         Detect protected characteristics in text.
 
@@ -271,7 +287,7 @@ class BiasDetectionService:
 
         return list(set(detected))
 
-    def detect_bias_keywords(self, text: str) -> Dict[str, List[str]]:
+    def detect_bias_keywords(self, text: str) -> dict[str, list[str]]:
         """
         Detect potentially biased keywords in text.
 
@@ -295,10 +311,12 @@ class BiasDetectionService:
 
         return detected_bias
 
-    def calculate_bias_risk_score(self,
-                                protected_chars: List[str],
-                                bias_keywords: Dict[str, List[str]],
-                                pii_detected: Dict[str, List[str]]) -> Tuple[float, BiasSeverity]:
+    def calculate_bias_risk_score(
+        self,
+        protected_chars: list[str],
+        bias_keywords: dict[str, list[str]],
+        pii_detected: dict[str, list[str]],
+    ) -> tuple[float, BiasSeverity]:
         """
         Calculate overall bias risk score and severity.
 
@@ -363,9 +381,9 @@ class BiasDetectionService:
 
             # Determine if human review is required
             requires_human_review = (
-                severity in [BiasSeverity.HIGH, BiasSeverity.CRITICAL] or
-                len(protected_chars) > 2 or
-                len(pii_detected) > 0
+                severity in [BiasSeverity.HIGH, BiasSeverity.CRITICAL]
+                or len(protected_chars) > 2
+                or len(pii_detected) > 0
             )
 
             # Generate explanation
@@ -386,18 +404,20 @@ class BiasDetectionService:
                 explanation=explanation,
                 recommendations=recommendations,
                 pii_detected=pii_detected,
-                requires_human_review=requires_human_review
+                requires_human_review=requires_human_review,
             )
 
         except Exception as e:
             logger.error(f"Error analyzing text bias: {e}")
             raise ProviderError(f"Bias analysis failed: {str(e)}") from e
 
-    def _generate_bias_explanation(self,
-                                 protected_chars: List[str],
-                                 bias_keywords: Dict[str, List[str]],
-                                 pii_detected: Dict[str, List[str]],
-                                 severity: BiasSeverity) -> str:
+    def _generate_bias_explanation(
+        self,
+        protected_chars: list[str],
+        bias_keywords: dict[str, list[str]],
+        pii_detected: dict[str, list[str]],
+        severity: BiasSeverity,
+    ) -> str:
         """Generate explanation for bias detection."""
         explanation = f"Análise de viés detectou nível {severity.value} de risco."
 
@@ -409,7 +429,9 @@ class BiasDetectionService:
             all_keywords = []
             for keywords in bias_keywords.values():
                 all_keywords.extend(keywords)
-            explanation += f" Palavras potencialmente discriminatórias: {', '.join(all_keywords[:5])}."
+            explanation += (
+                f" Palavras potencialmente discriminatórias: {', '.join(all_keywords[:5])}."
+            )
 
         if pii_detected:
             pii_types = list(pii_detected.keys())
@@ -417,41 +439,51 @@ class BiasDetectionService:
 
         return explanation
 
-    def _generate_bias_recommendations(self,
-                                     protected_chars: List[str],
-                                     bias_keywords: Dict[str, List[str]],
-                                     pii_detected: Dict[str, List[str]],
-                                     context: str) -> List[str]:
+    def _generate_bias_recommendations(
+        self,
+        protected_chars: list[str],
+        bias_keywords: dict[str, list[str]],
+        pii_detected: dict[str, list[str]],
+        context: str,
+    ) -> list[str]:
         """Generate recommendations for bias mitigation."""
         recommendations = []
 
         if pii_detected:
-            recommendations.extend([
-                "Remover todas as informações pessoais identificáveis (PII)",
-                "Anonimizar dados como CPF, RG, telefone e endereço",
-                "Evitar incluir datas de nascimento ou informações de contato"
-            ])
+            recommendations.extend(
+                [
+                    "Remover todas as informações pessoais identificáveis (PII)",
+                    "Anonimizar dados como CPF, RG, telefone e endereço",
+                    "Evitar incluir datas de nascimento ou informações de contato",
+                ]
+            )
 
         if protected_chars:
-            recommendations.extend([
-                "Remover referências a características protegidas pela lei brasileira",
-                "Focar apenas em qualificações profissionais relevantes",
-                "Evitar menções a idade, gênero, raça ou outras características pessoais"
-            ])
+            recommendations.extend(
+                [
+                    "Remover referências a características protegidas pela lei brasileira",
+                    "Focar apenas em qualificações profissionais relevantes",
+                    "Evitar menções a idade, gênero, raça ou outras características pessoais",
+                ]
+            )
 
         if bias_keywords:
-            recommendations.extend([
-                "Substituir termos potencialmente discriminatórios",
-                "Usar linguagem neutra e inclusiva",
-                "Focar em habilidades e competências mensuráveis"
-            ])
+            recommendations.extend(
+                [
+                    "Substituir termos potencialmente discriminatórios",
+                    "Usar linguagem neutra e inclusiva",
+                    "Focar em habilidades e competências mensuráveis",
+                ]
+            )
 
         if context == "prompt":
-            recommendations.extend([
-                "Adicionar regras explícitas anti-discriminação no prompt",
-                "Incluir instruções para avaliar apenas critérios relevantes à vaga",
-                "Implementar verificação de justiça algorítmica"
-            ])
+            recommendations.extend(
+                [
+                    "Adicionar regras explícitas anti-discriminação no prompt",
+                    "Incluir instruções para avaliar apenas critérios relevantes à vaga",
+                    "Implementar verificação de justiça algorítmica",
+                ]
+            )
 
         return recommendations
 
@@ -506,13 +538,14 @@ ESPECÍFICO PARA MELHORIA:
 3. Destacar competências e experiências alinhadas à vaga
 4. Usar linguagem inclusiva e neutra
 5. Manter autenticidade profissional do candidato
-"""
+""",
         }
 
         return base_rules + context_specific.get(context, "")
 
-    def calculate_fairness_metrics(self,
-                                 scores_by_group: Dict[str, List[float]]) -> FairnessMetrics:
+    def calculate_fairness_metrics(
+        self, scores_by_group: dict[str, list[float]]
+    ) -> FairnessMetrics:
         """
         Calculate algorithmic fairness metrics.
 
@@ -543,15 +576,19 @@ ESPECÍFICO PARA MELHORIA:
         predictive_equality = demographic_parity  # Simplified
 
         # Overall fairness score
-        overall_fairness = (demographic_parity + equal_opportunity +
-                          predictive_equality + (1 - abs(disparate_impact - 1))) / 4
+        overall_fairness = (
+            demographic_parity
+            + equal_opportunity
+            + predictive_equality
+            + (1 - abs(disparate_impact - 1))
+        ) / 4
 
         return FairnessMetrics(
             demographic_parity=demographic_parity,
             equal_opportunity=equal_opportunity,
             predictive_equality=predictive_equality,
             overall_fairness_score=overall_fairness,
-            disparate_impact_ratio=disparate_impact
+            disparate_impact_ratio=disparate_impact,
         )
 
     def should_block_processing(self, bias_result: BiasDetectionResult) -> bool:
@@ -565,15 +602,14 @@ ESPECÍFICO PARA MELHORIA:
             True if processing should be blocked
         """
         return (
-            bias_result.severity == BiasSeverity.CRITICAL or
-            (bias_result.severity == BiasSeverity.HIGH and len(bias_result.pii_detected) > 0) or
-            bias_result.confidence_score > 0.9
+            bias_result.severity == BiasSeverity.CRITICAL
+            or (bias_result.severity == BiasSeverity.HIGH and len(bias_result.pii_detected) > 0)
+            or bias_result.confidence_score > 0.9
         )
 
-    def create_bias_report(self,
-                          bias_result: BiasDetectionResult,
-                          text_sample: str,
-                          processing_id: str) -> Dict[str, Any]:
+    def create_bias_report(
+        self, bias_result: BiasDetectionResult, text_sample: str, processing_id: str
+    ) -> dict[str, Any]:
         """
         Create comprehensive bias report for auditing.
 
@@ -592,12 +628,13 @@ ESPECÍFICO PARA MELHORIA:
                 "has_bias": bias_result.has_bias,
                 "severity": bias_result.severity.value,
                 "confidence_score": bias_result.confidence_score,
-                "requires_human_review": bias_result.requires_human_review
+                "requires_human_review": bias_result.requires_human_review,
             },
             "detected_elements": {
                 "protected_characteristics": bias_result.detected_characteristics,
                 "pii_detected": bias_result.pii_detected,
-                "risk_factors_count": len(bias_result.detected_characteristics) + len(bias_result.pii_detected)
+                "risk_factors_count": len(bias_result.detected_characteristics)
+                + len(bias_result.pii_detected),
             },
             "recommendations": bias_result.recommendations,
             "explanation": bias_result.explanation,
@@ -607,7 +644,7 @@ ESPECÍFICO PARA MELHORIA:
                 if char in self.protected_characteristics
             },
             "sample_text": text_sample[:500] + "..." if len(text_sample) > 500 else text_sample,
-            "compliance_status": "COMPLIANT" if not bias_result.has_bias else "NON_COMPLIANT"
+            "compliance_status": "COMPLIANT" if not bias_result.has_bias else "NON_COMPLIANT",
         }
 
 

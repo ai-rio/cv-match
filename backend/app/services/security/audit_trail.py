@@ -10,16 +10,13 @@ mandatory under LGPD for accountability and transparency.
 """
 
 import logging
-from datetime import datetime, timezone, timedelta
-from typing import Any, Dict, List, Optional, Union
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 from enum import Enum
-import json
-
-from pydantic import BaseModel, Field
+from typing import Any
 
 from app.services.supabase.database import SupabaseDatabaseService
-from app.utils.pii_masker import mask_text, mask_dict
+from app.utils.pii_masker import mask_dict, mask_text
 
 logger = logging.getLogger(__name__)
 
@@ -86,38 +83,38 @@ class AuditEvent:
     """Audit event data structure."""
 
     event_type: AuditEventType
-    table_name: Optional[str] = None
-    record_id: Optional[str] = None
-    user_id: Optional[str] = None
-    user_email: Optional[str] = None
-    session_id: Optional[str] = None
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
+    table_name: str | None = None
+    record_id: str | None = None
+    user_id: str | None = None
+    user_email: str | None = None
+    session_id: str | None = None
+    ip_address: str | None = None
+    user_agent: str | None = None
     action: str = ""
-    details: Optional[Dict[str, Any]] = None
-    old_values: Optional[Dict[str, Any]] = None
-    new_values: Optional[Dict[str, Any]] = None
-    affected_fields: Optional[List[str]] = None
+    details: dict[str, Any] | None = None
+    old_values: dict[str, Any] | None = None
+    new_values: dict[str, Any] | None = None
+    affected_fields: list[str] | None = None
     success: bool = True
-    error_message: Optional[str] = None
-    created_at: Optional[datetime] = None
+    error_message: str | None = None
+    created_at: datetime | None = None
 
 
 @dataclass
 class DataAccessEvent:
     """Data access event structure."""
 
-    user_id: Optional[str]
+    user_id: str | None
     data_category: str
     access_type: DataAccessType
-    access_purpose: Optional[str] = None
+    access_purpose: str | None = None
     record_count: int = 1
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
-    session_id: Optional[str] = None
+    ip_address: str | None = None
+    user_agent: str | None = None
+    session_id: str | None = None
     consent_verified: bool = False
-    legal_basis: Optional[str] = None
-    created_at: Optional[datetime] = None
+    legal_basis: str | None = None
+    created_at: datetime | None = None
 
 
 @dataclass
@@ -127,11 +124,11 @@ class ComplianceEvent:
     compliance_type: ComplianceType
     check_type: str
     status: ComplianceStatus
-    details: Optional[Dict[str, Any]] = None
+    details: dict[str, Any] | None = None
     affected_records: int = 0
-    required_action: Optional[str] = None
-    due_date: Optional[datetime] = None
-    created_at: Optional[datetime] = None
+    required_action: str | None = None
+    due_date: datetime | None = None
+    created_at: datetime | None = None
 
 
 @dataclass
@@ -142,13 +139,13 @@ class SystemEvent:
     severity: EventSeverity
     source: str
     description: str
-    details: Optional[Dict[str, Any]] = None
-    user_id: Optional[str] = None
-    ip_address: Optional[str] = None
+    details: dict[str, Any] | None = None
+    user_id: str | None = None
+    ip_address: str | None = None
     resolved: bool = False
-    resolved_at: Optional[datetime] = None
-    resolved_by: Optional[str] = None
-    created_at: Optional[datetime] = None
+    resolved_at: datetime | None = None
+    resolved_by: str | None = None
+    created_at: datetime | None = None
 
 
 class AuditTrailService:
@@ -199,7 +196,7 @@ class AuditTrailService:
                 "affected_fields": event.affected_fields,
                 "success": event.success,
                 "error_message": event.error_message,
-                "created_at": event.created_at or datetime.now(timezone.utc).isoformat()
+                "created_at": event.created_at or datetime.now(UTC).isoformat(),
             }
 
             # Log to database
@@ -207,7 +204,9 @@ class AuditTrailService:
             event_id = result["id"]
 
             # Also log to application logger
-            logger.info(f"Audit event logged: {event.event_type.value} - {event.action} by user {event.user_id}")
+            logger.info(
+                f"Audit event logged: {event.event_type.value} - {event.action} by user {event.user_id}"
+            )
 
             return event_id
 
@@ -240,7 +239,7 @@ class AuditTrailService:
                 "session_id": event.session_id,
                 "consent_verified": event.consent_verified,
                 "legal_basis": event.legal_basis,
-                "created_at": event.created_at or datetime.now(timezone.utc).isoformat()
+                "created_at": event.created_at or datetime.now(UTC).isoformat(),
             }
 
             # Log to database
@@ -248,7 +247,9 @@ class AuditTrailService:
             event_id = result["id"]
 
             # Log to application logger
-            logger.info(f"Data access logged: {event.access_type.value} to {event.data_category} by user {event.user_id}")
+            logger.info(
+                f"Data access logged: {event.access_type.value} to {event.data_category} by user {event.user_id}"
+            )
 
             return event_id
 
@@ -276,7 +277,7 @@ class AuditTrailService:
                 "affected_records": event.affected_records,
                 "required_action": event.required_action,
                 "due_date": event.due_date.isoformat() if event.due_date else None,
-                "created_at": event.created_at or datetime.now(timezone.utc).isoformat()
+                "created_at": event.created_at or datetime.now(UTC).isoformat(),
             }
 
             # Log to database
@@ -284,7 +285,9 @@ class AuditTrailService:
             event_id = result["id"]
 
             # Log to application logger
-            logger.info(f"Compliance event logged: {event.compliance_type.value} - {event.check_type} - {event.status.value}")
+            logger.info(
+                f"Compliance event logged: {event.compliance_type.value} - {event.check_type} - {event.status.value}"
+            )
 
             return event_id
 
@@ -315,7 +318,7 @@ class AuditTrailService:
                 "resolved": event.resolved,
                 "resolved_at": event.resolved_at.isoformat() if event.resolved_at else None,
                 "resolved_by": event.resolved_by,
-                "created_at": event.created_at or datetime.now(timezone.utc).isoformat()
+                "created_at": event.created_at or datetime.now(UTC).isoformat(),
             }
 
             # Log to database
@@ -342,10 +345,10 @@ class AuditTrailService:
     async def get_user_audit_trail(
         self,
         user_id: str,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        event_types: Optional[List[AuditEventType]] = None
-    ) -> List[Dict[str, Any]]:
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        event_types: list[AuditEventType] | None = None,
+    ) -> list[dict[str, Any]]:
         """
         Get audit trail for a specific user.
 
@@ -373,7 +376,9 @@ class AuditTrailService:
             # Filter by event types if specified
             if event_types:
                 event_type_values = [et.value for et in event_types]
-                audit_logs = [log for log in audit_logs if log.get("event_type") in event_type_values]
+                audit_logs = [
+                    log for log in audit_logs if log.get("event_type") in event_type_values
+                ]
 
             # Mask any remaining PII
             for log in audit_logs:
@@ -388,10 +393,10 @@ class AuditTrailService:
 
     async def get_data_access_report(
         self,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        data_categories: Optional[List[str]] = None
-    ) -> Dict[str, Any]:
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        data_categories: list[str] | None = None,
+    ) -> dict[str, Any]:
         """
         Generate data access report.
 
@@ -412,28 +417,34 @@ class AuditTrailService:
                 filters["created_at__lte"] = end_date.isoformat()
 
             # Get data access logs
-            access_logs = await self.data_access_logs_db.list(filters=filters, order_by="created_at")
+            access_logs = await self.data_access_logs_db.list(
+                filters=filters, order_by="created_at"
+            )
 
             # Filter by data categories if specified
             if data_categories:
-                access_logs = [log for log in access_logs if log.get("data_category") in data_categories]
+                access_logs = [
+                    log for log in access_logs if log.get("data_category") in data_categories
+                ]
 
             # Generate report
             report = {
                 "report_period": {
                     "start_date": start_date.isoformat() if start_date else None,
-                    "end_date": end_date.isoformat() if end_date else None
+                    "end_date": end_date.isoformat() if end_date else None,
                 },
                 "summary": {
                     "total_access_events": len(access_logs),
-                    "unique_users": len(set(log.get("user_id") for log in access_logs if log.get("user_id"))),
+                    "unique_users": len(
+                        set(log.get("user_id") for log in access_logs if log.get("user_id"))
+                    ),
                     "data_categories": list(set(log.get("data_category") for log in access_logs)),
-                    "access_types": list(set(log.get("access_type") for log in access_logs))
+                    "access_types": list(set(log.get("access_type") for log in access_logs)),
                 },
                 "by_category": {},
                 "by_access_type": {},
                 "by_user": {},
-                "compliance_issues": []
+                "compliance_issues": [],
             }
 
             # Analyze by category
@@ -444,7 +455,7 @@ class AuditTrailService:
                         "count": 0,
                         "unique_users": set(),
                         "consent_verified": 0,
-                        "total_records": 0
+                        "total_records": 0,
                     }
 
                 report["by_category"][category]["count"] += 1
@@ -456,19 +467,27 @@ class AuditTrailService:
 
             # Convert sets to counts
             for category in report["by_category"]:
-                report["by_category"][category]["unique_users"] = len(report["by_category"][category]["unique_users"])
+                report["by_category"][category]["unique_users"] = len(
+                    report["by_category"][category]["unique_users"]
+                )
 
             # Check compliance issues
             for log in access_logs:
-                if not log.get("consent_verified") and log.get("access_type") in ["export", "download", "share"]:
-                    report["compliance_issues"].append({
-                        "type": "access_without_consent",
-                        "log_id": log.get("id"),
-                        "user_id": log.get("user_id"),
-                        "data_category": log.get("data_category"),
-                        "access_type": log.get("access_type"),
-                        "timestamp": log.get("created_at")
-                    })
+                if not log.get("consent_verified") and log.get("access_type") in [
+                    "export",
+                    "download",
+                    "share",
+                ]:
+                    report["compliance_issues"].append(
+                        {
+                            "type": "access_without_consent",
+                            "log_id": log.get("id"),
+                            "user_id": log.get("user_id"),
+                            "data_category": log.get("data_category"),
+                            "access_type": log.get("access_type"),
+                            "timestamp": log.get("created_at"),
+                        }
+                    )
 
             return report
 
@@ -476,7 +495,7 @@ class AuditTrailService:
             logger.error(f"Failed to generate data access report: {e}")
             raise
 
-    async def get_compliance_status(self) -> Dict[str, Any]:
+    async def get_compliance_status(self) -> dict[str, Any]:
         """
         Get current compliance status.
 
@@ -486,15 +505,14 @@ class AuditTrailService:
         try:
             # Get recent compliance logs
             recent_logs = await self.compliance_logs_db.list(
-                filters={"created_at__gte": (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()},
+                filters={"created_at__gte": (datetime.now(UTC) - timedelta(days=30)).isoformat()},
                 order_by="created_at",
-                limit=100
+                limit=100,
             )
 
             # Get unresolved system events
             unresolved_events = await self.system_events_db.list(
-                filters={"resolved": False},
-                order_by="created_at"
+                filters={"resolved": False}, order_by="created_at"
             )
 
             # Analyze compliance
@@ -502,14 +520,18 @@ class AuditTrailService:
                 "overall_status": "compliant",
                 "summary": {
                     "total_compliance_checks": len(recent_logs),
-                    "compliant_checks": len([log for log in recent_logs if log.get("status") == "compliant"]),
-                    "non_compliant_checks": len([log for log in recent_logs if log.get("status") == "non_compliant"]),
+                    "compliant_checks": len(
+                        [log for log in recent_logs if log.get("status") == "compliant"]
+                    ),
+                    "non_compliant_checks": len(
+                        [log for log in recent_logs if log.get("status") == "non_compliant"]
+                    ),
                     "warnings": len([log for log in recent_logs if log.get("status") == "warning"]),
-                    "unresolved_events": len(unresolved_events)
+                    "unresolved_events": len(unresolved_events),
                 },
                 "by_type": {},
                 "recent_issues": [],
-                "action_required": []
+                "action_required": [],
             }
 
             # Analyze by compliance type
@@ -520,7 +542,7 @@ class AuditTrailService:
                         "total": 0,
                         "compliant": 0,
                         "non_compliant": 0,
-                        "warnings": 0
+                        "warnings": 0,
                     }
 
                 status["by_type"][compliance_type]["total"] += 1
@@ -534,14 +556,16 @@ class AuditTrailService:
             # Identify issues requiring action
             for log in recent_logs:
                 if log.get("status") in ["non_compliant", "warning"] and log.get("required_action"):
-                    status["action_required"].append({
-                        "id": log.get("id"),
-                        "compliance_type": log.get("compliance_type"),
-                        "check_type": log.get("check_type"),
-                        "required_action": log.get("required_action"),
-                        "due_date": log.get("due_date"),
-                        "created_at": log.get("created_at")
-                    })
+                    status["action_required"].append(
+                        {
+                            "id": log.get("id"),
+                            "compliance_type": log.get("compliance_type"),
+                            "check_type": log.get("check_type"),
+                            "required_action": log.get("required_action"),
+                            "due_date": log.get("due_date"),
+                            "created_at": log.get("created_at"),
+                        }
+                    )
 
             # Recent non-compliant issues
             status["recent_issues"] = [
@@ -551,7 +575,7 @@ class AuditTrailService:
                     "check_type": log.get("check_type"),
                     "status": log.get("status"),
                     "details": log.get("details"),
-                    "created_at": log.get("created_at")
+                    "created_at": log.get("created_at"),
                 }
                 for log in recent_logs
                 if log.get("status") in ["non_compliant", "warning"]
@@ -569,7 +593,7 @@ class AuditTrailService:
             logger.error(f"Failed to get compliance status: {e}")
             raise
 
-    async def cleanup_old_audit_logs(self, retention_days: int = 365) -> Dict[str, int]:
+    async def cleanup_old_audit_logs(self, retention_days: int = 365) -> dict[str, int]:
         """
         Clean up old audit logs beyond retention period.
 
@@ -580,7 +604,7 @@ class AuditTrailService:
             Cleanup results
         """
         try:
-            cutoff_date = datetime.now(timezone.utc) - timedelta(days=retention_days)
+            cutoff_date = datetime.now(UTC) - timedelta(days=retention_days)
             results = {}
 
             # Clean up audit logs
@@ -597,15 +621,12 @@ class AuditTrailService:
 
             # Clean up resolved system events
             old_system_events = await self.system_events_db.list(
-                filters={
-                    "created_at__lt": cutoff_date.isoformat(),
-                    "resolved": True
-                }
+                filters={"created_at__lt": cutoff_date.isoformat(), "resolved": True}
             )
             results["system_events_deleted"] = len(old_system_events)
 
             # Keep compliance logs longer (7 years for legal requirements)
-            compliance_cutoff = datetime.now(timezone.utc) - timedelta(days=2555)  # 7 years
+            compliance_cutoff = datetime.now(UTC) - timedelta(days=2555)  # 7 years
             old_compliance_logs = await self.compliance_logs_db.list(
                 filters={"created_at__lt": compliance_cutoff.isoformat()}
             )
@@ -632,7 +653,7 @@ async def log_data_access(
     access_type: DataAccessType,
     access_purpose: str = None,
     record_count: int = 1,
-    consent_verified: bool = False
+    consent_verified: bool = False,
 ) -> str:
     """
     Convenience function to log data access.
@@ -654,7 +675,7 @@ async def log_data_access(
         access_type=access_type,
         access_purpose=access_purpose,
         record_count=record_count,
-        consent_verified=consent_verified
+        consent_verified=consent_verified,
     )
     return await audit_trail.log_data_access(event)
 
@@ -666,7 +687,7 @@ async def log_audit_event(
     table_name: str = None,
     record_id: str = None,
     success: bool = True,
-    error_message: str = None
+    error_message: str = None,
 ) -> str:
     """
     Convenience function to log audit events.
@@ -690,6 +711,6 @@ async def log_audit_event(
         table_name=table_name,
         record_id=record_id,
         success=success,
-        error_message=error_message
+        error_message=error_message,
     )
     return await audit_trail.log_audit_event(event)

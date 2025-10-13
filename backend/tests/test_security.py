@@ -6,16 +6,17 @@ injection attack prevention, and other security measures are working
 correctly.
 """
 
-import pytest
-from fastapi.testclient import TestClient
-from unittest.mock import Mock, patch
 import json
 import logging
+from unittest.mock import Mock, patch
+
+import pytest
+from fastapi.testclient import TestClient
 
 from app.main import app
-from app.models.secure import SecureLoginRequest, SecureFileUploadRequest
-from app.utils.validation import validate_string, validate_dict
-from app.utils.file_security import validate_file_security, FileSecurityConfig
+from app.models.secure import SecureFileUploadRequest, SecureLoginRequest
+from app.utils.file_security import FileSecurityConfig, validate_file_security
+from app.utils.validation import validate_dict, validate_string
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +57,10 @@ class TestInputValidation:
         for xss_input in xss_inputs:
             result = validate_string(xss_input, input_type="general")
             assert not result.is_valid, f"XSS not detected: {xss_input}"
-            assert any(pattern in " ".join(result.blocked_patterns).lower()
-                      for pattern in ["xss", "script", "javascript"])
+            assert any(
+                pattern in " ".join(result.blocked_patterns).lower()
+                for pattern in ["xss", "script", "javascript"]
+            )
 
     def test_validate_string_command_injection(self):
         """Test command injection prevention in string validation."""
@@ -73,8 +76,10 @@ class TestInputValidation:
         for command_input in command_inputs:
             result = validate_string(command_input, input_type="general")
             assert not result.is_valid, f"Command injection not detected: {command_input}"
-            assert any(pattern in " ".join(result.blocked_patterns).lower()
-                      for pattern in ["command", "injection"])
+            assert any(
+                pattern in " ".join(result.blocked_patterns).lower()
+                for pattern in ["command", "injection"]
+            )
 
     def test_validate_string_path_traversal(self):
         """Test path traversal prevention in string validation."""
@@ -113,10 +118,7 @@ class TestInputValidation:
             "safe_key": "safe_value",
             "sql_injection": "'; DROP TABLE users; --",
             "xss": "<script>alert('xss')</script>",
-            "nested": {
-                "command": "$(rm -rf /)",
-                "path": "../../../etc/passwd"
-            }
+            "nested": {"command": "$(rm -rf /)", "path": "../../../etc/passwd"},
         }
 
         result = validate_dict(malicious_dict, max_items=10, max_value_length=1000)
@@ -128,14 +130,8 @@ class TestInputValidation:
         safe_dict = {
             "name": "John Doe",
             "email": "john.doe@example.com",
-            "preferences": {
-                "theme": "dark",
-                "notifications": True
-            },
-            "metadata": {
-                "source": "web",
-                "version": "1.0.0"
-            }
+            "preferences": {"theme": "dark", "notifications": True},
+            "metadata": {"source": "web", "version": "1.0.0"},
         }
 
         result = validate_dict(safe_dict, max_items=20, max_value_length=500)
@@ -152,9 +148,7 @@ class TestFileSecurity:
         pdf_content = b"%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n>>\nendobj\n%%EOF"
 
         result = validate_file_security(
-            file_content=pdf_content,
-            filename="document.pdf",
-            content_type="application/pdf"
+            file_content=pdf_content, filename="document.pdf", content_type="application/pdf"
         )
 
         assert result.is_safe
@@ -170,7 +164,7 @@ class TestFileSecurity:
         result = validate_file_security(
             file_content=docx_content,
             filename="document.docx",
-            content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
 
         # Note: This is a simplified test - real DOCX validation would be more complex
@@ -182,9 +176,7 @@ class TestFileSecurity:
         large_content = b"A" * (11 * 1024 * 1024)  # 11MB
 
         result = validate_file_security(
-            file_content=large_content,
-            filename="large_file.pdf",
-            content_type="application/pdf"
+            file_content=large_content, filename="large_file.pdf", content_type="application/pdf"
         )
 
         assert not result.is_safe
@@ -198,7 +190,7 @@ class TestFileSecurity:
         result = validate_file_security(
             file_content=executable_content,
             filename="malicious.pdf",
-            content_type="application/pdf"
+            content_type="application/pdf",
         )
 
         assert not result.is_safe
@@ -216,12 +208,14 @@ class TestFileSecurity:
 
         for filename in malicious_filenames:
             result = validate_file_security(
-                file_content=b"safe content",
-                filename=filename,
-                content_type="application/pdf"
+                file_content=b"safe content", filename=filename, content_type="application/pdf"
             )
 
-            if "path traversal" in filename.lower() or "\x00" in filename or "con." in filename.lower():
+            if (
+                "path traversal" in filename.lower()
+                or "\x00" in filename
+                or "con." in filename.lower()
+            ):
                 assert not result.is_safe, f"Malicious filename not detected: {filename}"
 
 
@@ -257,9 +251,7 @@ class TestAPISecurity:
     def test_upload_endpoint_file_validation(self):
         """Test file upload endpoint security validation."""
         # Test malicious filename
-        files = {
-            "file": ("../../../etc/passwd", b"fake content", "application/pdf")
-        }
+        files = {"file": ("../../../etc/passwd", b"fake content", "application/pdf")}
 
         # Note: This test would require authentication in a real scenario
         # For now, test the endpoint structure
@@ -273,13 +265,13 @@ class TestAPISecurity:
             {
                 "tier": "basic'; DROP TABLE payments; --",
                 "success_url": "javascript:alert('xss')",
-                "metadata": {"sql": "'; DROP TABLE users; --"}
+                "metadata": {"sql": "'; DROP TABLE users; --"},
             },
             {
                 "tier": "<script>alert('xss')</script>",
                 "amount": -1000,  # Negative amount
-                "metadata": {"xss": "<script>alert('xss')"}
-            }
+                "metadata": {"xss": "<script>alert('xss')"},
+            },
         ]
 
         for payload in malicious_payloads:
@@ -324,27 +316,18 @@ class TestSecureModels:
     def test_secure_login_model_validation(self):
         """Test SecureLoginRequest model validation."""
         # Valid input
-        valid_data = {
-            "email": "john.doe@example.com",
-            "password": "SecurePass123!"
-        }
+        valid_data = {"email": "john.doe@example.com", "password": "SecurePass123!"}
         login_request = SecureLoginRequest(**valid_data)
         assert login_request.email == valid_data["email"]
         assert login_request.password == valid_data["password"]
 
         # Invalid email with injection
-        invalid_data = {
-            "email": "admin'; DROP TABLE users; --",
-            "password": "password"
-        }
+        invalid_data = {"email": "admin'; DROP TABLE users; --", "password": "password"}
         with pytest.raises(ValueError):
             SecureLoginRequest(**invalid_data)
 
         # Invalid password with script
-        invalid_data = {
-            "email": "test@example.com",
-            "password": "<script>alert('xss')</script>"
-        }
+        invalid_data = {"email": "test@example.com", "password": "<script>alert('xss')</script>"}
         with pytest.raises(ValueError):
             SecureLoginRequest(**invalid_data)
 
@@ -354,7 +337,7 @@ class TestSecureModels:
         valid_data = {
             "filename": "document.pdf",
             "file_size": 1024,
-            "content_type": "application/pdf"
+            "content_type": "application/pdf",
         }
         file_request = SecureFileUploadRequest(**valid_data)
         assert file_request.filename == valid_data["filename"]
@@ -363,7 +346,7 @@ class TestSecureModels:
         invalid_data = {
             "filename": "../../../etc/passwd",
             "file_size": 1024,
-            "content_type": "application/pdf"
+            "content_type": "application/pdf",
         }
         with pytest.raises(ValueError):
             SecureFileUploadRequest(**invalid_data)
@@ -372,7 +355,7 @@ class TestSecureModels:
         invalid_data = {
             "filename": "document.pdf",
             "file_size": 20 * 1024 * 1024,  # 20MB
-            "content_type": "application/pdf"
+            "content_type": "application/pdf",
         }
         with pytest.raises(ValueError):
             SecureFileUploadRequest(**invalid_data)
@@ -387,9 +370,7 @@ class TestSecurityMiddleware:
         large_payload = {"data": "A" * (12 * 1024 * 1024)}  # 12MB
 
         response = client.post(
-            "/api/test/echo",
-            json=large_payload,
-            headers={"Content-Type": "application/json"}
+            "/api/test/echo", json=large_payload, headers={"Content-Type": "application/json"}
         )
 
         # Should return 413 Payload Too Large
@@ -404,10 +385,7 @@ class TestSecurityMiddleware:
         ]
 
         for user_agent in malicious_user_agents:
-            response = client.get(
-                "/",
-                headers={"User-Agent": user_agent}
-            )
+            response = client.get("/", headers={"User-Agent": user_agent})
             # Should return 403 Forbidden
             assert response.status_code == 403
 
@@ -431,10 +409,10 @@ class TestIntegrationSecurity:
     def test_complete_secure_workflow(self):
         """Test complete secure user workflow."""
         # 1. Secure login attempt
-        login_response = client.post("/api/auth/secure-login", json={
-            "email": "test@example.com",
-            "password": "SecurePass123!"
-        })
+        login_response = client.post(
+            "/api/auth/secure-login",
+            json={"email": "test@example.com", "password": "SecurePass123!"},
+        )
         # Should return 401 for invalid credentials but handle input securely
         assert login_response.status_code in [401, 400]
 
@@ -468,14 +446,14 @@ class TestIntegrationSecurity:
 
     def test_logging_security(self):
         """Test that security events are properly logged."""
-        with patch('logging.Logger.info') as mock_info, \
-             patch('logging.Logger.warning') as mock_warning:
-
+        with (
+            patch("logging.Logger.info") as mock_info,
+            patch("logging.Logger.warning") as mock_warning,
+        ):
             # Trigger a login attempt
-            client.post("/api/auth/login", json={
-                "email": "test@example.com",
-                "password": "password"
-            })
+            client.post(
+                "/api/auth/login", json={"email": "test@example.com", "password": "password"}
+            )
 
             # Should have logged security events
             assert mock_info.called or mock_warning.called

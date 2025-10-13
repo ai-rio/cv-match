@@ -2,7 +2,6 @@ import logging
 from abc import ABC, abstractmethod
 from functools import lru_cache
 
-import numpy as np
 import openai
 from pydantic import BaseModel
 
@@ -61,7 +60,9 @@ class AnthropicEmbeddingService(EmbeddingService):
         # Note: Anthropic doesn't currently have a dedicated embeddings API,
         # so this implementation falls back to OpenAI for embeddings
         if not settings.OPENAI_API_KEY:
-            raise ValueError("OpenAI API key required for embeddings when using Anthropic as primary provider")
+            raise ValueError(
+                "OpenAI API key required for embeddings when using Anthropic as primary provider"
+            )
         self.openai_client = openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         self.api_key = api_key
 

@@ -1,7 +1,5 @@
 {
-  "include": [
-    "app/**/*"
-  ],
+  "include": ["app/**/*"],
   "exclude": [
     "**/node_modules",
     "**/__pycache__",
@@ -32,9 +30,7 @@
       "root": ".",
       "pythonVersion": "3.12",
       "pythonPlatform": "Linux",
-      "extraPaths": [
-        "app"
-      ]
+      "extraPaths": ["app"]
     }
   ],
   "typeCheckingMode": "off"

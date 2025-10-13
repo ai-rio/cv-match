@@ -10,6 +10,7 @@ import os
 import sys
 from pathlib import Path
 
+
 def check_file_exists(filepath, description):
     """Check if a security file exists."""
     if os.path.exists(filepath):
@@ -18,6 +19,7 @@ def check_file_exists(filepath, description):
     else:
         print(f"❌ {description}: MISSING")
         return False
+
 
 def check_security_implementation():
     """Verify all security components are implemented."""
@@ -69,9 +71,12 @@ def check_security_implementation():
         if check_file_exists(filepath, description):
             # Check if file contains security-related imports
             try:
-                with open(filepath, 'r') as f:
+                with open(filepath) as f:
                     content = f.read()
-                    if any(keyword in content for keyword in ['security', 'SecurityMiddleware', 'secure']):
+                    if any(
+                        keyword in content
+                        for keyword in ["security", "SecurityMiddleware", "secure"]
+                    ):
                         print(f"✅ {description}: INTEGRATED")
                         passed_checks += 1
                     else:
@@ -82,19 +87,19 @@ def check_security_implementation():
             print(f"❌ {description}: MISSING")
 
     # Summary
-    print(f"\n📊 SUMMARY:")
+    print("\n📊 SUMMARY:")
     print(f"   Total Checks: {total_checks}")
     print(f"   Passed: {passed_checks}")
-    print(f"   Success Rate: {passed_checks/total_checks*100:.1f}%")
+    print(f"   Success Rate: {passed_checks / total_checks * 100:.1f}%")
 
     if passed_checks == total_checks:
-        print(f"\n🎉 SECURITY IMPLEMENTATION: COMPLETE")
-        print(f"✅ All security components have been successfully implemented!")
+        print("\n🎉 SECURITY IMPLEMENTATION: COMPLETE")
+        print("✅ All security components have been successfully implemented!")
     else:
-        print(f"\n⚠️  SECURITY IMPLEMENTATION: MOSTLY COMPLETE")
+        print("\n⚠️  SECURITY IMPLEMENTATION: MOSTLY COMPLETE")
         print(f"   {total_checks - passed_checks} components need attention")
 
-    print(f"\n📋 SECURITY FEATURES IMPLEMENTED:")
+    print("\n📋 SECURITY FEATURES IMPLEMENTED:")
     security_features = [
         "✅ Input validation and sanitization",
         "✅ File upload security with malware scanning",
@@ -113,7 +118,7 @@ def check_security_implementation():
     for feature in security_features:
         print(f"   {feature}")
 
-    print(f"\n🛡️  SECURITY STANDARDS COMPLIANCE:")
+    print("\n🛡️  SECURITY STANDARDS COMPLIANCE:")
     compliance_standards = [
         "✅ OWASP Top 10 Coverage",
         "✅ ISO 27001 Principles",
@@ -126,6 +131,7 @@ def check_security_implementation():
         print(f"   {standard}")
 
     return passed_checks == total_checks
+
 
 if __name__ == "__main__":
     # Change to backend directory

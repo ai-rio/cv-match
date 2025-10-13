@@ -13,12 +13,14 @@ This document outlines the secure schema design changes required to fix the crit
 ### 1. Resumes Table Security Enhancement
 
 #### Current Issues:
+
 - Missing user_id column
 - No user ownership enforcement
 - Inadequate RLS policies
 - No foreign key constraints
 
 #### Proposed Secure Schema:
+
 ```sql
 -- Enhanced resumes table with proper security
 ALTER TABLE public.resumes
@@ -35,6 +37,7 @@ CHECK (length(user_id::text) > 0);
 ```
 
 #### RLS Policies for Resumes:
+
 ```sql
 -- Drop inadequate service-only policy
 DROP POLICY IF EXISTS "Service full access to resumes" ON public.resumes;
@@ -62,10 +65,12 @@ CREATE POLICY "Service role full access" ON public.resumes
 ### 2. Stripe Webhook Events Enhancement
 
 #### Current Issues:
+
 - Missing user_id for audit trail
 - Cannot trace webhook events to specific users
 
 #### Proposed Enhancement:
+
 ```sql
 -- Add user_id column for audit trail
 ALTER TABLE public.stripe_webhook_events
@@ -84,6 +89,7 @@ CHECK (user_id IS NULL OR length(user_id::text) > 0);
 ### 3. Enhanced Audit Logging
 
 #### Audit Trigger for Data Access:
+
 ```sql
 -- Create audit logging function
 CREATE OR REPLACE FUNCTION log_resume_access()
@@ -138,6 +144,7 @@ CREATE INDEX idx_resume_access_logs_accessed_at ON public.resume_access_logs(acc
 ### 4. Data Retention and Compliance
 
 #### Automatic Data Cleanup (LGPD 5-year retention):
+
 ```sql
 -- Create function for automatic data cleanup
 CREATE OR REPLACE FUNCTION cleanup_expired_data()
@@ -165,6 +172,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ### 5. Enhanced Validation Constraints
 
 #### Resume Content Validation:
+
 ```sql
 -- Add additional validation constraints
 ALTER TABLE public.resumes
@@ -181,6 +189,7 @@ CHECK (resume_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 ### 6. Performance Optimization
 
 #### Additional Indexes for Performance:
+
 ```sql
 -- Full-text search index for resume content
 CREATE INDEX idx_resumes_content_fts ON public.resumes
@@ -201,6 +210,7 @@ WHERE deleted_at IS NOT NULL;
 ### 7. Security Monitoring
 
 #### Security Metrics View:
+
 ```sql
 -- Create view for security monitoring
 CREATE OR REPLACE VIEW security_metrics AS
@@ -230,24 +240,28 @@ FROM public.resume_access_logs;
 ## Migration Strategy
 
 ### Phase 1: Schema Foundation (30 minutes)
+
 1. Add user_id column to resumes table
 2. Create foreign key constraints
 3. Add basic indexes
 4. Add validation constraints
 
 ### Phase 2: Security Policies (30 minutes)
+
 1. Drop inadequate RLS policies
 2. Create comprehensive user isolation policies
 3. Add administrative access policies
 4. Test policy effectiveness
 
 ### Phase 3: Audit and Monitoring (30 minutes)
+
 1. Create audit logging infrastructure
 2. Add access logging triggers
 3. Create security monitoring views
 4. Set up data retention policies
 
 ### Phase 4: Performance Optimization (30 minutes)
+
 1. Create additional indexes
 2. Optimize query patterns
 3. Test performance impact
@@ -256,12 +270,14 @@ FROM public.resume_access_logs;
 ## Rollback Plan
 
 ### Rollback Procedures:
+
 1. **Drop new indexes** - Reverse performance changes
 2. **Remove audit logging** - Disable access logging
 3. **Revert RLS policies** - Restore original policies (not recommended)
 4. **Drop user_id column** - Only if absolutely necessary
 
 ### Rollback Scripts:
+
 ```sql
 -- Emergency rollback script (use only if critical issues arise)
 -- DROP INDEX IF EXISTS idx_resumes_user_id;
@@ -273,6 +289,7 @@ FROM public.resume_access_logs;
 ## Testing Requirements
 
 ### Security Testing Checklist:
+
 - [ ] Verify user A cannot access user B's resumes
 - [ ] Test RLS policies with different user contexts
 - [ ] Validate foreign key constraints prevent orphaned data
@@ -281,6 +298,7 @@ FROM public.resume_access_logs;
 - [ ] Test data retention policies work correctly
 
 ### Performance Testing Checklist:
+
 - [ ] Benchmark query performance with new indexes
 - [ ] Test concurrent user access scenarios
 - [ ] Verify no performance regression (>20% threshold)
@@ -288,6 +306,7 @@ FROM public.resume_access_logs;
 - [ ] Validate full-text search performance
 
 ### Compliance Testing Checklist:
+
 - [ ] Verify LGPD 5-year data retention
 - [ ] Test right to erasure functionality
 - [ ] Validate audit trail completeness
@@ -297,6 +316,7 @@ FROM public.resume_access_logs;
 ## Implementation Notes
 
 ### Important Considerations:
+
 1. **Zero downtime**: The resumes table is currently empty (0 records)
 2. **Backward compatibility**: All changes are additive
 3. **Security first**: RLS policies are restrictive by default
@@ -304,6 +324,7 @@ FROM public.resume_access_logs;
 5. **Compliance**: Full LGPD compliance built-in
 
 ### Dependencies:
+
 1. Supabase CLI must be available
 2. Database must be accessible for migrations
 3. Application must handle new user_id requirements

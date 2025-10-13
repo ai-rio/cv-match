@@ -3,8 +3,8 @@ import uuid
 from typing import Any
 
 from app.agent.manager import AgentManager
-from app.services.supabase.database import SupabaseDatabaseService
 from app.core.exceptions import ProviderError
+from app.services.supabase.database import SupabaseDatabaseService
 
 logger = logging.getLogger(__name__)
 
@@ -163,7 +163,7 @@ class JobService:
                     if json_end != -1:
                         json_str = response[json_start:json_end].strip()
                         # Remove 'json' if present at start
-                        if json_str.startswith('json'):
+                        if json_str.startswith("json"):
                             json_str = json_str[4:].strip()
                         return json.loads(json_str)
 

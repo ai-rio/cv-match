@@ -10,14 +10,14 @@ prevents accidental exposure of personal data.
 
 import logging
 import time
-from typing import Callable, Dict, Any, Optional
-from fastapi import Request, Response, HTTPException
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import JSONResponse
+from collections.abc import Callable
+from typing import Any
 
+from fastapi import Request, Response
+from starlette.middleware.base import BaseHTTPMiddleware
+
+from app.services.security.audit_trail import AuditEventType, log_audit_event
 from app.services.security.pii_detection_service import scan_for_pii, validate_lgpd_compliance
-from app.services.security.audit_trail import log_audit_event, AuditEventType
-from app.utils.pii_masker import mask_text, mask_dict
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class PIIDetectionMiddleware(BaseHTTPMiddleware):
     Middleware to automatically detect and handle PII in requests and responses.
     """
 
-    def __init__(self, app, exclude_paths: Optional[list] = None):
+    def __init__(self, app, exclude_paths: list | None = None):
         """
         Initialize PII detection middleware.
 
@@ -42,7 +42,7 @@ class PIIDetectionMiddleware(BaseHTTPMiddleware):
             "/docs",
             "/openapi.json",
             "/favicon.ico",
-            "/static"
+            "/static",
         ]
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
@@ -87,7 +87,7 @@ class PIIDetectionMiddleware(BaseHTTPMiddleware):
             # Don't block the request due to PII detection errors
             return await call_next(request)
 
-    async def _scan_request_for_pii(self, request: Request) -> Dict[str, Any]:
+    async def _scan_request_for_pii(self, request: Request) -> dict[str, Any]:
         """
         Scan incoming request for PII.
 
@@ -102,12 +102,15 @@ class PIIDetectionMiddleware(BaseHTTPMiddleware):
                 "has_pii": False,
                 "pii_types": [],
                 "confidence_score": 0.0,
-                "masked_data": None
+                "masked_data": None,
             }
 
             # Only scan specific content types
             content_type = request.headers.get("content-type", "")
-            if not any(ct in content_type for ct in ["application/json", "text/plain", "application/x-www-form-urlencoded"]):
+            if not any(
+                ct in content_type
+                for ct in ["application/json", "text/plain", "application/x-www-form-urlencoded"]
+            ):
                 return pii_results
 
             # Get request body
@@ -117,7 +120,7 @@ class PIIDetectionMiddleware(BaseHTTPMiddleware):
 
             # Convert to string
             try:
-                body_text = body.decode('utf-8')
+                body_text = body.decode("utf-8")
             except UnicodeDecodeError:
                 # If not decodable, skip PII scanning
                 return pii_results
@@ -127,12 +130,16 @@ class PIIDetectionMiddleware(BaseHTTPMiddleware):
                 scan_result = scan_for_pii(body_text)
 
                 if scan_result.has_pii:
-                    pii_results.update({
-                        "has_pii": True,
-                        "pii_types": [pii_type.value for pii_type in scan_result.pii_types_found],
-                        "confidence_score": scan_result.confidence_score,
-                        "masked_data": scan_result.masked_text
-                    })
+                    pii_results.update(
+                        {
+                            "has_pii": True,
+                            "pii_types": [
+                                pii_type.value for pii_type in scan_result.pii_types_found
+                            ],
+                            "confidence_score": scan_result.confidence_score,
+                            "masked_data": scan_result.masked_text,
+                        }
+                    )
 
                     # Validate LGPD compliance
                     compliance_result = validate_lgpd_compliance(body_text)
@@ -145,7 +152,7 @@ class PIIDetectionMiddleware(BaseHTTPMiddleware):
             logger.error(f"Error scanning request for PII: {e}")
             return {"has_pii": False, "pii_types": [], "confidence_score": 0.0, "masked_data": None}
 
-    async def _scan_response_for_pii(self, response: Response) -> Dict[str, Any]:
+    async def _scan_response_for_pii(self, response: Response) -> dict[str, Any]:
         """
         Scan outgoing response for PII.
 
@@ -160,7 +167,7 @@ class PIIDetectionMiddleware(BaseHTTPMiddleware):
                 "has_pii": False,
                 "pii_types": [],
                 "confidence_score": 0.0,
-                "was_masked": False
+                "was_masked": False,
             }
 
             # Only scan JSON responses
@@ -179,10 +186,7 @@ class PIIDetectionMiddleware(BaseHTTPMiddleware):
             return {"has_pii": False, "pii_types": [], "confidence_score": 0.0, "was_masked": False}
 
     async def _log_pii_detection(
-        self,
-        request: Request,
-        pii_in_request: Dict[str, Any],
-        pii_in_response: Dict[str, Any]
+        self, request: Request, pii_in_request: dict[str, Any], pii_in_response: dict[str, Any]
     ) -> None:
         """
         Log PII detection events.
@@ -194,7 +198,7 @@ class PIIDetectionMiddleware(BaseHTTPMiddleware):
         """
         try:
             # Get user ID from request if available
-            user_id = getattr(request.state, 'user_id', None)
+            user_id = getattr(request.state, "user_id", None)
 
             # Log audit event
             if pii_in_request["has_pii"] or pii_in_response["has_pii"]:
@@ -203,8 +207,12 @@ class PIIDetectionMiddleware(BaseHTTPMiddleware):
                     "method": request.method,
                     "pii_in_request": pii_in_request["has_pii"],
                     "pii_in_response": pii_in_response["has_pii"],
-                    "pii_types": list(set(pii_in_request["pii_types"] + pii_in_response["pii_types"])),
-                    "max_confidence": max(pii_in_request["confidence_score"], pii_in_response["confidence_score"])
+                    "pii_types": list(
+                        set(pii_in_request["pii_types"] + pii_in_response["pii_types"])
+                    ),
+                    "max_confidence": max(
+                        pii_in_request["confidence_score"], pii_in_response["confidence_score"]
+                    ),
                 }
 
                 await log_audit_event(
@@ -212,7 +220,7 @@ class PIIDetectionMiddleware(BaseHTTPMiddleware):
                     action=f"PII detected in request/response for {request.url.path}",
                     user_id=user_id,
                     details=details,
-                    success=True
+                    success=True,
                 )
 
         except Exception as e:
@@ -254,7 +262,7 @@ class LGPDComplianceMiddleware(BaseHTTPMiddleware):
             response.headers["X-Policy-URL"] = "/api/privacy/privacy-policy"
 
             # Add PII protection notice if applicable
-            if hasattr(request.state, 'pii_detected') and request.state.pii_detected:
+            if hasattr(request.state, "pii_detected") and request.state.pii_detected:
                 response.headers["X-PII-Processed"] = "true"
                 response.headers["X-PII-Masked"] = "true"
 
@@ -324,8 +332,8 @@ class SecureLoggingMiddleware(BaseHTTPMiddleware):
                 "headers": dict(request.headers),
                 "client": {
                     "host": request.client.host if request.client else None,
-                    "port": request.client.port if request.client else None
-                }
+                    "port": request.client.port if request.client else None,
+                },
             }
 
             # Remove potentially sensitive headers
@@ -339,7 +347,9 @@ class SecureLoggingMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             logger.error(f"Error logging request safely: {e}")
 
-    def _log_response_safely(self, request: Request, response: Response, process_time: float) -> None:
+    def _log_response_safely(
+        self, request: Request, response: Response, process_time: float
+    ) -> None:
         """
         Log response without exposing PII.
 
@@ -358,9 +368,14 @@ class SecureLoggingMiddleware(BaseHTTPMiddleware):
             )
 
             # Log warnings for potentially sensitive responses
-            if status_code == 200 and "application/json" in response.headers.get("content-type", ""):
+            if status_code == 200 and "application/json" in response.headers.get(
+                "content-type", ""
+            ):
                 # This could be a response with user data
-                if any(endpoint in request.url.path for endpoint in ["/profile", "/user", "/consents", "/data"]):
+                if any(
+                    endpoint in request.url.path
+                    for endpoint in ["/profile", "/user", "/consents", "/data"]
+                ):
                     logger.debug(f"Sensitive data response for {request.url.path}")
 
         except Exception as e:

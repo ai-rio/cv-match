@@ -7,11 +7,10 @@ to prevent malicious file uploads and ensure file integrity.
 
 import hashlib
 import logging
-import mimetypes
 import os
 import re
 import tempfile
-from typing import Any, BinaryIO
+from typing import Any
 
 import magic
 from pydantic import BaseModel
@@ -73,11 +72,11 @@ class FileSecurityValidator:
         self.malware_patterns = {
             # Executable signatures
             "executable_signatures": [
-                b"MZ",                    # Windows PE executable
-                b"\x7fELF",               # Linux executable
-                b"\xca\xfe\xba\xbe",      # Java class file
-                b"\xfe\xed\xfa\xce",      # Mach-O binary (macOS)
-                b"\xfe\xed\xfa\xcf",      # Mach-O binary (macOS)
+                b"MZ",  # Windows PE executable
+                b"\x7fELF",  # Linux executable
+                b"\xca\xfe\xba\xbe",  # Java class file
+                b"\xfe\xed\xfa\xce",  # Mach-O binary (macOS)
+                b"\xfe\xed\xfa\xcf",  # Mach-O binary (macOS)
             ],
             # Script content patterns
             "script_patterns": [
@@ -190,7 +189,9 @@ class FileSecurityValidator:
 
         if file_size > self.config.max_file_size:
             result.is_safe = False
-            result.errors.append(f"File too large: {file_size} bytes (max: {self.config.max_file_size})")
+            result.errors.append(
+                f"File too large: {file_size} bytes (max: {self.config.max_file_size})"
+            )
             return
 
         # Check for empty files
@@ -222,7 +223,7 @@ class FileSecurityValidator:
             return
 
         # Check for dangerous characters
-        dangerous_chars = ['<', '>', ':', '"', '|', '?', '*']
+        dangerous_chars = ["<", ">", ":", '"', "|", "?", "*"]
         if any(char in filename for char in dangerous_chars):
             result.is_safe = False
             result.errors.append(f"Dangerous characters in filename: {filename}")
@@ -277,9 +278,7 @@ class FileSecurityValidator:
         result.file_info["detected_content_type"] = actual_content_type
         result.warnings.append(f"Content type validation passed: {actual_content_type}")
 
-    def _validate_content_signature(
-        self, file_content: bytes, result: FileSecurityResult
-    ) -> None:
+    def _validate_content_signature(self, file_content: bytes, result: FileSecurityResult) -> None:
         """Validate file content signature (magic numbers)."""
         # PDF signature
         if file_content.startswith(b"%PDF"):
@@ -312,14 +311,14 @@ class FileSecurityValidator:
 
         # Check for PDF version
         try:
-            version_line = content.split(b'\n')[0].decode('utf-8')
-            if not re.match(r'%PDF-\d\.\d', version_line):
+            version_line = content.split(b"\n")[0].decode("utf-8")
+            if not re.match(r"%PDF-\d\.\d", version_line):
                 return False
         except (UnicodeDecodeError, IndexError):
             return False
 
         # Look for %%EOF marker
-        if b'%%EOF' not in content[-1024:]:  # Check last 1KB
+        if b"%%EOF" not in content[-1024:]:  # Check last 1KB
             return False
 
         return True
@@ -331,17 +330,17 @@ class FileSecurityValidator:
 
         # DOCX files should contain specific XML files
         try:
-            import zipfile
             import io
+            import zipfile
 
             with zipfile.ZipFile(io.BytesIO(content)) as zip_file:
-                required_files = ['[Content_Types].xml', 'word/document.xml']
+                required_files = ["[Content_Types].xml", "word/document.xml"]
                 for req_file in required_files:
                     if req_file not in zip_file.namelist():
                         return False
 
                 # Check for suspicious files
-                suspicious_files = ['vbaProject.bin', 'word/vbaProject.bin']
+                suspicious_files = ["vbaProject.bin", "word/vbaProject.bin"]
                 for susp_file in suspicious_files:
                     if susp_file in zip_file.namelist():
                         return False
@@ -355,7 +354,7 @@ class FileSecurityValidator:
         """Check if content is plain text."""
         try:
             # Try to decode as UTF-8
-            content.decode('utf-8')
+            content.decode("utf-8")
             return True
         except UnicodeDecodeError:
             return False
@@ -391,16 +390,16 @@ class FileSecurityValidator:
     def _scan_docx_macros(self, file_content: bytes, result: FileSecurityResult) -> None:
         """Scan DOCX files for macros."""
         try:
-            import zipfile
             import io
+            import zipfile
 
             with zipfile.ZipFile(io.BytesIO(file_content)) as zip_file:
                 # Check for macro-related files
                 macro_files = [
-                    'vbaProject.bin',
-                    'word/vbaProject.bin',
-                    'xl/vbaProject.bin',
-                    'ppt/vbaProject.bin',
+                    "vbaProject.bin",
+                    "word/vbaProject.bin",
+                    "xl/vbaProject.bin",
+                    "ppt/vbaProject.bin",
                 ]
 
                 for macro_file in macro_files:
@@ -444,13 +443,13 @@ class FileSecurityValidator:
 
         try:
             # Extract PDF version
-            content_str = content.decode('utf-8', errors='ignore')
-            version_match = re.search(r'%PDF-(\d\.\d)', content_str)
+            content_str = content.decode("utf-8", errors="ignore")
+            version_match = re.search(r"%PDF-(\d\.\d)", content_str)
             if version_match:
                 metadata["pdf_version"] = version_match.group(1)
 
             # Count pages (basic estimation)
-            page_count = content_str.count('/Type /Page')
+            page_count = content_str.count("/Type /Page")
             metadata["estimated_pages"] = page_count
 
         except Exception as e:

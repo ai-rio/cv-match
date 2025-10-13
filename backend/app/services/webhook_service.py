@@ -8,11 +8,10 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
-from supabase import create_client
-
 from app.core.config import settings
 from app.core.database import SupabaseSession
 from app.services.usage_limit_service import UsageLimitService
+from supabase import create_client
 
 logger = logging.getLogger(__name__)
 
