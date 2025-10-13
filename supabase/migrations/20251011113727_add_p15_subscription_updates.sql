@@ -67,8 +67,7 @@ COMMENT ON COLUMN subscriptions.deleted_at IS 'Soft delete timestamp for LGPD co
 COMMENT ON COLUMN subscriptions.stripe_price_id IS 'Stripe price ID for the subscription';
 
 -- Add unique constraint for active subscriptions
-ALTER TABLE subscriptions
-ADD CONSTRAINT one_active_subscription_per_user UNIQUE (user_id, status)
+CREATE UNIQUE INDEX one_active_subscription_per_user ON subscriptions(user_id, status)
 WHERE status = 'active' AND deleted_at IS NULL;
 
 -- Create new indexes for performance

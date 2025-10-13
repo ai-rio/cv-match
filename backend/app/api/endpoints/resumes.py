@@ -8,7 +8,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 
-from app.core.auth import get_current_user
+from app.core.auth_dependencies import get_current_user
 from app.models.resume import ResumeListResponse, ResumeResponse, ResumeUploadResponse
 from app.services.resume_service import ResumeService
 from app.services.supabase.database import SupabaseDatabaseService

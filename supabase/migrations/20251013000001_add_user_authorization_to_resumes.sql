@@ -96,9 +96,6 @@ $$;
 -- =====================================================
 
 COMMENT ON COLUMN public.resumes.user_id IS 'User ID of resume owner - critical for authorization and LGPD compliance';
-COMMENT ON POLICY "Users can view their own resumes" IS 'RLS policy ensuring users can only access their own resumes';
-COMMENT ON POLICY "Users can insert their own resumes" IS 'RLS policy ensuring resumes are associated with creating user';
-COMMENT ON POLICY "Service role full access for operations" IS 'Service role access for backend operations with proper context';
 
 -- =====================================================
 -- MIGRATION COMPLETE

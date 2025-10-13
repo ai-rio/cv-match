@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel, Field
 
-from app.models.auth import User
+from app.models.auth_models import User
 from app.services.security.audit_trail import (
     AuditEventType,
     DataAccessType,
@@ -126,7 +126,7 @@ async def scan_text_for_pii(
 
         # Apply masking if requested
         masked_text = None
-        if request.masking_level != "none":
+        if request.masking_level != "none" and result.masked_text:
             if request.masking_level == "partial":
                 masked_text = mask_pii(result.masked_text)
             elif request.masking_level == "full":
@@ -231,7 +231,7 @@ async def grant_consent(
     """
     try:
         # Get client information
-        client_ip = http_request.client.host
+        client_ip = http_request.client.host if http_request.client else "unknown"
         user_agent = http_request.headers.get("user-agent")
 
         # Create consent request
@@ -344,7 +344,7 @@ async def request_data_access(
     """
     try:
         # Get client information
-        client_ip = http_request.client.host
+        client_ip = http_request.client.host if http_request.client else "unknown"
         user_agent = http_request.headers.get("user-agent")
 
         # Create data access request
@@ -391,7 +391,7 @@ async def request_data_export(
     """
     try:
         # Get client information
-        client_ip = http_request.client.host
+        client_ip = http_request.client.host if http_request.client else "unknown"
         user_agent = http_request.headers.get("user-agent")
 
         # Create portability request
@@ -440,7 +440,7 @@ async def request_data_deletion(
     """
     try:
         # Get client information
-        client_ip = http_request.client.host
+        client_ip = http_request.client.host if http_request.client else "unknown"
         user_agent = http_request.headers.get("user-agent")
 
         # Create deletion request
@@ -504,8 +504,13 @@ async def get_compliance_status(current_user: User = Depends(get_current_user)):
 
         audit_summary = {
             "total_events": len(user_audit_logs),
-            "event_types": list(set(log.get("event_type") for log in user_audit_logs)),
-            "last_activity": max(log.get("created_at") for log in user_audit_logs)
+            "event_types": list(
+                {log.get("event_type") for log in user_audit_logs if log.get("event_type")}
+            ),
+            "last_activity": max(
+                (log.get("created_at") for log in user_audit_logs if log.get("created_at")),
+                default=None,
+            )
             if user_audit_logs
             else None,
         }

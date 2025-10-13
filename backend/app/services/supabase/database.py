@@ -1,4 +1,4 @@
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from app.core.config import settings
 from supabase import Client, create_client
@@ -6,7 +6,7 @@ from supabase import Client, create_client
 T = TypeVar("T")
 
 
-class SupabaseDatabaseService(Generic[T]):
+class SupabaseDatabaseService[T]:
     """Service for interacting with Supabase database."""
 
     def __init__(self, table_name: str, model_class: type[T]):

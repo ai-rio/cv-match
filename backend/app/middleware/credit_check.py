@@ -7,7 +7,7 @@ from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
 
-from app.core.auth import get_current_user
+from app.core.auth_dependencies import get_current_user
 from app.core.database import SupabaseSession
 from app.services.usage_limit_service import UsageLimitService
 

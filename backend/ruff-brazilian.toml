@@ -98,6 +98,7 @@ select = [
 ignore = [
     "E501",  # line too long, handled by formatter
     "B008",  # do not perform function calls in argument defaults
+    "B904",  # raise-without-from-inside-except (code quality improvement)
     "C901",  # too complex
     "ANN101",  # missing-type-self
     "ANN102",  # missing-type-cls

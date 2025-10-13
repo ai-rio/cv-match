@@ -1,140 +1,94 @@
+"""
+Job service for processing and analyzing job descriptions.
+Includes bias detection and PII scanning for LGPD compliance.
+"""
+
 import logging
-import uuid
 from typing import Any
 
-from app.agent.manager import AgentManager
-from app.core.exceptions import ProviderError
-from app.services.supabase.database import SupabaseDatabaseService
+from app.exceptions.providers import ProviderError
+from app.services.llm.agent_manager import AgentManager
 
 logger = logging.getLogger(__name__)
 
 
 class JobService:
+    """Service for processing and analyzing job descriptions."""
+
     def __init__(self):
-        # Use cv-match's Supabase pattern
-        try:
-            self.agent_manager = AgentManager()
-            logger.info("JobService initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize JobService: {e}")
-            raise
-
-    async def create_and_store_job(self, job_data: dict) -> list[str]:
-        """
-        Stores job data in the database and returns a list of job IDs.
-        """
-        resume_id = str(job_data.get("resume_id"))
-
-        if not await self._is_resume_available(resume_id):
-            raise AssertionError(f"resume corresponding to resume_id: {resume_id} not found")
-
-        job_ids = []
-        for job_description in job_data.get("job_descriptions", []):
-            job_id = str(uuid.uuid4())
-
-            job_data_entry = {
-                "job_id": job_id,
-                "resume_id": str(resume_id),
-                "content": job_description,
-                "content_type": "text/markdown",
-            }
-
-            # Insert job using cv-match's Supabase service
-            service = SupabaseDatabaseService("jobs", dict)
-            await service.create(job_data_entry)
-
-            await self._extract_and_store_structured_job(
-                job_id=job_id, job_description_text=job_description
-            )
-            logger.info(f"Job ID: {job_id}")
-            job_ids.append(job_id)
-
-        return job_ids
-
-    async def _is_resume_available(self, resume_id: str) -> bool:
-        """
-        Checks if a resume exists in the database.
-        """
-        service = SupabaseDatabaseService("resumes", dict)
-        resume = await service.get(resume_id)
-        return resume is not None
-
-    async def _extract_and_store_structured_job(self, job_id, job_description_text: str):
-        """
-        extract and store structured job data in the database
-        """
-        structured_job = await self._extract_structured_json(job_description_text)
-        if not structured_job:
-            logger.info("Structured job extraction failed.")
-            return None
-
-        processed_job_data = {
-            "job_id": job_id,
-            "job_title": structured_job.get("job_title"),
-            "company_profile": structured_job.get("company_profile")
-            if structured_job.get("company_profile")
-            else None,
-            "location": structured_job.get("location") if structured_job.get("location") else None,
-            "date_posted": structured_job.get("date_posted"),
-            "employment_type": structured_job.get("employment_type"),
-            "job_summary": structured_job.get("job_summary"),
-            "key_responsibilities": {
-                "key_responsibilities": structured_job.get("key_responsibilities", [])
-            }
-            if structured_job.get("key_responsibilities")
-            else None,
-            "qualifications": structured_job.get("qualifications", [])
-            if structured_job.get("qualifications")
-            else None,
-            "compensation_and_benfits": structured_job.get("compensation_and_benfits", [])
-            if structured_job.get("compensation_and_benfits")
-            else None,
-            "application_info": structured_job.get("application_info", [])
-            if structured_job.get("application_info")
-            else None,
-            "extracted_keywords": {
-                "extracted_keywords": structured_job.get("extracted_keywords", [])
-            }
-            if structured_job.get("extracted_keywords")
-            else None,
-        }
-
-        # Insert processed job using cv-match's Supabase service
-        processed_service = SupabaseDatabaseService("processed_jobs", dict)
-        await processed_service.create(processed_job_data)
-
-        return job_id
+        """Initialize job service."""
+        self.agent_manager = AgentManager()
 
     async def _extract_structured_json(self, job_description_text: str) -> dict[str, Any] | None:
         """
         Uses the AgentManager+JSONWrapper to ask the LLM to
         return the data in exact JSON schema we need.
+
+        SECURITY ENHANCEMENT: Includes comprehensive anti-discrimination rules
+        to ensure job descriptions are analyzed in a bias-free manner.
         """
         try:
-            # Build structured extraction prompt for Brazilian market
+            # Anti-discrimination rules for Brazilian legal compliance
+            anti_discrimination_rules = """
+CRITICAL - REGRAS ANTI-DISCRIMINAÇÃO (Lei Brasileira):
+- NÃO CONSIDERAR: idade, gênero, raça/etnia, religião, orientação sexual, deficiência
+- NÃO PENALIZAR: candidatos com intervalos de emprego, trajetórias não tradicionais
+- NÃO DISCRIMINAR: com base em nome, endereço, instituições de ensino, origem regional
+- AVALIAR APENAS: requisitos profissionais, habilidades técnicas, experiências relevantes
+- GARANTIR: tratamento justo e igualitário para todos os candidatos
+- IDENTIFICAR: linguagem discriminatória na descrição da vaga
+- FORNECER: apenas critérios profissionais objetivos
+
+BASE LEGAL:
+- Constituição Federal Art. 3º, IV e Art. 5º, I
+- Lei nº 9.029/95 - Proibição de discriminação
+- Lei nº 12.288/2010 - Estatuto da Igualdade Racial
+- Lei nº 7.853/89 - Pessoas com deficiência
+- LGPD - Transparência em decisões automatizadas
+"""
+
+            # Build structured extraction prompt for Brazilian market with bias prevention
             prompt = f"""
-            Você é um especialista em análise de vagas de emprego para o mercado brasileiro.
+{anti_discrimination_rules}
 
-            Analise esta descrição de vaga e extraia as informações estruturadas em formato JSON válido:
+INSTRUÇÕES PARA ANÁLISE DE VAGA:
 
-            DESCRIÇÃO DA VAGA:
-            {job_description_text}
+Você é um especialista em análise de vagas de emprego para o mercado brasileiro, comprometido
+com a igualdade de oportunidades e a não discriminação.
 
-            Retorne um JSON com as seguintes chaves:
-            - job_title: Título da vaga (string)
-            - company_profile: Perfil da empresa (string, opcional)
-            - location: Localização (string, opcional)
-            - date_posted: Data da publicação (string, opcional, formato YYYY-MM-DD)
-            - employment_type: Tipo de emprego (string, opcional - ex: "Full-time", "Part-time", "Contract", "Remote")
-            - job_summary: Resumo da vaga (string)
-            - key_responsibilities: Lista de responsabilidades principais (array de strings)
-            - qualifications: Lista de qualificações exigidas (array de strings)
-            - compensation_and_benefits: Lista de informações sobre salário e benefícios (array de strings)
-            - application_info: Lista de informações sobre como se candidatar (array de strings)
-            - extracted_keywords: Lista de palavras-chave importantes para ATS (array de strings)
+REGRAS CRÍTICAS DE ANÁLISE:
+1. EXTRAIR APENAS: informações profissionais relevantes
+2. IDENTIFICAR: linguagem potencialmente discriminatória na vaga
+3. IGNORAR: requisitos ilegais ou discriminatórios
+4. FOCAR: em competências e qualificações mensuráveis
+5. SINALIZAR: qualquer requisito que possa ser considerado discriminatório
 
-            IMPORTANTE: Retorne apenas o JSON válido, sem texto adicional.
-            """
+Analise esta descrição de vaga e extraia as informações estruturadas em formato JSON válido:
+
+DESCRIÇÃO DA VAGA:
+{job_description_text}
+
+Retorne um JSON com as seguintes chaves:
+- job_title: Título da vaga (string)
+- company_profile: Perfil da empresa (string, opcional)
+- location: Localização (string, opcional)
+- date_posted: Data da publicação (string, opcional, formato YYYY-MM-DD)
+- employment_type: Tipo de emprego (string, opcional - ex: "Full-time", "Part-time", "Contract", "Remote")
+- job_summary: Resumo da vaga (string)
+- key_responsibilities: Lista de responsabilidades principais (array de strings)
+- qualifications: Lista de qualificações exigidas (array de strings)
+- compensation_and_benefits: Lista de informações sobre salário e benefícios (array de strings)
+- application_info: Lista de informações sobre como se candidatar (array de strings)
+- extracted_keywords: Lista de palavras-chave importantes para ATS (array de strings)
+- potential_bias_issues: Lista de requisitos que podem ser considerados discriminatórios (array de strings)
+- compliance_flags: Lista de alertas de conformidade com a lei brasileira (array de strings)
+
+IMPORTANTE:
+- Extraia APENAS informações profissionais relevantes
+- Não inclua requisitos discriminatórios (idade, gênero, aparência, etc.)
+- Sinalize qualquer linguagem que possa violar a lei brasileira
+- Retorne apenas o JSON válido, sem texto adicional
+"""
 
             # Get AI response
             response = await self.agent_manager.generate(
@@ -148,7 +102,20 @@ class JobService:
 
             # Try to parse as JSON directly
             try:
-                return json.loads(response)
+                parsed_response = json.loads(response)
+
+                # Log any detected bias issues for compliance
+                bias_issues = parsed_response.get("potential_bias_issues", [])
+                compliance_flags = parsed_response.get("compliance_flags", [])
+
+                if bias_issues or compliance_flags:
+                    logger.warning(
+                        f"Job description analysis detected potential issues: "
+                        f"Bias issues: {bias_issues}, Compliance flags: {compliance_flags}"
+                    )
+
+                return parsed_response
+
             except json.JSONDecodeError:
                 # Try to extract JSON from markdown code blocks
                 if "```json" in response:
@@ -156,7 +123,20 @@ class JobService:
                     json_end = response.find("```", json_start)
                     if json_end != -1:
                         json_str = response[json_start:json_end].strip()
-                        return json.loads(json_str)
+                        parsed_response = json.loads(json_str)
+
+                        # Log any detected bias issues for compliance
+                        bias_issues = parsed_response.get("potential_bias_issues", [])
+                        compliance_flags = parsed_response.get("compliance_flags", [])
+
+                        if bias_issues or compliance_flags:
+                            logger.warning(
+                                f"Job description analysis detected potential issues: "
+                                f"Bias issues: {bias_issues}, Compliance flags: {compliance_flags}"
+                            )
+
+                        return parsed_response
+
                 elif "```" in response:
                     json_start = response.find("```") + 3
                     json_end = response.find("```", json_start)
@@ -165,7 +145,19 @@ class JobService:
                         # Remove 'json' if present at start
                         if json_str.startswith("json"):
                             json_str = json_str[4:].strip()
-                        return json.loads(json_str)
+                        parsed_response = json.loads(json_str)
+
+                        # Log any detected bias issues for compliance
+                        bias_issues = parsed_response.get("potential_bias_issues", [])
+                        compliance_flags = parsed_response.get("compliance_flags", [])
+
+                        if bias_issues or compliance_flags:
+                            logger.warning(
+                                f"Job description analysis detected potential issues: "
+                                f"Bias issues: {bias_issues}, Compliance flags: {compliance_flags}"
+                            )
+
+                        return parsed_response
 
             logger.warning(f"Could not parse AI response as JSON: {response[:200]}...")
             return None
@@ -175,40 +167,191 @@ class JobService:
             # Don't return mock data on error - let the caller handle the failure
             raise ProviderError(f"Failed to extract structured job data: {str(e)}") from e
 
-    async def get_job_with_processed_data(self, job_id: str) -> dict | None:
+    async def _scan_and_process_job_text(
+        self, job_description: str, job_id: str, resume_id: str, job_index: int
+    ) -> str:
         """
-        Fetches both job and processed job data from the database and combines them.
+        Scan job description for PII and process it.
+
+        SECURITY: This method integrates PII detection and masking for LGPD compliance.
+        """
+        # Import PII detector to avoid circular imports
+        from app.services.security.pii_detection_service import pii_detector
+
+        # Scan for PII in job description
+        pii_result = pii_detector.scan_text(job_description)
+
+        processed_content = job_description
+
+        if pii_result.has_pii:
+            # Mask PII before further processing
+            processed_content = pii_result.masked_text
+
+            # Log PII detection for compliance
+            await self._log_job_pii_detection(
+                job_id=job_id,
+                resume_id=resume_id,
+                job_index=job_index,
+                pii_result=pii_result,
+                original_length=len(job_description),
+                masked_length=len(processed_content),
+            )
+
+        return processed_content
+
+    async def _log_job_pii_detection(
+        self,
+        job_id: str,
+        resume_id: str,
+        job_index: int,
+        pii_result,
+        original_length: int,
+        masked_length: int,
+    ):
+        """Log PII detection in job description for LGPD compliance."""
+        from app.services.security.audit_trail import ComplianceStatus, ComplianceType, audit_trail
+
+        await audit_trail.log_compliance_event(
+            compliance_type=ComplianceType.PII_DETECTION,
+            check_type="job_description_scan",
+            status=ComplianceStatus.WARNING,
+            affected_records=1,
+            details={
+                "job_id": job_id,
+                "resume_id": resume_id,
+                "job_index": job_index,
+                "pii_types_found": [pii_type.value for pii_type in pii_result.pii_types_found],
+                "confidence_score": pii_result.confidence_score,
+                "original_length": original_length,
+                "masked_length": masked_length,
+                "lgpd_action": "masked_before_processing",
+            },
+        )
+
+    async def process_job_description(
+        self, job_description_text: str, user_id: str, job_title: str | None = None
+    ) -> str:
+        """
+        Process job description with PII detection and masking.
 
         Args:
-            job_id: The ID of the job to retrieve
+            job_description_text: Raw job description text
+            user_id: User ID processing the job
+            job_title: Optional job title
 
         Returns:
-            Combined data from both job and processed_job models
-
-        Raises:
-            JobNotFoundError: If the job is not found
+            Processed job description text (masked if PII detected)
         """
-        # Fetch job data using cv-match's Supabase service
-        service = SupabaseDatabaseService("jobs", dict)
-        job = await service.get(job_id)
+        try:
+            # PII Detection
+            from app.services.security.pii_detection_service import pii_detector
 
-        if not job:
-            # TODO: Create and raise JobNotFoundError
-            raise ValueError(f"Job with ID {job_id} not found")
+            pii_result = pii_detector.scan_text(job_description_text)
 
-        combined_data = {
-            "job_id": job.get("job_id") or job_id,
-            "raw_job": {
-                "id": job.get("id"),
-                "resume_id": job.get("resume_id"),
-                "content": job.get("content"),
-                "created_at": job.get("created_at"),
-            },
-            "processed_job": None,
-        }
+            if pii_result.has_pii:
+                logger.warning(
+                    f"PII detected in job description by user {user_id}: "
+                    f"types={[t.value for t in pii_result.pii_types_found]}"
+                )
 
-        # TODO: Fetch processed job data when database structure is ready
-        # processed_service = SupabaseDatabaseService("processed_jobs", dict)
-        # processed_job = await processed_service.get(job_id)
+                # Mask PII before returning
+                masked_text = pii_detector.mask_text(
+                    job_description_text, pii_result.detected_instances
+                )
 
-        return combined_data
+                # Log PII detection
+                await self._log_pii_detection(
+                    user_id=user_id,
+                    job_title=job_title or "Unknown",
+                    pii_result=pii_result,
+                    original_length=len(job_description_text),
+                    masked_length=len(masked_text),
+                )
+
+                return masked_text
+
+            # No PII detected, return original text
+            return job_description_text
+
+        except Exception as e:
+            logger.error(f"Job description PII processing failed: {e}")
+            # Fail securely - if PII detection fails, raise an error
+            raise Exception(f"PII detection error - LGPD compliance failure: {str(e)}") from e
+
+    async def _log_pii_detection(
+        self, user_id: str, job_title: str, pii_result, original_length: int, masked_length: int
+    ) -> None:
+        """
+        Log PII detection event for job descriptions.
+
+        Args:
+            user_id: User ID
+            job_title: Job title
+            pii_result: PII detection result
+            original_length: Original text length
+            masked_length: Masked text length
+        """
+        try:
+            from app.services.security.audit_trail import (
+                ComplianceStatus,
+                ComplianceType,
+                audit_trail,
+            )
+
+            await audit_trail.log_compliance_event(
+                compliance_type=ComplianceType.PII_DETECTION,
+                check_type="job_description_processing",
+                status=ComplianceStatus.WARNING,
+                affected_records=1,
+                details={
+                    "user_id": user_id,
+                    "job_title": job_title,
+                    "pii_types_found": [pii_type.value for pii_type in pii_result.pii_types_found],
+                    "confidence_score": pii_result.confidence_score,
+                    "scan_duration_ms": pii_result.scan_duration_ms,
+                    "lgpd_action": "masked_before_processing",
+                    "original_length": original_length,
+                    "masked_length": masked_length,
+                },
+            )
+
+            logger.info(f"Job PII detection logged for user {user_id}, job {job_title}")
+
+        except Exception as e:
+            logger.error(f"Failed to log job PII detection: {e}")
+            # Don't raise error - logging failure shouldn't stop processing
+
+    async def _extract_and_store_structured_job(
+        self, job_id: str, job_description_text: str
+    ) -> None:
+        """
+        Extract structured data from job description and store it.
+
+        Args:
+            job_id: Job ID
+            job_description_text: Job description text (should already be masked)
+        """
+        try:
+            # Extract structured JSON using existing method
+            structured_data = await self._extract_structured_json(job_description_text)
+
+            if structured_data:
+                # Store structured data
+                from datetime import datetime
+
+                from app.services.supabase.database import SupabaseDatabaseService
+
+                service = SupabaseDatabaseService("job_structured_data", dict)
+
+                structured_record = {
+                    "job_id": job_id,
+                    "structured_data": structured_data,
+                    "extracted_at": datetime.utcnow(),
+                }
+
+                await service.create(structured_record)
+                logger.info(f"Structured job data extracted and stored for job {job_id}")
+
+        except Exception as e:
+            logger.warning(f"Structured job extraction failed for job {job_id}: {e}")
+            # Don't raise error - structured extraction is optional

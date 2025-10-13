@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
 
-from app.models.auth import TokenResponse, UserProfile
+from app.models.auth_models import TokenResponse, UserProfile
 from app.models.secure import SecureLoginRequest
 from app.services.supabase.auth import SupabaseAuthService, get_auth_service
 from app.utils.validation import validate_string

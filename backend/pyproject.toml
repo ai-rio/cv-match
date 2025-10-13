@@ -27,6 +27,9 @@ dependencies = [
     "markitdown[all]==0.1.2",
     "PyPDF2==3.0.1",
     "python-docx==1.1.0",
+    "llama-index>=0.12.38",
+    "sentry-sdk>=2.41.0",
+    "python-magic>=0.4.27",
 ]
 
 [project.optional-dependencies]

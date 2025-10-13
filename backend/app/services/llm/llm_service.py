@@ -6,7 +6,7 @@ import openai
 from pydantic import BaseModel
 
 from app.core.config import settings
-from app.models.llm import LLMUsage
+from app.models.llm_models import LLMUsage
 
 
 class LLMResponse(BaseModel):

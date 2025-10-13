@@ -2,14 +2,14 @@
 Base API response models for consistent API responses.
 """
 
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from pydantic import BaseModel, Field
 
 T = TypeVar("T")
 
 
-class BaseAPIResponse(BaseModel, Generic[T]):
+class BaseAPIResponse[T](BaseModel):
     """Base API response model for consistent responses."""
 
     status: str = Field(..., description="Response status: 'success' or 'error'")
@@ -59,7 +59,7 @@ class PaginationParams(BaseModel):
     page_size: int | None = Field(None, ge=1, le=100, description="Alias for limit")
 
 
-class PaginatedResult(BaseModel, Generic[T]):
+class PaginatedResult[T](BaseModel):
     """Paginated result wrapper."""
 
     items: list[T] = Field(..., description="List of items")

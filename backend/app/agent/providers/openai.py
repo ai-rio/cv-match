@@ -5,9 +5,9 @@ from typing import Any
 from fastapi.concurrency import run_in_threadpool
 from openai import OpenAI
 
-from ...core.config import settings
-from ..exceptions import ProviderError
-from .base import EmbeddingProvider, Provider
+from app.agent.exceptions import ProviderError
+from app.agent.providers.base import EmbeddingProvider, Provider
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 

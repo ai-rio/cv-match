@@ -184,7 +184,7 @@ class InputValidator:
 
     def _check_injection_patterns(self, input_str: str, result: ValidationResult):
         """Check for injection patterns in input."""
-        input_lower = input_str.lower()
+        input_str.lower()
 
         for category, patterns in self.compiled_patterns.items():
             category_matched = False

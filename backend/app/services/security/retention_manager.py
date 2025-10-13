@@ -378,7 +378,6 @@ class RetentionManager:
         """Execute cleanup for a specific data category."""
         try:
             cutoff_date = datetime.now(UTC) - timedelta(days=policy.retention_days)
-            errors = []
 
             if data_category == DataCategory.USER_PROFILE:
                 result = await self._cleanup_profiles(cutoff_date, policy)

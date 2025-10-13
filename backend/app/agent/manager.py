@@ -1,10 +1,10 @@
 from typing import Any
 
-from ..core.config import settings
-from ..core.exceptions import ProviderError
-from .providers.base import EmbeddingProvider, Provider
-from .strategies.base import Strategy
-from .strategies.wrapper import JSONWrapper, MDWrapper
+from app.agent.providers.base import EmbeddingProvider, Provider
+from app.agent.strategies.base import Strategy
+from app.agent.strategies.wrapper import JSONWrapper, MDWrapper
+from app.core.config import settings
+from app.core.exceptions import ProviderError
 
 
 class AgentManager:

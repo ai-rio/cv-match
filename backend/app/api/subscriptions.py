@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from app.config.pricing import pricing_config
-from app.core.auth import get_current_user
+from app.core.auth_dependencies import get_current_user
 from app.models.subscription import (
     SubscriptionCreate,
     SubscriptionDetails,

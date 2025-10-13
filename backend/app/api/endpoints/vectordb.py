@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.models.vectordb import (
+from app.models.vectordb_models import (
     DeleteDocumentsRequest,
     DocumentInput,
     DocumentUploadResponse,

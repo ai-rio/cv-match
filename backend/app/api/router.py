@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api import pricing, subscriptions
+from app.api import pricing_endpoints, subscriptions
 from app.api.endpoints import (
     auth,
     llm,
@@ -24,6 +24,6 @@ api_router.include_router(llm.router, prefix="/llm", tags=["LLM Services"])
 api_router.include_router(vectordb.router, prefix="/vectordb", tags=["Vector Database"])
 api_router.include_router(payments.router, prefix="/payments", tags=["Payments"])
 api_router.include_router(webhooks.router, tags=["Webhooks"])
-api_router.include_router(pricing.router, prefix="/pricing", tags=["Pricing"])
+api_router.include_router(pricing_endpoints.router, prefix="/pricing", tags=["Pricing"])
 api_router.include_router(subscriptions.router, tags=["Subscriptions"])
 api_router.include_router(transparency.router, tags=["Transparency"])

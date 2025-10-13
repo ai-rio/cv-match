@@ -428,7 +428,7 @@ class AuditTrailService:
                 ]
 
             # Generate report
-            report = {
+            report: dict[str, Any] = {
                 "report_period": {
                     "start_date": start_date.isoformat() if start_date else None,
                     "end_date": end_date.isoformat() if end_date else None,
@@ -436,10 +436,10 @@ class AuditTrailService:
                 "summary": {
                     "total_access_events": len(access_logs),
                     "unique_users": len(
-                        set(log.get("user_id") for log in access_logs if log.get("user_id"))
+                        {log.get("user_id") for log in access_logs if log.get("user_id")}
                     ),
-                    "data_categories": list(set(log.get("data_category") for log in access_logs)),
-                    "access_types": list(set(log.get("access_type") for log in access_logs)),
+                    "data_categories": list({log.get("data_category") for log in access_logs}),
+                    "access_types": list({log.get("access_type") for log in access_logs}),
                 },
                 "by_category": {},
                 "by_access_type": {},
@@ -453,7 +453,7 @@ class AuditTrailService:
                 if category not in report["by_category"]:
                     report["by_category"][category] = {
                         "count": 0,
-                        "unique_users": set(),
+                        "unique_users": set[str](),
                         "consent_verified": 0,
                         "total_records": 0,
                     }
@@ -516,7 +516,7 @@ class AuditTrailService:
             )
 
             # Analyze compliance
-            status = {
+            status: dict[str, Any] = {
                 "overall_status": "compliant",
                 "summary": {
                     "total_compliance_checks": len(recent_logs),
@@ -651,7 +651,7 @@ async def log_data_access(
     user_id: str,
     data_category: str,
     access_type: DataAccessType,
-    access_purpose: str = None,
+    access_purpose: str | None = None,
     record_count: int = 1,
     consent_verified: bool = False,
 ) -> str:
@@ -683,11 +683,11 @@ async def log_data_access(
 async def log_audit_event(
     event_type: AuditEventType,
     action: str,
-    user_id: str = None,
-    table_name: str = None,
-    record_id: str = None,
+    user_id: str | None = None,
+    table_name: str | None = None,
+    record_id: str | None = None,
     success: bool = True,
-    error_message: str = None,
+    error_message: str | None = None,
 ) -> str:
     """
     Convenience function to log audit events.

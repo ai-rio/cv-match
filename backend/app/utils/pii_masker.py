@@ -167,7 +167,7 @@ class PIIMasker:
         # Sort rules by specificity (more specific patterns first)
         sorted_rules = sorted(all_rules.items(), key=lambda x: len(x[1].pattern), reverse=True)
 
-        for rule_name, rule in sorted_rules:
+        for _rule_name, rule in sorted_rules:
             if masking_level == MaskingLevel.FULL:
                 masked_text = self._apply_full_mask(masked_text, rule)
             elif masking_level == MaskingLevel.HASH:
@@ -213,7 +213,7 @@ class PIIMasker:
             return rule.mask_char * len(value)
 
         # Extract non-digit characters for format preservation
-        non_digits = [c for c in value if not c.isdigit()]
+        [c for c in value if not c.isdigit()]
         digits = [c for c in value if c.isdigit()]
 
         if len(digits) <= rule.show_first + rule.show_last:

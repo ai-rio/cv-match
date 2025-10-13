@@ -424,9 +424,7 @@ class WebhookService:
                 cancel_at_period_end=subscription_data.get("cancel_at_period_end", False),
             )
 
-            subscription_details = await subscription_service.update_subscription(
-                existing_sub["id"], update_data
-            )
+            await subscription_service.update_subscription(existing_sub["id"], update_data)
 
             logger.info(
                 f"Updated subscription {existing_sub['id']}: status={subscription_data.get('status')}"
@@ -470,9 +468,7 @@ class WebhookService:
 
             if existing_sub:
                 # Cancel subscription immediately (deleted in Stripe)
-                subscription_details = await subscription_service.cancel_subscription(
-                    existing_sub["id"], immediate=True
-                )
+                await subscription_service.cancel_subscription(existing_sub["id"], immediate=True)
 
                 logger.info(f"Canceled subscription {existing_sub['id']} (deleted in Stripe)")
 

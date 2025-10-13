@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.config import settings
-from app.models.llm import (
+from app.models.llm_models import (
     EmbeddingRequest,
     EmbeddingResponse,
     TextGenerationRequest,

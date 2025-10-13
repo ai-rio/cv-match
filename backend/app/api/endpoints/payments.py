@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr
 
 from app.config.pricing import pricing_config
-from app.core.auth import get_current_user
+from app.core.auth_dependencies import get_current_user
 from app.core.database import SupabaseSession
 from app.services.stripe_service import stripe_service
 from app.utils.validation import validate_dict, validate_string

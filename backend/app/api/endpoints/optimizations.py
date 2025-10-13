@@ -9,7 +9,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.core.auth import get_current_user
+from app.core.auth_dependencies import get_current_user
 from app.core.database import SupabaseSession
 from app.middleware.credit_check import check_credits, require_pro_or_credits
 from app.models.optimization import (

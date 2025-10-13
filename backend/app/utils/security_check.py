@@ -146,14 +146,6 @@ class SecurityChecker:
 
     def _check_security_headers(self):
         """Check security headers configuration."""
-        required_headers = [
-            "X-Frame-Options",
-            "X-Content-Type-Options",
-            "X-XSS-Protection",
-            "Content-Security-Policy",
-            "Referrer-Policy",
-            "Strict-Transport-Security",
-        ]
 
         # Check if middleware is configured to add security headers
         try:

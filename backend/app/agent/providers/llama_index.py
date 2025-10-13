@@ -11,9 +11,9 @@ except ImportError:
     BaseEmbedding = None  # type: ignore
     BaseLLM = None  # type: ignore
 
-from ...core.config import settings
-from ..exceptions import ProviderError
-from .base import EmbeddingProvider, Provider
+from app.agent.exceptions import ProviderError
+from app.agent.providers.base import EmbeddingProvider, Provider
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 

@@ -494,7 +494,7 @@ class InputSanitizer:
         # Sanitize documents if present
         if "documents" in request_data:
             document_results = []
-            for i, doc in enumerate(request_data["documents"]):
+            for _i, doc in enumerate(request_data["documents"]):
                 if "text" in doc:
                     result = self.sanitize_text(
                         doc["text"], input_type="document", user_id=user_id, ip_address=ip_address
