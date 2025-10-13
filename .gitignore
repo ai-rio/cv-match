@@ -31,6 +31,12 @@
 /backend/build/
 /backend/dist/
 /backend/*.egg-info/
+/backend/.next/
+# Next.js build artifacts
+.next/
+out/
+build/
+*.tsbuildinfo
 
 # Caches and logs
 __pycache__/
