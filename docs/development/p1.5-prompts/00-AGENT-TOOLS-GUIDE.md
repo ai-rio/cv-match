@@ -82,11 +82,11 @@ print(result.data)
 ```bash
 # Install component
 cd frontend
-bux shadcn-ui@latest add button
-bux shadcn-ui@latest add card
-bux shadcn-ui@latest add badge
-bux shadcn-ui@latest add tabs
-bux shadcn-ui@latest add dialog
+bunx  shadcn-ui@latest add button
+bunx  shadcn-ui@latest add card
+bunx  shadcn-ui@latest add badge
+bunx  shadcn-ui@latest add tabs
+bunx  shadcn-ui@latest add dialog
 ```
 
 **Use cases**:

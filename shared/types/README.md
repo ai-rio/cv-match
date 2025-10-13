@@ -54,7 +54,7 @@ This document outlines the type consistency validation performed between fronten
 
 ```bash
 # Frontend type validation
-cd frontend && bux tsc --noEmit --skipLibCheck
+cd frontend && bunx  tsc --noEmit --skipLibCheck
 
 # Backend type validation
 cd backend && python3 -m py_compile app/models/*.py
