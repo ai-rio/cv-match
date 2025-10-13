@@ -1,0 +1,140 @@
+{
+  "branches": [
+    "main",
+    {
+      "name": "develop",
+      "prerelease": "beta"
+    }
+  ],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/changelog",
+    "@semantic-release/github",
+    [
+      "@semantic-release/git",
+      {
+        "assets": ["CHANGELOG.md"],
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ]
+  ],
+  "preset": "conventionalcommits",
+  "presetConfig": {
+    "types": [
+      {
+        "type": "feat",
+        "section": "Features",
+        "hidden": false
+      },
+      {
+        "type": "fix",
+        "section": "Bug Fixes",
+        "hidden": false
+      },
+      {
+        "type": "chore",
+        "section": "Chores",
+        "hidden": false
+      },
+      {
+        "type": "docs",
+        "section": "Documentation",
+        "hidden": false
+      },
+      {
+        "type": "style",
+        "section": "Styles",
+        "hidden": false
+      },
+      {
+        "type": "refactor",
+        "section": "Code Refactoring",
+        "hidden": false
+      },
+      {
+        "type": "perf",
+        "section": "Performance Improvements",
+        "hidden": false
+      },
+      {
+        "type": "test",
+        "section": "Tests",
+        "hidden": false
+      },
+      {
+        "type": "build",
+        "section": "Build System",
+        "hidden": false
+      },
+      {
+        "type": "ci",
+        "section": "Continuous Integration",
+        "hidden": false
+      },
+      {
+        "type": "revert",
+        "section": "Reverts",
+        "hidden": false
+      }
+    ]
+  },
+  "generateNotes": {
+    "preset": "conventionalcommits",
+    "writerOpts": {
+      "commitsSort": ["subject", "scope"],
+      "groups": [
+        {
+          "title": "🚀 Features",
+          "sort": 1,
+          "commits": ["feat"]
+        },
+        {
+          "title": "🐛 Bug Fixes",
+          "sort": 2,
+          "commits": ["fix"]
+        },
+        {
+          "title": "🔧 Performance",
+          "sort": 3,
+          "commits": ["perf"]
+        },
+        {
+          "title": "🎨 Styles",
+          "sort": 4,
+          "commits": ["style"]
+        },
+        {
+          "title": "📚 Documentation",
+          "sort": 5,
+          "commits": ["docs"]
+        },
+        {
+          "title": "♻️ Code Refactoring",
+          "sort": 6,
+          "commits": ["refactor"]
+        },
+        {
+          "title": "🔨 Build System",
+          "sort": 7,
+          "commits": ["build", "ci"]
+        },
+        {
+          "title": "✅ Tests",
+          "sort": 8,
+          "commits": ["test"]
+        },
+        {
+          "title": "🧹 Chores",
+          "sort": 9,
+          "commits": ["chore"]
+        }
+      ],
+      "commitGroupsSort": "title",
+      "noteGroupsSort": "title"
+    }
+  },
+  "tagFormat": "v${version}",
+  "repositoryUrl": "https://github.com/carlosnunes/cv-match.git",
+  "ci": true
+}

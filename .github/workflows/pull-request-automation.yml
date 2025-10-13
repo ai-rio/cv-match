@@ -1,0 +1,345 @@
+name: Pull Request Automation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  # PR Validation and Automation
+  pr-automation:
+    name: Pull Request Automation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && !github.event.pull_request.draft
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v40
+      with:
+        files: |
+          **/*.ts
+          **/*.tsx
+          **/*.js
+          **/*.jsx
+          **/*.py
+          **/*.sql
+          **/*.md
+
+    - name: Analyze changes and determine PR type
+      id: pr-analysis
+      run: |
+        CHANGED_FILES="${{ steps.changed-files.outputs.all_changed_files }}"
+        FRONTEND_CHANGES=false
+        BACKEND_CHANGES=false
+        DOCS_CHANGES=false
+        DB_CHANGES=false
+        BREAKING_CHANGES=false
+
+        for file in $CHANGED_FILES; do
+          case "$file" in
+            frontend/*)
+              FRONTEND_CHANGES=true
+              ;;
+            backend/*)
+              BACKEND_CHANGES=true
+              ;;
+            docs/*|*.md)
+              DOCS_CHANGES=true
+              ;;
+            supabase/migrations/*|*.sql)
+              DB_CHANGES=true
+              ;;
+          esac
+
+          # Check for breaking changes
+          if [[ "$file" =~ \.(ts|tsx|js|jsx|py)$ ]]; then
+            if git diff --name-only HEAD~1 HEAD | xargs grep -l "BREAKING CHANGE\|!: " 2>/dev/null; then
+              BREAKING_CHANGES=true
+            fi
+          fi
+        done
+
+        echo "frontend_changes=$FRONTEND_CHANGES" >> $GITHUB_OUTPUT
+        echo "backend_changes=$BACKEND_CHANGES" >> $GITHUB_OUTPUT
+        echo "docs_changes=$DOCS_CHANGES" >> $GITHUB_OUTPUT
+        echo "db_changes=$DB_CHANGES" >> $GITHUB_OUTPUT
+        echo "breaking_changes=$BREAKING_CHANGES" >> $GITHUB_OUTPUT
+
+        # Determine PR type from branch name
+        BRANCH_NAME="${{ github.head_ref }}"
+        PR_TYPE="feature"
+
+        case "$BRANCH_NAME" in
+          feature/*)
+            PR_TYPE="feature"
+            ;;
+          release/*)
+            PR_TYPE="release"
+            ;;
+          hotfix/*)
+            PR_TYPE="hotfix"
+            ;;
+        esac
+
+        echo "pr_type=$PR_TYPE" >> $GITHUB_OUTPUT
+
+    - name: Generate PR description
+      id: pr-description
+      run: |
+        PR_TYPE="${{ steps.pr-analysis.outputs.pr_type }}"
+        FRONTEND="${{ steps.pr-analysis.outputs.frontend_changes }}"
+        BACKEND="${{ steps.pr-analysis.outputs.backend_changes }}"
+        DOCS="${{ steps.pr-analysis.outputs.docs_changes }}"
+        DB="${{ steps.pr-analysis.outputs.db_changes }}"
+        BREAKING="${{ steps.pr-analysis.outputs.breaking_changes }}"
+
+        # Generate description based on changes
+        DESCRIPTION="## Summary\n\n"
+
+        if [[ "$FRONTEND" == "true" ]]; then
+          DESCRIPTION+="- 🎨 Frontend changes\n"
+        fi
+        if [[ "$BACKEND" == "true" ]]; then
+          DESCRIPTION+="- ⚙️ Backend changes\n"
+        fi
+        if [[ "$DOCS" == "true" ]]; then
+          DESCRIPTION+="- 📚 Documentation updates\n"
+        fi
+        if [[ "$DB" == "true" ]]; then
+          DESCRIPTION+="- 🗄️ Database schema changes\n"
+        fi
+
+        DESCRIPTION+="\n## Type of Change\n\n"
+        case "$PR_TYPE" in
+          feature)
+            DESCRIPTION+="- [x] Feature\n"
+            ;;
+          hotfix)
+            DESCRIPTION+="- [x] Bug Fix / Hotfix\n"
+            ;;
+          release)
+            DESCRIPTION+="- [x] Release\n"
+            ;;
+        esac
+
+        if [[ "$BREAKING" == "true" ]]; then
+          DESCRIPTION+="- [x] Breaking Change\n"
+        fi
+
+        DESCRIPTION+="\n## Test Plan\n\n"
+        DESCRIPTION+="- [ ] Automated tests passing\n"
+        if [[ "$FRONTEND" == "true" ]]; then
+          DESCRIPTION+="- [ ] Frontend components tested\n"
+        fi
+        if [[ "$BACKEND" == "true" ]]; then
+          DESCRIPTION+="- [ ] API endpoints tested\n"
+        fi
+        if [[ "$DB" == "true" ]]; then
+          DESCRIPTION+="- [ ] Database migrations tested\n"
+        fi
+
+        DESCRIPTION+="\n## Brazilian Market Considerations\n\n"
+        DESCRIPTION+="- [ ] Portuguese (pt-br) localization verified\n"
+        DESCRIPTION+="- [ ] BRL payment integration tested\n"
+        DESCRIPTION+="- [ ] LGPD compliance checked\n"
+
+        DESCRIPTION+="\n---\n\n"
+        DESCRIPTION+="🤖 Generated with Claude Code for CV-Match Brazilian SaaS"
+
+        # Save description to file
+        echo "$DESCRIPTION" > pr-description.md
+        echo "description<<EOF" >> $GITHUB_OUTPUT
+        echo "$DESCRIPTION" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Update PR description
+      if: github.event.action == 'opened'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const description = `${{ steps.pr-description.outputs.description }}`;
+          github.rest.pulls.update({
+            pull_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: description
+          });
+
+    - name: Add PR labels
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const prType = '${{ steps.pr-analysis.outputs.pr_type }}';
+          const frontend = '${{ steps.pr-analysis.outputs.frontend_changes }}' === 'true';
+          const backend = '${{ steps.pr-analysis.outputs.backend_changes }}' === 'true';
+          const docs = '${{ steps.pr-analysis.outputs.docs_changes }}' === 'true';
+          const db = '${{ steps.pr-analysis.outputs.db_changes }}' === 'true';
+          const breaking = '${{ steps.pr-analysis.outputs.breaking_changes }}' === 'true';
+
+          const labels = [];
+
+          // Add type label
+          labels.push(prType);
+
+          // Add component labels
+          if (frontend) labels.push('frontend');
+          if (backend) labels.push('backend');
+          if (docs) labels.push('documentation');
+          if (db) labels.push('database');
+          if (breaking) labels.push('breaking-change');
+
+          // Add Brazilian market label
+          labels.push('brazilian-market');
+
+          github.rest.issues.addLabels({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            labels: labels
+          });
+
+    - name: Set PR reviewers
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const prType = '${{ steps.pr-analysis.outputs.pr_type }}';
+          const db = '${{ steps.pr-analysis.outputs.db_changes }}' === 'true';
+
+          let reviewers = [];
+
+          // Default reviewers
+          reviewers = ['carlosnunes'];
+
+          // Add database reviewers if needed
+          if (db) {
+            // Add database-specific reviewers if available
+          }
+
+          if (reviewers.length > 0) {
+            github.rest.pulls.requestReviewers({
+              pull_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              reviewers: reviewers
+            });
+          }
+
+    - name: Check merge conflicts
+      run: |
+        echo "Checking for merge conflicts..."
+
+        # Try to merge with target branch to detect conflicts
+        git fetch origin "${{ github.base_ref }}"
+        git checkout -b temp-merge-test
+        git merge "origin/${{ github.base_ref }}" --no-commit --no-ff
+
+        if [ $? -eq 0 ]; then
+          echo "✅ No merge conflicts detected"
+        else
+          echo "❌ Merge conflicts detected"
+          echo "Please resolve conflicts before merging"
+
+          # Comment on PR about conflicts
+          gh pr comment ${{ github.event.pull_request.number }} --body "⚠️ **Merge conflicts detected**. Please resolve conflicts before this PR can be merged."
+          exit 1
+        fi
+
+    - name: Validate commit messages
+      run: |
+        echo "Validating commit messages..."
+
+        # Get commits in this PR
+        COMMITS=$(git rev-list --no-merges "origin/${{ github.base_ref }}..${{ github.sha }}")
+        INVALID_COMMITS=()
+
+        for commit in $COMMITS; do
+          MESSAGE=$(git log --format=%B -n 1 $commit)
+
+          # Check for conventional commit format
+          if ! echo "$MESSAGE" | grep -E "^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .+"; then
+            INVALID_COMMITS+=("$commit")
+          fi
+        done
+
+        if [ ${#INVALID_COMMITS[@]} -gt 0 ]; then
+          echo "❌ Invalid commit messages found:"
+          for commit in "${INVALID_COMMITS[@]}"; do
+            MESSAGE=$(git log --format=%B -n 1 $commit)
+            echo "  - $commit: $MESSAGE"
+          done
+
+          gh pr comment ${{ github.event.pull_request.number }} --body "⚠️ **Invalid commit messages detected**. Please use conventional commit format: \`type(scope): description\`"
+          exit 1
+        else
+          echo "✅ All commit messages follow conventional format"
+        fi
+
+    - name: Check Brazilian market requirements
+      run: |
+        echo "Checking Brazilian market specific requirements..."
+
+        BRANCH_NAME="${{ github.head_ref }}"
+        WARNING_MESSAGES=()
+
+        # Check if this is a feature or release branch
+        if [[ "$BRANCH_NAME" =~ ^(feature|release)/.+$ ]]; then
+          # Check for Brazilian Portuguese considerations
+          if grep -r "pt-br\|português\|brazilian\|BRL" frontend/ backend/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --include="*.py" 2>/dev/null; then
+            echo "✅ Brazilian market localization found"
+          else
+            WARNING_MESSAGES+=("Consider adding Brazilian Portuguese (pt-br) localization")
+          fi
+
+          # Check for BRL payment integration if payment-related
+          if grep -r "payment\|stripe\|subscription\|pricing" . --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --include="*.py" --include="*.sql" 2>/dev/null; then
+            if grep -r "BRL\|brazil\|real" . --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --include="*.py" --include="*.sql" 2>/dev/null; then
+              echo "✅ BRL payment integration found"
+            else
+              WARNING_MESSAGES+=("Consider adding BRL payment support for Brazilian market")
+            fi
+          fi
+        fi
+
+        # Post warnings if any
+        if [ ${#WARNING_MESSAGES[@]} -gt 0 ]; then
+          WARNING_BODY="## Brazilian Market Considerations\n\n"
+          for msg in "${WARNING_MESSAGES[@]}"; do
+            WARNING_BODY+="- ⚠️ $msg\n"
+          done
+          WARNING_BODY+="\n💡 These are suggestions for ensuring proper Brazilian market support."
+
+          gh pr comment ${{ github.event.pull_request.number }} --body "$WARNING_BODY"
+        fi
+
+    - name: Generate PR statistics
+      run: |
+        echo "Generating PR statistics..."
+
+        # Get commit count
+        COMMIT_COUNT=$(git rev-list --count "origin/${{ github.base_ref }}..${{ github.sha }}")
+
+        # Get file changes
+        FILES_CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}..${{ github.sha }}" | wc -l)
+
+        # Get line additions/deletions
+        LINES_ADDED=$(git diff --numstat "origin/${{ github.base_ref }}..${{ github.sha }}" | awk '{sum+=$1} END {print sum}')
+        LINES_DELETED=$(git diff --numstat "origin/${{ github.base_ref }}..${{ github.sha }}" | awk '{sum+=$2} END {print sum}')
+
+        # Generate statistics comment
+        STATS_BODY="## 📊 Pull Request Statistics\n\n"
+        STATS_BODY+="- **Commits:** $COMMIT_COUNT\n"
+        STATS_BODY+="- **Files Changed:** $FILES_CHANGED\n"
+        STATS_BODY+="- **Lines Added:** $LINES_ADDED\n"
+        STATS_BODY+="- **Lines Deleted:** $LINES_DELETED\n"
+        STATS_BODY+="- **PR Type:** ${{ steps.pr-analysis.outputs.pr_type }}\n\n"
+        STATS_BODY+="---\n\n"
+        STATS_BODY+="🇧🇷 Ready for CV-Match Brazilian SaaS platform"
+
+        gh pr comment ${{ github.event.pull_request.number }} --body "$STATS_BODY"

@@ -1,10 +1,17 @@
-# Enterprise Git Workflow with Pre-commit Hooks
+# Git Flow Workflow Guide for CV-Match Brazilian SaaS
 
-This document outlines the comprehensive Git workflow implemented for CV-Match to ensure code quality, security, and consistency across the enterprise.
+## Overview
 
-## 🚀 Overview
+This document outlines the comprehensive Git Flow workflow implemented for CV-Match, specifically tailored for the Brazilian SaaS market. The workflow combines **Git Flow** principles with modern CI/CD automation to ensure systematic development, proper versioning, and seamless collaboration.
 
-Our Git workflow uses **Husky** for Git hooks management and **lint-staged** for efficient file processing. The system runs automated checks before commits and pushes to maintain high code quality standards.
+## 🚀 Architecture
+
+Our Git Flow workflow uses:
+- **Git Flow** branching strategy for systematic development
+- **GitHub Actions** for automated quality checks and CI/CD
+- **Husky** for local pre-commit hooks
+- **Semantic Release** for automated versioning
+- **Brazilian Market** specific validations and considerations
 
 ## 📁 Workflow Structure
 

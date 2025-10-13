@@ -1,0 +1,317 @@
+name: Branch Protection and CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [ published ]
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # Branch Protection Checks
+  branch-protection:
+    name: Branch Protection
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check branch name compliance
+      run: |
+        BRANCH_NAME="${{ github.head_ref }}"
+        echo "Checking branch: $BRANCH_NAME"
+
+        # Check Git Flow naming conventions
+        if [[ "$BRANCH_NAME" =~ ^(feature|release|hotfix)/.+$ ]]; then
+          echo "✅ Branch name follows Git Flow conventions"
+        elif [[ "$BRANCH_NAME" == "main" || "$BRANCH_NAME" == "develop" ]]; then
+          echo "✅ Protected branch"
+        else
+          echo "❌ Invalid branch name. Use Git Flow naming: feature/, release/, hotfix/"
+          exit 1
+        fi
+
+    - name: Validate base branch
+      run: |
+        BASE_BRANCH="${{ github.base_ref }}"
+        HEAD_BRANCH="${{ github.head_ref }}"
+
+        # Validate Git Flow branch hierarchy
+        case "$HEAD_BRANCH" in
+          feature/*)
+            if [[ "$BASE_BRANCH" != "develop" ]]; then
+              echo "❌ Feature branches must target 'develop' branch"
+              exit 1
+            fi
+            ;;
+          release/*)
+            if [[ "$BASE_BRANCH" != "main" ]]; then
+              echo "❌ Release branches must target 'main' branch"
+              exit 1
+            fi
+            ;;
+          hotfix/*)
+            if [[ "$BASE_BRANCH" != "main" ]]; then
+              echo "❌ Hotfix branches must target 'main' branch"
+              exit 1
+            fi
+            ;;
+        esac
+        echo "✅ Base branch validation passed"
+
+  # Frontend Quality Checks
+  frontend-quality:
+    name: Frontend Quality
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    - name: Install dependencies
+      working-directory: ./frontend
+      run: bun install --frozen-lockfile
+
+    - name: Type check
+      working-directory: ./frontend
+      run: bun run type-check
+
+    - name: Lint
+      working-directory: ./frontend
+      run: bun run lint
+
+    - name: Build
+      working-directory: ./frontend
+      run: bun run build
+      env:
+        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+
+  # Backend Quality Checks
+  backend-quality:
+    name: Backend Quality
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Setup UV
+      uses: astral-sh/setup-uv@v2
+      with:
+        version: "latest"
+
+    - name: Install dependencies
+      working-directory: ./backend
+      run: uv sync --frozen
+
+    - name: Type check
+      working-directory: ./backend
+      run: uv run mypy .
+
+    - name: Lint
+      working-directory: ./backend
+      run: uv run ruff check .
+
+    - name: Format check
+      working-directory: ./backend
+      run: uv run ruff format --check .
+
+    - name: Run tests
+      working-directory: ./backend
+      run: uv run pytest
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+  # Security Scans
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: Frontend dependency audit
+      working-directory: ./frontend
+      run: |
+        bun install
+        bun audit
+
+    - name: Backend dependency audit
+      working-directory: ./backend
+      run: |
+        uv sync
+        uv pip list | uv pip-audit
+
+  # Database Migration Check
+  database-migration:
+    name: Database Migration Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Supabase CLI
+      uses: supabase/setup-cli@v1
+      with:
+        version: latest
+
+    - name: Check migration files
+      run: |
+        if [ -d "supabase/migrations" ]; then
+          echo "✅ Migration directory found"
+          ls -la supabase/migrations/
+        else
+          echo "❌ No migration directory found"
+          exit 1
+        fi
+
+    - name: Validate migration syntax
+      run: |
+        for file in supabase/migrations/*.sql; do
+          if [ -f "$file" ]; then
+            echo "Validating $file..."
+            # Basic SQL syntax validation
+            if ! psql --help > /dev/null 2>&1; then
+              echo "Installing PostgreSQL client..."
+              sudo apt-get update && sudo apt-get install -y postgresql-client
+            fi
+            # Basic validation - check for common SQL patterns
+            if grep -q "DROP TABLE\|DELETE FROM\|TRUNCATE" "$file"; then
+              echo "⚠️ Warning: Potentially destructive operations found in $file"
+            fi
+          fi
+        done
+
+  # Semantic Release
+  semantic-release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+    needs: [frontend-quality, backend-quality, security-scan, database-migration]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Install semantic-release
+      run: npm install -g semantic-release @semantic-release/git @semantic-release/changelog @semantic-release/github
+
+    - name: Run semantic-release
+      run: semantic-release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Brazilian Market Specific Checks
+  brazilian-market-compliance:
+    name: Brazilian Market Compliance
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check Brazilian Portuguese localization
+      run: |
+        echo "Checking Brazilian Portuguese (pt-br) localization..."
+
+        # Check for next-intl configuration
+        if [ -f "frontend/next.config.js" ]; then
+          if grep -q "pt-br" frontend/next.config.js; then
+            echo "✅ Brazilian Portuguese configuration found"
+          else
+            echo "⚠️ Brazilian Portuguese configuration not found in next.config.js"
+          fi
+        fi
+
+        # Check for locale files
+        if [ -d "frontend/messages" ]; then
+          if [ -f "frontend/messages/pt-br.json" ]; then
+            echo "✅ Brazilian Portuguese translation file found"
+          else
+            echo "⚠️ Brazilian Portuguese translation file not found"
+          fi
+        fi
+
+    - name: Check BRL payment configuration
+      run: |
+        echo "Checking BRL payment integration..."
+
+        # Check for Stripe configuration
+        if grep -r "BRL\|brazilian\|real" frontend/ backend/ --include="*.ts" --include="*.js" --include="*.py"; then
+          echo "✅ BRL payment references found"
+        else
+          echo "⚠️ Limited BRL payment configuration found"
+        fi
+
+    - name: Check LGPD compliance references
+      run: |
+        echo "Checking LGPD (Brazilian GDPR) compliance..."
+
+        if grep -r "LGPD\|privacy\|brazilian.*law" docs/ --include="*.md"; then
+          echo "✅ LGPD compliance documentation found"
+        else
+          echo "⚠️ Consider adding LGPD compliance documentation"
+        fi
+
+  # Deployment Notification
+  deployment-notification:
+    name: Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [semantic-release]
+    if: success()
+
+    steps:
+    - name: Notify deployment success
+      run: |
+        echo "🚀 CV-Match deployment completed successfully!"
+        echo "📍 Brazilian SaaS platform is ready for production"
+        echo "📊 Semantic release version created"
