@@ -113,22 +113,22 @@ components/ui/
 
 | Component | Usage | Install Command |
 |-----------|-------|-----------------|
-| **Form** | All forms | `bux shadcn@latest add form` |
-| **Select** | Dropdowns | `bux shadcn@latest add select` |
-| **Radio Group** | Payment options | `bux shadcn@latest add radio-group` |
-| **Checkbox** | Feature lists | `bux shadcn@latest add checkbox` |
-| **Progress** | Credit usage | `bux shadcn@latest add progress` |
-| **Skeleton** | Loading states | `bux shadcn@latest add skeleton` |
-| **Toast** | Notifications | `bux shadcn@latest add toast` |
-| **Tooltip** | Help text | `bux shadcn@latest add tooltip` |
-| **Tabs** | Dashboard sections | `bux shadcn@latest add tabs` |
-| **Separator** | Visual dividers | `bux shadcn@latest add separator` |
-| **Avatar** | User profiles | `bux shadcn@latest add avatar` |
-| **Dropdown Menu** | User menu | `bux shadcn@latest add dropdown-menu` |
-| **Sheet** | Mobile navigation | `bux shadcn@latest add sheet` |
-| **Table** | Optimization history | `bux shadcn@latest add table` |
-| **Breadcrumb** | Navigation | `bux shadcn@latest add breadcrumb` |
-| **Command** | Search/command palette | `bux shadcn@latest add command` |
+| **Form** | All forms | `bunx  shadcn@latest add form` |
+| **Select** | Dropdowns | `bunx  shadcn@latest add select` |
+| **Radio Group** | Payment options | `bunx  shadcn@latest add radio-group` |
+| **Checkbox** | Feature lists | `bunx  shadcn@latest add checkbox` |
+| **Progress** | Credit usage | `bunx  shadcn@latest add progress` |
+| **Skeleton** | Loading states | `bunx  shadcn@latest add skeleton` |
+| **Toast** | Notifications | `bunx  shadcn@latest add toast` |
+| **Tooltip** | Help text | `bunx  shadcn@latest add tooltip` |
+| **Tabs** | Dashboard sections | `bunx  shadcn@latest add tabs` |
+| **Separator** | Visual dividers | `bunx  shadcn@latest add separator` |
+| **Avatar** | User profiles | `bunx  shadcn@latest add avatar` |
+| **Dropdown Menu** | User menu | `bunx  shadcn@latest add dropdown-menu` |
+| **Sheet** | Mobile navigation | `bunx  shadcn@latest add sheet` |
+| **Table** | Optimization history | `bunx  shadcn@latest add table` |
+| **Breadcrumb** | Navigation | `bunx  shadcn@latest add breadcrumb` |
+| **Command** | Search/command palette | `bunx  shadcn@latest add command` |
 
 ### Component Mapping Table
 
@@ -178,10 +178,10 @@ Premium animated components for visual appeal:
 
 ```bash
 # Primary choice
-bux shadcn@latest add @aceternity/hero-parallax
+bunx  shadcn@latest add @aceternity/hero-parallax
 
 # Alternative/addition
-bux shadcn@latest add @aceternity/spotlight
+bunx  shadcn@latest add @aceternity/spotlight
 ```
 
 **Usage:**
@@ -208,7 +208,7 @@ export function Hero() {
 #### **Feature Showcase**
 
 ```bash
-bux shadcn@latest add @aceternity/bento-grid
+bunx  shadcn@latest add @aceternity/bento-grid
 ```
 
 **Usage:**
@@ -234,8 +234,8 @@ const features = [
 #### **Dashboard Cards**
 
 ```bash
-bux shadcn@latest add @aceternity/3d-card
-bux shadcn@latest add @aceternity/animated-tooltip
+bunx  shadcn@latest add @aceternity/3d-card
+bunx  shadcn@latest add @aceternity/animated-tooltip
 ```
 
 **Usage:**
@@ -255,7 +255,7 @@ import { AnimatedTooltip } from "@/components/ui/animated-tooltip"
 #### **File Upload**
 
 ```bash
-bux shadcn@latest add @aceternity/file-upload
+bunx  shadcn@latest add @aceternity/file-upload
 ```
 
 **Usage:**
@@ -272,7 +272,7 @@ import { FileUpload } from "@/components/ui/file-upload"
 #### **Progress Indicator**
 
 ```bash
-bux shadcn@latest add @aceternity/tracing-beam
+bunx  shadcn@latest add @aceternity/tracing-beam
 ```
 
 **Usage:**
@@ -499,71 +499,71 @@ export function OnboardingStepper({ currentStep, steps }) {
 
 ```bash
 # Forms and inputs
-bux shadcn@latest add form
-bux shadcn@latest add select
-bux shadcn@latest add radio-group
-bux shadcn@latest add checkbox
+bunx  shadcn@latest add form
+bunx  shadcn@latest add select
+bunx  shadcn@latest add radio-group
+bunx  shadcn@latest add checkbox
 
 # Feedback
-bux shadcn@latest add toast
-bux shadcn@latest add progress
-bux shadcn@latest add skeleton
+bunx  shadcn@latest add toast
+bunx  shadcn@latest add progress
+bunx  shadcn@latest add skeleton
 
 # Navigation
-bux shadcn@latest add tabs
-bux shadcn@latest add dropdown-menu
-bux shadcn@latest add breadcrumb
+bunx  shadcn@latest add tabs
+bunx  shadcn@latest add dropdown-menu
+bunx  shadcn@latest add breadcrumb
 
 # Data display
-bux shadcn@latest add table
-bux shadcn@latest add avatar
-bux shadcn@latest add separator
+bunx  shadcn@latest add table
+bunx  shadcn@latest add avatar
+bunx  shadcn@latest add separator
 
 # Utilities
-bux shadcn@latest add tooltip
-bux shadcn@latest add sheet
-bux shadcn@latest add command
+bunx  shadcn@latest add tooltip
+bunx  shadcn@latest add sheet
+bunx  shadcn@latest add command
 ```
 
 ### Phase 2: Aceternity UI (Landing Page)
 
 ```bash
 # Hero section
-bux shadcn@latest add @aceternity/hero-parallax
-bux shadcn@latest add @aceternity/spotlight
+bunx  shadcn@latest add @aceternity/hero-parallax
+bunx  shadcn@latest add @aceternity/spotlight
 
 # Features
-bux shadcn@latest add @aceternity/bento-grid
-bux shadcn@latest add @aceternity/card-hover-effect
+bunx  shadcn@latest add @aceternity/bento-grid
+bunx  shadcn@latest add @aceternity/card-hover-effect
 
 # Background
-bux shadcn@latest add @aceternity/background-gradient
+bunx  shadcn@latest add @aceternity/background-gradient
 ```
 
 ### Phase 3: Aceternity UI (Dashboard & Flow)
 
 ```bash
 # Dashboard
-bux shadcn@latest add @aceternity/3d-card
-bux shadcn@latest add @aceternity/animated-tooltip
-bux shadcn@latest add @aceternity/moving-border
+bunx  shadcn@latest add @aceternity/3d-card
+bunx  shadcn@latest add @aceternity/animated-tooltip
+bunx  shadcn@latest add @aceternity/moving-border
 
 # Optimize flow
-bux shadcn@latest add @aceternity/file-upload
-bux shadcn@latest add @aceternity/tracing-beam
+bunx  shadcn@latest add @aceternity/file-upload
+bunx  shadcn@latest add @aceternity/tracing-beam
 
 # Results
-bux shadcn@latest add @aceternity/sparkles
-bux shadcn@latest add @aceternity/text-generate-effect
+bunx  shadcn@latest add @aceternity/sparkles
+bunx  shadcn@latest add @aceternity/text-generate-effect
 ```
 
 ### Phase 4: Nice-to-Have
 
 ```bash
 # Advanced animations
-bux shadcn@latest add @aceternity/floating-navbar
-bux shadcn@latest add @aceternity/wavy-background
-bux shadcn@latest add @aceternity/meteors
+bunx  shadcn@latest add @aceternity/floating-navbar
+bunx  shadcn@latest add @aceternity/wavy-background
+bunx  shadcn@latest add @aceternity/meteors
 ```
 
 ---
