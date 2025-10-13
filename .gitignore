@@ -51,6 +51,10 @@ yarn-error.log*
 next-env.d.ts
 .vercel
 .turbo
+*.log
+npm-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # OS files
 .DS_Store
@@ -60,6 +64,16 @@ next-env.d.ts
 .Trashes
 ehthumbs.db
 Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
 
 # Docker and databases
 .docker/data/
