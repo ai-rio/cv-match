@@ -1,13 +1,14 @@
 # 🎯 P1.5 Phase 4.2: Subscription Testing Suite
 
-**Agent**: test-writer-agent  
-**Phase**: 4 (Parallel execution with Prompt 05)  
-**Time Estimate**: 2 hours  
+**Agent**: test-writer-agent
+**Phase**: 4 (Parallel execution with Prompt 05)
+**Time Estimate**: 2 hours
 **Dependencies**: Phase 3 must be complete
 
 **Why test-writer-agent?** Writing comprehensive tests with proper mocking and coverage.
 
-**⚠️ CRITICAL**: 
+**⚠️ CRITICAL**:
+
 - DO NOT start until Phase 3 complete!
 - ✅ CAN RUN IN PARALLEL with Prompt 05
 
@@ -45,7 +46,7 @@ async def test_create_subscription_success(mock_supabase):
     mock_supabase.table().insert().execute.return_value = Mock(
         data=[{"id": "sub_123", "tier_id": "flow_pro"}]
     )
-    
+
     with patch.object(subscription_service, 'get_subscription_details'):
         data = SubscriptionCreate(
             user_id="user_123",
@@ -72,7 +73,7 @@ async def test_use_analysis_success(mock_supabase):
     mock_supabase.table().update().execute.return_value = Mock(
         data=[{"analyses_used_this_period": 6}]
     )
-    
+
     with patch('app.config.pricing.pricing_config.get_tier') as mock_tier:
         mock_tier.return_value = Mock(analyses_per_month=60, rollover_limit=30)
         result = await subscription_service.use_analysis("user_123", "sub_123")
@@ -90,7 +91,7 @@ async def test_use_analysis_limit_reached(mock_supabase):
             "current_period_end": datetime.utcnow().isoformat(),
         }
     )
-    
+
     with patch('app.config.pricing.pricing_config.get_tier') as mock_tier:
         mock_tier.return_value = Mock(analyses_per_month=15, rollover_limit=5)
         with pytest.raises(ValueError, match="No analyses available"):
@@ -126,12 +127,12 @@ def test_get_subscription_status(mock_auth):
             tier_id="flow_pro",
             analyses_remaining=45
         )
-        
+
         response = client.get(
             "/api/subscriptions/status",
             headers={"Authorization": "Bearer test"}
         )
-        
+
         assert response.status_code == 200
         data = response.json()
         assert data["has_active_subscription"] is True
@@ -140,7 +141,7 @@ def test_create_subscription(mock_auth):
     """Test POST /api/subscriptions."""
     with patch('app.services.subscription_service.subscription_service.create_subscription') as mock:
         mock.return_value = Mock(id="sub_123", tier_id="flow_pro")
-        
+
         response = client.post(
             "/api/subscriptions/",
             headers={"Authorization": "Bearer test"},
@@ -152,7 +153,7 @@ def test_create_subscription(mock_auth):
                 "stripe_price_id": "price_123"
             }
         )
-        
+
         assert response.status_code == 201
 
 def test_create_checkout_session(mock_auth):
@@ -167,13 +168,13 @@ def test_create_checkout_session(mock_auth):
                 id="cs_123",
                 url="https://checkout.stripe.com/123"
             )
-            
+
             response = client.post(
                 "/api/subscriptions/checkout",
                 headers={"Authorization": "Bearer test"},
                 json={"tier_id": "flow_pro"}
             )
-            
+
             assert response.status_code == 200
             data = response.json()
             assert "checkout_url" in data
@@ -208,11 +209,11 @@ async def test_handle_subscription_created():
             }
         }
     }
-    
+
     with patch('app.core.database.get_supabase_client') as mock_db:
         mock_db.return_value.table().select().execute.return_value = Mock(data=[])
         mock_db.return_value.table().insert().execute.return_value = Mock(data=[])
-        
+
         result = await handle_webhook_event(event)
         assert result["status"] == "success"
 
@@ -231,14 +232,14 @@ async def test_handle_subscription_updated():
             }
         }
     }
-    
+
     with patch('app.core.database.get_supabase_client') as mock_db:
         mock_db.return_value.table().select().execute.return_value = Mock(data=[])
         mock_db.return_value.table().insert().execute.return_value = Mock(data=[])
         mock_db.return_value.table().select().eq().single().execute.return_value = Mock(
             data={"id": "sub_123", "stripe_price_id": "price_old"}
         )
-        
+
         with patch('app.services.subscription_service.subscription_service.update_subscription'):
             result = await handle_webhook_event(event)
             assert result["status"] in ["success", "already_processed"]
@@ -247,13 +248,13 @@ async def test_handle_subscription_updated():
 async def test_duplicate_event_handling():
     """Test idempotency - duplicate events ignored."""
     event = {"id": "evt_123", "type": "customer.subscription.created"}
-    
+
     with patch('app.core.database.get_supabase_client') as mock_db:
         # Event already exists
         mock_db.return_value.table().select().execute.return_value = Mock(
             data=[{"id": "existing"}]
         )
-        
+
         result = await handle_webhook_event(event)
         assert result["status"] == "already_processed"
 ```
@@ -263,6 +264,7 @@ async def test_duplicate_event_handling():
 ## ✅ Verification Checklist
 
 ### 1. Run All Tests
+
 ```bash
 cd /home/carlos/projects/cv-match/backend
 
@@ -282,6 +284,7 @@ docker compose exec backend pytest tests/ -k subscription -v
 **Expected**: All tests pass ✅
 
 ### 2. Check Coverage
+
 ```bash
 docker compose exec backend pytest --cov=app/services/subscription_service --cov=app/api/subscriptions tests/
 ```
@@ -289,6 +292,7 @@ docker compose exec backend pytest --cov=app/services/subscription_service --cov
 **Expected**: Coverage > 80%
 
 ### 3. Test Specific Scenarios
+
 ```bash
 # Test limit enforcement
 docker compose exec backend pytest tests/unit/test_subscription_service.py::test_use_analysis_limit_reached -v
@@ -302,9 +306,11 @@ docker compose exec backend pytest tests/unit/test_subscription_service.py::test
 ## 🚨 Common Issues
 
 ### Issue 1: Import Errors
+
 **Error**: `ModuleNotFoundError`
 
 **Solution**:
+
 ```bash
 # Ensure backend container running
 docker compose up backend
@@ -314,9 +320,11 @@ docker compose exec backend python -c "import sys; print(sys.path)"
 ```
 
 ### Issue 2: Mock Not Working
+
 **Error**: `AttributeError: Mock object has no attribute`
 
 **Solution**:
+
 ```python
 # Use return_value for methods
 mock.method.return_value = Mock(data=[])
@@ -326,9 +334,11 @@ mock.method.side_effect = ValueError("error")
 ```
 
 ### Issue 3: Async Tests Fail
+
 **Error**: `RuntimeWarning: coroutine was never awaited`
 
 **Solution**:
+
 ```python
 # Always mark with @pytest.mark.asyncio
 @pytest.mark.asyncio
@@ -341,6 +351,7 @@ async def test_async_function():
 ## 📊 Success Criteria
 
 Phase 4.2 is complete when:
+
 - ✅ All service methods tested
 - ✅ All API endpoints tested
 - ✅ Webhook handlers tested
@@ -358,18 +369,21 @@ Phase 4.2 is complete when:
 ### P1.5 Complete! 🎉
 
 1. **Full Integration Test**:
+
 ```bash
 # End-to-end test
 ./scripts/test-subscription-flow.sh
 ```
 
 2. **Manual Testing**:
+
 - Create subscription via UI
 - Use analyses
 - Check rollover
 - Cancel subscription
 
 3. **Deployment Checklist**:
+
 - [ ] All tests pass
 - [ ] Migrations applied
 - [ ] Stripe webhooks configured

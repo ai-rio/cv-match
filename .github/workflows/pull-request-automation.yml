@@ -14,463 +14,463 @@ jobs:
     if: github.event_name == 'pull_request' && !github.event.pull_request.draft
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Get changed files
-      id: changed-files
-      uses: tj-actions/changed-files@v40
-      with:
-        files: |
-          **/*.ts
-          **/*.tsx
-          **/*.js
-          **/*.jsx
-          **/*.py
-          **/*.sql
-          **/*.md
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            **/*.ts
+            **/*.tsx
+            **/*.js
+            **/*.jsx
+            **/*.py
+            **/*.sql
+            **/*.md
 
-    - name: Analyze changes and determine PR type
-      id: pr-analysis
-      run: |
-        CHANGED_FILES="${{ steps.changed-files.outputs.all_changed_files }}"
-        FRONTEND_CHANGES=false
-        BACKEND_CHANGES=false
-        DOCS_CHANGES=false
-        DB_CHANGES=false
-        BREAKING_CHANGES=false
+      - name: Analyze changes and determine PR type
+        id: pr-analysis
+        run: |
+          CHANGED_FILES="${{ steps.changed-files.outputs.all_changed_files }}"
+          FRONTEND_CHANGES=false
+          BACKEND_CHANGES=false
+          DOCS_CHANGES=false
+          DB_CHANGES=false
+          BREAKING_CHANGES=false
 
-        for file in $CHANGED_FILES; do
-          case "$file" in
-            frontend/*)
-              FRONTEND_CHANGES=true
+          for file in $CHANGED_FILES; do
+            case "$file" in
+              frontend/*)
+                FRONTEND_CHANGES=true
+                ;;
+              backend/*)
+                BACKEND_CHANGES=true
+                ;;
+              docs/*|*.md)
+                DOCS_CHANGES=true
+                ;;
+              supabase/migrations/*|*.sql)
+                DB_CHANGES=true
+                ;;
+            esac
+
+            # Check for breaking changes
+            if [[ "$file" =~ \.(ts|tsx|js|jsx|py)$ ]]; then
+              if git diff --name-only HEAD~1 HEAD | xargs grep -l "BREAKING CHANGE\|!: " 2>/dev/null; then
+                BREAKING_CHANGES=true
+              fi
+            fi
+          done
+
+          echo "frontend_changes=$FRONTEND_CHANGES" >> $GITHUB_OUTPUT
+          echo "backend_changes=$BACKEND_CHANGES" >> $GITHUB_OUTPUT
+          echo "docs_changes=$DOCS_CHANGES" >> $GITHUB_OUTPUT
+          echo "db_changes=$DB_CHANGES" >> $GITHUB_OUTPUT
+          echo "breaking_changes=$BREAKING_CHANGES" >> $GITHUB_OUTPUT
+
+          # Determine PR type from branch name
+          BRANCH_NAME="${{ github.head_ref }}"
+          PR_TYPE="feature"
+
+          case "$BRANCH_NAME" in
+            feature/*)
+              PR_TYPE="feature"
               ;;
-            backend/*)
-              BACKEND_CHANGES=true
+            release/*)
+              PR_TYPE="release"
               ;;
-            docs/*|*.md)
-              DOCS_CHANGES=true
-              ;;
-            supabase/migrations/*|*.sql)
-              DB_CHANGES=true
+            hotfix/*)
+              PR_TYPE="hotfix"
               ;;
           esac
 
-          # Check for breaking changes
-          if [[ "$file" =~ \.(ts|tsx|js|jsx|py)$ ]]; then
-            if git diff --name-only HEAD~1 HEAD | xargs grep -l "BREAKING CHANGE\|!: " 2>/dev/null; then
-              BREAKING_CHANGES=true
-            fi
+          echo "pr_type=$PR_TYPE" >> $GITHUB_OUTPUT
+
+      - name: Run Type Error Analysis for PR
+        id: pr-type-analysis
+        run: |
+          echo "Running type error analysis for PR..."
+
+          # Setup Bun and Python
+          curl -fsSL https://bun.sh/install | bash
+          export BUN_INSTALL="$HOME/.bun"
+          export PATH="$BUN_INSTALL/bin:$PATH"
+
+          # Install dependencies
+          cd frontend && bun install --frozen-lockfile
+          cd ../backend && pip install mypy
+
+          # Analyze frontend TypeScript errors
+          cd frontend
+          FRONTEND_BUILD_OUTPUT=$(bun run build 2>&1)
+          FRONTEND_ERROR_COUNT=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS" || echo "0")
+
+          FRONTEND_CRITICAL=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS2307\|error TS2304" || echo "0")
+          FRONTEND_HIGH=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS2339\|error TS2345" || echo "0")
+          FRONTEND_MEDIUM=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS18047\|error TS2322" || echo "0")
+          FRONTEND_LOW=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS7006\|error TS6133" || echo "0")
+
+          FRONTEND_TYPE_SCORE=$(echo "100 - ($FRONTEND_ERROR_COUNT * 2)" | bc -l | cut -d. -f1)
+          if [ "$FRONTEND_TYPE_SCORE" -lt 0 ]; then
+            FRONTEND_TYPE_SCORE=0
           fi
-        done
 
-        echo "frontend_changes=$FRONTEND_CHANGES" >> $GITHUB_OUTPUT
-        echo "backend_changes=$BACKEND_CHANGES" >> $GITHUB_OUTPUT
-        echo "docs_changes=$DOCS_CHANGES" >> $GITHUB_OUTPUT
-        echo "db_changes=$DB_CHANGES" >> $GITHUB_OUTPUT
-        echo "breaking_changes=$BREAKING_CHANGES" >> $GITHUB_OUTPUT
+          # Analyze backend Python type errors
+          cd ../backend
+          BACKEND_MYPY_OUTPUT=$(python -m mypy app/ 2>&1)
+          BACKEND_ERROR_COUNT=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "error:" || echo "0")
 
-        # Determine PR type from branch name
-        BRANCH_NAME="${{ github.head_ref }}"
-        PR_TYPE="feature"
+          BACKEND_CRITICAL=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "error: Name.*not defined\|error: Module.*has no attribute" || echo "0")
+          BACKEND_HIGH=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "error: Incompatible types\|error: Argument.*has incompatible type" || echo "0")
+          BACKEND_MEDIUM=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "error: Item.*of.*has no attribute\|error: Returning Any" || echo "0")
+          BACKEND_LOW=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "warning:" || echo "0")
 
-        case "$BRANCH_NAME" in
-          feature/*)
-            PR_TYPE="feature"
-            ;;
-          release/*)
-            PR_TYPE="release"
-            ;;
-          hotfix/*)
-            PR_TYPE="hotfix"
-            ;;
-        esac
+          BACKEND_TYPE_SCORE=$(echo "100 - ($BACKEND_ERROR_COUNT * 2)" | bc -l | cut -d. -f1)
+          if [ "$BACKEND_TYPE_SCORE" -lt 0 ]; then
+            BACKEND_TYPE_SCORE=0
+          fi
 
-        echo "pr_type=$PR_TYPE" >> $GITHUB_OUTPUT
+          # Calculate totals
+          TOTAL_CRITICAL=$((FRONTEND_CRITICAL + BACKEND_CRITICAL))
+          TOTAL_HIGH=$((FRONTEND_HIGH + BACKEND_HIGH))
+          TOTAL_MEDIUM=$((FRONTEND_MEDIUM + BACKEND_MEDIUM))
+          TOTAL_LOW=$((FRONTEND_LOW + BACKEND_LOW))
+          TOTAL_ERRORS=$((FRONTEND_ERROR_COUNT + BACKEND_ERROR_COUNT))
 
-    - name: Run Type Error Analysis for PR
-      id: pr-type-analysis
-      run: |
-        echo "Running type error analysis for PR..."
+          # Calculate overall type safety score
+          OVERALL_TYPE_SCORE=$(( (FRONTEND_TYPE_SCORE + BACKEND_TYPE_SCORE) / 2 ))
 
-        # Setup Bun and Python
-        curl -fsSL https://bun.sh/install | bash
-        export BUN_INSTALL="$HOME/.bun"
-        export PATH="$BUN_INSTALL/bin:$PATH"
+          # Determine status
+          TYPE_CRITICAL_STATUS="✅ PASS"
+          TYPE_HIGH_STATUS="✅ PASS"
+          TYPE_MEDIUM_STATUS="✅ PASS"
+          TYPE_LOW_STATUS="✅ PASS"
+          TYPE_OVERALL_STATUS="✅ PASS"
 
-        # Install dependencies
-        cd frontend && bun install --frozen-lockfile
-        cd ../backend && pip install mypy
+          if [ "$TOTAL_CRITICAL" -gt 0 ]; then
+            TYPE_CRITICAL_STATUS="❌ FAIL"
+            TYPE_OVERALL_STATUS="❌ BLOCKED"
+          elif [ "$TOTAL_HIGH" -gt 10 ]; then
+            TYPE_HIGH_STATUS="⚠️ WARNING"
+            TYPE_OVERALL_STATUS="⚠️ WARNING"
+          elif [ "$TOTAL_MEDIUM" -gt 25 ]; then
+            TYPE_MEDIUM_STATUS="⚠️ WARNING"
+          elif [ "$TOTAL_LOW" -gt 50 ]; then
+            TYPE_LOW_STATUS="⚠️ WARNING"
+          fi
 
-        # Analyze frontend TypeScript errors
-        cd frontend
-        FRONTEND_BUILD_OUTPUT=$(bun run build 2>&1)
-        FRONTEND_ERROR_COUNT=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS" || echo "0")
+          # Set outputs for PR template
+          echo "TYPE_CRITICAL_ERRORS=$TOTAL_CRITICAL" >> $GITHUB_ENV
+          echo "TYPE_HIGH_ERRORS=$TOTAL_HIGH" >> $GITHUB_ENV
+          echo "TYPE_MEDIUM_ERRORS=$TOTAL_MEDIUM" >> $GITHUB_ENV
+          echo "TYPE_LOW_ERRORS=$TOTAL_LOW" >> $GITHUB_ENV
+          echo "TYPE_TOTAL_ERRORS=$TOTAL_ERRORS" >> $GITHUB_ENV
+          echo "TYPE_CRITICAL_STATUS=$TYPE_CRITICAL_STATUS" >> $GITHUB_ENV
+          echo "TYPE_HIGH_STATUS=$TYPE_HIGH_STATUS" >> $GITHUB_ENV
+          echo "TYPE_MEDIUM_STATUS=$TYPE_MEDIUM_STATUS" >> $GITHUB_ENV
+          echo "TYPE_LOW_STATUS=$TYPE_LOW_STATUS" >> $GITHUB_ENV
+          echo "TYPE_OVERALL_STATUS=$TYPE_OVERALL_STATUS" >> $GITHUB_ENV
+          echo "TYPE_SAFETY_SCORE=$OVERALL_TYPE_SCORE" >> $GITHUB_ENV
 
-        FRONTEND_CRITICAL=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS2307\|error TS2304" || echo "0")
-        FRONTEND_HIGH=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS2339\|error TS2345" || echo "0")
-        FRONTEND_MEDIUM=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS18047\|error TS2322" || echo "0")
-        FRONTEND_LOW=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS7006\|error TS6133" || echo "0")
+          # Set step outputs
+          echo "critical-errors=$TOTAL_CRITICAL" >> $GITHUB_OUTPUT
+          echo "high-errors=$TOTAL_HIGH" >> $GITHUB_OUTPUT
+          echo "medium-errors=$TOTAL_MEDIUM" >> $GITHUB_OUTPUT
+          echo "low-errors=$TOTAL_LOW" >> $GITHUB_OUTPUT
+          echo "total-errors=$TOTAL_ERRORS" >> $GITHUB_OUTPUT
+          echo "type-safety-score=$OVERALL_TYPE_SCORE" >> $GITHUB_OUTPUT
 
-        FRONTEND_TYPE_SCORE=$(echo "100 - ($FRONTEND_ERROR_COUNT * 2)" | bc -l | cut -d. -f1)
-        if [ "$FRONTEND_TYPE_SCORE" -lt 0 ]; then
-          FRONTEND_TYPE_SCORE=0
-        fi
+          echo "Type analysis completed:"
+          echo "- Critical: $TOTAL_CRITICAL"
+          echo "- High: $TOTAL_HIGH"
+          echo "- Medium: $TOTAL_MEDIUM"
+          echo "- Low: $TOTAL_LOW"
+          echo "- Total: $TOTAL_ERRORS"
+          echo "- Type Safety Score: $OVERALL_TYPE_SCORE%"
 
-        # Analyze backend Python type errors
-        cd ../backend
-        BACKEND_MYPY_OUTPUT=$(python -m mypy app/ 2>&1)
-        BACKEND_ERROR_COUNT=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "error:" || echo "0")
+      - name: Generate PR description
+        id: pr-description
+        run: |
+          PR_TYPE="${{ steps.pr-analysis.outputs.pr_type }}"
+          FRONTEND="${{ steps.pr-analysis.outputs.frontend_changes }}"
+          BACKEND="${{ steps.pr-analysis.outputs.backend_changes }}"
+          DOCS="${{ steps.pr-analysis.outputs.docs_changes }}"
+          DB="${{ steps.pr-analysis.outputs.db_changes }}"
+          BREAKING="${{ steps.pr-analysis.outputs.breaking_changes }}"
 
-        BACKEND_CRITICAL=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "error: Name.*not defined\|error: Module.*has no attribute" || echo "0")
-        BACKEND_HIGH=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "error: Incompatible types\|error: Argument.*has incompatible type" || echo "0")
-        BACKEND_MEDIUM=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "error: Item.*of.*has no attribute\|error: Returning Any" || echo "0")
-        BACKEND_LOW=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "warning:" || echo "0")
+          # Generate description based on changes
+          DESCRIPTION="## Summary\n\n"
 
-        BACKEND_TYPE_SCORE=$(echo "100 - ($BACKEND_ERROR_COUNT * 2)" | bc -l | cut -d. -f1)
-        if [ "$BACKEND_TYPE_SCORE" -lt 0 ]; then
-          BACKEND_TYPE_SCORE=0
-        fi
+          if [[ "$FRONTEND" == "true" ]]; then
+            DESCRIPTION+="- 🎨 Frontend changes\n"
+          fi
+          if [[ "$BACKEND" == "true" ]]; then
+            DESCRIPTION+="- ⚙️ Backend changes\n"
+          fi
+          if [[ "$DOCS" == "true" ]]; then
+            DESCRIPTION+="- 📚 Documentation updates\n"
+          fi
+          if [[ "$DB" == "true" ]]; then
+            DESCRIPTION+="- 🗄️ Database schema changes\n"
+          fi
 
-        # Calculate totals
-        TOTAL_CRITICAL=$((FRONTEND_CRITICAL + BACKEND_CRITICAL))
-        TOTAL_HIGH=$((FRONTEND_HIGH + BACKEND_HIGH))
-        TOTAL_MEDIUM=$((FRONTEND_MEDIUM + BACKEND_MEDIUM))
-        TOTAL_LOW=$((FRONTEND_LOW + BACKEND_LOW))
-        TOTAL_ERRORS=$((FRONTEND_ERROR_COUNT + BACKEND_ERROR_COUNT))
+          DESCRIPTION+="\n## 📋 Type Safety Metrics\n\n"
+          DESCRIPTION+="| Priority | Errors | Status |\n"
+          DESCRIPTION+="|----------|--------|--------|\n"
+          DESCRIPTION+="| 🔴 Critical | ${{ env.TYPE_CRITICAL_ERRORS }} | ${{ env.TYPE_CRITICAL_STATUS }} |\n"
+          DESCRIPTION+="| 🟡 High | ${{ env.TYPE_HIGH_ERRORS }} | ${{ env.TYPE_HIGH_STATUS }} |\n"
+          DESCRIPTION+="| 🟢 Medium | ${{ env.TYPE_MEDIUM_ERRORS }} | ${{ env.TYPE_MEDIUM_STATUS }} |\n"
+          DESCRIPTION+="| ⚪ Low | ${{ env.TYPE_LOW_ERRORS }} | ${{ env.TYPE_LOW_STATUS }} |\n"
+          DESCRIPTION+="| **Total** | **${{ env.TYPE_TOTAL_ERRORS }}** | **${{ env.TYPE_OVERALL_STATUS }}** |\n\n"
+          DESCRIPTION+="*Type Safety Score: ${{ env.TYPE_SAFETY_SCORE }}%*\n\n"
 
-        # Calculate overall type safety score
-        OVERALL_TYPE_SCORE=$(( (FRONTEND_TYPE_SCORE + BACKEND_TYPE_SCORE) / 2 ))
+          DESCRIPTION+="## Type of Change\n\n"
+          case "$PR_TYPE" in
+            feature)
+              DESCRIPTION+="- [x] Feature\n"
+              ;;
+            hotfix)
+              DESCRIPTION+="- [x] Bug Fix / Hotfix\n"
+              ;;
+            release)
+              DESCRIPTION+="- [x] Release\n"
+              ;;
+          esac
 
-        # Determine status
-        TYPE_CRITICAL_STATUS="✅ PASS"
-        TYPE_HIGH_STATUS="✅ PASS"
-        TYPE_MEDIUM_STATUS="✅ PASS"
-        TYPE_LOW_STATUS="✅ PASS"
-        TYPE_OVERALL_STATUS="✅ PASS"
+          if [[ "$BREAKING" == "true" ]]; then
+            DESCRIPTION+="- [x] Breaking Change\n"
+          fi
 
-        if [ "$TOTAL_CRITICAL" -gt 0 ]; then
-          TYPE_CRITICAL_STATUS="❌ FAIL"
-          TYPE_OVERALL_STATUS="❌ BLOCKED"
-        elif [ "$TOTAL_HIGH" -gt 10 ]; then
-          TYPE_HIGH_STATUS="⚠️ WARNING"
-          TYPE_OVERALL_STATUS="⚠️ WARNING"
-        elif [ "$TOTAL_MEDIUM" -gt 25 ]; then
-          TYPE_MEDIUM_STATUS="⚠️ WARNING"
-        elif [ "$TOTAL_LOW" -gt 50 ]; then
-          TYPE_LOW_STATUS="⚠️ WARNING"
-        fi
+          DESCRIPTION+="\n## Test Plan\n\n"
+          DESCRIPTION+="- [ ] Automated tests passing\n"
+          if [[ "$FRONTEND" == "true" ]]; then
+            DESCRIPTION+="- [ ] Frontend components tested\n"
+            DESCRIPTION+="- [ ] Frontend type errors resolved\n"
+          fi
+          if [[ "$BACKEND" == "true" ]]; then
+            DESCRIPTION+="- [ ] API endpoints tested\n"
+            DESCRIPTION+="- [ ] Backend type errors resolved\n"
+          fi
+          if [[ "$DB" == "true" ]]; then
+            DESCRIPTION+="- [ ] Database migrations tested\n"
+          fi
 
-        # Set outputs for PR template
-        echo "TYPE_CRITICAL_ERRORS=$TOTAL_CRITICAL" >> $GITHUB_ENV
-        echo "TYPE_HIGH_ERRORS=$TOTAL_HIGH" >> $GITHUB_ENV
-        echo "TYPE_MEDIUM_ERRORS=$TOTAL_MEDIUM" >> $GITHUB_ENV
-        echo "TYPE_LOW_ERRORS=$TOTAL_LOW" >> $GITHUB_ENV
-        echo "TYPE_TOTAL_ERRORS=$TOTAL_ERRORS" >> $GITHUB_ENV
-        echo "TYPE_CRITICAL_STATUS=$TYPE_CRITICAL_STATUS" >> $GITHUB_ENV
-        echo "TYPE_HIGH_STATUS=$TYPE_HIGH_STATUS" >> $GITHUB_ENV
-        echo "TYPE_MEDIUM_STATUS=$TYPE_MEDIUM_STATUS" >> $GITHUB_ENV
-        echo "TYPE_LOW_STATUS=$TYPE_LOW_STATUS" >> $GITHUB_ENV
-        echo "TYPE_OVERALL_STATUS=$TYPE_OVERALL_STATUS" >> $GITHUB_ENV
-        echo "TYPE_SAFETY_SCORE=$OVERALL_TYPE_SCORE" >> $GITHUB_ENV
+          DESCRIPTION+="\n## 📝 Type Safety Checklist\n\n"
+          DESCRIPTION+="### Frontend (TypeScript)\n"
+          DESCRIPTION+="- [ ] No critical type errors (TS2307, TS2304)\n"
+          DESCRIPTION+="- [ ] High priority errors under threshold (TS2339, TS2345)\n"
+          DESCRIPTION+="- [ ] Component props properly typed\n"
+          DESCRIPTION+="- [ ] API response types defined\n"
+          DESCRIPTION+="\n### Backend (Python)\n"
+          DESCRIPTION+="- [ ] No critical type errors\n"
+          DESCRIPTION+="- [ ] Function signatures typed\n"
+          DESCRIPTION+="- [ ] Return types specified\n"
+          DESCRIPTION+="- [ ] Database models typed\n"
+          DESCRIPTION+="\n### Brazilian Market Types\n"
+          DESCRIPTION+="- [ ] BRL currency types defined\n"
+          DESCRIPTION+="- [ ] PT-BR translation types\n"
+          DESCRIPTION+="- [ ] Brazilian payment method types\n\n"
 
-        # Set step outputs
-        echo "critical-errors=$TOTAL_CRITICAL" >> $GITHUB_OUTPUT
-        echo "high-errors=$TOTAL_HIGH" >> $GITHUB_OUTPUT
-        echo "medium-errors=$TOTAL_MEDIUM" >> $GITHUB_OUTPUT
-        echo "low-errors=$TOTAL_LOW" >> $GITHUB_OUTPUT
-        echo "total-errors=$TOTAL_ERRORS" >> $GITHUB_OUTPUT
-        echo "type-safety-score=$OVERALL_TYPE_SCORE" >> $GITHUB_OUTPUT
+          DESCRIPTION+="\n## Brazilian Market Considerations\n\n"
+          DESCRIPTION+="- [ ] Portuguese (pt-br) localization verified\n"
+          DESCRIPTION+="- [ ] BRL payment integration tested\n"
+          DESCRIPTION+="- [ ] LGPD compliance checked\n"
 
-        echo "Type analysis completed:"
-        echo "- Critical: $TOTAL_CRITICAL"
-        echo "- High: $TOTAL_HIGH"
-        echo "- Medium: $TOTAL_MEDIUM"
-        echo "- Low: $TOTAL_LOW"
-        echo "- Total: $TOTAL_ERRORS"
-        echo "- Type Safety Score: $OVERALL_TYPE_SCORE%"
+          DESCRIPTION+="\n---\n\n"
+          DESCRIPTION+="🤖 Generated with Claude Code for CV-Match Brazilian SaaS\n"
+          DESCRIPTION+="*Type safety metrics automatically calculated and validated*"
 
-    - name: Generate PR description
-      id: pr-description
-      run: |
-        PR_TYPE="${{ steps.pr-analysis.outputs.pr_type }}"
-        FRONTEND="${{ steps.pr-analysis.outputs.frontend_changes }}"
-        BACKEND="${{ steps.pr-analysis.outputs.backend_changes }}"
-        DOCS="${{ steps.pr-analysis.outputs.docs_changes }}"
-        DB="${{ steps.pr-analysis.outputs.db_changes }}"
-        BREAKING="${{ steps.pr-analysis.outputs.breaking_changes }}"
+          # Save description to file
+          echo "$DESCRIPTION" > pr-description.md
+          echo "description<<EOF" >> $GITHUB_OUTPUT
+          echo "$DESCRIPTION" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-        # Generate description based on changes
-        DESCRIPTION="## Summary\n\n"
-
-        if [[ "$FRONTEND" == "true" ]]; then
-          DESCRIPTION+="- 🎨 Frontend changes\n"
-        fi
-        if [[ "$BACKEND" == "true" ]]; then
-          DESCRIPTION+="- ⚙️ Backend changes\n"
-        fi
-        if [[ "$DOCS" == "true" ]]; then
-          DESCRIPTION+="- 📚 Documentation updates\n"
-        fi
-        if [[ "$DB" == "true" ]]; then
-          DESCRIPTION+="- 🗄️ Database schema changes\n"
-        fi
-
-        DESCRIPTION+="\n## 📋 Type Safety Metrics\n\n"
-        DESCRIPTION+="| Priority | Errors | Status |\n"
-        DESCRIPTION+="|----------|--------|--------|\n"
-        DESCRIPTION+="| 🔴 Critical | ${{ env.TYPE_CRITICAL_ERRORS }} | ${{ env.TYPE_CRITICAL_STATUS }} |\n"
-        DESCRIPTION+="| 🟡 High | ${{ env.TYPE_HIGH_ERRORS }} | ${{ env.TYPE_HIGH_STATUS }} |\n"
-        DESCRIPTION+="| 🟢 Medium | ${{ env.TYPE_MEDIUM_ERRORS }} | ${{ env.TYPE_MEDIUM_STATUS }} |\n"
-        DESCRIPTION+="| ⚪ Low | ${{ env.TYPE_LOW_ERRORS }} | ${{ env.TYPE_LOW_STATUS }} |\n"
-        DESCRIPTION+="| **Total** | **${{ env.TYPE_TOTAL_ERRORS }}** | **${{ env.TYPE_OVERALL_STATUS }}** |\n\n"
-        DESCRIPTION+="*Type Safety Score: ${{ env.TYPE_SAFETY_SCORE }}%*\n\n"
-
-        DESCRIPTION+="## Type of Change\n\n"
-        case "$PR_TYPE" in
-          feature)
-            DESCRIPTION+="- [x] Feature\n"
-            ;;
-          hotfix)
-            DESCRIPTION+="- [x] Bug Fix / Hotfix\n"
-            ;;
-          release)
-            DESCRIPTION+="- [x] Release\n"
-            ;;
-        esac
-
-        if [[ "$BREAKING" == "true" ]]; then
-          DESCRIPTION+="- [x] Breaking Change\n"
-        fi
-
-        DESCRIPTION+="\n## Test Plan\n\n"
-        DESCRIPTION+="- [ ] Automated tests passing\n"
-        if [[ "$FRONTEND" == "true" ]]; then
-          DESCRIPTION+="- [ ] Frontend components tested\n"
-          DESCRIPTION+="- [ ] Frontend type errors resolved\n"
-        fi
-        if [[ "$BACKEND" == "true" ]]; then
-          DESCRIPTION+="- [ ] API endpoints tested\n"
-          DESCRIPTION+="- [ ] Backend type errors resolved\n"
-        fi
-        if [[ "$DB" == "true" ]]; then
-          DESCRIPTION+="- [ ] Database migrations tested\n"
-        fi
-
-        DESCRIPTION+="\n## 📝 Type Safety Checklist\n\n"
-        DESCRIPTION+="### Frontend (TypeScript)\n"
-        DESCRIPTION+="- [ ] No critical type errors (TS2307, TS2304)\n"
-        DESCRIPTION+="- [ ] High priority errors under threshold (TS2339, TS2345)\n"
-        DESCRIPTION+="- [ ] Component props properly typed\n"
-        DESCRIPTION+="- [ ] API response types defined\n"
-        DESCRIPTION+="\n### Backend (Python)\n"
-        DESCRIPTION+="- [ ] No critical type errors\n"
-        DESCRIPTION+="- [ ] Function signatures typed\n"
-        DESCRIPTION+="- [ ] Return types specified\n"
-        DESCRIPTION+="- [ ] Database models typed\n"
-        DESCRIPTION+="\n### Brazilian Market Types\n"
-        DESCRIPTION+="- [ ] BRL currency types defined\n"
-        DESCRIPTION+="- [ ] PT-BR translation types\n"
-        DESCRIPTION+="- [ ] Brazilian payment method types\n\n"
-
-        DESCRIPTION+="\n## Brazilian Market Considerations\n\n"
-        DESCRIPTION+="- [ ] Portuguese (pt-br) localization verified\n"
-        DESCRIPTION+="- [ ] BRL payment integration tested\n"
-        DESCRIPTION+="- [ ] LGPD compliance checked\n"
-
-        DESCRIPTION+="\n---\n\n"
-        DESCRIPTION+="🤖 Generated with Claude Code for CV-Match Brazilian SaaS\n"
-        DESCRIPTION+="*Type safety metrics automatically calculated and validated*"
-
-        # Save description to file
-        echo "$DESCRIPTION" > pr-description.md
-        echo "description<<EOF" >> $GITHUB_OUTPUT
-        echo "$DESCRIPTION" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
-
-    - name: Update PR description
-      if: github.event.action == 'opened'
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const description = `${{ steps.pr-description.outputs.description }}`;
-          github.rest.pulls.update({
-            pull_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: description
-          });
-
-    - name: Add PR labels
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const prType = '${{ steps.pr-analysis.outputs.pr_type }}';
-          const frontend = '${{ steps.pr-analysis.outputs.frontend_changes }}' === 'true';
-          const backend = '${{ steps.pr-analysis.outputs.backend_changes }}' === 'true';
-          const docs = '${{ steps.pr-analysis.outputs.docs_changes }}' === 'true';
-          const db = '${{ steps.pr-analysis.outputs.db_changes }}' === 'true';
-          const breaking = '${{ steps.pr-analysis.outputs.breaking_changes }}' === 'true';
-
-          const labels = [];
-
-          // Add type label
-          labels.push(prType);
-
-          // Add component labels
-          if (frontend) labels.push('frontend');
-          if (backend) labels.push('backend');
-          if (docs) labels.push('documentation');
-          if (db) labels.push('database');
-          if (breaking) labels.push('breaking-change');
-
-          // Add Brazilian market label
-          labels.push('brazilian-market');
-
-          github.rest.issues.addLabels({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            labels: labels
-          });
-
-    - name: Set PR reviewers
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const prType = '${{ steps.pr-analysis.outputs.pr_type }}';
-          const db = '${{ steps.pr-analysis.outputs.db_changes }}' === 'true';
-
-          let reviewers = [];
-
-          // Default reviewers
-          reviewers = ['carlosnunes'];
-
-          // Add database reviewers if needed
-          if (db) {
-            // Add database-specific reviewers if available
-          }
-
-          if (reviewers.length > 0) {
-            github.rest.pulls.requestReviewers({
+      - name: Update PR description
+        if: github.event.action == 'opened'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const description = `${{ steps.pr-description.outputs.description }}`;
+            github.rest.pulls.update({
               pull_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              reviewers: reviewers
+              body: description
             });
-          }
 
-    - name: Check merge conflicts
-      run: |
-        echo "Checking for merge conflicts..."
+      - name: Add PR labels
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prType = '${{ steps.pr-analysis.outputs.pr_type }}';
+            const frontend = '${{ steps.pr-analysis.outputs.frontend_changes }}' === 'true';
+            const backend = '${{ steps.pr-analysis.outputs.backend_changes }}' === 'true';
+            const docs = '${{ steps.pr-analysis.outputs.docs_changes }}' === 'true';
+            const db = '${{ steps.pr-analysis.outputs.db_changes }}' === 'true';
+            const breaking = '${{ steps.pr-analysis.outputs.breaking_changes }}' === 'true';
 
-        # Try to merge with target branch to detect conflicts
-        git fetch origin "${{ github.base_ref }}"
-        git checkout -b temp-merge-test
-        git merge "origin/${{ github.base_ref }}" --no-commit --no-ff
+            const labels = [];
 
-        if [ $? -eq 0 ]; then
-          echo "✅ No merge conflicts detected"
-        else
-          echo "❌ Merge conflicts detected"
-          echo "Please resolve conflicts before merging"
+            // Add type label
+            labels.push(prType);
 
-          # Comment on PR about conflicts
-          gh pr comment ${{ github.event.pull_request.number }} --body "⚠️ **Merge conflicts detected**. Please resolve conflicts before this PR can be merged."
-          exit 1
-        fi
+            // Add component labels
+            if (frontend) labels.push('frontend');
+            if (backend) labels.push('backend');
+            if (docs) labels.push('documentation');
+            if (db) labels.push('database');
+            if (breaking) labels.push('breaking-change');
 
-    - name: Validate commit messages
-      run: |
-        echo "Validating commit messages..."
+            // Add Brazilian market label
+            labels.push('brazilian-market');
 
-        # Get commits in this PR
-        COMMITS=$(git rev-list --no-merges "origin/${{ github.base_ref }}..${{ github.sha }}")
-        INVALID_COMMITS=()
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: labels
+            });
 
-        for commit in $COMMITS; do
-          MESSAGE=$(git log --format=%B -n 1 $commit)
+      - name: Set PR reviewers
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prType = '${{ steps.pr-analysis.outputs.pr_type }}';
+            const db = '${{ steps.pr-analysis.outputs.db_changes }}' === 'true';
 
-          # Check for conventional commit format
-          if ! echo "$MESSAGE" | grep -E "^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .+"; then
-            INVALID_COMMITS+=("$commit")
+            let reviewers = [];
+
+            // Default reviewers
+            reviewers = ['carlosnunes'];
+
+            // Add database reviewers if needed
+            if (db) {
+              // Add database-specific reviewers if available
+            }
+
+            if (reviewers.length > 0) {
+              github.rest.pulls.requestReviewers({
+                pull_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                reviewers: reviewers
+              });
+            }
+
+      - name: Check merge conflicts
+        run: |
+          echo "Checking for merge conflicts..."
+
+          # Try to merge with target branch to detect conflicts
+          git fetch origin "${{ github.base_ref }}"
+          git checkout -b temp-merge-test
+          git merge "origin/${{ github.base_ref }}" --no-commit --no-ff
+
+          if [ $? -eq 0 ]; then
+            echo "✅ No merge conflicts detected"
+          else
+            echo "❌ Merge conflicts detected"
+            echo "Please resolve conflicts before merging"
+
+            # Comment on PR about conflicts
+            gh pr comment ${{ github.event.pull_request.number }} --body "⚠️ **Merge conflicts detected**. Please resolve conflicts before this PR can be merged."
+            exit 1
           fi
-        done
 
-        if [ ${#INVALID_COMMITS[@]} -gt 0 ]; then
-          echo "❌ Invalid commit messages found:"
-          for commit in "${INVALID_COMMITS[@]}"; do
+      - name: Validate commit messages
+        run: |
+          echo "Validating commit messages..."
+
+          # Get commits in this PR
+          COMMITS=$(git rev-list --no-merges "origin/${{ github.base_ref }}..${{ github.sha }}")
+          INVALID_COMMITS=()
+
+          for commit in $COMMITS; do
             MESSAGE=$(git log --format=%B -n 1 $commit)
-            echo "  - $commit: $MESSAGE"
+
+            # Check for conventional commit format
+            if ! echo "$MESSAGE" | grep -E "^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .+"; then
+              INVALID_COMMITS+=("$commit")
+            fi
           done
 
-          gh pr comment ${{ github.event.pull_request.number }} --body "⚠️ **Invalid commit messages detected**. Please use conventional commit format: \`type(scope): description\`"
-          exit 1
-        else
-          echo "✅ All commit messages follow conventional format"
-        fi
+          if [ ${#INVALID_COMMITS[@]} -gt 0 ]; then
+            echo "❌ Invalid commit messages found:"
+            for commit in "${INVALID_COMMITS[@]}"; do
+              MESSAGE=$(git log --format=%B -n 1 $commit)
+              echo "  - $commit: $MESSAGE"
+            done
 
-    - name: Check Brazilian market requirements
-      run: |
-        echo "Checking Brazilian market specific requirements..."
-
-        BRANCH_NAME="${{ github.head_ref }}"
-        WARNING_MESSAGES=()
-
-        # Check if this is a feature or release branch
-        if [[ "$BRANCH_NAME" =~ ^(feature|release)/.+$ ]]; then
-          # Check for Brazilian Portuguese considerations
-          if grep -r "pt-br\|português\|brazilian\|BRL" frontend/ backend/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --include="*.py" 2>/dev/null; then
-            echo "✅ Brazilian market localization found"
+            gh pr comment ${{ github.event.pull_request.number }} --body "⚠️ **Invalid commit messages detected**. Please use conventional commit format: \`type(scope): description\`"
+            exit 1
           else
-            WARNING_MESSAGES+=("Consider adding Brazilian Portuguese (pt-br) localization")
+            echo "✅ All commit messages follow conventional format"
           fi
 
-          # Check for BRL payment integration if payment-related
-          if grep -r "payment\|stripe\|subscription\|pricing" . --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --include="*.py" --include="*.sql" 2>/dev/null; then
-            if grep -r "BRL\|brazil\|real" . --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --include="*.py" --include="*.sql" 2>/dev/null; then
-              echo "✅ BRL payment integration found"
+      - name: Check Brazilian market requirements
+        run: |
+          echo "Checking Brazilian market specific requirements..."
+
+          BRANCH_NAME="${{ github.head_ref }}"
+          WARNING_MESSAGES=()
+
+          # Check if this is a feature or release branch
+          if [[ "$BRANCH_NAME" =~ ^(feature|release)/.+$ ]]; then
+            # Check for Brazilian Portuguese considerations
+            if grep -r "pt-br\|português\|brazilian\|BRL" frontend/ backend/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --include="*.py" 2>/dev/null; then
+              echo "✅ Brazilian market localization found"
             else
-              WARNING_MESSAGES+=("Consider adding BRL payment support for Brazilian market")
+              WARNING_MESSAGES+=("Consider adding Brazilian Portuguese (pt-br) localization")
+            fi
+
+            # Check for BRL payment integration if payment-related
+            if grep -r "payment\|stripe\|subscription\|pricing" . --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --include="*.py" --include="*.sql" 2>/dev/null; then
+              if grep -r "BRL\|brazil\|real" . --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --include="*.py" --include="*.sql" 2>/dev/null; then
+                echo "✅ BRL payment integration found"
+              else
+                WARNING_MESSAGES+=("Consider adding BRL payment support for Brazilian market")
+              fi
             fi
           fi
-        fi
 
-        # Post warnings if any
-        if [ ${#WARNING_MESSAGES[@]} -gt 0 ]; then
-          WARNING_BODY="## Brazilian Market Considerations\n\n"
-          for msg in "${WARNING_MESSAGES[@]}"; do
-            WARNING_BODY+="- ⚠️ $msg\n"
-          done
-          WARNING_BODY+="\n💡 These are suggestions for ensuring proper Brazilian market support."
+          # Post warnings if any
+          if [ ${#WARNING_MESSAGES[@]} -gt 0 ]; then
+            WARNING_BODY="## Brazilian Market Considerations\n\n"
+            for msg in "${WARNING_MESSAGES[@]}"; do
+              WARNING_BODY+="- ⚠️ $msg\n"
+            done
+            WARNING_BODY+="\n💡 These are suggestions for ensuring proper Brazilian market support."
 
-          gh pr comment ${{ github.event.pull_request.number }} --body "$WARNING_BODY"
-        fi
+            gh pr comment ${{ github.event.pull_request.number }} --body "$WARNING_BODY"
+          fi
 
-    - name: Generate PR statistics
-      run: |
-        echo "Generating PR statistics..."
+      - name: Generate PR statistics
+        run: |
+          echo "Generating PR statistics..."
 
-        # Get commit count
-        COMMIT_COUNT=$(git rev-list --count "origin/${{ github.base_ref }}..${{ github.sha }}")
+          # Get commit count
+          COMMIT_COUNT=$(git rev-list --count "origin/${{ github.base_ref }}..${{ github.sha }}")
 
-        # Get file changes
-        FILES_CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}..${{ github.sha }}" | wc -l)
+          # Get file changes
+          FILES_CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}..${{ github.sha }}" | wc -l)
 
-        # Get line additions/deletions
-        LINES_ADDED=$(git diff --numstat "origin/${{ github.base_ref }}..${{ github.sha }}" | awk '{sum+=$1} END {print sum}')
-        LINES_DELETED=$(git diff --numstat "origin/${{ github.base_ref }}..${{ github.sha }}" | awk '{sum+=$2} END {print sum}')
+          # Get line additions/deletions
+          LINES_ADDED=$(git diff --numstat "origin/${{ github.base_ref }}..${{ github.sha }}" | awk '{sum+=$1} END {print sum}')
+          LINES_DELETED=$(git diff --numstat "origin/${{ github.base_ref }}..${{ github.sha }}" | awk '{sum+=$2} END {print sum}')
 
-        # Generate statistics comment
-        STATS_BODY="## 📊 Pull Request Statistics\n\n"
-        STATS_BODY+="- **Commits:** $COMMIT_COUNT\n"
-        STATS_BODY+="- **Files Changed:** $FILES_CHANGED\n"
-        STATS_BODY+="- **Lines Added:** $LINES_ADDED\n"
-        STATS_BODY+="- **Lines Deleted:** $LINES_DELETED\n"
-        STATS_BODY+="- **PR Type:** ${{ steps.pr-analysis.outputs.pr_type }}\n\n"
-        STATS_BODY+="---\n\n"
-        STATS_BODY+="🇧🇷 Ready for CV-Match Brazilian SaaS platform"
+          # Generate statistics comment
+          STATS_BODY="## 📊 Pull Request Statistics\n\n"
+          STATS_BODY+="- **Commits:** $COMMIT_COUNT\n"
+          STATS_BODY+="- **Files Changed:** $FILES_CHANGED\n"
+          STATS_BODY+="- **Lines Added:** $LINES_ADDED\n"
+          STATS_BODY+="- **Lines Deleted:** $LINES_DELETED\n"
+          STATS_BODY+="- **PR Type:** ${{ steps.pr-analysis.outputs.pr_type }}\n\n"
+          STATS_BODY+="---\n\n"
+          STATS_BODY+="🇧🇷 Ready for CV-Match Brazilian SaaS platform"
 
-        gh pr comment ${{ github.event.pull_request.number }} --body "$STATS_BODY"
+          gh pr comment ${{ github.event.pull_request.number }} --body "$STATS_BODY"

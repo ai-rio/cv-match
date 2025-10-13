@@ -23,7 +23,7 @@ import json
 import os
 import sys
 from datetime import UTC, datetime
-from typing import Any, Dict
+from typing import Any
 
 import httpx
 from dotenv import load_dotenv
@@ -56,7 +56,7 @@ class StripeTestValidator:
         self.start_time = datetime.now(UTC)
 
     def log_test(
-        self, test_name: str, passed: bool, message: str = "", details: Dict[str, Any] = None
+        self, test_name: str, passed: bool, message: str = "", details: dict[str, Any] = None
     ):
         """Log a test result."""
         status = (
@@ -599,7 +599,7 @@ class StripeTestValidator:
 
         return all(results.values())
 
-    def print_summary(self, results: Dict[str, bool]):
+    def print_summary(self, results: dict[str, bool]):
         """Print test summary."""
         total_time = (datetime.now(UTC) - self.start_time).total_seconds()
         total_tests = len(self.test_results)
@@ -626,7 +626,7 @@ class StripeTestValidator:
 
         print(f"\n{Colors.BOLD}Overall Status: {overall_status}{Colors.END}")
 
-    async def save_report(self, results: Dict[str, bool]):
+    async def save_report(self, results: dict[str, bool]):
         """Save detailed test report."""
         report = {
             "validation_summary": {

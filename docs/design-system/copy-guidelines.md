@@ -1,7 +1,7 @@
 # ✍️ CV-Match Copy & Messaging Guidelines
 
-**Version:** 1.0  
-**Last Updated:** October 12, 2025  
+**Version:** 1.0
+**Last Updated:** October 12, 2025
 **Purpose:** Voice, tone, and messaging standards for all content
 
 ---
@@ -23,26 +23,31 @@
 ### Our Voice Is:
 
 **1. Professional yet Approachable**
+
 - We're experts, but not stuffy
 - Helpful advisor, not distant corporation
 - Warm but credible
 
 **2. Confident and Empowering**
+
 - We believe in our users' potential
 - Positive, action-oriented language
 - "You CAN get that job"
 
 **3. Clear and Direct**
+
 - No jargon or corporate-speak
 - Simple words, short sentences
 - Get to the point quickly
 
 **4. Brazilian-First**
+
 - Culturally relevant references
 - Local market understanding
 - Addresses BR-specific challenges
 
 **5. Honest and Transparent**
+
 - Clear about limitations
 - No false promises
 - Upfront about costs
@@ -53,16 +58,16 @@
 
 ### Tone Varies by Context:
 
-| Context | Tone | Example |
-|---------|------|---------|
-| **Landing Page** | Inspiring, Confident | "Otimize seu currículo com IA e aumente suas chances em 87%" |
-| **Pricing** | Clear, Value-focused | "3 otimizações grátis • Sem cartão de crédito" |
-| **Dashboard** | Friendly, Encouraging | "Olá, Carlos! 👋 Pronto para sua próxima otimização?" |
-| **Optimize Flow** | Instructional, Supportive | "Cole a descrição da vaga aqui. Quanto mais detalhes, melhor!" |
-| **Results** | Celebratory, Motivating | "🎉 Parabéns! Seu currículo está 17% melhor!" |
-| **Errors** | Helpful, Solution-oriented | "Ops! Algo deu errado. Vamos tentar novamente?" |
-| **Upgrade Prompts** | Exciting, FOMO | "Você usou todos os créditos! Continue o sucesso →" |
-| **Support** | Patient, Understanding | "Estamos aqui para ajudar. Como podemos resolver isso?" |
+| Context             | Tone                       | Example                                                        |
+| ------------------- | -------------------------- | -------------------------------------------------------------- |
+| **Landing Page**    | Inspiring, Confident       | "Otimize seu currículo com IA e aumente suas chances em 87%"   |
+| **Pricing**         | Clear, Value-focused       | "3 otimizações grátis • Sem cartão de crédito"                 |
+| **Dashboard**       | Friendly, Encouraging      | "Olá, Carlos! 👋 Pronto para sua próxima otimização?"          |
+| **Optimize Flow**   | Instructional, Supportive  | "Cole a descrição da vaga aqui. Quanto mais detalhes, melhor!" |
+| **Results**         | Celebratory, Motivating    | "🎉 Parabéns! Seu currículo está 17% melhor!"                  |
+| **Errors**          | Helpful, Solution-oriented | "Ops! Algo deu errado. Vamos tentar novamente?"                |
+| **Upgrade Prompts** | Exciting, FOMO             | "Você usou todos os créditos! Continue o sucesso →"            |
+| **Support**         | Patient, Understanding     | "Estamos aqui para ajudar. Como podemos resolver isso?"        |
 
 ---
 
@@ -71,9 +76,11 @@
 ### Primary Value Proposition:
 
 **For Job Seekers:**
+
 > "Otimize seu currículo com IA em minutos e aumente suas chances de conseguir entrevistas"
 
 **For Recruiters:**
+
 > "Otimize currículos em escala com IA para encontrar os melhores candidatos mais rápido"
 
 ### Supporting Messages:
@@ -94,11 +101,13 @@
 **Formula**: [Benefit] + [Method] + [Timeframe/Outcome]
 
 ✅ **Good:**
+
 - "Otimize seu Currículo com IA em 3 Minutos"
 - "Aumente suas Chances de Entrevista em 87%"
 - "Currículos que Passam nos Robôs das Empresas"
 
 ❌ **Bad:**
+
 - "Ferramenta de Otimização de Currículos" (Too generic)
 - "Melhore Seu CV" (Vague)
 - "Plataforma Baseada em Inteligência Artificial" (Jargon)
@@ -108,6 +117,7 @@
 **Formula**: Be specific, add proof or detail
 
 ✅ **Good:**
+
 - "3 otimizações grátis • Sem cartão de crédito"
 - "Usado por 5.000+ profissionais brasileiros"
 - "Compatível com Gupy, Catho, LinkedIn e outros ATS"
@@ -117,12 +127,14 @@
 **Formula**: [Action Verb] + [Benefit/Object] + [Optional: Reassurance]
 
 ✅ **Good:**
+
 - "Começar Grátis (3 Créditos)" ← Clarity + value
 - "Ver Meu Score →" ← Action + curiosity
 - "Baixar Currículo Otimizado" ← Clear outcome
 - "Otimizar Agora (1 crédito)" ← Action + cost transparency
 
 ❌ **Bad:**
+
 - "Enviar" (Too generic)
 - "Clique Aqui" (Vague)
 - "Continuar" (Where to?)
@@ -132,6 +144,7 @@
 **Formula**: Anticipate questions, remove friction
 
 ✅ **Good:**
+
 - "Aceita: .pdf, .docx (max 2MB)" ← Clear expectations
 - "Seus dados são protegidos (LGPD)" ← Reduce anxiety
 - "Créditos nunca expiram" ← Remove objection
@@ -142,6 +155,7 @@
 **Formula**: [Feature] → [Benefit]
 
 ✅ **Good:**
+
 - "IA Avançada → Otimização inteligente que passa nos robôs"
 - "Templates Brasileiros → Formatos que recrutadores BR esperam"
 - "Suporte em PT-BR → Ajuda quando você precisa, no seu idioma"
@@ -153,35 +167,42 @@
 ### Brazilian Portuguese Guidelines:
 
 **1. Use Brazilian Spelling:**
+
 - ✅ "Otimizar" (not "Optimizar")
 - ✅ "Fato" (not "Facto")
 - ✅ "Contato" (not "Contacto")
 
 **2. Cultural References:**
+
 - Use "PIX" (popular payment in Brazil)
 - Reference "LGPD" (Brazilian GDPR)
 - Mention "ATS" but explain (American systems used in BR)
 - Use "R$" for currency (e.g., "R$ 29,90")
 
 **3. Formality Level:**
+
 - Use "você" (informal but professional)
 - NOT "tu" (too informal for business)
 - NOT "vós" (too formal, archaic)
 
 **4. Number Formatting:**
+
 - ✅ "R$ 29,90" (comma for decimal)
 - ✅ "10.000" (dot for thousands)
 - ❌ "R$ 29.90" (American style)
 
 **5. Date Format:**
+
 - ✅ "12/10/2025" (DD/MM/YYYY)
 - ❌ "10/12/2025" (American MM/DD/YYYY)
 
 **6. Time:**
+
 - ✅ "14h30" or "14:30"
 - ❌ "2:30 PM"
 
 **7. Common Phrases:**
+
 - "Cadastre-se" (Sign up) NOT "Registre-se"
 - "Entrar" (Login) NOT "Fazer login"
 - "Grátis" or "Gratuito" (Free) NOT "Livre"
@@ -403,20 +424,24 @@ Você agora tem 60 otimizações por mês
 ### ✅ Use These Words:
 
 **Action Words:**
+
 - Otimizar, Melhorar, Aumentar, Conseguir
 - Analisar, Comparar, Ajustar, Personalizar
 - Começar, Experimentar, Descobrir, Transformar
 
 **Value Words:**
+
 - Grátis, Rápido, Fácil, Simples
 - Eficaz, Comprovado, Garantido, Testado
 - Profissional, Inteligente, Avançado
 
 **Trust Words:**
+
 - Seguro, Protegido, Transparente, Honesto
 - Confiável, Aprovado, Certificado
 
 **Brazilian Context:**
+
 - Brasil/Brasileiro, Nacional, Local
 - PIX, Boleto, Cartão
 - LGPD, ATS (explicar)
@@ -425,6 +450,7 @@ Você agora tem 60 otimizações por mês
 ### ❌ Avoid These Words:
 
 **Corporate Jargon:**
+
 - "Solução" (use "ferramenta" or "plataforma")
 - "Alavancagem" (use "aumento")
 - "Sinergia" (just no)
@@ -432,23 +458,27 @@ Você agora tem 60 otimizações por mês
 - "Ecossistema" (too vague)
 
 **Vague Terms:**
+
 - "Qualidade" (be specific)
 - "Inovador" (show, don't tell)
 - "Revolucionário" (too strong)
 - "Único" (probably not true)
 
 **Negative Framing:**
+
 - "Não perca" (use "Ganhe")
 - "Evite erros" (use "Garanta sucesso")
 - "Sem problemas" (unnecessary)
 
 **Exaggerations:**
+
 - "Melhor do mundo"
 - "100% garantido"
 - "Nunca visto antes"
 - "Absolutamente perfeito"
 
 **American English:**
+
 - "Resume" (use "Currículo")
 - "Job" (use "Vaga" or "Emprego")
 - "Recruiter" (use "Recrutador")
@@ -475,33 +505,36 @@ Before publishing ANY copy, ask:
 
 ### Who Reviews What:
 
-| Content Type | Reviewer | Approval |
-|--------------|----------|----------|
-| Landing Page | Marketing Lead | CEO |
-| Pricing Copy | Product + Legal | CEO |
-| Error Messages | Product Manager | UX Lead |
-| Email Campaigns | Marketing Team | Marketing Lead |
-| Legal/Terms | Legal Team | Legal |
-| Blog Posts | Content Writer | Marketing Lead |
-| Social Media | Social Media Manager | Marketing Lead |
+| Content Type    | Reviewer             | Approval       |
+| --------------- | -------------------- | -------------- |
+| Landing Page    | Marketing Lead       | CEO            |
+| Pricing Copy    | Product + Legal      | CEO            |
+| Error Messages  | Product Manager      | UX Lead        |
+| Email Campaigns | Marketing Team       | Marketing Lead |
+| Legal/Terms     | Legal Team           | Legal          |
+| Blog Posts      | Content Writer       | Marketing Lead |
+| Social Media    | Social Media Manager | Marketing Lead |
 
 ---
 
 ## 📚 Resources
 
 ### Writing Tools:
+
 - **Hemingway Editor**: Check readability
 - **Grammarly**: Grammar and tone
 - **Portuguese Spell Check**: BR spelling
 - **Readable.io**: Readability score
 
 ### Inspiration:
+
 - Nubank (Brazilian fintech - great copy)
 - Notion (clear, friendly tone)
 - Stripe (technical but approachable)
 - Airbnb (warm, human)
 
 ### Brazilian References:
+
 - **Dicionário Priberam**: PT-BR dictionary
 - **Academia Brasileira de Letras**: Grammar rules
 - **Guia de Estilo UOL**: Brazilian style guide
@@ -565,6 +598,6 @@ C) Escrever bem
 
 ---
 
-**Last Updated:** October 12, 2025  
-**Next Review:** Quarterly or after major releases  
+**Last Updated:** October 12, 2025
+**Next Review:** Quarterly or after major releases
 **Maintained by:** Marketing & Product Teams

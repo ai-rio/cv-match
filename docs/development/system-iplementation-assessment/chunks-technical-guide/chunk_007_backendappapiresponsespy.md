@@ -49,7 +49,6 @@ class TestSimilarityService:
         assert 'skills' in result.section_similarities
         assert 'experience' in result.section_similarities
 
-
 <!-- Context: tests/test_api_endpoints.py -->
 
 # tests/test_api_endpoints.py
@@ -98,7 +97,8 @@ class TestResumeMatchingAPI:
         )
 
         assert response.status_code == 413  # Unsupported file type
-```
+
+````
 
 
 <!-- Context: tests/test_api_endpoints.py > Integration Testing -->
@@ -183,15 +183,13 @@ class TestResumeMatchingIntegration:
         history = history_response.json()
         assert len(history) >= 1
         assert history[0]['id'] == match_data['match_id']
-```
+````
 
 ---
-
 
 <!-- Context: tests/test_integration.py > Performance Optimization Guidelines -->
 
 ## Performance Optimization Guidelines
-
 
 <!-- Context: tests/test_integration.py > Performance Optimization Guidelines > 1. Database Optimization -->
 
@@ -218,7 +216,6 @@ CREATE INDEX idx_ai_suggestions_match_priority ON ai_suggestions(match_result_id
 CREATE TABLE match_results_y2024m01 PARTITION OF match_results
 FOR VALUES FROM ('2024-01-01') TO ('2024-02-01');
 ```
-
 
 <!-- Context: tests/test_integration.py > Performance Optimization Guidelines > 2. Caching Strategy -->
 
@@ -256,7 +253,6 @@ class CacheService:
         if keys:
             self.redis_client.delete(*keys)
 ```
-
 
 <!-- Context: backend/app/services/cache_service.py (Enhanced) > 3. API Response Optimization -->
 
@@ -314,6 +310,7 @@ async def get_match_history(
 This technical integration guide provides comprehensive specifications for implementing Resume-Matcher features into the CV-Match platform. The guide covers all aspects from service architecture to testing strategies, ensuring a successful integration with minimal disruption to existing functionality.
 
 **Key Implementation Points:**
+
 - Follow the existing service layer patterns
 - Implement comprehensive error handling
 - Use caching strategies for performance optimization

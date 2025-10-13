@@ -1,7 +1,7 @@
 # P0 Core Services - Quick Implementation Guide
 
-**Goal**: Complete P0 by copying Resume-Matcher services to cv-match  
-**Time**: 1-2 days  
+**Goal**: Complete P0 by copying Resume-Matcher services to cv-match
+**Time**: 1-2 days
 **Status**: Ready to start
 
 ---
@@ -17,6 +17,7 @@ You have excellent infrastructure (Week 0-2 complete). Now you need to copy the 
 ### Step 1: Backend Services (4-6 hours)
 
 #### 1.1 Copy Resume Service
+
 ```bash
 # Copy the service file
 cp /home/carlos/projects/Resume-Matcher/apps/backend/app/services/resume_service.py \
@@ -35,6 +36,7 @@ print('✅ ResumeService imported')
 ```
 
 **Checklist**:
+
 - [ ] `resume_service.py` copied
 - [ ] `text_extraction.py` copied
 - [ ] Imports working
@@ -43,6 +45,7 @@ print('✅ ResumeService imported')
 ---
 
 #### 1.2 Copy Job Service
+
 ```bash
 # Copy the service file
 cp /home/carlos/projects/Resume-Matcher/apps/backend/app/services/job_service.py \
@@ -56,6 +59,7 @@ print('✅ JobService imported')
 ```
 
 **Checklist**:
+
 - [ ] `job_service.py` copied
 - [ ] Imports working
 - [ ] No dependency errors
@@ -63,6 +67,7 @@ print('✅ JobService imported')
 ---
 
 #### 1.3 Copy Score Improvement Service
+
 ```bash
 # Copy the service file
 cp /home/carlos/projects/Resume-Matcher/apps/backend/app/services/score_improvement_service.py \
@@ -76,6 +81,7 @@ print('✅ ScoreImprovementService imported')
 ```
 
 **Checklist**:
+
 - [ ] `score_improvement_service.py` copied
 - [ ] Imports working
 - [ ] No dependency errors
@@ -83,6 +89,7 @@ print('✅ ScoreImprovementService imported')
 ---
 
 #### 1.4 Copy Agent System
+
 ```bash
 # Copy the entire agent directory
 cp -r /home/carlos/projects/Resume-Matcher/apps/backend/app/agent \
@@ -97,6 +104,7 @@ print(f'✅ AgentManager initialized with {len(manager.providers)} providers')
 ```
 
 **Checklist**:
+
 - [ ] `app/agent/` directory copied
 - [ ] AgentManager imports
 - [ ] LLM providers configured
@@ -107,6 +115,7 @@ print(f'✅ AgentManager initialized with {len(manager.providers)} providers')
 ### Step 2: Database Migrations (1-2 hours)
 
 #### 2.1 Identify Needed Migrations
+
 ```bash
 # List Resume-Matcher migrations
 ls /home/carlos/projects/Resume-Matcher/apps/backend/supabase/migrations/
@@ -119,6 +128,7 @@ ls /home/carlos/projects/Resume-Matcher/apps/backend/supabase/migrations/
 ```
 
 #### 2.2 Copy Migrations
+
 ```bash
 # Copy relevant migrations
 cp /home/carlos/projects/Resume-Matcher/apps/backend/supabase/migrations/YYYYMMDDHHMMSS_create_resumes_table.sql \
@@ -128,6 +138,7 @@ cp /home/carlos/projects/Resume-Matcher/apps/backend/supabase/migrations/YYYYMMD
 ```
 
 #### 2.3 Apply Migrations
+
 ```bash
 cd /home/carlos/projects/cv-match
 
@@ -150,6 +161,7 @@ for table in tables:
 ```
 
 **Checklist**:
+
 - [ ] Migrations identified
 - [ ] Migrations copied
 - [ ] Migrations applied
@@ -177,16 +189,16 @@ async def upload_resume(
     current_user = Depends(get_current_user)
 ):
     """Upload and parse resume"""
-    
+
     # Validate file type
     if file.content_type not in ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
         raise HTTPException(400, "Invalid file type")
-    
+
     # Validate file size (2MB)
     contents = await file.read()
     if len(contents) > 2 * 1024 * 1024:
         raise HTTPException(400, "File too large")
-    
+
     # Process resume
     resume_service = ResumeService()
     result = await resume_service.process_resume(
@@ -194,7 +206,7 @@ async def upload_resume(
         filename=file.filename,
         user_id=current_user.id
     )
-    
+
     return {
         "resume_id": result["id"],
         "filename": file.filename,
@@ -203,6 +215,7 @@ async def upload_resume(
 ```
 
 **Checklist**:
+
 - [ ] Endpoint created
 - [ ] File validation works
 - [ ] Resume parsing works
@@ -235,7 +248,7 @@ async def start_optimization(
     current_user = Depends(get_current_user)
 ):
     """Start resume optimization"""
-    
+
     # Process job description
     job_service = JobService()
     job_analysis = await job_service.analyze_job(
@@ -243,7 +256,7 @@ async def start_optimization(
         title=request.job_title,
         company=request.company
     )
-    
+
     # Calculate match score
     score_service = ScoreImprovementService()
     optimization = await score_service.optimize(
@@ -251,7 +264,7 @@ async def start_optimization(
         job_analysis=job_analysis,
         user_id=current_user.id
     )
-    
+
     return {
         "optimization_id": optimization["id"],
         "status": "processing",
@@ -260,6 +273,7 @@ async def start_optimization(
 ```
 
 **Checklist**:
+
 - [ ] Endpoint created
 - [ ] Job analysis works
 - [ ] Match score calculated
@@ -278,25 +292,26 @@ async def get_optimization(
     current_user = Depends(get_current_user)
 ):
     """Get optimization results"""
-    
+
     # Fetch from database
     from app.core.database import get_supabase_client
     client = get_supabase_client()
-    
+
     result = client.table("optimizations")\
         .select("*")\
         .eq("id", optimization_id)\
         .eq("user_id", current_user.id)\
         .single()\
         .execute()
-    
+
     if not result.data:
         raise HTTPException(404, "Optimization not found")
-    
+
     return result.data
 ```
 
 **Checklist**:
+
 - [ ] Endpoint created
 - [ ] Results retrieval works
 - [ ] Authorization works
@@ -325,6 +340,7 @@ api_router.include_router(
 ```
 
 **Checklist**:
+
 - [ ] Routes registered
 - [ ] API docs show endpoints
 - [ ] Endpoints accessible
@@ -344,22 +360,26 @@ Replace mock API calls with real ones:
 // const response = await fetch('/api/optimizations/start', {
 
 // To this:
-const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/optimizations/start`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${session.access_token}`
+const response = await fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}/api/optimizations/start`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({
+      resume_id: resumeData.id,
+      job_description: jobDescription.description,
+      job_title: jobDescription.jobTitle,
+      company: jobDescription.company,
+    }),
   },
-  body: JSON.stringify({
-    resume_id: resumeData.id,
-    job_description: jobDescription.description,
-    job_title: jobDescription.jobTitle,
-    company: jobDescription.company
-  })
-});
+);
 ```
 
 **Checklist**:
+
 - [ ] Real API calls replace mocks
 - [ ] Authentication headers added
 - [ ] Error handling works
@@ -370,6 +390,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/optimizatio
 ### Step 5: End-to-End Testing (2-3 hours)
 
 #### 5.1 Test Upload Flow
+
 ```bash
 # Manual test
 # 1. Open http://localhost:3001/pt-br/optimize
@@ -379,6 +400,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/optimizatio
 ```
 
 **Checklist**:
+
 - [ ] Can upload PDF
 - [ ] Can upload DOCX
 - [ ] File validation works
@@ -387,6 +409,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/optimizatio
 ---
 
 #### 5.2 Test Analysis Flow
+
 ```bash
 # Manual test
 # 1. Continue from uploaded resume
@@ -397,6 +420,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/optimizatio
 ```
 
 **Checklist**:
+
 - [ ] Job description validates
 - [ ] Analysis starts
 - [ ] Match score calculated
@@ -405,6 +429,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/optimizatio
 ---
 
 #### 5.3 Test Results Display
+
 ```bash
 # Manual test
 # 1. Wait for analysis complete
@@ -415,6 +440,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/optimizatio
 ```
 
 **Checklist**:
+
 - [ ] Results display correctly
 - [ ] Match score accurate
 - [ ] Improvements listed
@@ -423,6 +449,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/optimizatio
 ---
 
 #### 5.4 Test Portuguese (PT-BR)
+
 ```bash
 # Manual test
 # 1. Ensure locale is pt-br
@@ -431,6 +458,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/optimizatio
 ```
 
 **Checklist**:
+
 - [ ] All UI in Portuguese
 - [ ] Error messages in Portuguese
 - [ ] No English leaking through
@@ -461,6 +489,7 @@ async def test_process_resume():
 ```
 
 **Checklist**:
+
 - [ ] Resume service tests
 - [ ] Job service tests
 - [ ] Score service tests
@@ -490,6 +519,7 @@ def test_upload_resume_endpoint():
 ```
 
 **Checklist**:
+
 - [ ] Upload endpoint test
 - [ ] Analysis endpoint test
 - [ ] Results endpoint test
@@ -500,6 +530,7 @@ def test_upload_resume_endpoint():
 ## ✅ Completion Checklist
 
 ### Backend
+
 - [ ] 4 services copied and working
 - [ ] Agent system copied and working
 - [ ] 4+ tables created via migrations
@@ -508,12 +539,14 @@ def test_upload_resume_endpoint():
 - [ ] Basic tests written
 
 ### Frontend
+
 - [ ] Mock API calls replaced with real calls
 - [ ] Authentication headers added
 - [ ] Error handling implemented
 - [ ] Loading states work
 
 ### Testing
+
 - [ ] Can upload resume
 - [ ] Can analyze job description
 - [ ] Match score calculates
@@ -521,6 +554,7 @@ def test_upload_resume_endpoint():
 - [ ] E2E flow works in PT-BR
 
 ### Documentation
+
 - [ ] API endpoints documented
 - [ ] Service interfaces documented
 - [ ] Migration guide created
@@ -533,6 +567,7 @@ def test_upload_resume_endpoint():
 After finishing all steps above:
 
 1. **Run full test suite**:
+
 ```bash
 cd backend
 docker compose exec backend python -m pytest tests/ -v
@@ -540,17 +575,20 @@ docker compose exec backend python -m pytest tests/ -v
 ```
 
 2. **Test E2E manually**:
+
 ```bash
 # Complete optimization flow from upload to results
 ```
 
 3. **Update documentation**:
+
 ```bash
 # Mark P0 as complete in ROADMAP.md
 # Update P0-VERIFICATION-CHECKLIST.md
 ```
 
 4. **Merge to main**:
+
 ```bash
 git add .
 git commit -m "feat: Complete P0 - Core services implemented and tested"
@@ -559,6 +597,7 @@ git push origin feature/p0-frontend-migration
 ```
 
 5. **Start P1**:
+
 ```bash
 git checkout main
 git pull
@@ -571,6 +610,7 @@ git checkout -b feature/p1-payment-integration
 ## 🆘 Troubleshooting
 
 ### Import Errors
+
 ```bash
 # Check Python path
 docker compose exec backend python -c "import sys; print(sys.path)"
@@ -580,6 +620,7 @@ docker compose restart backend
 ```
 
 ### Database Errors
+
 ```bash
 # Check migrations
 supabase db diff --schema public
@@ -589,6 +630,7 @@ supabase db reset
 ```
 
 ### API Errors
+
 ```bash
 # Check backend logs
 docker compose logs backend --tail=100
@@ -622,6 +664,7 @@ Update as you go!
 ## 🎯 Success Criteria
 
 P0 is complete when:
+
 - ✅ All services copied and working
 - ✅ All tables created
 - ✅ All endpoints responding
@@ -633,6 +676,6 @@ P0 is complete when:
 
 ---
 
-**Estimated Time**: 1-2 days  
-**Difficulty**: Medium (mostly copy-paste with some integration)  
+**Estimated Time**: 1-2 days
+**Difficulty**: Medium (mostly copy-paste with some integration)
 **Reward**: Working product! 🎉

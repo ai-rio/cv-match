@@ -7,21 +7,25 @@ This document outlines the type consistency validation performed between fronten
 ### ✅ Fixed Type Mismatches
 
 #### 1. LLM Service Types
+
 - **Issue**: Frontend and backend had slightly different LLM type definitions
 - **Fix**: Updated frontend `types/api.ts` to match backend `models/llm.py` exactly
 - **Status**: ✅ RESOLVED
 
 #### 2. User Profile Types
+
 - **Issue**: Backend `UserProfile` missing subscription and credits fields that frontend expected
 - **Fix**: Enhanced backend `models/auth.py` UserProfile model with subscription_tier, credits_remaining, created_at, updated_at
 - **Status**: ✅ RESOLVED
 
 #### 3. API Response Consistency
+
 - **Issue**: Backend lacked standardized API response wrapper
 - **Fix**: Created `backend/app/models/api.py` with BaseAPIResponse, SuccessResponse, ErrorResponse models
 - **Status**: ✅ RESOLVED
 
 #### 4. Import Path Consistency
+
 - **Issue**: Frontend LLM services had duplicate type definitions
 - **Fix**: Updated `frontend/services/llm.ts` to import from central type definitions
 - **Status**: ✅ RESOLVED
@@ -29,11 +33,13 @@ This document outlines the type consistency validation performed between fronten
 ### 📋 Type Consistency Validation
 
 #### Authentication Types
+
 - ✅ `TokenResponse`: Matches between frontend/backend
 - ✅ `UserProfile`: Enhanced to include all frontend fields
 - ✅ `LoginRequest`: Consistent structure
 
 #### LLM Service Types
+
 - ✅ `TextGenerationRequest`: Identical structure
 - ✅ `TextGenerationResponse`: Identical structure
 - ✅ `EmbeddingRequest`: Identical structure
@@ -41,11 +47,13 @@ This document outlines the type consistency validation performed between fronten
 - ✅ `LLMUsage`: Identical structure
 
 #### Resume/CV Types
+
 - ✅ `Resume`: Consistent structure
 - ✅ `ResumeCreateRequest`: Consistent structure
 - ✅ `ResumeUploadRequest`: Consistent structure
 
 #### Payment/Usage Types
+
 - ✅ `UserCredits`: Consistent structure
 - ✅ `UsageLimitCheckResponse`: Consistent structure
 - ✅ Payment models: Consistent structure
@@ -66,6 +74,7 @@ make db-status
 ### 📊 Cross-Project Type Boundaries
 
 #### Frontend ↔ Backend API Contracts
+
 1. **Authentication**: `/api/auth/*` endpoints
 2. **LLM Services**: `/api/llm/*` endpoints
 3. **Resume Management**: `/api/resumes/*` endpoints
@@ -73,6 +82,7 @@ make db-status
 5. **Usage Tracking**: `/api/usage/*` endpoints
 
 #### Configuration Types
+
 1. **Environment Variables**: Consistent validation in both projects
 2. **Database Schema**: Backend models match database migrations
 3. **API URLs**: Consistent environment variable usage

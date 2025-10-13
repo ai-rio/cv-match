@@ -1,8 +1,8 @@
 # 04 - Aceternity UI Installation
 
-**Agent**: `frontend-specialist`  
-**Phase**: 2  
-**Duration**: 3h  
+**Agent**: `frontend-specialist`
+**Phase**: 2
+**Duration**: 3h
 **Dependencies**: Previous phase complete
 
 ---

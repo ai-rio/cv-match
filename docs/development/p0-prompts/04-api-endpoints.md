@@ -1,9 +1,9 @@
 # Agent Prompt: API Endpoints Creation
 
-**Agent**: backend-specialist  
-**Phase**: 3 - API Endpoints (After Phase 1 & 2 complete)  
-**Priority**: P0  
-**Estimated Time**: 3 hours  
+**Agent**: backend-specialist
+**Phase**: 3 - API Endpoints (After Phase 1 & 2 complete)
+**Priority**: P0
+**Estimated Time**: 3 hours
 **Dependencies**: Backend services copied, Database tables created
 
 ---
@@ -17,6 +17,7 @@ Create 3 FastAPI endpoints for resume optimization workflow: upload resume, star
 ## 📋 Complete Implementation in Previous Message
 
 See the full implementation above with:
+
 - Resume upload endpoint
 - Optimization endpoints (start, get, list)
 - Route registration

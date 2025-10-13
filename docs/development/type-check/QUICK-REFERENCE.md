@@ -59,7 +59,7 @@ bun run lint:fix:backend              # Auto-fix Python only
 const email = user?.profile?.email;
 
 // Nullish coalescing
-const name = user?.name ?? 'Anonymous';
+const name = user?.name ?? "Anonymous";
 
 // Type guard
 if (user !== null) {
@@ -72,7 +72,7 @@ if (user !== null) {
 ```typescript
 // Safe assertion after check
 const value = getValue();
-if (typeof value === 'string') {
+if (typeof value === "string") {
   const upper = value.toUpperCase(); // Safe
 }
 

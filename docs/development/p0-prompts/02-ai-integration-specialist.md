@@ -1,9 +1,9 @@
 # Agent Prompt: AI Integration & Score Service
 
-**Agent**: ai-integration-specialist  
-**Phase**: 1 - AI Services (Parallel with Backend Services)  
-**Priority**: P0  
-**Estimated Time**: 2.5 hours  
+**Agent**: ai-integration-specialist
+**Phase**: 1 - AI Services (Parallel with Backend Services)
+**Priority**: P0
+**Estimated Time**: 2.5 hours
 **Dependencies**: None (can start immediately, works in parallel)
 
 ---
@@ -18,11 +18,13 @@ Copy and adapt the score_improvement_service.py and the entire agent/ system fro
 
 ### Task 1: Copy agent/ Directory System (1 hour)
 
-**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/agent/`  
+**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/agent/`
 **Target**: `/home/carlos/projects/cv-match/backend/app/agent/`
 
 **Actions**:
+
 1. Copy entire agent directory structure:
+
    ```bash
    cp -r /home/carlos/projects/Resume-Matcher/apps/backend/app/agent \
          /home/carlos/projects/cv-match/backend/app/
@@ -50,6 +52,7 @@ Copy and adapt the score_improvement_service.py and the entire agent/ system fro
    ```
 
 **Success Criteria**:
+
 - [x] Directory copied with all files
 - [x] All imports updated
 - [x] AgentManager can be imported
@@ -59,13 +62,15 @@ Copy and adapt the score_improvement_service.py and the entire agent/ system fro
 
 ### Task 2: Adapt score_improvement_service.py (1 hour)
 
-**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/score_improvement_service.py`  
+**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/score_improvement_service.py`
 **Target**: `/home/carlos/projects/cv-match/backend/app/services/score_improvement_service.py`
 
 **Actions**:
+
 1. Copy the file to target location
 
 2. Update imports to match cv-match + agent system:
+
    ```python
    from app.agent.manager import AgentManager
    from app.core.database import get_supabase_client
@@ -91,6 +96,7 @@ Copy and adapt the score_improvement_service.py and the entire agent/ system fro
    ```
 
 **Success Criteria**:
+
 - [x] File copied and adapted
 - [x] Imports work
 - [x] Service instantiable
@@ -102,16 +108,18 @@ Copy and adapt the score_improvement_service.py and the entire agent/ system fro
 ### Task 3: Test LLM Integration (30 min)
 
 **Actions**:
+
 1. Create test script for LLM integration:
+
    ```python
    # File: backend/test_llm_integration.py
    import asyncio
    from app.agent.manager import AgentManager
-   
+
    async def test_llm():
        manager = AgentManager()
        print(f"✅ Initialized with {len(manager.providers)} provider(s)")
-       
+
        # Test simple completion
        response = await manager.generate(
            "Diga 'olá' em português",
@@ -119,12 +127,13 @@ Copy and adapt the score_improvement_service.py and the entire agent/ system fro
        )
        print(f"✅ LLM Response: {response[:100]}")
        print("✅ LLM integration working!")
-   
+
    if __name__ == "__main__":
        asyncio.run(test_llm())
    ```
 
 2. Run the test:
+
    ```bash
    docker compose exec backend python test_llm_integration.py
    ```
@@ -136,6 +145,7 @@ Copy and adapt the score_improvement_service.py and the entire agent/ system fro
    - No rate limiting issues (in test mode)
 
 **Success Criteria**:
+
 - [x] AgentManager initializes with providers
 - [x] Can make test completion request
 - [x] Receives response from LLM
@@ -149,6 +159,7 @@ Copy and adapt the score_improvement_service.py and the entire agent/ system fro
 ### Agent System Architecture
 
 The agent system should have:
+
 ```
 app/agent/
 ├── __init__.py
@@ -171,27 +182,27 @@ class ScoreImprovementService:
         self.agent_manager = AgentManager()
         self.resume_service = ResumeService()
         self.job_service = JobService()
-    
+
     async def calculate_match_score(
         self,
         resume_text: str,
         job_description: str
     ) -> dict:
         """Calculate match score using LLM"""
-        
+
         # Build prompt
         prompt = self._build_score_prompt(resume_text, job_description)
-        
+
         # Get LLM response
         response = await self.agent_manager.generate(
             prompt,
             max_tokens=2000,
             temperature=0.3  # Lower for more consistent scoring
         )
-        
+
         # Parse response
         result = self._parse_score_response(response)
-        
+
         return {
             "match_score": result["score"],
             "improvements": result["suggestions"],
@@ -202,23 +213,24 @@ class ScoreImprovementService:
 ### Prompt Engineering for Brazilian Market
 
 Ensure prompts include:
+
 ```python
 def _build_score_prompt(self, resume: str, job: str) -> str:
     return f"""
     Você é um especialista em análise de currículos para o mercado brasileiro.
-    
+
     Analise este currículo em relação à vaga e forneça:
     1. Score de compatibilidade (0-100)
     2. Principais pontos fortes
     3. Áreas de melhoria
     4. Palavras-chave para ATS
-    
+
     CURRÍCULO:
     {resume}
-    
+
     VAGA:
     {job}
-    
+
     Responda em JSON válido com as chaves:
     - score (número)
     - strengths (lista)
@@ -232,8 +244,10 @@ def _build_score_prompt(self, resume: str, job: str) -> str:
 ## 🚨 Common Issues & Solutions
 
 ### Issue 1: OpenRouter API Key Not Found
-**Symptom**: `KeyError: 'OPENROUTER_API_KEY'`  
-**Solution**: 
+
+**Symptom**: `KeyError: 'OPENROUTER_API_KEY'`
+**Solution**:
+
 ```bash
 # Check .env
 grep OPENROUTER_API_KEY backend/.env
@@ -246,13 +260,16 @@ docker compose restart backend
 ```
 
 ### Issue 2: Rate Limiting
-**Symptom**: `429 Too Many Requests`  
+
+**Symptom**: `429 Too Many Requests`
 **Solution**: Implement retry with exponential backoff in agent/manager.py
 
 ### Issue 3: LLM Response Parsing
-**Symptom**: `JSONDecodeError`  
+
+**Symptom**: `JSONDecodeError`
 **Solution**: Add robust parsing with fallbacks:
-```python
+
+````python
 def _parse_score_response(self, response: str) -> dict:
     try:
         # Try to parse as JSON
@@ -264,11 +281,13 @@ def _parse_score_response(self, response: str) -> dict:
             return json.loads(json_str)
         # Fallback
         return {"score": 0, "error": "Failed to parse response"}
-```
+````
 
 ### Issue 4: Timeout on Long Completions
-**Symptom**: `TimeoutError`  
+
+**Symptom**: `TimeoutError`
 **Solution**: Increase timeout in httpx client:
+
 ```python
 async with httpx.AsyncClient(timeout=60.0) as client:
     # Make request
@@ -316,6 +335,7 @@ docker compose exec backend python test_llm_integration.py
 ## 📝 Deliverables
 
 ### Files to Create:
+
 1. `/home/carlos/projects/cv-match/backend/app/agent/` (entire directory)
    - `manager.py`
    - `providers/` directory with provider implementations
@@ -324,7 +344,9 @@ docker compose exec backend python test_llm_integration.py
 3. `/home/carlos/projects/cv-match/backend/test_llm_integration.py` (test script)
 
 ### Environment Variables to Add:
+
 Add to `backend/.env`:
+
 ```env
 # LLM Configuration
 RESUME_MATCHER_LLM_PROVIDER=openrouter
@@ -336,11 +358,13 @@ OPENROUTER_API_KEY=your_key_here
 ```
 
 ### Documentation:
+
 - Document LLM provider configuration
 - Note prompt templates used
 - Explain score calculation logic
 
 ### Git Commit:
+
 ```bash
 git add backend/app/agent/
 git add backend/app/services/score_improvement_service.py
@@ -372,6 +396,7 @@ Related: P0 AI Services implementation"
 ## 🎯 Success Definition
 
 Mission complete when:
+
 1. Agent system fully copied and operational
 2. Score improvement service working
 3. LLM integration tested and verified
@@ -383,6 +408,7 @@ Mission complete when:
 ## 🔄 Handoff to Backend Specialist
 
 After completion, notify backend-specialist agent:
+
 - ✅ Agent system operational
 - ✅ Score service available
 - ✅ LLM integration working

@@ -1,9 +1,9 @@
 # 01 - CSS Variables & Theme Setup
 
-**Agent**: `frontend-specialist`  
-**Phase**: 1 (Foundation)  
-**Execution**: Parallel with Prompt 02  
-**Duration**: 2 hours  
+**Agent**: `frontend-specialist`
+**Phase**: 1 (Foundation)
+**Execution**: Parallel with Prompt 02
+**Duration**: 2 hours
 **Dependencies**: None
 
 ---
@@ -39,47 +39,47 @@ Set up the complete CSS variable system with OKLCH colors and implement theme pr
   /* Background & Foreground */
   --background: oklch(0.9824 0.0013 286.3757);
   --foreground: oklch(0.3211 0 0);
-  
+
   /* Card */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.3211 0 0);
-  
+
   /* Popover */
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.3211 0 0);
-  
+
   /* Primary (Green - Growth & Success) */
   --primary: oklch(0.6487 0.1538 150.3071);
   --primary-foreground: oklch(1 0 0);
-  
+
   /* Secondary (Purple - Innovation & AI) */
   --secondary: oklch(0.6746 0.1414 261.338);
   --secondary-foreground: oklch(1 0 0);
-  
+
   /* Muted */
   --muted: oklch(0.8828 0.0285 98.1033);
   --muted-foreground: oklch(0.5382 0 0);
-  
+
   /* Accent (Blue - Trust & Professionalism) */
   --accent: oklch(0.8269 0.108 211.9627);
   --accent-foreground: oklch(0.3211 0 0);
-  
+
   /* Destructive (Red - Errors & Warnings) */
   --destructive: oklch(0.6368 0.2078 25.3313);
   --destructive-foreground: oklch(1 0 0);
-  
+
   /* Border & Input */
   --border: oklch(0.8699 0 0);
   --input: oklch(0.8699 0 0);
   --ring: oklch(0.6487 0.1538 150.3071);
-  
+
   /* Charts */
   --chart-1: oklch(0.6487 0.1538 150.3071);
   --chart-2: oklch(0.6746 0.1414 261.338);
   --chart-3: oklch(0.8269 0.108 211.9627);
   --chart-4: oklch(0.588 0.0993 245.7394);
   --chart-5: oklch(0.5905 0.1608 148.2409);
-  
+
   /* Sidebar (if using) */
   --sidebar: oklch(0.9824 0.0013 286.3757);
   --sidebar-foreground: oklch(0.3211 0 0);
@@ -89,25 +89,29 @@ Set up the complete CSS variable system with OKLCH colors and implement theme pr
   --sidebar-accent-foreground: oklch(0.3211 0 0);
   --sidebar-border: oklch(0.8699 0 0);
   --sidebar-ring: oklch(0.6487 0.1538 150.3071);
-  
+
   /* Typography */
   --font-sans: Plus Jakarta Sans, sans-serif;
   --font-serif: Source Serif 4, serif;
   --font-mono: JetBrains Mono, monospace;
-  
+
   /* Radius */
   --radius: 0.5rem;
-  
+
   /* Shadows */
   --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
   --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow-sm:
+    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
   --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-  --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
-  --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
-  --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
+  --shadow-md:
+    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+  --shadow-lg:
+    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+  --shadow-xl:
+    0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
-  
+
   /* Spacing */
   --spacing: 0.25rem;
 }
@@ -117,47 +121,47 @@ Set up the complete CSS variable system with OKLCH colors and implement theme pr
   /* Background & Foreground */
   --background: oklch(0.2303 0.0125 264.2926);
   --foreground: oklch(0.9219 0 0);
-  
+
   /* Card */
   --card: oklch(0.321 0.0078 223.6661);
   --card-foreground: oklch(0.9219 0 0);
-  
+
   /* Popover */
   --popover: oklch(0.321 0.0078 223.6661);
   --popover-foreground: oklch(0.9219 0 0);
-  
+
   /* Primary (Green stays consistent) */
   --primary: oklch(0.6487 0.1538 150.3071);
   --primary-foreground: oklch(1 0 0);
-  
+
   /* Secondary (Muted Purple) */
   --secondary: oklch(0.588 0.0993 245.7394);
   --secondary-foreground: oklch(0.9219 0 0);
-  
+
   /* Muted */
   --muted: oklch(0.3867 0 0);
   --muted-foreground: oklch(0.7155 0 0);
-  
+
   /* Accent (Vibrant Purple) */
   --accent: oklch(0.6746 0.1414 261.338);
   --accent-foreground: oklch(0.9219 0 0);
-  
+
   /* Destructive (Red stays consistent) */
   --destructive: oklch(0.6368 0.2078 25.3313);
   --destructive-foreground: oklch(1 0 0);
-  
+
   /* Border & Input */
   --border: oklch(0.3867 0 0);
   --input: oklch(0.3867 0 0);
   --ring: oklch(0.6487 0.1538 150.3071);
-  
+
   /* Charts (consistent across themes) */
   --chart-1: oklch(0.6487 0.1538 150.3071);
   --chart-2: oklch(0.588 0.0993 245.7394);
   --chart-3: oklch(0.6746 0.1414 261.338);
   --chart-4: oklch(0.8269 0.108 211.9627);
   --chart-5: oklch(0.5905 0.1608 148.2409);
-  
+
   /* Sidebar */
   --sidebar: oklch(0.2303 0.0125 264.2926);
   --sidebar-foreground: oklch(0.9219 0 0);
@@ -203,7 +207,7 @@ Set up the complete CSS variable system with OKLCH colors and implement theme pr
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -233,12 +237,12 @@ bun install next-themes
 **Location**: `src/app/layout.tsx`
 
 ```tsx
-import { ThemeProvider } from 'next-themes'
+import { ThemeProvider } from "next-themes";
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="pt-br" suppressHydrationWarning>
@@ -254,11 +258,12 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }
 ```
 
 **Key points:**
+
 - `suppressHydrationWarning` prevents hydration mismatch
 - `attribute="class"` uses class-based theming
 - `enableSystem` detects OS theme preference
@@ -269,21 +274,21 @@ export default function RootLayout({
 **Location**: `src/components/theme-toggle.tsx`
 
 ```tsx
-'use client'
+"use client";
 
-import { Moon, Sun } from 'lucide-react'
-import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export function ThemeToggle() {
-  const { theme, setTheme, systemTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const { theme, setTheme, systemTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   // Prevent hydration mismatch
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
     return (
@@ -291,19 +296,19 @@ export function ThemeToggle() {
         <Sun className="h-5 w-5" />
         <span className="sr-only">Toggle theme</span>
       </Button>
-    )
+    );
   }
 
-  const currentTheme = theme === 'system' ? systemTheme : theme
-  const isDark = currentTheme === 'dark'
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const isDark = currentTheme === "dark";
 
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
       className="w-10 h-10 transition-colors hover:bg-accent"
-      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+      aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
     >
       {isDark ? (
         <Sun className="h-5 w-5 text-foreground" />
@@ -311,14 +316,15 @@ export function ThemeToggle() {
         <Moon className="h-5 w-5 text-foreground" />
       )}
       <span className="sr-only">
-        {isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        {isDark ? "Switch to light mode" : "Switch to dark mode"}
       </span>
     </Button>
-  )
+  );
 }
 ```
 
 **Features:**
+
 - Handles hydration properly
 - Accessible (ARIA labels, keyboard)
 - Smooth transitions
@@ -330,21 +336,21 @@ export function ThemeToggle() {
 **Location**: Update your navigation component (header/navbar)
 
 ```tsx
-import { ThemeToggle } from '@/components/theme-toggle'
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Navigation() {
   return (
     <nav className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo, nav links, etc. */}
-        
+
         <div className="flex items-center gap-4">
           {/* Other nav items */}
           <ThemeToggle />
         </div>
       </div>
     </nav>
-  )
+  );
 }
 ```
 
@@ -355,6 +361,7 @@ export function Navigation() {
 Test each item before moving to next phase:
 
 ### Visual Tests
+
 - [ ] Open app in browser
 - [ ] Click theme toggle - page should switch immediately
 - [ ] Background color changes (light: near-white, dark: dark blue-gray)
@@ -363,6 +370,7 @@ Test each item before moving to next phase:
 - [ ] Cards have proper background in both themes
 
 ### Technical Tests
+
 - [ ] No console errors
 - [ ] No hydration warnings
 - [ ] Theme persists on page reload
@@ -370,21 +378,25 @@ Test each item before moving to next phase:
 - [ ] Smooth transitions between themes (no flicker)
 
 ### Color Verification
+
 Use browser DevTools to verify CSS variables are applied:
 
 **Light Theme** (check in DevTools):
+
 ```css
 --background: oklch(0.9824 0.0013 286.3757)
---primary: oklch(0.6487 0.1538 150.3071)
+  --primary: oklch(0.6487 0.1538 150.3071);
 ```
 
 **Dark Theme** (check in DevTools):
+
 ```css
 --background: oklch(0.2303 0.0125 264.2926)
---primary: oklch(0.6487 0.1538 150.3071)  /* Same! */
+  --primary: oklch(0.6487 0.1538 150.3071) /* Same! */;
 ```
 
 ### Accessibility Tests
+
 - [ ] Keyboard navigation: Tab to theme toggle, Enter to activate
 - [ ] Screen reader announces current theme
 - [ ] Focus indicator visible on toggle button
@@ -399,6 +411,7 @@ Use browser DevTools to verify CSS variables are applied:
 **Symptoms**: Console warning about server/client mismatch
 
 **Solution**:
+
 ```tsx
 // In layout.tsx
 <html lang="pt-br" suppressHydrationWarning>
@@ -414,6 +427,7 @@ if (!mounted) return <LoadingSkeleton />
 **Symptoms**: Brief flash of wrong theme
 
 **Solution**:
+
 1. Ensure `suppressHydrationWarning` on `<html>`
 2. Use `disableTransitionOnChange={false}` in ThemeProvider
 3. Add this script to `layout.tsx` before children:
@@ -436,6 +450,7 @@ if (!mounted) return <LoadingSkeleton />
 **Symptoms**: Still seeing old colors
 
 **Solution**:
+
 1. Hard refresh browser (Cmd+Shift+R / Ctrl+Shift+F5)
 2. Clear browser cache
 3. Restart dev server
@@ -447,6 +462,7 @@ if (!mounted) return <LoadingSkeleton />
 **Symptoms**: Theme toggle missing from UI
 
 **Solution**:
+
 1. Check Button component exists (from shadcn)
 2. Verify lucide-react icons installed
 3. Check import path is correct
@@ -457,16 +473,19 @@ if (!mounted) return <LoadingSkeleton />
 ## 📊 Performance Considerations
 
 ### Theme Switching Performance
+
 - Should be instant (<50ms)
 - No layout shifts
 - Smooth transitions
 
 ### CSS Variable Performance
+
 - OKLCH is well-supported in modern browsers
 - Fallbacks not needed for target browsers (2024+)
 - CSS variables have minimal performance impact
 
 ### Bundle Size
+
 - `next-themes`: ~2KB gzipped
 - No additional libraries needed
 
@@ -475,22 +494,27 @@ if (!mounted) return <LoadingSkeleton />
 ## 🎨 Design System Compliance
 
 ### Color Usage
+
 ✅ **Correct**:
+
 ```tsx
 <div className="bg-primary text-primary-foreground">CTA</div>
 <Card className="bg-card text-card-foreground">Content</Card>
 ```
 
 ❌ **Incorrect**:
+
 ```tsx
 <div className="bg-green-600">CTA</div>  {/* Don't use Tailwind colors directly */}
 <Card className="bg-white">Content</Card>  {/* Use design tokens */}
 ```
 
 ### Theme-Aware Components
+
 All components should automatically adapt to theme via CSS variables.
 
 No need for conditional classes like:
+
 ```tsx
 // ❌ Don't do this
 <div className={theme === 'dark' ? 'bg-gray-900' : 'bg-white'}>
@@ -511,10 +535,13 @@ No need for conditional classes like:
 CV-Match uses a dual-theme system (light/dark) with OKLCH color space for perceptually uniform colors.
 
 ### Toggle Theme
+
 Use the theme toggle in the navigation bar or let the system detect your OS preference.
 
 ### For Developers
+
 Always use CSS variables from the design system:
+
 - `bg-background` instead of `bg-white`
 - `text-foreground` instead of `text-black`
 - `bg-primary` for CTAs (green)
@@ -528,6 +555,7 @@ Always use CSS variables from the design system:
 After completing this prompt:
 
 1. **Commit your changes**:
+
 ```bash
 git add .
 git commit -m "feat(design-system): Phase 1.1 - CSS variables and theme provider"
@@ -550,8 +578,8 @@ git commit -m "feat(design-system): Phase 1.1 - CSS variables and theme provider
 
 ---
 
-**Estimated Time**: 2 hours  
-**Complexity**: Medium  
-**Agent**: frontend-specialist  
+**Estimated Time**: 2 hours
+**Complexity**: Medium
+**Agent**: frontend-specialist
 
 **Status**: Ready for implementation ✅

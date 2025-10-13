@@ -6,7 +6,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api.router import api_router
 from app.core.config import settings
-from app.core.sentry import init_sentry, get_sentry_config
+from app.core.sentry import get_sentry_config, init_sentry
 from app.services.security import SecurityMiddleware
 
 # Initialize Sentry first (before other imports)
@@ -83,7 +83,7 @@ async def root():
         "security_enabled": settings.ENABLE_RATE_LIMITING,
         "sentry_enabled": sentry_config.enabled,
         "market": "brazil",
-        "locale": "pt-BR"
+        "locale": "pt-BR",
     }
 
 
@@ -95,9 +95,7 @@ async def sentry_health():
     # Test Sentry by capturing a test message in development
     if settings.ENVIRONMENT == "development" and sentry_config.enabled:
         sentry_config.add_breadcrumb(
-            message="Sentry health check accessed",
-            category="health",
-            level="info"
+            message="Sentry health check accessed", category="health", level="info"
         )
 
     return {
@@ -122,16 +120,14 @@ async def test_sentry_error():
         # Test exception handling
         raise ValueError("Este é um erro de teste para o Sentry - CV-Match Backend")
     except Exception as e:
-        sentry_config.capture_exception(e, {
-            "test_endpoint": True,
-            "market": "brazil",
-            "application": "cv-match-backend"
-        })
+        sentry_config.capture_exception(
+            e, {"test_endpoint": True, "market": "brazil", "application": "cv-match-backend"}
+        )
         return {
             "test_error_triggered": True,
             "error_message": str(e),
             "sentry_enabled": sentry_config.enabled,
-            "message": "Erro de teste capturado pelo Sentry"
+            "message": "Erro de teste capturado pelo Sentry",
         }
 
 

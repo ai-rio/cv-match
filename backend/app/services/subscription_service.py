@@ -3,18 +3,18 @@ Subscription management service for CV-Match.
 Handles subscription lifecycle, usage tracking, and rollover.
 """
 
-from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
 import logging
+from datetime import datetime
+from typing import Any
 
-from app.core.database import get_supabase_client
 from app.config.pricing import pricing_config
+from app.core.database import get_supabase_client
 from app.models.subscription import (
     SubscriptionCreate,
-    SubscriptionUpdate,
     SubscriptionDetails,
-    SubscriptionUsage,
     SubscriptionStatus,
+    SubscriptionUpdate,
+    SubscriptionUsage,
 )
 
 logger = logging.getLogger(__name__)
@@ -27,8 +27,7 @@ class SubscriptionService:
         self.supabase = get_supabase_client()
 
     async def create_subscription(
-        self,
-        subscription_data: SubscriptionCreate
+        self, subscription_data: SubscriptionCreate
     ) -> SubscriptionDetails:
         """
         Create a new subscription for a user.
@@ -51,9 +50,7 @@ class SubscriptionService:
         # Check for existing active subscription
         existing = await self.get_active_subscription(subscription_data.user_id)
         if existing:
-            raise ValueError(
-                f"User already has active subscription: {existing['tier_id']}"
-            )
+            raise ValueError(f"User already has active subscription: {existing['tier_id']}")
 
         # Calculate period (current month)
         now = datetime.utcnow()
@@ -93,10 +90,7 @@ class SubscriptionService:
 
         return await self.get_subscription_details(result.data[0]["id"])
 
-    async def get_subscription_details(
-        self,
-        subscription_id: str
-    ) -> SubscriptionDetails:
+    async def get_subscription_details(self, subscription_id: str) -> SubscriptionDetails:
         """
         Get complete subscription details with usage.
 
@@ -106,9 +100,13 @@ class SubscriptionService:
         Returns:
             Subscription details
         """
-        result = self.supabase.table("subscriptions").select("*").eq(
-            "id", subscription_id
-        ).single().execute()
+        result = (
+            self.supabase.table("subscriptions")
+            .select("*")
+            .eq("id", subscription_id)
+            .single()
+            .execute()
+        )
 
         if not result.data:
             raise ValueError(f"Subscription not found: {subscription_id}")
@@ -158,10 +156,7 @@ class SubscriptionService:
             updated_at=updated_at,
         )
 
-    async def get_active_subscription(
-        self,
-        user_id: str
-    ) -> Optional[Dict[str, Any]]:
+    async def get_active_subscription(self, user_id: str) -> dict[str, Any] | None:
         """
         Get user's active subscription if exists.
 
@@ -171,18 +166,22 @@ class SubscriptionService:
         Returns:
             Subscription data or None
         """
-        result = self.supabase.table("subscriptions").select("*").eq(
-            "user_id", user_id
-        ).eq("status", "active").order("created_at", desc=True).limit(1).execute()
+        result = (
+            self.supabase.table("subscriptions")
+            .select("*")
+            .eq("user_id", user_id)
+            .eq("status", "active")
+            .order("created_at", desc=True)
+            .limit(1)
+            .execute()
+        )
 
         if result.data and len(result.data) > 0:
             return result.data[0]
         return None
 
     async def update_subscription(
-        self,
-        subscription_id: str,
-        update_data: SubscriptionUpdate
+        self, subscription_id: str, update_data: SubscriptionUpdate
     ) -> SubscriptionDetails:
         """
         Update subscription details.
@@ -197,9 +196,12 @@ class SubscriptionService:
         update_dict = update_data.model_dump(exclude_none=True)
         update_dict["updated_at"] = datetime.utcnow().isoformat()
 
-        result = self.supabase.table("subscriptions").update(update_dict).eq(
-            "id", subscription_id
-        ).execute()
+        result = (
+            self.supabase.table("subscriptions")
+            .update(update_dict)
+            .eq("id", subscription_id)
+            .execute()
+        )
 
         if not result.data:
             raise ValueError(f"Failed to update subscription: {subscription_id}")
@@ -209,9 +211,7 @@ class SubscriptionService:
         return await self.get_subscription_details(subscription_id)
 
     async def cancel_subscription(
-        self,
-        subscription_id: str,
-        immediate: bool = False
+        self, subscription_id: str, immediate: bool = False
     ) -> SubscriptionDetails:
         """
         Cancel a subscription.
@@ -230,25 +230,21 @@ class SubscriptionService:
             "updated_at": datetime.utcnow().isoformat(),
         }
 
-        result = self.supabase.table("subscriptions").update(update_data).eq(
-            "id", subscription_id
-        ).execute()
+        result = (
+            self.supabase.table("subscriptions")
+            .update(update_data)
+            .eq("id", subscription_id)
+            .execute()
+        )
 
         if not result.data:
             raise ValueError(f"Failed to cancel subscription: {subscription_id}")
 
-        logger.info(
-            f"Canceled subscription {subscription_id} "
-            f"(immediate: {immediate})"
-        )
+        logger.info(f"Canceled subscription {subscription_id} (immediate: {immediate})")
 
         return await self.get_subscription_details(subscription_id)
 
-    async def use_analysis(
-        self,
-        user_id: str,
-        subscription_id: str
-    ) -> SubscriptionUsage:
+    async def use_analysis(self, user_id: str, subscription_id: str) -> SubscriptionUsage:
         """
         Record usage of one analysis from subscription.
 
@@ -265,24 +261,28 @@ class SubscriptionService:
         subscription = await self.get_subscription_details(subscription_id)
 
         if subscription.analyses_available <= 0:
-            raise ValueError(
-                "No analyses available. Limit reached for this period."
-            )
+            raise ValueError("No analyses available. Limit reached for this period.")
 
         # Increment usage
         new_usage = subscription.analyses_used_this_period + 1
 
-        result = self.supabase.table("subscriptions").update({
-            "analyses_used_this_period": new_usage,
-            "updated_at": datetime.utcnow().isoformat(),
-        }).eq("id", subscription_id).execute()
+        result = (
+            self.supabase.table("subscriptions")
+            .update(
+                {
+                    "analyses_used_this_period": new_usage,
+                    "updated_at": datetime.utcnow().isoformat(),
+                }
+            )
+            .eq("id", subscription_id)
+            .execute()
+        )
 
         if not result.data:
             raise ValueError("Failed to update usage")
 
         logger.info(
-            f"User {user_id} used analysis. "
-            f"Remaining: {subscription.analyses_available - 1}"
+            f"User {user_id} used analysis. Remaining: {subscription.analyses_available - 1}"
         )
 
         return SubscriptionUsage(
@@ -294,10 +294,7 @@ class SubscriptionService:
             period_end=subscription.current_period_end,
         )
 
-    async def process_period_renewal(
-        self,
-        subscription_id: str
-    ) -> SubscriptionDetails:
+    async def process_period_renewal(self, subscription_id: str) -> SubscriptionDetails:
         """
         Process monthly subscription renewal.
         Called by Stripe webhook on period renewal.
@@ -340,24 +337,21 @@ class SubscriptionService:
             "updated_at": datetime.utcnow().isoformat(),
         }
 
-        result = self.supabase.table("subscriptions").update(update_data).eq(
-            "id", subscription_id
-        ).execute()
+        result = (
+            self.supabase.table("subscriptions")
+            .update(update_data)
+            .eq("id", subscription_id)
+            .execute()
+        )
 
         if not result.data:
             raise ValueError("Failed to renew subscription period")
 
-        logger.info(
-            f"Renewed subscription {subscription_id}. "
-            f"Rollover: {new_rollover} analyses"
-        )
+        logger.info(f"Renewed subscription {subscription_id}. Rollover: {new_rollover} analyses")
 
         return await self.get_subscription_details(subscription_id)
 
-    async def get_subscription_status(
-        self,
-        user_id: str
-    ) -> SubscriptionStatus:
+    async def get_subscription_status(self, user_id: str) -> SubscriptionStatus:
         """
         Get quick status check for user subscription + credits.
 
@@ -381,9 +375,10 @@ class SubscriptionService:
 
         # Check for credits (existing credit system)
         # Import here to avoid circular imports
-        from app.services.usage_limit_service import UsageLimitService
-        from app.core.database import SupabaseSession
         from uuid import UUID
+
+        from app.core.database import SupabaseSession
+        from app.services.usage_limit_service import UsageLimitService
 
         usage_service = UsageLimitService(SupabaseSession())
         credits = await usage_service.get_user_credits(UUID(user_id))

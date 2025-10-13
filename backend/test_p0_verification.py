@@ -10,8 +10,9 @@ Requirements:
 4. All endpoints tested with UV package manager
 """
 
-import httpx
 import asyncio
+
+import httpx
 
 
 class P0Verifier:
@@ -87,8 +88,10 @@ class P0Verifier:
             sys.path.append("/app")
 
             # Import just to verify they exist
-            from app.models.resume import ResumeUploadResponse  # noqa: F401
-            from app.models.resume import ResumeResponse  # noqa: F401
+            from app.models.resume import (
+                ResumeResponse,  # noqa: F401
+                ResumeUploadResponse,  # noqa: F401
+            )
 
             self.log_verification(
                 "Resume Pydantic models defined", True, "ResumeUploadResponse, ResumeResponse"
@@ -170,9 +173,11 @@ class P0Verifier:
             sys.path.append("/app")
 
             # Import just to verify they exist
-            from app.models.optimization import StartOptimizationRequest  # noqa: F401
-            from app.models.optimization import OptimizationResponse  # noqa: F401
-            from app.models.optimization import OptimizationStatus
+            from app.models.optimization import (
+                OptimizationResponse,  # noqa: F401
+                OptimizationStatus,
+                StartOptimizationRequest,  # noqa: F401
+            )
 
             self.log_verification(
                 "Optimization Pydantic models defined",
@@ -319,8 +324,8 @@ class P0Verifier:
         # Check dependencies are available
         try:
             import fastapi  # noqa: F401
-            import pydantic  # noqa: F401
             import httpx  # noqa: F401
+            import pydantic  # noqa: F401
             import supabase  # noqa: F401
 
             self.log_verification(

@@ -5,23 +5,28 @@ This directory contains Cursor rules that provide context-aware guidance for dev
 ## Rule Structure
 
 ### Project-wide Rules
+
 - **`project-overview.mdc`**: Overall project standards and architecture principles (always applied)
 - **`development-workflow.mdc`**: Development workflow, commands, and troubleshooting
 
 ### Backend Rules (`backend/`)
+
 - **`fastapi-standards.mdc`**: FastAPI endpoint patterns and best practices
 - **`supabase-integration.mdc`**: Supabase service usage and patterns
 - **`llm-integration.mdc`**: LLM and embedding service integration
 
 ### Frontend Rules (`frontend/`)
+
 - **`nextjs-standards.mdc`**: Next.js component patterns and standards
 - **`supabase-auth.mdc`**: Frontend authentication patterns
 - **`api-integration.mdc`**: API client and service integration
 
 ### Database Rules
+
 - **`database-migrations.mdc`**: Migration patterns and SQL best practices
 
 ### Templates (`templates/`)
+
 - **`api-endpoint-template.mdc`**: Complete FastAPI endpoint template
 - **`react-component-template.mdc`**: Complete React component template
 - **`service-class-template.mdc`**: Service class pattern template
@@ -37,18 +42,23 @@ Rules are automatically applied based on:
 ## Using the Rules
 
 ### Automatic Application
+
 Rules automatically provide context when you're working with relevant files:
+
 - Editing Python files in `backend/` → Backend rules apply
 - Editing React components → Frontend rules apply
 - Working with migrations → Database rules apply
 
 ### Manual Reference
+
 Reference templates explicitly:
+
 - `@api-endpoint-template` - Get the FastAPI endpoint template
 - `@react-component-template` - Get the React component template
 - `@service-class-template` - Get the service class template
 
 ### Rule Types
+
 - **Always**: Applied to all conversations (project overview)
 - **Auto Attached**: Applied when working with matching files
 - **Agent Requested**: AI decides when to include based on context
@@ -69,6 +79,7 @@ For simpler use cases, the project also includes `AGENTS.md` in the root directo
 ## Customization
 
 Feel free to modify these rules to match your specific needs:
+
 - Add new rules for additional services or patterns
 - Modify existing rules to match your coding style
 - Create project-specific templates for common use cases

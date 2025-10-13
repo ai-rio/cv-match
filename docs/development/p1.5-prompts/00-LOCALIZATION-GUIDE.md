@@ -7,6 +7,7 @@
 ## 🚨 CRITICAL RULES
 
 ### ❌ NEVER DO THIS:
+
 ```tsx
 // ❌ WRONG - Hardcoded Portuguese
 <Button>Assinar Agora</Button>
@@ -15,6 +16,7 @@
 ```
 
 ### ✅ ALWAYS DO THIS:
+
 ```tsx
 // ✅ RIGHT - Using next-intl
 import { useTranslations } from 'next-intl';
@@ -41,12 +43,12 @@ const t = useTranslations('pricing');
   "subscriptions": {
     "title": "Escolha seu plano",
     "subtitle": "Encontre o plano perfeito para suas necessidades",
-    
+
     "tabs": {
       "credits": "Créditos (Flex)",
       "subscriptions": "Assinaturas (Flow)"
     },
-    
+
     "flow_starter": {
       "name": "Flow Starter",
       "description": "Assinatura mensal para quem busca oportunidades regularmente",
@@ -56,7 +58,7 @@ const t = useTranslations('pricing');
       "rollover": "Rollover de até {limit} análises",
       "cta": "Começar Agora"
     },
-    
+
     "flow_pro": {
       "name": "Flow Pro",
       "description": "Plano profissional para quem busca muitas oportunidades",
@@ -67,7 +69,7 @@ const t = useTranslations('pricing');
       "cta": "Assinar Agora",
       "popular": "Mais Popular"
     },
-    
+
     "features": {
       "ai_analysis": "Análise avançada com IA",
       "templates": "Modelos de currículo profissionais",
@@ -75,14 +77,14 @@ const t = useTranslations('pricing');
       "cancel_anytime": "Cancele quando quiser",
       "rollover": "Rollover de análises não usadas"
     },
-    
+
     "cancel": {
       "title": "Cancelar Assinatura",
       "description": "Tem certeza que deseja cancelar?",
       "confirm": "Sim, cancelar",
       "keep": "Manter assinatura"
     },
-    
+
     "manage": {
       "title": "Gerenciar Assinatura",
       "current_plan": "Plano atual",
@@ -97,12 +99,13 @@ const t = useTranslations('pricing');
 ```
 
 **Also create**: `frontend/locales/en/subscriptions.json`
+
 ```json
 {
   "subscriptions": {
     "title": "Choose your plan",
     "subtitle": "Find the perfect plan for your needs",
-    
+
     "flow_pro": {
       "name": "Flow Pro",
       "description": "Professional plan for serious job seekers",
@@ -120,25 +123,27 @@ const t = useTranslations('pricing');
 ### 2. Using Translations in Components
 
 #### Basic Usage:
-```tsx
-'use client';
 
-import { useTranslations } from 'next-intl';
+```tsx
+"use client";
+
+import { useTranslations } from "next-intl";
 
 export function SubscriptionCard() {
-  const t = useTranslations('subscriptions');
-  
+  const t = useTranslations("subscriptions");
+
   return (
     <Card>
-      <CardTitle>{t('flow_pro.name')}</CardTitle>
-      <CardDescription>{t('flow_pro.description')}</CardDescription>
-      <Button>{t('flow_pro.cta')}</Button>
+      <CardTitle>{t("flow_pro.name")}</CardTitle>
+      <CardDescription>{t("flow_pro.description")}</CardDescription>
+      <Button>{t("flow_pro.cta")}</Button>
     </Card>
   );
 }
 ```
 
 #### With Variables:
+
 ```tsx
 const t = useTranslations('subscriptions');
 
@@ -150,6 +155,7 @@ const t = useTranslations('subscriptions');
 ```
 
 #### With Pluralization:
+
 ```json
 {
   "remaining": {
@@ -161,7 +167,7 @@ const t = useTranslations('subscriptions');
 ```
 
 ```tsx
-<p>{t('remaining', { count: analyses })}</p>
+<p>{t("remaining", { count: analyses })}</p>
 ```
 
 ---
@@ -171,22 +177,23 @@ const t = useTranslations('subscriptions');
 **Use next-intl's number formatting**:
 
 ```tsx
-import { useFormatter } from 'next-intl';
+import { useFormatter } from "next-intl";
 
 const format = useFormatter();
 
 // Format currency
-const price = format.number(49.90, {
-  style: 'currency',
-  currency: 'BRL'
+const price = format.number(49.9, {
+  style: "currency",
+  currency: "BRL",
 });
 // Output: R$ 49,90
 
 // In component:
-<p>{price}</p>
+<p>{price}</p>;
 ```
 
 **OR define in translations**:
+
 ```json
 {
   "price_formatted": "R$ {amount}"
@@ -194,7 +201,7 @@ const price = format.number(49.90, {
 ```
 
 ```tsx
-<p>{t('price_formatted', { amount: '49,90' })}</p>
+<p>{t("price_formatted", { amount: "49,90" })}</p>
 ```
 
 ---
@@ -202,19 +209,21 @@ const price = format.number(49.90, {
 ### 4. Date Formatting
 
 ```tsx
-import { useFormatter } from 'next-intl';
+import { useFormatter } from "next-intl";
 
 const format = useFormatter();
 
 // Format date
-const nextBilling = format.dateTime(new Date('2025-11-10'), {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric'
+const nextBilling = format.dateTime(new Date("2025-11-10"), {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
 });
 // Output: 10 de novembro de 2025
 
-<p>{t('next_billing')}: {nextBilling}</p>
+<p>
+  {t("next_billing")}: {nextBilling}
+</p>;
 ```
 
 ---
@@ -222,6 +231,7 @@ const nextBilling = format.dateTime(new Date('2025-11-10'), {
 ### 5. Feature Lists
 
 **Translation file**:
+
 ```json
 {
   "features": {
@@ -236,17 +246,18 @@ const nextBilling = format.dateTime(new Date('2025-11-10'), {
 ```
 
 **Component**:
+
 ```tsx
-const t = useTranslations('subscriptions.features');
+const t = useTranslations("subscriptions.features");
 
 <ul>
-  {t.raw('list').map((feature: string, index: number) => (
+  {t.raw("list").map((feature: string, index: number) => (
     <li key={index}>
       <Check className="w-4 h-4" />
       {feature}
     </li>
   ))}
-</ul>
+</ul>;
 ```
 
 ---
@@ -280,15 +291,15 @@ const t = useTranslations('subscriptions');
 **For Server Components**, use different import:
 
 ```tsx
-import { getTranslations } from 'next-intl/server';
+import { getTranslations } from "next-intl/server";
 
 export default async function PricingPage() {
-  const t = await getTranslations('subscriptions');
-  
+  const t = await getTranslations("subscriptions");
+
   return (
     <div>
-      <h1>{t('title')}</h1>
-      <p>{t('subtitle')}</p>
+      <h1>{t("title")}</h1>
+      <p>{t("subtitle")}</p>
     </div>
   );
 }
@@ -304,14 +315,14 @@ export default async function PricingPage() {
 {
   "title": "Escolha seu plano",
   "subtitle": "Preços simples e transparentes para todos",
-  
+
   "tabs": {
     "credits": "Créditos",
     "subscriptions": "Assinaturas",
     "description_credits": "Pague por uso - créditos nunca expiram",
     "description_subscriptions": "Mensalidade com rollover de análises"
   },
-  
+
   "free": {
     "name": "Gratuito",
     "description": "Para experimentar nossa plataforma",
@@ -322,7 +333,7 @@ export default async function PricingPage() {
       "Exportação em texto"
     ]
   },
-  
+
   "flex_10": {
     "name": "Flex 10",
     "description": "Pacote de 10 créditos",
@@ -337,7 +348,7 @@ export default async function PricingPage() {
       "Exportação PDF e DOCX"
     ]
   },
-  
+
   "flex_25": {
     "name": "Flex 25",
     "description": "Pacote popular com melhor valor",
@@ -354,7 +365,7 @@ export default async function PricingPage() {
       "Suporte prioritário"
     ]
   },
-  
+
   "flex_50": {
     "name": "Flex 50",
     "description": "Para uso intensivo",
@@ -370,7 +381,7 @@ export default async function PricingPage() {
       "Análise detalhada"
     ]
   },
-  
+
   "flex_100": {
     "name": "Flex 100",
     "description": "Pacote empresarial",
@@ -385,7 +396,7 @@ export default async function PricingPage() {
       "Suporte dedicado"
     ]
   },
-  
+
   "flow_starter": {
     "name": "Flow Starter",
     "description": "Para buscas regulares",
@@ -402,7 +413,7 @@ export default async function PricingPage() {
       "Cancele quando quiser"
     ]
   },
-  
+
   "flow_pro": {
     "name": "Flow Pro",
     "description": "Para profissionais ativos",
@@ -422,7 +433,7 @@ export default async function PricingPage() {
       "Cancele quando quiser"
     ]
   },
-  
+
   "flow_business": {
     "name": "Flow Business",
     "description": "Para recrutadores",
@@ -441,7 +452,7 @@ export default async function PricingPage() {
       "Cancele quando quiser"
     ]
   },
-  
+
   "flow_enterprise": {
     "name": "Flow Enterprise",
     "description": "Solução personalizada",
@@ -457,7 +468,7 @@ export default async function PricingPage() {
       "Suporte 24/7"
     ]
   },
-  
+
   "comparison": {
     "title": "Compare os planos",
     "feature": "Recurso",
@@ -466,7 +477,7 @@ export default async function PricingPage() {
     "pro": "Pro",
     "business": "Business"
   },
-  
+
   "features_detailed": {
     "ai_analysis": "Análise avançada com IA",
     "ats_score": "Pontuação ATS",
@@ -479,7 +490,7 @@ export default async function PricingPage() {
     "sla": "SLA garantido",
     "csm": "Customer Success Manager"
   },
-  
+
   "billing": {
     "monthly": "Mensal",
     "yearly": "Anual",
@@ -487,7 +498,7 @@ export default async function PricingPage() {
     "billed_monthly": "Cobrado mensalmente",
     "billed_yearly": "Cobrado anualmente"
   },
-  
+
   "actions": {
     "subscribe": "Assinar",
     "buy_credits": "Comprar Créditos",
@@ -497,14 +508,14 @@ export default async function PricingPage() {
     "manage": "Gerenciar",
     "contact_sales": "Falar com Vendas"
   },
-  
+
   "status": {
     "active": "Ativa",
     "canceled": "Cancelada",
     "past_due": "Pagamento atrasado",
     "trialing": "Período de teste"
   },
-  
+
   "manage_subscription": {
     "title": "Gerenciar Assinatura",
     "current_plan": "Plano atual",
@@ -517,7 +528,7 @@ export default async function PricingPage() {
     "update_payment": "Atualizar pagamento",
     "cancel_subscription": "Cancelar assinatura"
   },
-  
+
   "cancel_dialog": {
     "title": "Cancelar assinatura",
     "description": "Tem certeza que deseja cancelar sua assinatura?",
@@ -530,7 +541,7 @@ export default async function PricingPage() {
     "feedback": "Por que você está cancelando?",
     "feedback_placeholder": "Seu feedback nos ajuda a melhorar..."
   },
-  
+
   "upgrade_dialog": {
     "title": "Fazer upgrade",
     "from": "De {current}",
@@ -539,14 +550,14 @@ export default async function PricingPage() {
     "confirm": "Confirmar upgrade",
     "cancel": "Voltar"
   },
-  
+
   "success": {
     "subscribed": "Assinatura ativada com sucesso!",
     "upgraded": "Upgrade realizado com sucesso!",
     "downgraded": "Plano alterado com sucesso!",
     "canceled": "Assinatura cancelada"
   },
-  
+
   "errors": {
     "payment_failed": "Falha no pagamento",
     "subscription_not_found": "Assinatura não encontrada",
@@ -575,36 +586,42 @@ export default async function PricingPage() {
 ## 🚨 Common Mistakes to AVOID
 
 ### ❌ Mistake 1: Hardcoded Text
+
 ```tsx
-<Button>Assinar Agora</Button>  // WRONG!
+<Button>Assinar Agora</Button> // WRONG!
 ```
 
 ### ✅ Solution:
+
 ```tsx
-<Button>{t('flow_pro.cta')}</Button>  // CORRECT!
+<Button>{t("flow_pro.cta")}</Button> // CORRECT!
 ```
 
 ---
 
 ### ❌ Mistake 2: Hardcoded Currency
+
 ```tsx
-<p>R$ {price}</p>  // WRONG!
+<p>R$ {price}</p> // WRONG!
 ```
 
 ### ✅ Solution:
+
 ```tsx
 const format = useFormatter();
-<p>{format.number(price, { style: 'currency', currency: 'BRL' })}</p>
+<p>{format.number(price, { style: "currency", currency: "BRL" })}</p>;
 ```
 
 ---
 
 ### ❌ Mistake 3: Inline Pluralization
+
 ```tsx
-<p>{count === 1 ? 'análise' : 'análises'}</p>  // WRONG!
+<p>{count === 1 ? "análise" : "análises"}</p> // WRONG!
 ```
 
 ### ✅ Solution:
+
 ```json
 {
   "analyses": {
@@ -613,8 +630,9 @@ const format = useFormatter();
   }
 }
 ```
+
 ```tsx
-<p>{t('analyses', { count })}</p>
+<p>{t("analyses", { count })}</p>
 ```
 
 ---
@@ -642,6 +660,7 @@ grep -r "Assinar\|Cancelar\|R\$" app/ components/ --include="*.tsx" --exclude="l
 ## ✅ Success Criteria
 
 Agent successfully implements i18n when:
+
 - [ ] NO hardcoded Portuguese/English in components
 - [ ] ALL text uses `useTranslations()`
 - [ ] Currency uses `useFormatter()`

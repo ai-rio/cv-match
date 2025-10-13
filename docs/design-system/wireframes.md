@@ -1,7 +1,7 @@
 # 📐 CV-Match ASCII Wireframes
 
-**Version:** 1.0  
-**Last Updated:** October 12, 2025  
+**Version:** 1.0
+**Last Updated:** October 12, 2025
 **Purpose:** Visual layout specifications for key screens
 
 ---
@@ -768,6 +768,6 @@ SPECIAL NOTES:
 
 ---
 
-**Last Updated:** October 12, 2025  
-**Next Review:** After Phase 1 implementation  
+**Last Updated:** October 12, 2025
+**Next Review:** After Phase 1 implementation
 **Maintained by:** CV-Match Design Team

@@ -25,10 +25,12 @@ from app.services.score_improvement_service import ScoreImprovementService
 from app.services.supabase.database import SupabaseDatabaseService
 from app.services.usage_limit_service import UsageLimitService
 
+
 # Database dependency
 async def get_db() -> SupabaseSession:
     """Get database session."""
     return SupabaseSession()
+
 
 logger = logging.getLogger(__name__)
 
@@ -162,7 +164,10 @@ class ExtendedScoreImprovementService(ScoreImprovementService):
         return [opt for opt in optimizations if opt.get("user_id") == user_id]
 
     async def update_optimization_status(
-        self, optimization_id: str, status: OptimizationStatus, results: dict[str, Any] | None = None
+        self,
+        optimization_id: str,
+        status: OptimizationStatus,
+        results: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """
         Update optimization status and results.
@@ -190,7 +195,7 @@ class ExtendedScoreImprovementService(ScoreImprovementService):
 async def start_optimization(
     request: StartOptimizationRequest,
     current_user: dict = Depends(check_credits),
-    db: SupabaseSession = Depends(get_db)
+    db: SupabaseSession = Depends(get_db),
 ) -> OptimizationResponse:
     """
     Start resume optimization process.
@@ -247,9 +252,7 @@ async def start_optimization(
         if credit_cost > 0:
             # Deduct credits atomically
             credit_deducted = await usage_limit_service.deduct_credits(
-                user_id=user_id,
-                amount=credit_cost,
-                operation_id=result["id"]
+                user_id=user_id, amount=credit_cost, operation_id=result["id"]
             )
 
             if not credit_deducted:
@@ -258,20 +261,21 @@ async def start_optimization(
                 await optimization_service.update_optimization_status(
                     optimization_id=result["id"],
                     status=OptimizationStatus.FAILED,
-                    results={"error_message": "Failed to deduct credits"}
+                    results={"error_message": "Failed to deduct credits"},
                 )
                 raise HTTPException(
                     status_code=status.HTTP_402_PAYMENT_REQUIRED,
-                    detail="Failed to deduct credits. Please check your credit balance."
+                    detail="Failed to deduct credits. Please check your credit balance.",
                 )
 
         # Update status to processing since credits have been deducted
         await optimization_service.update_optimization_status(
-            optimization_id=result["id"],
-            status=OptimizationStatus.PROCESSING
+            optimization_id=result["id"], status=OptimizationStatus.PROCESSING
         )
 
-        logger.info(f"Optimization {result['id']} started for user {current_user['id']}, {credit_cost} credits deducted")
+        logger.info(
+            f"Optimization {result['id']} started for user {current_user['id']}, {credit_cost} credits deducted"
+        )
 
         return OptimizationResponse(
             id=result["id"],
@@ -420,7 +424,7 @@ async def list_optimizations(
 async def process_optimization(
     optimization_id: str,
     current_user: dict = Depends(require_pro_or_credits),
-    db: SupabaseSession = Depends(get_db)
+    db: SupabaseSession = Depends(get_db),
 ) -> OptimizationDetailResponse:
     """
     Process an optimization (perform the actual analysis).
@@ -547,8 +551,7 @@ async def process_optimization(
 
 @router.get("/credits/check")
 async def check_user_credits(
-    current_user: dict = Depends(get_current_user),
-    db: SupabaseSession = Depends(get_db)
+    current_user: dict = Depends(get_current_user), db: SupabaseSession = Depends(get_db)
 ):
     """
     Check user's current credit balance and status.
@@ -582,12 +585,10 @@ async def check_user_credits(
                 "free_optimizations_used": usage_stats.free_optimizations_used,
                 "paid_optimizations_used": usage_stats.paid_optimizations_used,
                 "total_optimizations_this_month": usage_stats.total_optimizations_this_month,
-                "can_optimize": usage_stats.can_optimize
-            }
+                "can_optimize": usage_stats.can_optimize,
+            },
         }
 
     except Exception as e:
         logger.error(f"Failed to check credits for user {current_user['id']}: {str(e)}")
-        raise HTTPException(
-            status_code=500, detail="Failed to retrieve credit information"
-        )
+        raise HTTPException(status_code=500, detail="Failed to retrieve credit information")

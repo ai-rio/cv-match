@@ -12,8 +12,8 @@ from uuid import UUID, uuid4
 
 import pytest
 
-from app.services.usage_limit_service import UsageLimitService
 from app.core.database import SupabaseSession
+from app.services.usage_limit_service import UsageLimitService
 
 
 @pytest.mark.unit
@@ -34,15 +34,16 @@ class TestCreditAtomicity:
         """Test successful atomic credit deduction via RPC function."""
         # Mock successful atomic deduction
         mock_result = MagicMock()
-        mock_result.data = [{
-            "success": True,
-            "new_balance": 45,
-            "previous_balance": 50,
-            "deducted_amount": 5
-        }]
+        mock_result.data = [
+            {"success": True, "new_balance": 45, "previous_balance": 50, "deducted_amount": 5}
+        ]
 
-        with patch.object(self.db.client, 'rpc', return_value=mock_result):
-            with patch.object(self.db.client.table, 'insert', return_value=MagicMock(data=[{"id": "transaction_123"}])):
+        with patch.object(self.db.client, "rpc", return_value=mock_result):
+            with patch.object(
+                self.db.client.table,
+                "insert",
+                return_value=MagicMock(data=[{"id": "transaction_123"}]),
+            ):
                 result = await self.service.deduct_credits(self.test_user_id, 5, "operation_123")
 
         assert result is True
@@ -52,13 +53,11 @@ class TestCreditAtomicity:
         """Test atomic credit deduction with insufficient funds."""
         # Mock insufficient funds response
         mock_result = MagicMock()
-        mock_result.data = [{
-            "success": False,
-            "reason": "insufficient_credits",
-            "current_balance": 3
-        }]
+        mock_result.data = [
+            {"success": False, "reason": "insufficient_credits", "current_balance": 3}
+        ]
 
-        with patch.object(self.db.client, 'rpc', return_value=mock_result):
+        with patch.object(self.db.client, "rpc", return_value=mock_result):
             result = await self.service.deduct_credits(self.test_user_id, 5, "operation_123")
 
         assert result is False
@@ -75,7 +74,7 @@ class TestCreditAtomicity:
             "id": "credit_123",
             "user_id": str(self.test_user_id),
             "credits_remaining": initial_balance,
-            "total_credits": initial_balance
+            "total_credits": initial_balance,
         }
 
         # Track successful deductions
@@ -87,15 +86,23 @@ class TestCreditAtomicity:
 
             if remaining_balance >= deduction_amount:
                 mock_result = MagicMock()
-                mock_result.data = [{
-                    "success": True,
-                    "new_balance": remaining_balance - deduction_amount,
-                    "deducted_amount": deduction_amount
-                }]
+                mock_result.data = [
+                    {
+                        "success": True,
+                        "new_balance": remaining_balance - deduction_amount,
+                        "deducted_amount": deduction_amount,
+                    }
+                ]
 
-                with patch.object(self.db.client, 'rpc', return_value=mock_result):
-                    with patch.object(self.db.client.table, 'insert', return_value=MagicMock(data=[{"id": f"transaction_{uuid4()}"}])):
-                        result = await self.service.deduct_credits(self.test_user_id, deduction_amount, f"op_{uuid4()}")
+                with patch.object(self.db.client, "rpc", return_value=mock_result):
+                    with patch.object(
+                        self.db.client.table,
+                        "insert",
+                        return_value=MagicMock(data=[{"id": f"transaction_{uuid4()}"}]),
+                    ):
+                        result = await self.service.deduct_credits(
+                            self.test_user_id, deduction_amount, f"op_{uuid4()}"
+                        )
 
                 if result:
                     successful_deductions.append(1)
@@ -103,14 +110,18 @@ class TestCreditAtomicity:
             else:
                 # Simulate insufficient funds
                 mock_result = MagicMock()
-                mock_result.data = [{
-                    "success": False,
-                    "reason": "insufficient_credits",
-                    "current_balance": remaining_balance
-                }]
+                mock_result.data = [
+                    {
+                        "success": False,
+                        "reason": "insufficient_credits",
+                        "current_balance": remaining_balance,
+                    }
+                ]
 
-                with patch.object(self.db.client, 'rpc', return_value=mock_result):
-                    result = await self.service.deduct_credits(self.test_user_id, deduction_amount, f"op_{uuid4()}")
+                with patch.object(self.db.client, "rpc", return_value=mock_result):
+                    result = await self.service.deduct_credits(
+                        self.test_user_id, deduction_amount, f"op_{uuid4()}"
+                    )
 
                 return False
 
@@ -120,7 +131,9 @@ class TestCreditAtomicity:
 
         # Verify results
         successful_count = sum(results)
-        assert successful_count == num_concurrent_operations  # All should succeed with initial balance
+        assert (
+            successful_count == num_concurrent_operations
+        )  # All should succeed with initial balance
         assert len(successful_deductions) == num_concurrent_operations
 
     @pytest.mark.asyncio
@@ -135,23 +148,28 @@ class TestCreditAtomicity:
             "id": "credit_123",
             "user_id": str(self.test_user_id),
             "credits_remaining": current_balance,
-            "total_credits": 50
+            "total_credits": 50,
         }
 
         # Mock successful update with optimistic locking
-        updated_credits = {
-            **mock_credits,
-            "credits_remaining": current_balance - 5
-        }
+        updated_credits = {**mock_credits, "credits_remaining": current_balance - 5}
 
-        with patch.object(self.db.client.table, 'select') as mock_select:
+        with patch.object(self.db.client.table, "select") as mock_select:
             mock_select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
 
-            with patch.object(self.db.client.table, 'update') as mock_update:
-                mock_update.return_value.eq.return_value.eq.return_value.execute.return_value.data = [updated_credits]
+            with patch.object(self.db.client.table, "update") as mock_update:
+                mock_update.return_value.eq.return_value.eq.return_value.execute.return_value.data = [
+                    updated_credits
+                ]
 
-                with patch.object(self.db.client.table, 'insert', return_value=MagicMock(data=[{"id": "transaction_123"}])):
-                    result = await self.service.deduct_credits_fallback(self.test_user_id, 5, "operation_123")
+                with patch.object(
+                    self.db.client.table,
+                    "insert",
+                    return_value=MagicMock(data=[{"id": "transaction_123"}]),
+                ):
+                    result = await self.service.deduct_credits_fallback(
+                        self.test_user_id, 5, "operation_123"
+                    )
 
         assert result is True
 
@@ -166,20 +184,28 @@ class TestCreditAtomicity:
             "id": "credit_123",
             "user_id": str(self.test_user_id),
             "credits_remaining": current_balance,
-            "total_credits": 50
+            "total_credits": 50,
         }
 
         # First attempt: simulate race condition (no rows updated)
-        with patch.object(self.db.client.table, 'select') as mock_select:
+        with patch.object(self.db.client.table, "select") as mock_select:
             mock_select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
 
-            with patch.object(self.db.client.table, 'update') as mock_update:
+            with patch.object(self.db.client.table, "update") as mock_update:
                 # Simulate no rows updated (race condition)
                 mock_update.return_value.eq.return_value.eq.return_value.execute.return_value.data = []
 
-                with patch.object(self.db.client.table, 'insert', return_value=MagicMock(data=[{"id": "transaction_123"}])):
-                    with patch.object(self.service, 'deduct_credits', return_value=True) as mock_retry:
-                        result = await self.service.deduct_credits_fallback(self.test_user_id, deduction_amount, "operation_123")
+                with patch.object(
+                    self.db.client.table,
+                    "insert",
+                    return_value=MagicMock(data=[{"id": "transaction_123"}]),
+                ):
+                    with patch.object(
+                        self.service, "deduct_credits", return_value=True
+                    ) as mock_retry:
+                        result = await self.service.deduct_credits_fallback(
+                            self.test_user_id, deduction_amount, "operation_123"
+                        )
 
         # Should have attempted retry
         assert result is True  # Retry succeeded
@@ -197,23 +223,29 @@ class TestCreditAtomicity:
         async def add_credits():
             # Mock credit addition
             mock_add_result = MagicMock()
-            mock_add_result.data = [{
-                "id": "credit_123",
-                "credits_remaining": initial_balance + len(operations_completed) * add_amount,
-                "total_credits": initial_balance + len(operations_completed) * add_amount
-            }]
-
-            with patch.object(self.db.client.table, 'select') as mock_select:
-                mock_select.return_value.eq.return_value.execute.return_value.data = [{
+            mock_add_result.data = [
+                {
                     "id": "credit_123",
-                    "user_id": str(self.test_user_id),
-                    "credits_remaining": initial_balance,
-                    "total_credits": initial_balance
-                }]
+                    "credits_remaining": initial_balance + len(operations_completed) * add_amount,
+                    "total_credits": initial_balance + len(operations_completed) * add_amount,
+                }
+            ]
 
-                with patch.object(self.db.client.table, 'update', return_value=mock_add_result):
-                    with patch.object(self.db.client.table, 'insert', return_value=MagicMock()):
-                        result = await self.service.add_credits(self.test_user_id, add_amount, "test", "Test addition")
+            with patch.object(self.db.client.table, "select") as mock_select:
+                mock_select.return_value.eq.return_value.execute.return_value.data = [
+                    {
+                        "id": "credit_123",
+                        "user_id": str(self.test_user_id),
+                        "credits_remaining": initial_balance,
+                        "total_credits": initial_balance,
+                    }
+                ]
+
+                with patch.object(self.db.client.table, "update", return_value=mock_add_result):
+                    with patch.object(self.db.client.table, "insert", return_value=MagicMock()):
+                        result = await self.service.add_credits(
+                            self.test_user_id, add_amount, "test", "Test addition"
+                        )
                         operations_completed.append(("add", add_amount))
                         return result
 
@@ -221,19 +253,24 @@ class TestCreditAtomicity:
             # Wait for some additions first
             await asyncio.sleep(0.01)
 
-            current_balance = initial_balance + sum(amount for op_type, amount in operations_completed if op_type == "add")
-            current_balance -= sum(amount for op_type, amount in operations_completed if op_type == "deduct")
+            current_balance = initial_balance + sum(
+                amount for op_type, amount in operations_completed if op_type == "add"
+            )
+            current_balance -= sum(
+                amount for op_type, amount in operations_completed if op_type == "deduct"
+            )
 
             if current_balance >= deduct_amount:
                 mock_deduct_result = MagicMock()
-                mock_deduct_result.data = [{
-                    "success": True,
-                    "new_balance": current_balance - deduct_amount
-                }]
+                mock_deduct_result.data = [
+                    {"success": True, "new_balance": current_balance - deduct_amount}
+                ]
 
-                with patch.object(self.db.client, 'rpc', return_value=mock_deduct_result):
-                    with patch.object(self.db.client.table, 'insert', return_value=MagicMock()):
-                        result = await self.service.deduct_credits(self.test_user_id, deduct_amount, f"op_{uuid4()}")
+                with patch.object(self.db.client, "rpc", return_value=mock_deduct_result):
+                    with patch.object(self.db.client.table, "insert", return_value=MagicMock()):
+                        result = await self.service.deduct_credits(
+                            self.test_user_id, deduct_amount, f"op_{uuid4()}"
+                        )
                         operations_completed.append(("deduct", deduct_amount))
                         return result
             else:
@@ -249,7 +286,9 @@ class TestCreditAtomicity:
 
         # Verify final state
         total_added = sum(amount for op_type, amount in operations_completed if op_type == "add")
-        total_deducted = sum(amount for op_type, amount in operations_completed if op_type == "deduct")
+        total_deducted = sum(
+            amount for op_type, amount in operations_completed if op_type == "deduct"
+        )
         final_balance = initial_balance + total_added - total_deducted
 
         assert final_balance >= 0  # Should never go negative
@@ -260,20 +299,20 @@ class TestCreditAtomicity:
         """Test credit deduction transaction rollback on failure."""
         # Mock successful credit deduction
         mock_deduct_result = MagicMock()
-        mock_deduct_result.data = [{
-            "success": True,
-            "new_balance": 45,
-            "deducted_amount": 5
-        }]
+        mock_deduct_result.data = [{"success": True, "new_balance": 45, "deducted_amount": 5}]
 
         # Mock transaction recording failure
-        with patch.object(self.db.client, 'rpc', return_value=mock_deduct_result):
-            with patch.object(self.db.client.table, 'insert', side_effect=Exception("Database error")):
+        with patch.object(self.db.client, "rpc", return_value=mock_deduct_result):
+            with patch.object(
+                self.db.client.table, "insert", side_effect=Exception("Database error")
+            ):
                 # Should still return True because credits were already deducted atomically
                 # Transaction recording failure should not affect the deduction itself
                 result = await self.service.deduct_credits(self.test_user_id, 5, "operation_123")
 
-        assert result is True  # Credits were deducted, transaction logging failed but didn't break the operation
+        assert (
+            result is True
+        )  # Credits were deducted, transaction logging failed but didn't break the operation
 
     @pytest.mark.asyncio
     async def test_credit_deduction_with_multiple_operations(self):
@@ -286,33 +325,41 @@ class TestCreditAtomicity:
         remaining_balance = initial_balance
 
         for i, cost in enumerate(operation_costs):
-            operation_id = f"multi_op_{i+1}"
+            operation_id = f"multi_op_{i + 1}"
 
             if remaining_balance >= cost:
                 mock_result = MagicMock()
-                mock_result.data = [{
-                    "success": True,
-                    "new_balance": remaining_balance - cost,
-                    "deducted_amount": cost
-                }]
+                mock_result.data = [
+                    {
+                        "success": True,
+                        "new_balance": remaining_balance - cost,
+                        "deducted_amount": cost,
+                    }
+                ]
 
-                with patch.object(self.db.client, 'rpc', return_value=mock_result):
-                    with patch.object(self.db.client.table, 'insert', return_value=MagicMock()):
-                        result = await self.service.deduct_credits(self.test_user_id, cost, operation_id)
+                with patch.object(self.db.client, "rpc", return_value=mock_result):
+                    with patch.object(self.db.client.table, "insert", return_value=MagicMock()):
+                        result = await self.service.deduct_credits(
+                            self.test_user_id, cost, operation_id
+                        )
 
                 assert result is True
                 remaining_balance -= cost
             else:
                 # Should fail when insufficient credits
                 mock_result = MagicMock()
-                mock_result.data = [{
-                    "success": False,
-                    "reason": "insufficient_credits",
-                    "current_balance": remaining_balance
-                }]
+                mock_result.data = [
+                    {
+                        "success": False,
+                        "reason": "insufficient_credits",
+                        "current_balance": remaining_balance,
+                    }
+                ]
 
-                with patch.object(self.db.client, 'rpc', return_value=mock_result):
-                    result = await self.service.deduct_credits(self.test_user_id, cost, operation_id)
+                with patch.object(self.db.client, "rpc", return_value=mock_result):
+                    result = await self.service.deduct_credits(
+                        self.test_user_id, cost, operation_id
+                    )
 
                 assert result is False
                 break
@@ -329,29 +376,41 @@ class TestCreditAtomicity:
 
         # First deduction
         mock_result_1 = MagicMock()
-        mock_result_1.data = [{
-            "success": True,
-            "new_balance": 45,
-            "deducted_amount": deduction_amount
-        }]
+        mock_result_1.data = [
+            {"success": True, "new_balance": 45, "deducted_amount": deduction_amount}
+        ]
 
-        with patch.object(self.db.client, 'rpc', return_value=mock_result_1):
-            with patch.object(self.db.client.table, 'insert', return_value=MagicMock(data=[{"id": "transaction_123"}])):
-                result1 = await self.service.deduct_credits(self.test_user_id, deduction_amount, operation_id)
+        with patch.object(self.db.client, "rpc", return_value=mock_result_1):
+            with patch.object(
+                self.db.client.table,
+                "insert",
+                return_value=MagicMock(data=[{"id": "transaction_123"}]),
+            ):
+                result1 = await self.service.deduct_credits(
+                    self.test_user_id, deduction_amount, operation_id
+                )
 
         assert result1 is True
 
         # Second deduction with same operation ID
         mock_result_2 = MagicMock()
-        mock_result_2.data = [{
-            "success": True,
-            "new_balance": 45,  # Should be the same (idempotent)
-            "deducted_amount": 0  # Should not deduct again
-        }]
+        mock_result_2.data = [
+            {
+                "success": True,
+                "new_balance": 45,  # Should be the same (idempotent)
+                "deducted_amount": 0,  # Should not deduct again
+            }
+        ]
 
-        with patch.object(self.db.client, 'rpc', return_value=mock_result_2):
-            with patch.object(self.db.client.table, 'insert', return_value=MagicMock(data=[{"id": "transaction_123"}])):
-                result2 = await self.service.deduct_credits(self.test_user_id, deduction_amount, operation_id)
+        with patch.object(self.db.client, "rpc", return_value=mock_result_2):
+            with patch.object(
+                self.db.client.table,
+                "insert",
+                return_value=MagicMock(data=[{"id": "transaction_123"}]),
+            ):
+                result2 = await self.service.deduct_credits(
+                    self.test_user_id, deduction_amount, operation_id
+                )
 
         assert result2 is True
         # Note: True idempotency would require checking if operation_id already exists
@@ -362,14 +421,10 @@ class TestCreditAtomicity:
         """Test credit deduction handling with operation timeout."""
         # Mock database timeout
         mock_result = MagicMock()
-        mock_result.data = [{
-            "success": False,
-            "reason": "timeout",
-            "error": "Operation timed out"
-        }]
+        mock_result.data = [{"success": False, "reason": "timeout", "error": "Operation timed out"}]
 
-        with patch.object(self.db.client, 'rpc', return_value=mock_result):
-            with patch.object(self.db.client.table, 'insert', return_value=MagicMock()):
+        with patch.object(self.db.client, "rpc", return_value=mock_result):
+            with patch.object(self.db.client.table, "insert", return_value=MagicMock()):
                 result = await self.service.deduct_credits(self.test_user_id, 5, "operation_123")
 
         # Should handle timeout gracefully
@@ -381,14 +436,16 @@ class TestCreditAtomicity:
         """Test credit deduction with database connection pool exhaustion."""
         # Mock connection pool exhaustion
         mock_result = MagicMock()
-        mock_result.data = [{
-            "success": False,
-            "reason": "connection_exhausted",
-            "error": "No available database connections"
-        }]
+        mock_result.data = [
+            {
+                "success": False,
+                "reason": "connection_exhausted",
+                "error": "No available database connections",
+            }
+        ]
 
-        with patch.object(self.db.client, 'rpc', return_value=mock_result):
-            with patch.object(self.db.client.table, 'insert', return_value=MagicMock()):
+        with patch.object(self.db.client, "rpc", return_value=mock_result):
+            with patch.object(self.db.client.table, "insert", return_value=MagicMock()):
                 result = await self.service.deduct_credits(self.test_user_id, 5, "operation_123")
 
         # Should handle connection exhaustion gracefully
@@ -405,29 +462,35 @@ class TestCreditAtomicity:
 
         # Mock READ COMMITTED isolation level behavior
         mock_read_committed_result = MagicMock()
-        mock_read_committed_result.data = [{
-            "success": True,
-            "new_balance": initial_balance - 5,
-            "isolation_level": "READ_COMMITTED"
-        }]
+        mock_read_committed_result.data = [
+            {
+                "success": True,
+                "new_balance": initial_balance - 5,
+                "isolation_level": "READ_COMMITTED",
+            }
+        ]
 
-        with patch.object(self.db.client, 'rpc', return_value=mock_read_committed_result):
-            with patch.object(self.db.client.table, 'insert', return_value=MagicMock()):
+        with patch.object(self.db.client, "rpc", return_value=mock_read_committed_result):
+            with patch.object(self.db.client.table, "insert", return_value=MagicMock()):
                 result_rc = await self.service.deduct_credits(self.test_user_id, 5, "operation_rc")
 
         assert result_rc is True
 
         # Mock SERIALIZABLE isolation level behavior
         mock_serializable_result = MagicMock()
-        mock_serializable_result.data = [{
-            "success": True,
-            "new_balance": initial_balance - 10,
-            "isolation_level": "SERIALIZABLE"
-        }]
+        mock_serializable_result.data = [
+            {
+                "success": True,
+                "new_balance": initial_balance - 10,
+                "isolation_level": "SERIALIZABLE",
+            }
+        ]
 
-        with patch.object(self.db.client, 'rpc', return_value=mock_serializable_result):
-            with patch.object(self.db.client.table, 'insert', return_value=MagicMock()):
-                result_serializable = await self.service.deduct_credits(self.test_user_id, 10, "operation_serializable")
+        with patch.object(self.db.client, "rpc", return_value=mock_serializable_result):
+            with patch.object(self.db.client.table, "insert", return_value=MagicMock()):
+                result_serializable = await self.service.deduct_credits(
+                    self.test_user_id, 10, "operation_serializable"
+                )
 
         assert result_serializable is True
 
@@ -494,15 +557,11 @@ class TestCreditAtomicity:
             else:
                 # Simulate recovery
                 mock_result = MagicMock()
-                mock_result.data = [{
-                    "success": True,
-                    "new_balance": 45,
-                    "deducted_amount": 5
-                }]
+                mock_result.data = [{"success": True, "new_balance": 45, "deducted_amount": 5}]
                 return mock_result
 
         # Test circuit breaker behavior
-        with patch.object(self.db.client, 'rpc', side_effect=mock_rpc_with_circuit_breaker):
+        with patch.object(self.db.client, "rpc", side_effect=mock_rpc_with_circuit_breaker):
             # First few attempts should fail
             for i in range(max_failures):
                 with pytest.raises(UsageLimitError):
@@ -512,7 +571,7 @@ class TestCreditAtomicity:
             # Implementation would depend on specific circuit breaker pattern
 
             # After recovery, operations should succeed
-            with patch.object(self.db.client.table, 'insert', return_value=MagicMock()):
+            with patch.object(self.db.client.table, "insert", return_value=MagicMock()):
                 result = await self.service.deduct_credits(self.test_user_id, 5, "op_recovery")
 
             assert result is True
@@ -522,30 +581,30 @@ class TestCreditAtomicity:
         """Test credit deduction with deadlock detection and resolution."""
         # Mock deadlock scenario
         mock_deadlock_result = MagicMock()
-        mock_deadlock_result.data = [{
-            "success": False,
-            "reason": "deadlock_detected",
-            "error": "Deadlock detected, retry recommended"
-        }]
+        mock_deadlock_result.data = [
+            {
+                "success": False,
+                "reason": "deadlock_detected",
+                "error": "Deadlock detected, retry recommended",
+            }
+        ]
 
         # First attempt: deadlock
-        with patch.object(self.db.client, 'rpc', return_value=mock_deadlock_result):
-            with patch.object(self.db.client.table, 'insert', return_value=MagicMock()):
-                result1 = await self.service.deduct_credits(self.test_user_id, 5, "operation_deadlock")
+        with patch.object(self.db.client, "rpc", return_value=mock_deadlock_result):
+            with patch.object(self.db.client.table, "insert", return_value=MagicMock()):
+                result1 = await self.service.deduct_credits(
+                    self.test_user_id, 5, "operation_deadlock"
+                )
 
         # Should handle deadlock gracefully (possibly retry)
         # Implementation depends on specific deadlock handling strategy
 
         # Second attempt: success after retry
         mock_success_result = MagicMock()
-        mock_success_result.data = [{
-            "success": True,
-            "new_balance": 45,
-            "deducted_amount": 5
-        }]
+        mock_success_result.data = [{"success": True, "new_balance": 45, "deducted_amount": 5}]
 
-        with patch.object(self.db.client, 'rpc', return_value=mock_success_result):
-            with patch.object(self.db.client.table, 'insert', return_value=MagicMock()):
+        with patch.object(self.db.client, "rpc", return_value=mock_success_result):
+            with patch.object(self.db.client.table, "insert", return_value=MagicMock()):
                 result2 = await self.service.deduct_credits(self.test_user_id, 5, "operation_retry")
 
         assert result2 is True

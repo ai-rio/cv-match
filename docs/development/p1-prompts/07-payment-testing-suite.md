@@ -1,16 +1,18 @@
 # Agent Prompt: Payment Testing Suite
 
-**Agent**: test-writer-agent  
-**Phase**: 4 - Testing (Parallel with frontend)  
-**Priority**: P0  
-**Time**: 1.5 hours  
+**Agent**: test-writer-agent
+**Phase**: 4 - Testing (Parallel with frontend)
+**Priority**: P0
+**Time**: 1.5 hours
 
 ## Mission
+
 Write comprehensive tests for payment flow, webhooks, and credit management.
 
 ## Tasks
 
 ### Task 1: Webhook Tests (45min)
+
 ```python
 # tests/integration/test_payment_webhooks.py
 
@@ -35,6 +37,7 @@ def test_checkout_completed():
 ```
 
 ### Task 2: Credit Management Tests (45min)
+
 ```python
 # tests/unit/test_usage_limit_service.py
 
@@ -51,6 +54,7 @@ async def test_concurrent_deduction():
 ```
 
 ### Task 3: E2E Payment Flow (30min)
+
 ```python
 # tests/e2e/test_payment_flow.py
 
@@ -65,12 +69,14 @@ async def test_complete_payment_flow():
 ```
 
 ## Coverage Requirements
+
 - Webhook handling: 90%+
 - Credit management: 95%+
 - Payment endpoints: 85%+
 - Overall P1 code: 80%+
 
 ## Success Criteria
+
 - All payment tests pass
 - Webhook idempotency verified
 - Atomic operations tested

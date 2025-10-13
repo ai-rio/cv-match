@@ -1,7 +1,7 @@
 # 🚀 CV-Match UI/UX Quick Start Guide
 
-**Status:** Ready to implement  
-**Estimated Time to First Improvement:** 2-4 hours  
+**Status:** Ready to implement
+**Estimated Time to First Improvement:** 2-4 hours
 **Owner:** You (Carlos)
 
 ---
@@ -11,6 +11,7 @@
 > **"I'm lost about the UI/UX flow. Should /optimize be protected? How do we capture users?"**
 
 **Answer:** YES, protect `/optimize`. Use a **freemium funnel** where:
+
 1. Users sign up FIRST (with 3 free credits)
 2. Dashboard becomes the central hub
 3. Upgrade prompts come AFTER value is proven
@@ -26,11 +27,13 @@ This document gives you everything you need to start TODAY.
 **Task:** Read these docs and make key decisions
 
 **Documents to Review:**
+
 1. `/docs/ux-strategy.md` - Full strategy (15 min)
 2. `/docs/flow-comparison.md` - Current vs Proposed flows (10 min)
 3. `/docs/implementation-checklist.md` - Action items (10 min)
 
 **Decisions to Make:**
+
 - [ ] Free tier size: **3 or 5 credits?** → Recommend: **3**
 - [ ] Onboarding: **Required or optional?** → Recommend: **Optional (skippable)**
 - [ ] Credits reset: **Monthly or lifetime?** → Recommend: **Lifetime for free tier**
@@ -38,6 +41,7 @@ This document gives you everything you need to start TODAY.
 - [ ] Email service: **Resend, SendGrid, or other?** → Recommend: **Resend**
 
 **Write down your decisions here:**
+
 ```
 My decisions:
 - Free tier: ___ credits
@@ -56,80 +60,80 @@ My decisions:
 **File to Edit:** `frontend/middleware.ts`
 
 **Current Code:**
+
 ```typescript
 // Only handles i18n
 export default createMiddleware({
-  locales: ['pt-br', 'en'],
-  defaultLocale: 'pt-br',
-  localePrefix: 'always',
+  locales: ["pt-br", "en"],
+  defaultLocale: "pt-br",
+  localePrefix: "always",
 });
 ```
 
 **New Code:** (Copy & paste this)
 
 ```typescript
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import createIntlMiddleware from 'next-intl/middleware';
+import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import createIntlMiddleware from "next-intl/middleware";
 
 // Create i18n middleware
 const intlMiddleware = createIntlMiddleware({
-  locales: ['pt-br', 'en'],
-  defaultLocale: 'pt-br',
-  localePrefix: 'always',
+  locales: ["pt-br", "en"],
+  defaultLocale: "pt-br",
+  localePrefix: "always",
 });
 
 export async function middleware(req: NextRequest) {
   // 1. Handle i18n first
   const response = intlMiddleware(req);
-  
+
   // 2. Define protected routes
   const protectedPaths = [
-    '/optimize',
-    '/dashboard', 
-    '/history',
-    '/settings',
-    '/results'
+    "/optimize",
+    "/dashboard",
+    "/history",
+    "/settings",
+    "/results",
   ];
-  
+
   const path = req.nextUrl.pathname;
-  const locale = path.split('/')[1]; // pt-br or en
-  
+  const locale = path.split("/")[1]; // pt-br or en
+
   // Check if current path is protected
-  const isProtected = protectedPaths.some(p => 
-    path.includes(`/${locale}${p}`)
+  const isProtected = protectedPaths.some((p) =>
+    path.includes(`/${locale}${p}`),
   );
-  
+
   if (isProtected) {
     // 3. Check authentication
     const res = NextResponse.next();
     const supabase = createMiddlewareClient({ req, res });
-    const { data: { session } } = await supabase.auth.getSession();
-    
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
     if (!session) {
       // 4. Redirect to signup with return URL
       const signupUrl = new URL(`/${locale}/auth/signup`, req.url);
-      signupUrl.searchParams.set('redirect', path);
-      signupUrl.searchParams.set('message', 'signup_required');
-      
+      signupUrl.searchParams.set("redirect", path);
+      signupUrl.searchParams.set("message", "signup_required");
+
       return NextResponse.redirect(signupUrl);
     }
   }
-  
+
   return response;
 }
 
 export const config = {
-  matcher: [
-    '/',
-    '/(pt-br|en)/:path*',
-    '/((?!_next|_vercel|.*\\..*).*)',
-  ],
+  matcher: ["/", "/(pt-br|en)/:path*", "/((?!_next|_vercel|.*\\..*).*)"],
 };
 ```
 
 **Test it:**
+
 1. Save the file
 2. Restart your dev server: `bun run dev`
 3. Try to access `http://localhost:3000/pt-br/optimize` while logged out
@@ -159,7 +163,7 @@ export const config = {
       </Link>
     </Button>
   </div>
-  
+
   {/* Add trust badges below CTA */}
   <div className="mt-6 flex flex-wrap gap-4 justify-center text-sm text-gray-600">
     <span className="flex items-center gap-1">
@@ -185,6 +189,7 @@ export const config = {
 ```
 
 **Test it:**
+
 1. Go to your landing page
 2. CTA should say "Começar Grátis • 3 Créditos 🎁"
 3. Click it and verify it goes to signup
@@ -194,35 +199,40 @@ export const config = {
 
 ## 🎯 After 4 Hours, You Should Have:
 
-✅ Protected `/optimize` route with middleware  
-✅ Clear signup flow with redirect back  
-✅ Updated landing page CTA emphasizing free tier  
-✅ Trust badges to reduce friction  
-✅ Made key product decisions  
+✅ Protected `/optimize` route with middleware
+✅ Clear signup flow with redirect back
+✅ Updated landing page CTA emphasizing free tier
+✅ Trust badges to reduce friction
+✅ Made key product decisions
 
 ---
 
 ## 📅 Your 4-Week Roadmap
 
 ### Week 1: Foundation
+
 **Focus:** Core auth flow and basic improvements
 
 **Monday-Tuesday:**
+
 - [ ] Implement middleware protection (Done above! ✅)
 - [ ] Update landing page CTAs (Done above! ✅)
 - [ ] Clean up `/optimize` page (remove duplicate auth checks)
 
 **Wednesday-Thursday:**
+
 - [ ] Add credit counter to dashboard
 - [ ] Create upgrade modal component
 - [ ] Test entire flow end-to-end
 
 **Friday:**
+
 - [ ] Deploy to staging
 - [ ] Test with real users
 - [ ] Fix any critical bugs
 
 **Success Metrics:**
+
 - Users can't access `/optimize` without auth ✅
 - Clear free tier offering on landing ✅
 - Smoother signup → optimize flow ✅
@@ -230,24 +240,29 @@ export const config = {
 ---
 
 ### Week 2: Onboarding & Engagement
+
 **Focus:** Get users to their AHA moment faster
 
 **Monday-Tuesday:**
+
 - [ ] Create onboarding flow (3 steps)
 - [ ] Add first-time user tooltips
 - [ ] Implement "skip" functionality
 
 **Wednesday-Thursday:**
+
 - [ ] Set up email service (Resend)
 - [ ] Create welcome email template
 - [ ] Set up automated email triggers
 
 **Friday:**
+
 - [ ] Test onboarding on different devices
 - [ ] Verify emails are sending
 - [ ] A/B test onboarding vs no onboarding
 
 **Success Metrics:**
+
 - Signup → First optimization: Target 70%
 - Onboarding completion rate: Target 60%
 - Email open rate: Target 40%
@@ -255,14 +270,17 @@ export const config = {
 ---
 
 ### Week 3: Analytics & Optimization
+
 **Focus:** Understand user behavior and optimize
 
 **Monday-Tuesday:**
+
 - [ ] Install PostHog
 - [ ] Track key events (signup, optimization, upgrade)
 - [ ] Set up funnels
 
 **Wednesday-Thursday:**
+
 - [ ] Set up A/B tests
   - Test 1: CTA copy
   - Test 2: Free credit amount (3 vs 5)
@@ -270,11 +288,13 @@ export const config = {
 - [ ] Create metrics dashboard
 
 **Friday:**
+
 - [ ] Review initial data
 - [ ] Identify biggest drop-off points
 - [ ] Plan optimizations for Week 4
 
 **Success Metrics:**
+
 - All events tracking correctly ✅
 - Funnel conversion rates baseline established
 - At least 2 A/B tests running
@@ -282,29 +302,35 @@ export const config = {
 ---
 
 ### Week 4: Polish & Launch
+
 **Focus:** Final touches and go-live
 
 **Monday-Tuesday:**
+
 - [ ] Mobile optimization
 - [ ] Performance audit (Lighthouse > 90)
 - [ ] Error handling and edge cases
 
 **Wednesday:**
+
 - [ ] Final staging tests
 - [ ] Prepare rollback plan
 - [ ] Communication plan (announce to users)
 
 **Thursday:**
+
 - [ ] 🚀 LAUNCH TO PRODUCTION
 - [ ] Monitor metrics closely
 - [ ] Be ready to fix issues quickly
 
 **Friday:**
+
 - [ ] Review launch metrics
 - [ ] Collect user feedback
 - [ ] Plan next iteration
 
 **Success Metrics:**
+
 - No critical bugs in production
 - Conversion rate improved by 50%+
 - Positive user feedback
@@ -316,11 +342,13 @@ export const config = {
 ### Why This Approach Works
 
 **1. Psychology of Free Trials**
+
 - Users try before they buy (reduces risk)
 - Experience value first (builds trust)
 - Upgrade when they're convinced (higher conversion)
 
 **2. Freemium Funnel**
+
 ```
 Wide Top (Many free users)
     ↓
@@ -332,6 +360,7 @@ Narrow Bottom (Paying customers)
 ```
 
 **3. Product-Led Growth**
+
 - Product sells itself
 - Lower customer acquisition cost
 - Viral potential (users tell friends)
@@ -356,23 +385,28 @@ Your new flow:
 ## 🚨 Common Mistakes to Avoid
 
 ### ❌ Mistake 1: Making free tier too generous
-**Problem:** Users never upgrade  
+
+**Problem:** Users never upgrade
 **Solution:** 3 credits is enough to prove value, not enough to satisfy
 
 ### ❌ Mistake 2: Hiding the upgrade path
-**Problem:** Users don't know they can get more  
+
+**Problem:** Users don't know they can get more
 **Solution:** Show credit count everywhere, tease paid features
 
 ### ❌ Mistake 3: Annoying upgrade prompts
-**Problem:** Pushes users away  
+
+**Problem:** Pushes users away
 **Solution:** Show upgrades AFTER delivering value
 
 ### ❌ Mistake 4: Not tracking metrics
-**Problem:** Flying blind, can't optimize  
+
+**Problem:** Flying blind, can't optimize
 **Solution:** Track everything from day 1
 
 ### ❌ Mistake 5: Over-complicating onboarding
-**Problem:** Users abandon before starting  
+
+**Problem:** Users abandon before starting
 **Solution:** Keep it simple, make it skippable
 
 ---
@@ -380,6 +414,7 @@ Your new flow:
 ## 📊 Metrics to Watch (Your North Star)
 
 ### Week 1 Focus:
+
 - **Signup Conversion Rate:** Landing page → Signup
   - Current: Unknown
   - Target: 15%
@@ -391,6 +426,7 @@ Your new flow:
   - Track in: PostHog
 
 ### Week 2-4 Focus:
+
 - **Credit Usage Rate:** How many credits users actually use
   - Current: Unknown
   - Target: 2.8/3 credits
@@ -402,6 +438,7 @@ Your new flow:
   - Track in: Stripe + PostHog
 
 ### Long-term:
+
 - **Monthly Recurring Revenue (MRR)**
 - **Customer Lifetime Value (LTV)**
 - **Customer Acquisition Cost (CAC)**
@@ -482,27 +519,35 @@ When all boxes are checked, you're ready to launch! 🚀
 ## 🆘 If You Get Stuck
 
 ### Issue: Middleware not working
+
 **Debug:**
+
 1. Check if `@supabase/auth-helpers-nextjs` is installed
 2. Verify environment variables are set
 3. Check browser console for errors
 4. Try clearing cookies and cache
 
 ### Issue: Redirect loop
+
 **Debug:**
+
 1. Check if signup page is also protected (it shouldn't be)
 2. Verify matcher patterns in middleware
 3. Check Supabase session handling
 
 ### Issue: Can't track analytics
+
 **Debug:**
+
 1. Check if PostHog key is correct
 2. Verify it's initialized before tracking
 3. Check browser network tab
 4. Look for adblockers
 
 ### Issue: Users confused
+
 **Debug:**
+
 1. Ask 5 real users for feedback
 2. Watch them use the product (screen recording)
 3. Check where they drop off (analytics)
@@ -526,16 +571,19 @@ Set milestones and celebrate when you hit them:
 ## 📚 Additional Resources
 
 **UI/UX Inspiration:**
+
 - Grammarly's freemium model
 - Canva's upgrade flow
 - Notion's onboarding
 
 **Reading:**
+
 - "Hooked" by Nir Eyal (habit formation)
 - "Lean Analytics" by Alistair Croll
 - "Traction" by Gabriel Weinberg
 
 **Tools:**
+
 - PostHog (analytics)
 - Hotjar (heatmaps)
 - Loom (user testing videos)
@@ -547,13 +595,14 @@ Set milestones and celebrate when you hit them:
 You've got this! The strategy is sound, the implementation is straightforward, and you have everything you need to succeed.
 
 **Remember:**
+
 - Start small (protect route, update CTA)
 - Ship quickly (Week 1 improvements matter)
 - Measure everything (data > opinions)
 - Iterate fast (A/B test, learn, improve)
 - Focus on users (make them successful)
 
-The worst thing you can do is **not start**. The second worst is **overthink it**. 
+The worst thing you can do is **not start**. The second worst is **overthink it**.
 
 Pick the simplest version, implement it today, and improve it based on real user data.
 
@@ -577,6 +626,7 @@ Before you close your laptop today:
 - [ ] Sleep well knowing you've made progress 😴
 
 **Tomorrow you'll:**
+
 - Build on today's foundation
 - Add the upgrade modal
 - Set up analytics
@@ -584,8 +634,8 @@ Before you close your laptop today:
 
 ---
 
-*You've got all the tools. Now go build something amazing.* 🚀
+_You've got all the tools. Now go build something amazing._ 🚀
 
-**Last Updated:** October 12, 2025  
-**Your Coach:** AI UI/UX Specialist  
+**Last Updated:** October 12, 2025
+**Your Coach:** AI UI/UX Specialist
 **Your Mission:** Ship a better CV-Match experience

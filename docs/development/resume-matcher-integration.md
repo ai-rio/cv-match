@@ -9,6 +9,7 @@ This document outlines the integration strategy for leveraging the existing Resu
 ### What Resume-Matcher Provides (85% Complete)
 
 #### ✅ Production-Ready Core Services
+
 1. **ResumeService** - Complete PDF/DOCX parsing with MarkItDown
 2. **JobService** - Job description processing and structuring
 3. **ScoreImprovementService** - Advanced cosine similarity matching with LLM improvement
@@ -17,6 +18,7 @@ This document outlines the integration strategy for leveraging the existing Resu
 6. **Database Operations** - Complete Supabase integration
 
 #### ✅ Frontend Components
+
 1. **FileUpload** - Advanced drag-drop file upload with validation
 2. **ResumeAnalysis** - Interactive score display with improvement suggestions
 3. **Dashboard Components** - Complete UI for job listings, resume components
@@ -24,6 +26,7 @@ This document outlines the integration strategy for leveraging the existing Resu
 5. **Payment Integration** - Stripe integration for SaaS billing
 
 #### ✅ SaaS Infrastructure
+
 1. **Authentication** - Complete user management system
 2. **Usage Limits** - Credit-based usage tracking
 3. **Payment System** - Stripe webhooks and subscription management
@@ -305,6 +308,7 @@ class CreditService:
 #### Key Integration Points
 
 1. **Environment Variables**
+
    ```bash
    # Add to .env
    RESUME_MATCHER_LLM_PROVIDER=openrouter
@@ -314,6 +318,7 @@ class CreditService:
    ```
 
 2. **Dependencies**
+
    ```bash
    # Add to requirements.txt
    markitdown==0.1.2
@@ -332,6 +337,7 @@ class CreditService:
 ### 1. ScoreImprovementService ($50K Value)
 
 The core matching algorithm that provides:
+
 - Cosine similarity calculation between resumes and jobs
 - LLM-powered improvement suggestions
 - Real-time streaming responses
@@ -342,6 +348,7 @@ The core matching algorithm that provides:
 ### 2. FileUpload Component ($15K Value)
 
 Advanced file upload component with:
+
 - Drag-and-drop functionality
 - File type validation (PDF, DOCX)
 - Size limits and progress tracking
@@ -352,6 +359,7 @@ Advanced file upload component with:
 ### 3. Usage Tracking System ($20K Value)
 
 Complete SaaS infrastructure:
+
 - Credit deduction and validation
 - Usage limits enforcement
 - Subscription management
@@ -363,13 +371,13 @@ Complete SaaS infrastructure:
 
 ### Time Savings Breakdown
 
-| Feature | From Scratch | With Integration | Time Saved |
-|---------|-------------|------------------|------------|
-| Core Matching Algorithm | 3-4 months | 1 day | 95% |
-| File Processing | 2-3 weeks | 1 day | 95% |
-| Usage Billing | 4-6 weeks | 3 days | 90% |
-| Frontend UI | 6-8 weeks | 1 week | 85% |
-| **Total** | **4-6 months** | **2-4 weeks** | **90%** |
+| Feature                 | From Scratch   | With Integration | Time Saved |
+| ----------------------- | -------------- | ---------------- | ---------- |
+| Core Matching Algorithm | 3-4 months     | 1 day            | 95%        |
+| File Processing         | 2-3 weeks      | 1 day            | 95%        |
+| Usage Billing           | 4-6 weeks      | 3 days           | 90%        |
+| Frontend UI             | 6-8 weeks      | 1 week           | 85%        |
+| **Total**               | **4-6 months** | **2-4 weeks**    | **90%**    |
 
 ### Risk Reduction
 

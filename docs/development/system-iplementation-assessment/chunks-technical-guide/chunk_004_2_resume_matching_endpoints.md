@@ -11,7 +11,6 @@ source: technical-integration-guide.md
 
 ## Database Schema Changes
 
-
 <!-- Context: backend/app/services/llm/llm_service.py (Enhanced) > Database Schema Changes > New Tables for Resume Matching -->
 
 ### New Tables for Resume Matching
@@ -223,16 +222,13 @@ CREATE STORAGE POLICY "Users can upload resume files" ON storage.buckets
 
 ---
 
-
 <!-- Context: backend/app/services/llm/llm_service.py (Enhanced) > API Endpoint Specifications -->
 
 ## API Endpoint Specifications
 
-
 <!-- Context: backend/app/services/llm/llm_service.py (Enhanced) > API Endpoint Specifications > Resume Matching API Endpoints -->
 
 ### Resume Matching API Endpoints
-
 
 <!-- Context: backend/app/services/llm/llm_service.py (Enhanced) > API Endpoint Specifications > Resume Matching API Endpoints > 1. Document Upload and Processing -->
 
@@ -462,9 +458,10 @@ async def get_user_job_descriptions(
         )
 ```
 
-
 <!-- Context: backend/app/api/endpoints/documents.py > 2. Resume Matching Endpoints -->
 
 #### 2. Resume Matching Endpoints
 
 ```python
+
+```

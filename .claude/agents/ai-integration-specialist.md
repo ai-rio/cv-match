@@ -40,11 +40,11 @@ class AIService:
     ) -> OptimizationResult:
         """
         Optimize résumé for job description using AI.
-        
+
         Returns optimized text, match percentage, and suggestions.
         """
         prompt = self._build_optimization_prompt(resume_text, job_description)
-        
+
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{self.base_url}/chat/completions",
@@ -61,7 +61,7 @@ class AIService:
                 timeout=30.0
             )
             response.raise_for_status()
-            
+
         result = response.json()
         return self._parse_ai_response(result)
 
@@ -69,21 +69,21 @@ class AIService:
         """Build optimization prompt with Brazilian job market context."""
         return f"""
         Você é um especialista em otimização de currículos para o mercado brasileiro.
-        
+
         Analise este currículo e otimize-o para a seguinte vaga:
-        
+
         CURRÍCULO:
         {resume}
-        
+
         DESCRIÇÃO DA VAGA:
         {job}
-        
+
         Forneça:
         1. Versão otimizada do currículo
         2. Percentual de compatibilidade (0-100)
         3. Sugestões específicas de melhoria
         4. Palavras-chave para ATS
-        
+
         Responda em formato JSON.
         """
 ```

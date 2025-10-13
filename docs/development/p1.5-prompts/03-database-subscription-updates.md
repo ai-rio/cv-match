@@ -1,8 +1,8 @@
 # 🎯 P1.5 Phase 2: Database Subscription Updates
 
-**Agent**: database-architect  
-**Phase**: 2 (Sequential - MUST wait for Phase 1 to complete)  
-**Time Estimate**: 3 hours  
+**Agent**: database-architect
+**Phase**: 2 (Sequential - MUST wait for Phase 1 to complete)
+**Time Estimate**: 3 hours
 **Dependencies**: Phase 1.1 AND 1.2 must be complete
 
 **Why database-architect?** This task involves database schema design, migrations, RLS policies, and LGPD compliance - core database architecture.
@@ -16,6 +16,7 @@
 Create the database schema for subscription management. This includes creating the subscriptions table, updating existing tables to support subscriptions, implementing RLS policies, and ensuring LGPD compliance.
 
 **What You're Building:**
+
 - `subscriptions` table with all necessary fields
 - Updates to `users` table for Stripe customer tracking
 - `subscription_usage_history` table for audit trail
@@ -28,6 +29,7 @@ Create the database schema for subscription management. This includes creating t
 ## 🔍 Context
 
 ### Current State
+
 - ✅ Database has `users`, `resumes`, `optimizations` tables
 - ✅ RLS policies exist for existing tables
 - ❌ No subscriptions table
@@ -35,6 +37,7 @@ Create the database schema for subscription management. This includes creating t
 - ❌ Users table missing Stripe customer fields
 
 ### Target State
+
 - ✅ Complete subscription schema
 - ✅ Stripe customer tracking in users table
 - ✅ Usage history with audit trail
@@ -43,7 +46,9 @@ Create the database schema for subscription management. This includes creating t
 - ✅ LGPD compliant (5-year retention, soft deletes)
 
 ### Reference Architecture
+
 You're adapting **QuoteKit's subscription database schema**:
+
 - QuoteKit: `/home/carlos/projects/QuoteKit/docs/architecture/01-specifications/S004-comprehensive-subscription-schema.sql`
 
 ---
@@ -51,7 +56,9 @@ You're adapting **QuoteKit's subscription database schema**:
 ## 🛠️ CRITICAL: Tools You MUST Use
 
 ### 1. Supabase Studio
+
 Access the database UI:
+
 ```bash
 # Open Supabase Studio
 http://localhost:54323
@@ -63,6 +70,7 @@ http://localhost:54323
 ```
 
 ### 2. Supabase CLI
+
 ```bash
 # Create migration
 supabase migration new add_subscription_tables
@@ -75,6 +83,7 @@ supabase db push
 ```
 
 ### 3. PostgreSQL CLI
+
 ```bash
 # Connect to database
 docker compose exec supabase psql -U postgres -d postgres
@@ -110,7 +119,7 @@ Add Stripe customer tracking to existing users table:
 -- ============================================================================
 
 -- Add Stripe customer fields to users table
-ALTER TABLE users 
+ALTER TABLE users
 ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT UNIQUE,
 ADD COLUMN IF NOT EXISTS stripe_customer_created_at TIMESTAMPTZ,
 ADD COLUMN IF NOT EXISTS billing_email TEXT,
@@ -124,8 +133,8 @@ COMMENT ON COLUMN users.billing_address IS 'Billing address in JSON format: {lin
 COMMENT ON COLUMN users.tax_ids IS 'Tax identification numbers (CPF/CNPJ for Brazil): [{type, value}]';
 
 -- Create index on stripe_customer_id for fast lookups
-CREATE INDEX IF NOT EXISTS idx_users_stripe_customer_id 
-ON users(stripe_customer_id) 
+CREATE INDEX IF NOT EXISTS idx_users_stripe_customer_id
+ON users(stripe_customer_id)
 WHERE stripe_customer_id IS NOT NULL;
 ```
 
@@ -143,51 +152,51 @@ Main subscription tracking table:
 CREATE TABLE IF NOT EXISTS subscriptions (
   -- Primary key
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  
+
   -- User relationship
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  
+
   -- Subscription tier (flow_starter, flow_pro, flow_business, flow_enterprise)
   tier_id TEXT NOT NULL,
-  
+
   -- Subscription status
-  status TEXT NOT NULL DEFAULT 'active' 
+  status TEXT NOT NULL DEFAULT 'active'
     CHECK (status IN ('active', 'canceled', 'past_due', 'paused', 'incomplete')),
-  
+
   -- Stripe integration
   stripe_subscription_id TEXT UNIQUE,
   stripe_customer_id TEXT NOT NULL,
   stripe_price_id TEXT NOT NULL,
-  
+
   -- Billing period
   current_period_start TIMESTAMPTZ NOT NULL,
   current_period_end TIMESTAMPTZ NOT NULL,
-  
+
   -- Cancellation tracking
   cancel_at_period_end BOOLEAN DEFAULT FALSE,
   canceled_at TIMESTAMPTZ,
   cancellation_reason TEXT,
-  
+
   -- Usage tracking (current period)
   analyses_used_this_period INTEGER DEFAULT 0 CHECK (analyses_used_this_period >= 0),
   analyses_rollover INTEGER DEFAULT 0 CHECK (analyses_rollover >= 0),
-  
+
   -- Trial tracking (if applicable)
   trial_start TIMESTAMPTZ,
   trial_end TIMESTAMPTZ,
-  
+
   -- Metadata
   metadata JSONB DEFAULT '{}',
-  
+
   -- LGPD Compliance
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   deleted_at TIMESTAMPTZ,
-  
+
   -- Constraints
   CONSTRAINT valid_period CHECK (current_period_end > current_period_start),
   CONSTRAINT valid_trial CHECK (trial_end IS NULL OR trial_end > trial_start),
-  CONSTRAINT one_active_subscription_per_user UNIQUE (user_id, status) 
+  CONSTRAINT one_active_subscription_per_user UNIQUE (user_id, status)
     WHERE status = 'active' AND deleted_at IS NULL
 );
 
@@ -206,7 +215,7 @@ CREATE INDEX idx_subscriptions_stripe_subscription_id ON subscriptions(stripe_su
 CREATE INDEX idx_subscriptions_period_end ON subscriptions(current_period_end) WHERE status = 'active';
 
 -- Partial index for active subscriptions (most common query)
-CREATE INDEX idx_subscriptions_active ON subscriptions(user_id, status) 
+CREATE INDEX idx_subscriptions_active ON subscriptions(user_id, status)
 WHERE status = 'active' AND deleted_at IS NULL;
 ```
 
@@ -224,11 +233,11 @@ Audit trail for all subscription usage events:
 CREATE TABLE IF NOT EXISTS subscription_usage_history (
   -- Primary key
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  
+
   -- Relationships
   subscription_id UUID NOT NULL REFERENCES subscriptions(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  
+
   -- Event type
   event_type TEXT NOT NULL CHECK (event_type IN (
     'analysis_used',
@@ -240,20 +249,20 @@ CREATE TABLE IF NOT EXISTS subscription_usage_history (
     'period_renewed',
     'rollover_applied'
   )),
-  
+
   -- Usage details
   analyses_before INTEGER,
   analyses_after INTEGER,
   rollover_before INTEGER,
   rollover_after INTEGER,
-  
+
   -- Period tracking
   period_start TIMESTAMPTZ,
   period_end TIMESTAMPTZ,
-  
+
   -- Event metadata
   event_metadata JSONB DEFAULT '{}',
-  
+
   -- Timestamps
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
@@ -287,20 +296,20 @@ Track all Stripe webhook events for idempotency:
 CREATE TABLE IF NOT EXISTS stripe_webhook_events (
   -- Primary key
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  
+
   -- Stripe event ID (unique constraint for idempotency)
   stripe_event_id TEXT UNIQUE NOT NULL,
-  
+
   -- Event details
   event_type TEXT NOT NULL,
   event_data JSONB NOT NULL,
-  
+
   -- Processing status
   processed BOOLEAN DEFAULT FALSE,
   processed_at TIMESTAMPTZ,
   processing_error TEXT,
   retry_count INTEGER DEFAULT 0,
-  
+
   -- Timestamps
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
@@ -335,7 +344,7 @@ ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY subscriptions_select_own ON subscriptions
   FOR SELECT
   USING (
-    auth.uid() = user_id 
+    auth.uid() = user_id
     AND deleted_at IS NULL
   );
 
@@ -479,7 +488,7 @@ BEGIN
         NEW.current_period_end
       );
     END IF;
-    
+
     -- Log period renewals
     IF (OLD.current_period_start != NEW.current_period_start) THEN
       INSERT INTO subscription_usage_history (
@@ -508,7 +517,7 @@ BEGIN
         )
       );
     END IF;
-    
+
     -- Log cancellations
     IF (OLD.status != 'canceled' AND NEW.status = 'canceled') THEN
       INSERT INTO subscription_usage_history (
@@ -531,7 +540,7 @@ BEGIN
       );
     END IF;
   END IF;
-  
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -562,11 +571,11 @@ BEGIN
   -- Soft delete subscriptions older than 5 years
   UPDATE subscriptions
   SET deleted_at = NOW()
-  WHERE 
+  WHERE
     created_at < NOW() - INTERVAL '5 years'
     AND deleted_at IS NULL
     AND status IN ('canceled', 'incomplete');
-  
+
   -- Log cleanup event
   RAISE NOTICE 'Cleaned up old subscription data (5 year retention)';
 END;
@@ -574,7 +583,7 @@ $$ LANGUAGE plpgsql;
 
 -- Schedule cleanup (run monthly via cron or external scheduler)
 -- Note: pg_cron extension required, or run via external scheduler
-COMMENT ON FUNCTION cleanup_old_subscription_data IS 
+COMMENT ON FUNCTION cleanup_old_subscription_data IS
   'LGPD compliance: Soft-delete subscription data older than 5 years';
 ```
 
@@ -585,6 +594,7 @@ COMMENT ON FUNCTION cleanup_old_subscription_data IS
 After completing all tasks:
 
 ### 1. Migration Applied Successfully
+
 ```bash
 cd /home/carlos/projects/cv-match
 
@@ -596,19 +606,21 @@ echo $?  # Should be 0
 ```
 
 ### 2. Tables Created
+
 ```bash
 # Check tables exist
 supabase db remote psql -c "
-SELECT tablename 
-FROM pg_tables 
-WHERE schemaname = 'public' 
+SELECT tablename
+FROM pg_tables
+WHERE schemaname = 'public'
   AND tablename IN ('subscriptions', 'subscription_usage_history', 'stripe_webhook_events');
 "
 ```
 
 **Expected output:**
+
 ```
-           tablename            
+           tablename
 --------------------------------
  subscriptions
  subscription_usage_history
@@ -616,11 +628,12 @@ WHERE schemaname = 'public'
 ```
 
 ### 3. Users Table Updated
+
 ```bash
 supabase db remote psql -c "
-SELECT column_name, data_type 
-FROM information_schema.columns 
-WHERE table_name = 'users' 
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'users'
   AND column_name IN ('stripe_customer_id', 'billing_email', 'billing_address');
 "
 ```
@@ -628,10 +641,11 @@ WHERE table_name = 'users'
 **Expected**: All 3 columns exist.
 
 ### 4. Indexes Created
+
 ```bash
 supabase db remote psql -c "
-SELECT indexname 
-FROM pg_indexes 
+SELECT indexname
+FROM pg_indexes
 WHERE tablename = 'subscriptions';
 "
 ```
@@ -639,11 +653,12 @@ WHERE tablename = 'subscriptions';
 **Expected**: At least 5 indexes including `idx_subscriptions_active`.
 
 ### 5. RLS Policies Enabled
+
 ```bash
 supabase db remote psql -c "
-SELECT tablename, rowsecurity 
-FROM pg_tables 
-WHERE schemaname = 'public' 
+SELECT tablename, rowsecurity
+FROM pg_tables
+WHERE schemaname = 'public'
   AND tablename IN ('subscriptions', 'subscription_usage_history');
 "
 ```
@@ -651,10 +666,11 @@ WHERE schemaname = 'public'
 **Expected**: `rowsecurity = t` (true) for both tables.
 
 ### 6. Triggers Created
+
 ```bash
 supabase db remote psql -c "
-SELECT tgname, tgrelid::regclass 
-FROM pg_trigger 
+SELECT tgname, tgrelid::regclass
+FROM pg_trigger
 WHERE tgrelid IN ('subscriptions'::regclass);
 "
 ```
@@ -662,6 +678,7 @@ WHERE tgrelid IN ('subscriptions'::regclass);
 **Expected**: `update_subscriptions_updated_at` and `log_subscription_changes` triggers.
 
 ### 7. Test Subscription Insert
+
 ```bash
 supabase db remote psql -c "
 INSERT INTO subscriptions (
@@ -687,10 +704,11 @@ INSERT INTO subscriptions (
 **Expected**: Returns a UUID, no errors.
 
 ### 8. Test Audit Trail Trigger
+
 ```bash
 supabase db remote psql -c "
-SELECT COUNT(*) 
-FROM subscription_usage_history 
+SELECT COUNT(*)
+FROM subscription_usage_history
 WHERE event_type = 'subscription_created';
 "
 ```
@@ -702,19 +720,23 @@ WHERE event_type = 'subscription_created';
 ## 🚨 Common Issues & Solutions
 
 ### Issue 1: Migration Fails - Column Already Exists
+
 **Error**: `ERROR: column "stripe_customer_id" of relation "users" already exists`
 
 **Solution**:
+
 ```sql
 -- Use IF NOT EXISTS
-ALTER TABLE users 
+ALTER TABLE users
 ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT UNIQUE;
 ```
 
 ### Issue 2: RLS Policy Conflicts
+
 **Error**: `ERROR: policy "subscriptions_select_own" for table "subscriptions" already exists`
 
 **Solution**:
+
 ```sql
 -- Drop and recreate
 DROP POLICY IF EXISTS subscriptions_select_own ON subscriptions;
@@ -722,9 +744,11 @@ CREATE POLICY subscriptions_select_own ON subscriptions...
 ```
 
 ### Issue 3: Trigger Not Firing
+
 **Error**: No entries in `subscription_usage_history` after insert
 
 **Solution**:
+
 ```bash
 # Check trigger exists
 supabase db remote psql -c "\dft+ subscriptions"
@@ -734,9 +758,11 @@ supabase db remote psql -c "\df log_subscription_change"
 ```
 
 ### Issue 4: Permission Denied
+
 **Error**: `ERROR: permission denied for table subscriptions`
 
 **Solution**:
+
 ```sql
 -- Grant permissions to service role
 GRANT ALL ON subscriptions TO service_role;
@@ -748,6 +774,7 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO service_role;
 ## 📊 Success Criteria
 
 Phase 2 is complete when:
+
 - ✅ All tables created successfully
 - ✅ Users table updated with Stripe fields
 - ✅ All indexes created

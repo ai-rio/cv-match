@@ -26,8 +26,7 @@ async def get_db() -> SupabaseSession:
 
 @router.get("/credits", response_model=UserCreditsResponse)
 async def get_user_credits(
-    current_user: dict = Depends(get_current_user),
-    db: SupabaseSession = Depends(get_db)
+    current_user: dict = Depends(get_current_user), db: SupabaseSession = Depends(get_db)
 ) -> UserCreditsResponse:
     """
     Get current user's credit balance and subscription information.
@@ -68,7 +67,9 @@ async def get_user_credits(
             else:
                 upgrade_prompt = "Purchase more credits to continue optimizing your resume."
 
-        logger.info(f"Retrieved credits for user {current_user['id']}: {credits_remaining} credits, tier: {subscription_tier}")
+        logger.info(
+            f"Retrieved credits for user {current_user['id']}: {credits_remaining} credits, tier: {subscription_tier}"
+        )
 
         return UserCreditsResponse(
             credits_remaining=credits_remaining,
@@ -76,12 +77,12 @@ async def get_user_credits(
             can_optimize=can_optimize,
             upgrade_prompt=upgrade_prompt,
             is_pro=is_pro,
-            total_credits=total_credits
+            total_credits=total_credits,
         )
 
     except Exception as e:
         logger.error(f"Error retrieving credits for user {current_user['id']}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve credit information"
+            detail="Failed to retrieve credit information",
         )

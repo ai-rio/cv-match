@@ -10,8 +10,9 @@ source: technical-integration-guide.md
 <!-- Context: Specialized services for resume matching -->
 
 # Specialized services for resume matching
+
 class ResumeService(SupabaseDatabaseService):
-    """Service for resume operations"""
+"""Service for resume operations"""
 
     def __init__(self):
         super().__init__("resumes", ResumeModel)
@@ -28,13 +29,13 @@ class ResumeService(SupabaseDatabaseService):
             raise Exception(f"Failed to get resumes with embeddings: {str(e)}")
 
 class JobDescriptionService(SupabaseDatabaseService):
-    """Service for job description operations"""
+"""Service for job description operations"""
 
     def __init__(self):
         super().__init__("job_descriptions", JobDescriptionModel)
 
 class MatchResultService(SupabaseDatabaseService):
-    """Service for match result operations"""
+"""Service for match result operations"""
 
     def __init__(self):
         super().__init__("match_results", MatchResultModel)
@@ -55,7 +56,8 @@ class MatchResultService(SupabaseDatabaseService):
             return response.data
         except Exception as e:
             raise Exception(f"Failed to get match history: {str(e)}")
-```
+
+````
 
 
 <!-- Context: Specialized services for resume matching > 2. LLM Service Enhancement -->
@@ -336,10 +338,9 @@ class LLMService:
                 })
 
         return suggestions[:10]  # Limit to 10 suggestions
-```
+````
 
 ---
-
 
 <!-- Context: backend/app/services/llm/llm_service.py (Enhanced) > Database Schema Changes -->
 

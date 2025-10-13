@@ -1,9 +1,9 @@
 # Agent Prompt: Backend Services Migration
 
-**Agent**: backend-specialist  
-**Phase**: 1 - Backend Services  
-**Priority**: P0  
-**Estimated Time**: 3 hours  
+**Agent**: backend-specialist
+**Phase**: 1 - Backend Services
+**Priority**: P0
+**Estimated Time**: 3 hours
 **Dependencies**: None (can start immediately)
 
 ---
@@ -18,10 +18,11 @@ Copy and adapt 4 core service files from Resume-Matcher to cv-match, ensuring th
 
 ### Task 1: Copy resume_service.py (45 min)
 
-**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/resume_service.py`  
+**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/resume_service.py`
 **Target**: `/home/carlos/projects/cv-match/backend/app/services/resume_service.py`
 
 **Actions**:
+
 1. Copy the file to target location
 2. Update imports to match cv-match structure:
    - Change `from app.` to match cv-match import paths
@@ -37,6 +38,7 @@ Copy and adapt 4 core service files from Resume-Matcher to cv-match, ensuring th
    ```
 
 **Success Criteria**:
+
 - [x] File copied to correct location
 - [x] All imports resolve
 - [x] No syntax errors
@@ -47,10 +49,11 @@ Copy and adapt 4 core service files from Resume-Matcher to cv-match, ensuring th
 
 ### Task 2: Copy job_service.py (45 min)
 
-**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/job_service.py`  
+**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/job_service.py`
 **Target**: `/home/carlos/projects/cv-match/backend/app/services/job_service.py`
 
 **Actions**:
+
 1. Copy the file to target location
 2. Update imports to match cv-match structure
 3. Adapt any Resume-Matcher-specific patterns to cv-match
@@ -61,6 +64,7 @@ Copy and adapt 4 core service files from Resume-Matcher to cv-match, ensuring th
    ```
 
 **Success Criteria**:
+
 - [x] File copied
 - [x] Imports work
 - [x] JobService instantiable
@@ -70,10 +74,11 @@ Copy and adapt 4 core service files from Resume-Matcher to cv-match, ensuring th
 
 ### Task 3: Copy text_extraction.py (30 min)
 
-**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/text_extraction.py`  
+**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/text_extraction.py`
 **Target**: `/home/carlos/projects/cv-match/backend/app/services/text_extraction.py`
 
 **Actions**:
+
 1. Copy the file
 2. Update imports
 3. Ensure PDF/DOCX parsing libraries are in cv-match's dependencies
@@ -83,6 +88,7 @@ Copy and adapt 4 core service files from Resume-Matcher to cv-match, ensuring th
    ```
 
 **Success Criteria**:
+
 - [x] File copied
 - [x] Dependencies available
 - [x] Can import extract_text function
@@ -93,15 +99,17 @@ Copy and adapt 4 core service files from Resume-Matcher to cv-match, ensuring th
 ### Task 4: Verify All Services Together (30 min)
 
 **Actions**:
+
 1. Create a verification script that imports all services:
+
    ```python
    # File: backend/verify_services.py
    from app.services.resume_service import ResumeService
    from app.services.job_service import JobService
    from app.services.text_extraction import extract_text
-   
+
    print("✅ All services imported successfully")
-   
+
    # Test instantiation
    resume_svc = ResumeService()
    job_svc = JobService()
@@ -109,6 +117,7 @@ Copy and adapt 4 core service files from Resume-Matcher to cv-match, ensuring th
    ```
 
 2. Run verification:
+
    ```bash
    docker compose exec backend python verify_services.py
    ```
@@ -116,6 +125,7 @@ Copy and adapt 4 core service files from Resume-Matcher to cv-match, ensuring th
 3. Document any issues found and resolve them
 
 **Success Criteria**:
+
 - [x] All 3 services import without errors
 - [x] All services can be instantiated
 - [x] No missing dependencies
@@ -128,12 +138,14 @@ Copy and adapt 4 core service files from Resume-Matcher to cv-match, ensuring th
 ### Import Pattern Translation
 
 **Resume-Matcher Pattern**:
+
 ```python
 from app.services.database import get_db_client
 from app.models.resume import Resume Model
 ```
 
 **cv-match Pattern**:
+
 ```python
 from app.core.database import get_supabase_client
 from app.models.resume import ResumeModel  # If exists, or create
@@ -142,12 +154,14 @@ from app.models.resume import ResumeModel  # If exists, or create
 ### Database Client Pattern
 
 **Resume-Matcher**:
+
 ```python
 db = get_db_client()
 result = db.table('resumes').select('*').execute()
 ```
 
 **cv-match (keep same)**:
+
 ```python
 from app.core.database import get_supabase_client
 client = get_supabase_client()
@@ -157,6 +171,7 @@ result = client.table('resumes').select('*').execute()
 ### Async Patterns
 
 Ensure all service methods that do I/O are async:
+
 ```python
 async def process_resume(self, file_content: bytes) -> dict:
     # Extract text
@@ -171,19 +186,23 @@ async def process_resume(self, file_content: bytes) -> dict:
 ## 🚨 Common Issues & Solutions
 
 ### Issue 1: Missing Dependencies
-**Symptom**: `ModuleNotFoundError`  
+
+**Symptom**: `ModuleNotFoundError`
 **Solution**: Check `requirements.txt`, add missing packages, run `uv sync`
 
 ### Issue 2: Import Path Errors
-**Symptom**: `ImportError: cannot import name...`  
+
+**Symptom**: `ImportError: cannot import name...`
 **Solution**: Check directory structure, update imports to match cv-match paths
 
 ### Issue 3: Database Client Mismatch
-**Symptom**: `AttributeError` on database operations  
+
+**Symptom**: `AttributeError` on database operations
 **Solution**: Verify Supabase client methods, adapt if Resume-Matcher uses different patterns
 
 ### Issue 4: Async/Await Issues
-**Symptom**: `RuntimeWarning: coroutine was never awaited`  
+
+**Symptom**: `RuntimeWarning: coroutine was never awaited`
 **Solution**: Add `await` to all async calls, ensure functions are marked `async def`
 
 ---
@@ -230,17 +249,20 @@ print('✅ All services operational!')
 ## 📝 Deliverables
 
 ### Files to Create:
+
 1. `/home/carlos/projects/cv-match/backend/app/services/resume_service.py`
 2. `/home/carlos/projects/cv-match/backend/app/services/job_service.py`
 3. `/home/carlos/projects/cv-match/backend/app/services/text_extraction.py`
 4. `/home/carlos/projects/cv-match/backend/verify_services.py` (verification script)
 
 ### Documentation to Update:
+
 - Add comments explaining any significant adaptations
 - Note any Resume-Matcher patterns that were changed
 - Document dependencies added
 
 ### Git Commit:
+
 ```bash
 git add backend/app/services/resume_service.py
 git add backend/app/services/job_service.py
@@ -273,6 +295,7 @@ Related: P0 Core Services implementation"
 ## 🎯 Success Definition
 
 Mission complete when:
+
 1. All 3 service files exist in cv-match
 2. All imports resolve correctly
 3. All services can be instantiated
@@ -285,6 +308,7 @@ Mission complete when:
 ## 🔄 Handoff to Next Agent
 
 After completion, provide to AI Integration Specialist:
+
 - Confirmation all 3 services are working
 - Any patterns they should follow
 - List of available services they can depend on

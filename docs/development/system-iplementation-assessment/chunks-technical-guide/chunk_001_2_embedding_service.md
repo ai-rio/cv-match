@@ -16,7 +16,6 @@ source: technical-integration-guide.md
 **Last Updated:** October 12, 2025
 **Target Audience:** Development Team, Technical Architects
 
-
 <!-- Context: Technical Integration Guide > Executive Summary -->
 
 ## Executive Summary
@@ -24,6 +23,7 @@ source: technical-integration-guide.md
 This technical integration guide provides detailed specifications for implementing Resume-Matcher's AI-powered features into the CV-Match SaaS platform. The guide covers service architecture, code adaptation patterns, database schema changes, API specifications, and integration best practices.
 
 **Integration Scope:**
+
 - Document processing and parsing pipeline
 - Vector similarity matching with Qdrant
 - LLM-powered analysis and suggestions
@@ -31,6 +31,7 @@ This technical integration guide provides detailed specifications for implementi
 - Comprehensive API endpoints
 
 **Technical Stack:**
+
 - **Backend:** FastAPI with async/await patterns
 - **Database:** Supabase PostgreSQL + Qdrant vector database
 - **AI Services:** OpenAI GPT-4 + Embeddings API
@@ -38,11 +39,9 @@ This technical integration guide provides detailed specifications for implementi
 
 ---
 
-
 <!-- Context: Technical Integration Guide > Service Structure Recommendations -->
 
 ## Service Structure Recommendations
-
 
 <!-- Context: Technical Integration Guide > Service Structure Recommendations > Backend Architecture Overview -->
 
@@ -86,11 +85,9 @@ CV-Match Backend Integration
 │       └── security.py
 ```
 
-
 <!-- Context: Technical Integration Guide > Service Structure Recommendations > Service Layer Implementation -->
 
 ### Service Layer Implementation
-
 
 <!-- Context: Technical Integration Guide > Service Structure Recommendations > Service Layer Implementation > 1. Document Processing Service -->
 
@@ -345,9 +342,10 @@ class DocumentProcessingService:
             return 'en'
 ```
 
-
 <!-- Context: backend/app/services/resume_matching/document_processing_service.py > 2. Embedding Service -->
 
 #### 2. Embedding Service
 
 ```python
+
+```

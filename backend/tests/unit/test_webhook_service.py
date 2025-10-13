@@ -68,9 +68,7 @@ class TestWebhookService:
             mock_client = MagicMock()
             # Mock the synchronous call chain
             # Mock the synchronous call chain
-            mock_chain = (
-                mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
             mock_chain.data = []
             mock_create_client.return_value = mock_client
 
@@ -90,9 +88,7 @@ class TestWebhookService:
             mock_client = MagicMock()
             # Mock the synchronous call chain
             # Mock the synchronous call chain
-            mock_chain = (
-                mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
             mock_chain.data = [mock_webhook_event]
             mock_create_client.return_value = mock_client
 
@@ -119,15 +115,11 @@ class TestWebhookService:
             mock_client = MagicMock()
             # Mock user lookup
             # Mock user lookup
-            mock_chain = (
-                mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
             mock_chain.data = [mock_user]
             # Mock payment creation
             # Mock payment creation
-            mock_chain = (
-                mock_client.table.return_value.insert.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.insert.return_value.execute.return_value
             mock_chain.data = [{"id": "payment_test_123"}]
             mock_create_client.return_value = mock_client
 
@@ -157,15 +149,11 @@ class TestWebhookService:
             mock_client = MagicMock()
             # Mock user lookup
             # Mock user lookup
-            mock_chain = (
-                mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
             mock_chain.data = [mock_user]
             # Mock subscription creation
             # Mock subscription creation
-            mock_chain = (
-                mock_client.table.return_value.insert.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.insert.return_value.execute.return_value
             mock_chain.data = [{"id": "subscription_test_123"}]
             mock_create_client.return_value = mock_client
 
@@ -202,15 +190,11 @@ class TestWebhookService:
             mock_client = MagicMock()
             # Mock subscription lookup
             # Mock subscription lookup
-            mock_chain = (
-                mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
             mock_chain.data = [mock_subscription]
             # Mock payment creation
             # Mock payment creation
-            mock_chain = (
-                mock_client.table.return_value.insert.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.insert.return_value.execute.return_value
             mock_chain.data = [{"id": "payment_history_test_123"}]
             mock_create_client.return_value = mock_client
 
@@ -241,15 +225,11 @@ class TestWebhookService:
             mock_client = MagicMock()
             # Mock subscription lookup
             # Mock subscription lookup
-            mock_chain = (
-                mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
             mock_chain.data = [mock_subscription]
             # Mock subscription update
             # Mock subscription update
-            mock_chain = (
-                mock_client.table.return_value.update.return_value.eq.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.update.return_value.eq.return_value.execute.return_value
             mock_chain.data = [{**mock_subscription, "status": "past_due"}]
             mock_create_client.return_value = mock_client
 
@@ -281,15 +261,11 @@ class TestWebhookService:
             mock_client = MagicMock()
             # Mock subscription lookup
             # Mock subscription lookup
-            mock_chain = (
-                mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
             mock_chain.data = [mock_subscription]
             # Mock subscription update
             # Mock subscription update
-            mock_chain = (
-                mock_client.table.return_value.update.return_value.eq.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.update.return_value.eq.return_value.execute.return_value
             mock_chain.data = [{**mock_subscription, "status": "canceled"}]
             mock_create_client.return_value = mock_client
 
@@ -312,9 +288,7 @@ class TestWebhookService:
             mock_client = MagicMock()
             # Mock webhook event creation
             # Mock webhook event creation
-            mock_chain = (
-                mock_client.table.return_value.insert.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.insert.return_value.execute.return_value
             mock_chain.data = [{"id": "webhook_event_test_123"}]
             mock_create_client.return_value = mock_client
 
@@ -344,9 +318,7 @@ class TestWebhookService:
             mock_client = MagicMock()
             # Mock user lookup returns empty
             # Mock the synchronous call chain
-            mock_chain = (
-                mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
             mock_chain.data = []
             mock_create_client.return_value = mock_client
 
@@ -388,15 +360,11 @@ class TestWebhookService:
             mock_client = MagicMock()
             # Mock user lookup
             # Mock user lookup
-            mock_chain = (
-                mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.select.return_value.eq.return_value.execute.return_value
             mock_chain.data = [mock_user]
             # Mock payment creation
             # Mock payment creation
-            mock_chain = (
-                mock_client.table.return_value.insert.return_value.execute.return_value
-            )
+            mock_chain = mock_client.table.return_value.insert.return_value.execute.return_value
             mock_chain.data = [{"id": "payment_brazilian_123"}]
             mock_create_client.return_value = mock_client
 

@@ -24,6 +24,7 @@ Step 6b: 60% grudgingly sign up/pay
 ```
 
 **Problems:**
+
 - ⚠️ Users invest 15 minutes before knowing they need an account
 - ⚠️ No clear value proposition before work
 - ⚠️ Authentication gate feels like a trap
@@ -62,6 +63,7 @@ Step 12: Converts to paid (knows value first)
 ```
 
 **Benefits:**
+
 - ✅ Clear expectations upfront
 - ✅ Fast signup (OAuth)
 - ✅ Immediate access to product
@@ -90,6 +92,7 @@ If auth but no credits: Redirect to payment
 ```
 
 **Problems:**
+
 - User already did the work
 - Feels like bait-and-switch
 - High friction point
@@ -117,6 +120,7 @@ Post-result screen: "2 credits left" + subtle "Upgrade to Pro" link
 ```
 
 **Benefits:**
+
 - ✅ User knows credit status before starting
 - ✅ No surprises
 - ✅ Smooth workflow
@@ -145,6 +149,7 @@ Frustration → Abandonment
 ### ✅ PROPOSED FLOW
 
 **Before Last Credit:**
+
 ```
 User clicks "New Optimization" with 1 credit left
   ↓
@@ -160,6 +165,7 @@ Results screen with prominent upgrade CTA
 ```
 
 **After Last Credit:**
+
 ```
 User clicks "New Optimization" with 0 credits
   ↓
@@ -179,6 +185,7 @@ If "Buy": Stripe checkout → Success → Credits added
 ```
 
 **Benefits:**
+
 - ✅ Transparent credit tracking
 - ✅ Warning before last credit
 - ✅ Upgrade prompt comes at natural moment
@@ -227,6 +234,7 @@ Can view history, analytics, download past results
 ```
 
 **Benefits:**
+
 - ✅ Dashboard is the center of gravity
 - ✅ Clear credit visibility
 - ✅ Professional feel
@@ -240,6 +248,7 @@ Can view history, analytics, download past results
 ### Authentication Strategy
 
 **BEFORE:**
+
 ```
 ❌ /optimize is public
 ❌ Auth check happens mid-workflow
@@ -247,6 +256,7 @@ Can view history, analytics, download past results
 ```
 
 **AFTER:**
+
 ```
 ✅ /optimize is protected
 ✅ Middleware enforces auth
@@ -256,6 +266,7 @@ Can view history, analytics, download past results
 ### Route Architecture
 
 **Public Routes:**
+
 ```
 /                    - Landing page
 /pricing            - Pricing tiers
@@ -266,6 +277,7 @@ Can view history, analytics, download past results
 ```
 
 **Protected Routes (Require Auth):**
+
 ```
 /dashboard          - Main hub ⭐
 /optimize           - Optimization workflow
@@ -326,14 +338,14 @@ History & analytics → Sunk cost psychology
 
 ### Metrics Improvement Projections
 
-| Metric | Current | Proposed | Improvement |
-|--------|---------|----------|-------------|
-| Landing → Signup | ~8% | ~18% | +125% |
-| Signup → First Optimization | ~45% | ~70% | +55% |
-| First → Third Optimization | ~60% | ~85% | +41% |
-| Free → Paid Conversion | ~5% | ~15% | +200% |
-| User Satisfaction | 3.8/5 | 4.5/5 | +18% |
-| Support Tickets (confusion) | High | Low | -60% |
+| Metric                      | Current | Proposed | Improvement |
+| --------------------------- | ------- | -------- | ----------- |
+| Landing → Signup            | ~8%     | ~18%     | +125%       |
+| Signup → First Optimization | ~45%    | ~70%     | +55%        |
+| First → Third Optimization  | ~60%    | ~85%     | +41%        |
+| Free → Paid Conversion      | ~5%     | ~15%     | +200%       |
+| User Satisfaction           | 3.8/5   | 4.5/5    | +18%        |
+| Support Tickets (confusion) | High    | Low      | -60%        |
 
 ---
 
@@ -402,7 +414,8 @@ Priority 10: A/B testing framework
 3. **"Paid User Workflow" (1.5 min)**
    - Dashboard → Multiple optimizations → Analytics
 
-**Purpose:** 
+**Purpose:**
+
 - Internal alignment
 - User testing
 - Training support team
@@ -427,6 +440,7 @@ Before implementing, confirm:
 ## 🚦 Go/No-Go Criteria
 
 ### Go if:
+
 ✅ Current conversion rate < 10%
 ✅ High abandonment at /optimize payment step
 ✅ Support tickets about "unexpected charges"
@@ -434,6 +448,7 @@ Before implementing, confirm:
 ✅ Low repeat usage (< 40% use 2nd credit)
 
 ### Don't go if:
+
 ❌ Current conversion rate > 20%
 ❌ Users are happy (NPS > 60)
 ❌ Clear free trial already working
@@ -444,16 +459,19 @@ Before implementing, confirm:
 ## 🎯 Success Criteria (3 Months Post-Implementation)
 
 **Must Have:**
+
 - [ ] Signup conversion: 15%+
 - [ ] Free → Paid conversion: 12%+
 - [ ] Support tickets down 40%+
 
 **Should Have:**
+
 - [ ] User retention (30d): 50%+
 - [ ] NPS: 50+
 - [ ] Average credits used: 2.8/3
 
 **Nice to Have:**
+
 - [ ] Viral coefficient: 0.3+ (referrals)
 - [ ] LTV:CAC ratio: 3:1
 - [ ] Mobile usage: 30%+
@@ -463,9 +481,11 @@ Before implementing, confirm:
 ## 💬 Quote from Users (Hypothetical)
 
 **Before:**
+
 > "I spent 15 minutes uploading my resume and filling out the job description, only to be asked to pay. Felt like a trap. Abandoned."
 
 **After:**
+
 > "I loved that I could try it free first. After seeing the results from my first optimization, upgrading to Pro was a no-brainer. Worth every real!"
 
 ---
@@ -529,5 +549,5 @@ Before implementing, confirm:
 
 ---
 
-*Last Updated: October 12, 2025*
-*Next Review: After Phase 1 implementation*
+_Last Updated: October 12, 2025_
+_Next Review: After Phase 1 implementation_

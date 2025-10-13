@@ -1,12 +1,13 @@
 # 🎨 CV-Match UI/UX Strategy & User Flow Architecture
 
-**Date:** October 12, 2025  
-**Version:** 1.0  
+**Date:** October 12, 2025
+**Version:** 1.0
 **Status:** Strategy Proposal
 
 ---
 
 ## 📋 Table of Contents
+
 1. [Current State Analysis](#current-state-analysis)
 2. [Product Architecture Strategy](#product-architecture-strategy)
 3. [User Personas & Journey Maps](#user-personas--journey-maps)
@@ -20,19 +21,23 @@
 ## 🔍 Current State Analysis
 
 ### What We Have:
+
 ✅ **Pricing Model**
+
 - Free tier: 5 credits (actually 3 in code)
 - Basic: R$14.90 (10 credits)
 - Pro: R$29.90 (50 credits) - Most popular
 - Enterprise: R$99.90 (200 credits)
 
 ✅ **Core Features**
+
 - AI-powered resume optimization
 - ATS compatibility checking
 - Job description matching
 - Brazilian market focus (LGPD, PIX, local content)
 
 ✅ **Key Pages**
+
 - Landing page
 - `/optimize` - The optimization workflow (multi-step)
 - `/pricing` - Pricing tiers
@@ -97,7 +102,9 @@
 ## 👥 User Personas & Journey Maps
 
 ### Persona 1: "Job Seeker João" 🎓
+
 **Profile:**
+
 - 25-35 years old
 - Looking for tech/corporate jobs
 - Applying to 5-10 jobs per week
@@ -105,17 +112,19 @@
 - Budget conscious but willing to pay for results
 
 **Current Journey (Problematic):**
+
 ```
-Google "otimizar currículo IA" 
-→ Lands on CV-Match 
-→ Goes to /optimize 
-→ Uploads resume 
-→ Fills job details 
-→ 😤 FRICTION: Asked to pay 
+Google "otimizar currículo IA"
+→ Lands on CV-Match
+→ Goes to /optimize
+→ Uploads resume
+→ Fills job details
+→ 😤 FRICTION: Asked to pay
 → 40% abandon here
 ```
 
 **Ideal Journey:**
+
 ```
 Google "otimizar currículo IA"
 → Lands on CV-Match
@@ -134,7 +143,9 @@ Google "otimizar currículo IA"
 ```
 
 ### Persona 2: "Recruiter Rita" 💼
+
 **Profile:**
+
 - 30-45 years old
 - HR professional or recruiter
 - Needs to optimize multiple resumes
@@ -142,6 +153,7 @@ Google "otimizar currículo IA"
 - Wants bulk features
 
 **Journey:**
+
 ```
 Corporate research
 → Lands on pricing page
@@ -163,26 +175,27 @@ graph TD
     B -->|Learn More| C[Features Section]
     B -->|See Pricing| D[Pricing Page]
     B -->|Try Free| E[Sign Up Page]
-    
+
     C --> E
     D --> E
-    
+
     E --> F[Sign Up Form]
     F --> G{Method?}
     G -->|Email| H[Email + Password]
     G -->|Google| I[OAuth Google]
     G -->|LinkedIn| J[OAuth LinkedIn]
-    
+
     H --> K[Email Verification]
     K --> L[Onboarding Flow]
     I --> L
     J --> L
-    
+
     L --> M[Dashboard with 3-5 Free Credits]
     M --> N[First Optimization CTA]
 ```
 
 **Key Changes:**
+
 1. ✅ Authentication happens BEFORE optimization
 2. ✅ Free tier is the default entry point
 3. ✅ Users see value (free credits) immediately
@@ -198,21 +211,21 @@ graph TD
     B --> C[Upload Resume]
     C --> D[Job Details Form]
     D --> E{Has Credits?}
-    
+
     E -->|Yes - Free| F[Start Processing]
     E -->|Yes - Paid| F
     E -->|No Credits| G[Upgrade Modal]
-    
+
     F --> H[Processing Screen]
     H --> I[Results Page]
     I --> J[Download + Share]
-    
+
     G --> K{User Decision}
     K -->|Buy Credits| L[Stripe Checkout]
     K -->|Cancel| A
     L --> M[Payment Success]
     M --> F
-    
+
     J --> N{Next Action}
     N -->|New Optimization| B
     N -->|View History| O[History Page]
@@ -220,6 +233,7 @@ graph TD
 ```
 
 **Key Changes:**
+
 1. ✅ Credit check happens BEFORE starting work (no wasted effort)
 2. ✅ Clear upgrade path with context
 3. ✅ Smooth loop back to dashboard
@@ -236,24 +250,25 @@ graph TD
     D --> E[Continue Optimization]
     E --> F[Processing]
     F --> G[Results]
-    
+
     G --> H[Post-Result Upgrade Prompt]
     H --> I{"🎉 Loved the results?"}
     I --> J[See Upgrade Options]
     J --> K[Pricing Comparison]
     K --> L{User Choice}
-    
+
     L -->|Basic R$14.90| M[Stripe Checkout]
     L -->|Pro R$29.90| M
     L -->|Not Now| N[Dashboard - No Credits]
-    
+
     M --> O[Payment Success]
     O --> P[Dashboard - Credits Added]
-    
+
     N --> Q[Persistent Upgrade Banner]
 ```
 
 **Psychological Triggers:**
+
 - ✅ Warning before last credit (creates urgency)
 - ✅ Show upgrade AFTER delivering value (not before)
 - ✅ Social proof in upgrade modal ("Join 5,000+ users")
@@ -264,9 +279,11 @@ graph TD
 ## 📈 Conversion Optimization Strategy
 
 ### Stage 1: Awareness & Acquisition
+
 **Goal:** Get users to sign up for free
 
 **Tactics:**
+
 1. **Landing Page Optimization**
    - Hero: "Optimize your resume with AI - Free trial included"
    - Before/after visual example (blurred real resume)
@@ -284,15 +301,19 @@ graph TD
    - Comparison pages: "CV-Match vs Manual Optimization"
 
 ### Stage 2: Activation (AHA Moment)
+
 **Goal:** Get users to complete their first optimization
 
 **Metrics to Track:**
+
 - Time to first optimization: Target < 5 minutes
 - Completion rate: Target > 60%
 - Satisfaction with first result: Target > 4.5/5
 
 **Tactics:**
+
 1. **Onboarding Flow**
+
    ```
    Step 1: Welcome screen (skip option)
    Step 2: Quick tutorial (30 seconds)
@@ -309,9 +330,11 @@ graph TD
    - Celebrate the result
 
 ### Stage 3: Engagement & Retention
+
 **Goal:** Get users to use multiple credits
 
 **Tactics:**
+
 1. **Email Drip Campaign**
    - Day 1: Welcome + Quick Start Guide
    - Day 3: "You have 2 credits left"
@@ -328,9 +351,11 @@ graph TD
    - Weekly digest: "Your match scores this week"
 
 ### Stage 4: Monetization
+
 **Goal:** Convert free users to paid
 
 **Conversion Triggers:**
+
 1. **Natural Exhaustion Point**
    - After 3rd free credit: Upgrade screen
    - "You've optimized 3 resumes! Upgrade to keep going"
@@ -350,6 +375,7 @@ graph TD
    - Success rate statistics
 
 **Pricing Page Strategy:**
+
 - Show FREE tier prominently (not hidden)
 - Highlight "Most Popular" (Pro plan)
 - Annual discount (2 months free)
@@ -357,9 +383,11 @@ graph TD
 - Chat support widget
 
 ### Stage 5: Retention & Expansion
+
 **Goal:** Keep paid users and increase LTV
 
 **Tactics:**
+
 1. **Usage Monitoring**
    - Low usage alert: "You have unused credits"
    - High usage: "Upgrade to unlimited"
@@ -381,6 +409,7 @@ graph TD
 ### Recommended Approach: **Hybrid Model**
 
 #### Public Pages (No Auth Required):
+
 - `/` - Landing page
 - `/pricing` - Pricing information
 - `/features` - Feature showcase
@@ -388,6 +417,7 @@ graph TD
 - `/demo` - Interactive demo (NEW - Recommended)
 
 #### Protected Pages (Auth Required):
+
 - `/dashboard` - Main hub
 - `/optimize` - **MOVE THIS TO PROTECTED**
 - `/history` - Past optimizations
@@ -401,35 +431,43 @@ graph TD
 export default async function middleware(req: NextRequest) {
   // 1. Handle i18n (existing)
   const response = nextIntlMiddleware(req);
-  
+
   // 2. Check if protected route
-  const protectedPaths = ['/dashboard', '/optimize', '/history', '/settings', '/results'];
+  const protectedPaths = [
+    "/dashboard",
+    "/optimize",
+    "/history",
+    "/settings",
+    "/results",
+  ];
   const path = req.nextUrl.pathname;
-  const isProtected = protectedPaths.some(p => path.includes(p));
-  
+  const isProtected = protectedPaths.some((p) => path.includes(p));
+
   if (isProtected) {
     // 3. Check authentication
     const supabase = createMiddlewareClient({ req, res: response });
-    const { data: { session } } = await supabase.auth.getSession();
-    
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
     if (!session) {
       // 4. Redirect to signup with return URL
-      const locale = path.split('/')[1]; // pt-br or en
+      const locale = path.split("/")[1]; // pt-br or en
       const signupUrl = `/${locale}/auth/signup?redirect=${encodeURIComponent(path)}`;
       return NextResponse.redirect(new URL(signupUrl, req.url));
     }
-    
+
     // 5. Check credit limits for /optimize
-    if (path.includes('/optimize')) {
+    if (path.includes("/optimize")) {
       const hasCredits = await checkUserCredits(session.user.id);
       if (!hasCredits) {
         return NextResponse.redirect(
-          new URL(`/${locale}/pricing?reason=no_credits`, req.url)
+          new URL(`/${locale}/pricing?reason=no_credits`, req.url),
         );
       }
     }
   }
-  
+
   return response;
 }
 ```
@@ -441,6 +479,7 @@ export default async function middleware(req: NextRequest) {
 ### Option A: **Freemium (Recommended for CV-Match)**
 
 **Structure:**
+
 ```
 Free Tier (3-5 credits)
 ↓
@@ -459,6 +498,7 @@ Enterprise (200 credits) - R$99.90
 ✅ Competitive advantage over manual services
 
 **Free Tier Strategy:**
+
 - 3 free credits (enough to prove value)
 - Full feature access (not limited features)
 - Credits reset monthly? **NO** (creates pressure to buy)
@@ -469,12 +509,14 @@ Enterprise (200 credits) - R$99.90
 ### Option B: **Freemium with Feature Gating**
 
 **Free Tier:**
+
 - 5 optimizations per month
 - Basic optimization only
 - PDF download only
 - Email support
 
 **Paid Tiers - Unlock:**
+
 - Advanced AI optimization
 - Multiple format exports (.docx, .pdf, .txt)
 - Cover letter generation
@@ -500,6 +542,7 @@ Enterprise (200 credits) - R$99.90
 ### Phase 1: **Foundation & Quick Wins** (Week 1-2)
 
 **Priority Changes:**
+
 1. ✅ Move `/optimize` to protected route
 2. ✅ Implement middleware auth checks
 3. ✅ Add "Sign Up Free" CTA to landing page
@@ -507,6 +550,7 @@ Enterprise (200 credits) - R$99.90
 5. ✅ Create upgrade modal for when credits run out
 
 **Files to Modify:**
+
 - `middleware.ts` - Add auth checks
 - `/app/[locale]/optimize/page.tsx` - Remove internal auth logic
 - `/app/[locale]/page.tsx` - Landing page CTAs
@@ -517,6 +561,7 @@ Enterprise (200 credits) - R$99.90
 ### Phase 2: **Onboarding & First-Time UX** (Week 3-4)
 
 **New Features:**
+
 1. Create `/app/[locale]/onboarding/page.tsx`
    - 3-step guided tour
    - Optional (skip button)
@@ -537,12 +582,14 @@ Enterprise (200 credits) - R$99.90
 ### Phase 3: **Conversion Optimization** (Week 5-6)
 
 **A/B Tests to Run:**
+
 1. Free tier size: 3 vs 5 credits
 2. Upgrade timing: After 2nd vs 3rd optimization
 3. Upgrade discount: 10% vs 20% vs No discount
 4. CTA copy: "Start Free" vs "Try Now Free" vs "Optimize Free"
 
 **Analytics to Track:**
+
 - Signup conversion rate
 - Time to first optimization
 - Credit exhaustion rate
@@ -552,6 +599,7 @@ Enterprise (200 credits) - R$99.90
 - Churn rate
 
 **Tools Needed:**
+
 - Google Analytics 4 + custom events
 - Hotjar or Microsoft Clarity (heatmaps)
 - PostHog or Amplitude (product analytics)
@@ -562,6 +610,7 @@ Enterprise (200 credits) - R$99.90
 ### Phase 4: **Retention & Growth** (Week 7-8)
 
 **Features:**
+
 1. Referral program
    - Give 2 credits, get 2 credits
    - Social sharing after results
@@ -589,17 +638,18 @@ Enterprise (200 credits) - R$99.90
 
 **Supporting Metrics:**
 
-| Metric | Current | Target (3mo) | Target (6mo) |
-|--------|---------|--------------|--------------|
-| Monthly Signups | TBD | 1,000 | 5,000 |
-| Signup → First Optimization | TBD | 60% | 75% |
-| Free → Paid Conversion | TBD | 8% | 15% |
-| Average Credits Used (Free) | TBD | 2.5/3 | 3/3 |
-| Monthly Recurring Revenue | TBD | R$10k | R$50k |
-| User Retention (30d) | TBD | 40% | 60% |
-| NPS Score | TBD | 40 | 60 |
+| Metric                      | Current | Target (3mo) | Target (6mo) |
+| --------------------------- | ------- | ------------ | ------------ |
+| Monthly Signups             | TBD     | 1,000        | 5,000        |
+| Signup → First Optimization | TBD     | 60%          | 75%          |
+| Free → Paid Conversion      | TBD     | 8%           | 15%          |
+| Average Credits Used (Free) | TBD     | 2.5/3        | 3/3          |
+| Monthly Recurring Revenue   | TBD     | R$10k        | R$50k        |
+| User Retention (30d)        | TBD     | 40%          | 60%          |
+| NPS Score                   | TBD     | 40           | 60           |
 
 **Funnel Metrics:**
+
 ```
 1000 Visitors
 ↓ 20% (Signup)
@@ -648,24 +698,28 @@ R$538 MRR per 1000 visitors
 ## 🛠️ Action Items for Implementation
 
 ### Immediate (This Week):
+
 - [ ] Update middleware with auth protection for `/optimize`
 - [ ] Create sign-up flow with free credit allocation
 - [ ] Add credit counter to dashboard
 - [ ] Create upgrade modal component
 
 ### Short Term (Next 2 Weeks):
+
 - [ ] Build onboarding flow
 - [ ] Implement email campaign system
 - [ ] Add analytics tracking
 - [ ] Create A/B test framework
 
 ### Medium Term (Next Month):
+
 - [ ] Launch referral program
 - [ ] Build usage analytics dashboard
 - [ ] Optimize mobile experience
 - [ ] Content marketing strategy
 
 ### Long Term (Next Quarter):
+
 - [ ] Advanced features for paid tiers
 - [ ] API for enterprise customers
 - [ ] International expansion
@@ -707,9 +761,10 @@ R$538 MRR per 1000 visitors
 ---
 
 **Version Control:**
+
 - v1.0 (2025-10-12) - Initial strategy document
 - Next review: After Phase 1 implementation
 
 ---
 
-*This document is a living strategy guide. Update as you learn from user behavior and A/B tests.*
+_This document is a living strategy guide. Update as you learn from user behavior and A/B tests._

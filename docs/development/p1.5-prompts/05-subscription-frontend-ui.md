@@ -1,13 +1,14 @@
 # 🎯 P1.5 Phase 4.1: Frontend Subscription UI
 
-**Agent**: frontend-specialist  
-**Phase**: 4 (Parallel execution with Prompt 06)  
-**Time Estimate**: 3 hours  
+**Agent**: frontend-specialist
+**Phase**: 4 (Parallel execution with Prompt 06)
+**Time Estimate**: 3 hours
 **Dependencies**: Phase 3 must be complete
 
 **Why frontend-specialist?** This task involves Next.js components, React hooks, TypeScript, next-intl localization, and Shadcn UI - core frontend development.
 
-**⚠️ CRITICAL**: 
+**⚠️ CRITICAL**:
+
 - DO NOT start until Phase 3 (API Endpoints) is complete!
 - ✅ CAN RUN IN PARALLEL with Prompt 06 (Testing)
 
@@ -22,12 +23,14 @@ Create the frontend UI for subscription management including pricing page, subsc
 ## 🛠️ CRITICAL: Required Tools
 
 ### 1. Shadcn Components
+
 ```bash
 cd frontend
 bunx  shadcn-ui@latest add card badge tabs dialog button alert
 ```
 
 ### 2. Check Shadcn Blocks
+
 Visit: https://ui.shadcn.com/blocks (Use "Pricing" blocks as reference)
 
 ---
@@ -42,7 +45,10 @@ Visit: https://ui.shadcn.com/blocks (Use "Pricing" blocks as reference)
 {
   "title": "Escolha seu plano",
   "subtitle": "Preços simples e transparentes",
-  "tabs": {"credits": "Créditos (Flex)", "subscriptions": "Assinaturas (Flow)"},
+  "tabs": {
+    "credits": "Créditos (Flex)",
+    "subscriptions": "Assinaturas (Flow)"
+  },
   "flow_pro": {
     "name": "Flow Pro",
     "price": "R$ 49,90",
@@ -76,18 +82,18 @@ import { CreditCards } from './CreditCards';
 
 export function PricingTabs() {
   const t = useTranslations('subscriptions');
-  
+
   return (
     <Tabs defaultValue="subscriptions" className="w-full">
       <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
         <TabsTrigger value="credits">{t('tabs.credits')}</TabsTrigger>
         <TabsTrigger value="subscriptions">{t('tabs.subscriptions')}</TabsTrigger>
       </TabsList>
-      
+
       <TabsContent value="credits" className="mt-8">
         <CreditCards />
       </TabsContent>
-      
+
       <TabsContent value="subscriptions" className="mt-8">
         <SubscriptionCards />
       </TabsContent>
@@ -117,19 +123,19 @@ const SUBSCRIPTION_TIERS = ['flow_starter', 'flow_pro', 'flow_business'];
 export function SubscriptionCards() {
   const t = useTranslations('subscriptions');
   const [loading, setLoading] = useState<string | null>(null);
-  
+
   const handleSubscribe = async (tierId: string) => {
     setLoading(tierId);
-    
+
     try {
       const response = await fetch('/api/subscriptions/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tier_id: tierId })
       });
-      
+
       const data = await response.json();
-      
+
       if (data.checkout_url) {
         window.location.href = data.checkout_url;
       }
@@ -139,12 +145,12 @@ export function SubscriptionCards() {
       setLoading(null);
     }
   };
-  
+
   return (
     <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
       {SUBSCRIPTION_TIERS.map((tierId) => {
         const isPopular = t(`${tierId}.popular`) !== `${tierId}.popular`;
-        
+
         return (
           <Card key={tierId} className={isPopular ? 'border-primary shadow-lg' : ''}>
             <CardHeader>
@@ -156,13 +162,13 @@ export function SubscriptionCards() {
               </div>
               <CardDescription>{t(`${tierId}.description`)}</CardDescription>
             </CardHeader>
-            
+
             <CardContent>
               <div className="mb-6">
                 <span className="text-4xl font-bold">{t(`${tierId}.price`)}</span>
                 <span className="text-muted-foreground">/{t(`${tierId}.period`)}</span>
               </div>
-              
+
               <ul className="space-y-3">
                 {t.raw(`${tierId}.features`).map((feature: string, i: number) => (
                   <li key={i} className="flex items-start gap-2">
@@ -172,7 +178,7 @@ export function SubscriptionCards() {
                 ))}
               </ul>
             </CardContent>
-            
+
             <CardFooter>
               <Button
                 className="w-full"
@@ -222,11 +228,11 @@ export function SubscriptionDashboard() {
   const t = useTranslations('subscriptions.manage');
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  
+
   useEffect(() => {
     fetchSubscription();
   }, []);
-  
+
   const fetchSubscription = async () => {
     try {
       const response = await fetch('/api/subscriptions/current');
@@ -236,7 +242,7 @@ export function SubscriptionDashboard() {
       console.error('Failed to fetch subscription:', error);
     }
   };
-  
+
   if (!subscription) {
     return (
       <Card>
@@ -246,9 +252,9 @@ export function SubscriptionDashboard() {
       </Card>
     );
   }
-  
+
   const usagePercentage = (subscription.analyses_used_this_period / subscription.analyses_per_month) * 100;
-  
+
   return (
     <>
       <Card>
@@ -260,13 +266,13 @@ export function SubscriptionDashboard() {
             </Badge>
           </div>
         </CardHeader>
-        
+
         <CardContent className="space-y-6">
           <div>
             <p className="text-sm text-muted-foreground mb-1">{t('current_plan')}</p>
             <p className="text-2xl font-bold">{subscription.tier_name}</p>
           </div>
-          
+
           <div>
             <p className="text-sm text-muted-foreground mb-2">{t('usage')}</p>
             <div className="space-y-2">
@@ -284,20 +290,20 @@ export function SubscriptionDashboard() {
               )}
             </div>
           </div>
-          
+
           <div>
             <p className="text-sm text-muted-foreground mb-1">{t('next_billing')}</p>
             <p className="font-medium">
               {new Date(subscription.current_period_end).toLocaleDateString('pt-BR')}
             </p>
           </div>
-          
+
           <div className="flex gap-3">
             <Button variant="outline" className="flex-1">
               {t('upgrade')}
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="flex-1"
               onClick={() => setShowCancelDialog(true)}
             >
@@ -306,7 +312,7 @@ export function SubscriptionDashboard() {
           </div>
         </CardContent>
       </Card>
-      
+
       <CancelSubscriptionDialog
         open={showCancelDialog}
         onOpenChange={setShowCancelDialog}
@@ -350,15 +356,15 @@ interface Props {
 export function CancelSubscriptionDialog({ open, onOpenChange, subscription, onCancel }: Props) {
   const t = useTranslations('subscriptions.cancel_dialog');
   const [loading, setLoading] = useState(false);
-  
+
   const handleCancel = async () => {
     setLoading(true);
-    
+
     try {
       await fetch(`/api/subscriptions/${subscription.id}/cancel`, {
         method: 'POST'
       });
-      
+
       onCancel();
       onOpenChange(false);
     } catch (error) {
@@ -367,7 +373,7 @@ export function CancelSubscriptionDialog({ open, onOpenChange, subscription, onC
       setLoading(false);
     }
   };
-  
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -375,7 +381,7 @@ export function CancelSubscriptionDialog({ open, onOpenChange, subscription, onC
           <AlertDialogTitle>{t('title')}</AlertDialogTitle>
           <AlertDialogDescription>{t('description')}</AlertDialogDescription>
         </AlertDialogHeader>
-        
+
         <div className="space-y-2 my-4">
           <p className="text-sm font-medium">{t('consequences')}</p>
           <ul className="text-sm text-muted-foreground space-y-1 ml-4">
@@ -383,7 +389,7 @@ export function CancelSubscriptionDialog({ open, onOpenChange, subscription, onC
             <li>• {t('keep_until', { date: new Date(subscription.current_period_end).toLocaleDateString('pt-BR') })}</li>
           </ul>
         </div>
-        
+
         <AlertDialogFooter>
           <AlertDialogCancel>{t('keep')}</AlertDialogCancel>
           <AlertDialogAction onClick={handleCancel} disabled={loading}>
@@ -401,6 +407,7 @@ export function CancelSubscriptionDialog({ open, onOpenChange, subscription, onC
 ## ✅ Verification Checklist
 
 ### 1. Components Render
+
 ```bash
 cd frontend
 bun run dev
@@ -410,33 +417,39 @@ open http://localhost:3000/pt-br/pricing
 ```
 
 **Check:**
+
 - [ ] Tabs switch between Flex/Flow
 - [ ] Subscription cards display correctly
 - [ ] "Popular" badge shows on Flow Pro
 - [ ] All text in Portuguese
 
 ### 2. Checkout Flow
+
 - [ ] Click "Assinar Agora"
 - [ ] Redirects to Stripe Checkout
 - [ ] Can complete test payment
 
 ### 3. Dashboard
+
 ```bash
 # Navigate to account page
 open http://localhost:3000/pt-br/account
 ```
 
 **Check:**
+
 - [ ] Subscription status displays
 - [ ] Usage progress bar works
 - [ ] Cancel button opens dialog
 
 ### 4. Responsive Design
+
 - [ ] Test on mobile (DevTools)
 - [ ] Cards stack vertically
 - [ ] Buttons are touch-friendly
 
 ### 5. No Hardcoded Text
+
 ```bash
 # Search for hardcoded Portuguese
 grep -r "Assinar\|Cancelar" components/pricing --include="*.tsx"
@@ -449,29 +462,35 @@ grep -r "Assinar\|Cancelar" components/pricing --include="*.tsx"
 ## 🚨 Common Issues
 
 ### Issue 1: Shadcn Components Not Found
+
 **Error**: `Module not found: @/components/ui/card`
 
 **Solution**:
+
 ```bash
 bunx  shadcn-ui@latest add card badge tabs dialog button
 ```
 
 ### Issue 2: Translation Keys Not Found
+
 **Error**: `subscriptions.flow_pro.name not found`
 
 **Solution**:
+
 - Verify `/frontend/locales/pt-br/subscriptions.json` exists
 - Check JSON structure matches `t('flow_pro.name')` calls
 
 ### Issue 3: API Calls Fail
+
 **Error**: `Failed to fetch`
 
 **Solution**:
+
 ```typescript
 // Add error handling
 try {
-  const response = await fetch('/api/subscriptions/status');
-  if (!response.ok) throw new Error('API failed');
+  const response = await fetch("/api/subscriptions/status");
+  if (!response.ok) throw new Error("API failed");
   const data = await response.json();
 } catch (error) {
   console.error(error);
@@ -483,6 +502,7 @@ try {
 ## 📊 Success Criteria
 
 Phase 4.1 is complete when:
+
 - ✅ Pricing page with tabs works
 - ✅ All subscription tiers display
 - ✅ Checkout redirects to Stripe

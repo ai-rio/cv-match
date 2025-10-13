@@ -91,6 +91,7 @@ graph LR
 ### Frontend (Next.js + TypeScript)
 
 #### **UI Components** (from Resume-Matcher)
+
 - **FileUpload Component**: Advanced drag-drop file upload with PDF/DOCX support
 - **ResumeAnalysis Component**: Interactive score display with improvement suggestions
 - **Dashboard Components**: Complete UI for job listings and resume management
@@ -98,6 +99,7 @@ graph LR
 - **Payment Components**: Stripe integration for billing
 
 #### **Pages & Routes**
+
 - `/dashboard` - Main dashboard with resume and job management
 - `/upload` - Resume upload interface
 - `/jobs` - Job description input and analysis
@@ -107,6 +109,7 @@ graph LR
 ### Backend (FastAPI + Python)
 
 #### **Core Services** (from Resume-Matcher)
+
 1. **ResumeService**:
    - PDF/DOCX parsing with MarkItDown
    - Structured data extraction using LLM
@@ -124,6 +127,7 @@ graph LR
    - Advanced retry logic with validation
 
 #### **AI & Infrastructure Services**
+
 1. **AgentManager**: Multi-provider LLM abstraction (OpenAI, OpenRouter, Ollama)
 2. **EmbeddingManager**: Vector embeddings with multiple providers
 3. **UsageLimitService**: Credit-based usage tracking and validation
@@ -132,6 +136,7 @@ graph LR
 ### Database Layer (Supabase)
 
 #### **Core Tables**
+
 - **resumes**: Raw resume content and metadata
 - **processed_resumes**: Structured resume data (skills, experience, etc.)
 - **jobs**: Job descriptions and requirements
@@ -139,6 +144,7 @@ graph LR
 - **match_results**: Matching scores and improvement suggestions
 
 #### **SaaS Infrastructure Tables**
+
 - **user_profiles**: Subscription tiers and credit management
 - **usage_tracking**: Detailed usage logs and credit consumption
 - **subscriptions**: Stripe subscription data
@@ -185,6 +191,7 @@ flowchart TD
 ## Technology Stack
 
 ### Frontend
+
 - **Next.js 15+**: React framework with App Router
 - **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first styling
@@ -192,6 +199,7 @@ flowchart TD
 - **Lucide React**: Icon library
 
 ### Backend
+
 - **FastAPI**: Modern Python web framework
 - **Pydantic**: Data validation and settings
 - **SQLAlchemy**: Python SQL toolkit and ORM
@@ -199,6 +207,7 @@ flowchart TD
 - **NumPy**: Numerical computing for similarity calculations
 
 ### Database & Infrastructure
+
 - **Supabase**: PostgreSQL database with real-time features
 - **pgvector**: Vector similarity search
 - **Stripe**: Payment processing
@@ -327,6 +336,7 @@ graph TD
 ```
 
 **Security Features:**
+
 - **Supabase Auth**: User authentication with JWT tokens
 - **Row Level Security (RLS)**: Database-level access control
 - **Multi-tenancy**: User data isolation with per-user permissions
@@ -371,18 +381,21 @@ graph TD
 ```
 
 ### Caching Strategy
+
 - **Response Caching**: Cache LLM responses when appropriate (TTL: 1 hour)
 - **Vector Cache**: Cache frequently used embeddings (Redis)
 - **User Session Cache**: Store user preferences and recent activity
 - **CDN Caching**: Static assets and UI components delivered via CDN
 
 ### Async Processing
+
 - **Background Tasks**: Heavy processing moved to background workers (Celery/Redis)
 - **Streaming Responses**: Real-time progress updates for long-running tasks
 - **Queue Management**: Prioritize processing based on subscription tier
 - **Result Caching**: Store processing results to avoid re-computation
 
 ### Database Optimization
+
 - **Vector Indexing**: Optimized similarity search with pgvector (HNSW index)
 - **Connection Pooling**: Efficient database connection management (pgbouncer)
 - **Query Optimization**: Indexed queries for common operations
@@ -391,11 +404,13 @@ graph TD
 ## Scalability Considerations
 
 ### Horizontal Scaling
+
 - **Load Balancing**: Multiple backend instances
 - **Database Read Replicas**: Read scaling for analytics
 - **CDN Integration**: Static asset delivery
 
 ### Resource Management
+
 - **Rate Limiting**: Per-user and per-tier rate limits
 - **Resource Quotas**: Fair usage enforcement
 - **Auto-scaling**: Dynamic resource allocation
@@ -403,12 +418,14 @@ graph TD
 ## Monitoring & Analytics
 
 ### Application Monitoring
+
 - **Health Checks**: API endpoint monitoring
 - **Performance Metrics**: Response times and throughput
 - **Error Tracking**: Comprehensive error logging and alerting
 - **Usage Analytics**: User behavior and feature adoption
 
 ### Business Metrics
+
 - **Conversion Rates**: Free to paid conversions
 - **User Engagement**: Active users and session duration
 - **Revenue Tracking**: Subscription revenue and churn
@@ -417,12 +434,14 @@ graph TD
 ## Development Workflow
 
 ### Local Development
+
 - **Hot Reload**: Fast development with automatic updates
 - **Database Migrations**: Schema versioning and deployment
 - **Environment Management**: Consistent development environments
 - **Testing Suite**: Unit, integration, and end-to-end tests
 
 ### Deployment Pipeline
+
 - **CI/CD**: Automated testing and deployment
 - **Staging Environment**: Production-like testing environment
 - **Blue-Green Deployments**: Zero-downtime deployments
@@ -431,12 +450,14 @@ graph TD
 ## Future Architecture Enhancements
 
 ### AI/ML Improvements
+
 - **Custom Models**: Fine-tuned models for specific industries
 - **Batch Processing**: Bulk analysis capabilities
 - **Advanced Analytics**: Predictive insights and recommendations
 - **Multi-modal AI**: Image and video resume analysis
 
 ### Enterprise Features
+
 - **API Access**: Programmatic access for enterprise customers
 - **SSO Integration**: Single sign-on for corporate customers
 - **Advanced Analytics**: Custom reports and data export

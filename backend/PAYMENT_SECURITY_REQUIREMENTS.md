@@ -7,17 +7,20 @@ This document outlines the security requirements for payment processing in CV-Ma
 ### HTTPS Requirements (MANDATORY)
 
 #### Production Environment
+
 - **HTTPS is REQUIRED for all payment endpoints in production**
 - Stripe webhooks will ONLY work with HTTPS URLs in production
 - All checkout sessions must use HTTPS success/cancel URLs
 - No HTTP endpoints allowed for payment processing
 
 #### Development Environment
+
 - HTTP is acceptable for local development (localhost)
 - Stripe test mode works with HTTP for local development
 - Webhook testing requires tools like `ngrok` or Stripe CLI for HTTPS tunneling
 
 ### SSL/TLS Configuration
+
 ```bash
 # Production SSL certificate requirements
 - Minimum TLS 1.2
@@ -29,6 +32,7 @@ This document outlines the security requirements for payment processing in CV-Ma
 ## 🚫 Sensitive Data Handling
 
 ### Never Log These Items:
+
 - Full credit card numbers
 - CVV codes
 - Expiration dates
@@ -37,6 +41,7 @@ This document outlines the security requirements for payment processing in CV-Ma
 - Full API keys (use masked versions)
 
 ### Safe to Log:
+
 - User IDs
 - Session IDs (partial, e.g., `cs_***...xyz`)
 - Payment amounts
@@ -48,12 +53,14 @@ This document outlines the security requirements for payment processing in CV-Ma
 ## 🔄 Idempotency Requirements
 
 ### Payment Processing
+
 - All payment operations must be idempotent
 - Check for existing payments before processing
 - Use unique identifiers to prevent duplicate processing
 - Implement retry logic with idempotency keys
 
 ### Webhook Processing
+
 - Verify webhook signature before processing
 - Use event IDs for deduplication
 - Store processed event IDs to prevent replay attacks
@@ -61,6 +68,7 @@ This document outlines the security requirements for payment processing in CV-Ma
 ## 🛡️ Security Best Practices
 
 ### Environment Variables
+
 ```bash
 # Required environment variables (NEVER commit actual values)
 STRIPE_SECRET_KEY=sk_test_...
@@ -71,6 +79,7 @@ STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
 ### API Key Security
+
 - Use test keys in development (`sk_test_`)
 - Use live keys only in production (`sk_live_`)
 - Never expose API keys in frontend code
@@ -78,6 +87,7 @@ STRIPE_PUBLISHABLE_KEY=pk_test_...
 - Monitor key usage
 
 ### Webhook Security
+
 - Always verify webhook signatures
 - Use timestamp tolerance (300 seconds)
 - Reject malformed payloads
@@ -86,6 +96,7 @@ STRIPE_PUBLISHABLE_KEY=pk_test_...
 ## 🔍 Security Monitoring
 
 ### Required Logging
+
 - Payment successes/failures
 - Webhook verification attempts
 - Signature verification failures
@@ -93,6 +104,7 @@ STRIPE_PUBLISHABLE_KEY=pk_test_...
 - API error responses
 
 ### Alert Monitoring
+
 - Multiple failed payments for same user
 - Unusual payment patterns
 - Webhook signature failures
@@ -101,6 +113,7 @@ STRIPE_PUBLISHABLE_KEY=pk_test_...
 ## 📋 Deployment Checklist
 
 ### Pre-deployment
+
 - [ ] Verify HTTPS certificate is valid
 - [ ] Test webhook endpoint with HTTPS
 - [ ] Confirm all environment variables are set
@@ -108,6 +121,7 @@ STRIPE_PUBLISHABLE_KEY=pk_test_...
 - [ ] Test with Stripe test mode first
 
 ### Post-deployment
+
 - [ ] Monitor first live transactions
 - [ ] Verify webhook delivery
 - [ ] Check SSL certificate security
@@ -117,6 +131,7 @@ STRIPE_PUBLISHABLE_KEY=pk_test_...
 ## 🚨 Emergency Procedures
 
 ### Security Incident
+
 1. Immediately rotate Stripe API keys
 2. Review recent transactions for anomalies
 3. Enable additional monitoring
@@ -124,6 +139,7 @@ STRIPE_PUBLISHABLE_KEY=pk_test_...
 5. Notify stakeholders
 
 ### Service Outage
+
 1. Check Stripe status dashboard
 2. Verify webhook connectivity
 3. Review recent deployments

@@ -4,22 +4,22 @@ Handles checkout sessions, payment processing, and subscription management.
 """
 
 import logging
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr
 
+from app.config.pricing import pricing_config
 from app.core.auth import get_current_user
 from app.core.database import SupabaseSession
 from app.services.stripe_service import stripe_service
-from app.services.usage_limit_service import UsageLimitService
-from app.config.pricing import pricing_config
+
 
 # Database dependency
 async def get_db() -> SupabaseSession:
     """Get database session."""
     return SupabaseSession()
+
 
 # Credit tiers configuration
 CREDIT_TIERS = {
@@ -28,18 +28,21 @@ CREDIT_TIERS = {
     "enterprise": 1000,
 }
 
+
 def get_credits_for_tier(tier: str) -> int:
     """Get credits for a given tier."""
     return CREDIT_TIERS.get(tier, 10)  # Default to 10 for unknown tiers
+
 
 def get_price_id_for_tier(tier: str) -> str:
     """Get Stripe price ID for a given tier."""
     # Map to Stripe plan types
     return {
-        "basic": "pro",       # Basic maps to pro in Stripe
+        "basic": "pro",  # Basic maps to pro in Stripe
         "pro": "pro",
         "enterprise": "enterprise",
     }.get(tier, "pro")  # Default to pro
+
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +80,7 @@ class CreateCustomerRequest(BaseModel):
 async def create_checkout_session(
     request: CreateCheckoutSessionRequest,
     current_user: dict = Depends(get_current_user),
-    db: SupabaseSession = Depends(get_db)
+    db: SupabaseSession = Depends(get_db),
 ) -> JSONResponse:
     """
     Create a Stripe checkout session for Brazilian market.
@@ -104,7 +107,7 @@ async def create_checkout_session(
         if not tier:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid tier. Must be one of: {list(pricing_config.tiers.keys())}"
+                detail=f"Invalid tier. Must be one of: {list(pricing_config.tiers.keys())}",
             )
 
         # Get credits and plan type from pricing config

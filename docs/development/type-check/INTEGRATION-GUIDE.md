@@ -26,6 +26,7 @@ This guide explains how the comprehensive type checking methodology from `/docs/
 **File**: `.github/workflows/type-checking-automation.yml`
 
 **Triggers**:
+
 - Push to any branch
 - Pull requests to main/develop
 - Manual workflow dispatch
@@ -33,23 +34,27 @@ This guide explains how the comprehensive type checking methodology from `/docs/
 **Jobs**:
 
 #### Type Error Analysis
+
 - Analyzes TypeScript and Python type errors
 - Classifies errors by priority (Critical, High, Medium, Low)
 - Calculates type safety score
 - Generates detailed reports
 
 #### Progressive Type Fixing
+
 - Applies automated fixes by priority level
 - Critical errors require manual intervention
 - High/Medium/Low errors have automated fixes
 - Commits fixes automatically when improvements are made
 
 #### Type Quality Gates
+
 - Enforces error thresholds for each priority
 - Blocks merges when quality gates fail
 - Provides detailed feedback on violations
 
 #### Brazilian Market Validation
+
 - Validates PT-BR translation types
 - Checks BRL currency type definitions
 - Ensures Brazilian payment method types
@@ -59,6 +64,7 @@ This guide explains how the comprehensive type checking methodology from `/docs/
 **File**: `.github/workflows/branch-protection.yml`
 
 **Enhancements**:
+
 - Detailed type error analysis in frontend and backend jobs
 - Type safety score calculation
 - Quality gate enforcement
@@ -69,6 +75,7 @@ This guide explains how the comprehensive type checking methodology from `/docs/
 **File**: `.github/workflows/pull-request-automation.yml`
 
 **Features**:
+
 - Real-time type error analysis for PRs
 - Type safety metrics in PR descriptions
 - Automated PR labeling based on type errors
@@ -82,19 +89,20 @@ This guide explains how the comprehensive type checking methodology from `/docs/
 
 ### Type Safety Metrics Section
 
-| Priority | Errors | Status |
-|----------|--------|--------|
-| 🔴 Critical | {{ TYPE_CRITICAL_ERRORS }} | {{ TYPE_CRITICAL_STATUS }} |
-| 🟡 High | {{ TYPE_HIGH_ERRORS }} | {{ TYPE_HIGH_STATUS }} |
-| 🟢 Medium | {{ TYPE_MEDIUM_ERRORS }} | {{ TYPE_MEDIUM_STATUS }} |
-| ⚪ Low | {{ TYPE_LOW_ERRORS }} | {{ TYPE_LOW_STATUS }} |
-| **Total** | **{{ TYPE_TOTAL_ERRORS }}** | **{{ TYPE_OVERALL_STATUS }}** |
+| Priority    | Errors                      | Status                        |
+| ----------- | --------------------------- | ----------------------------- |
+| 🔴 Critical | {{ TYPE_CRITICAL_ERRORS }}  | {{ TYPE_CRITICAL_STATUS }}    |
+| 🟡 High     | {{ TYPE_HIGH_ERRORS }}      | {{ TYPE_HIGH_STATUS }}        |
+| 🟢 Medium   | {{ TYPE_MEDIUM_ERRORS }}    | {{ TYPE_MEDIUM_STATUS }}      |
+| ⚪ Low      | {{ TYPE_LOW_ERRORS }}       | {{ TYPE_LOW_STATUS }}         |
+| **Total**   | **{{ TYPE_TOTAL_ERRORS }}** | **{{ TYPE_OVERALL_STATUS }}** |
 
-*Type Safety Score: {{ TYPE_SAFETY_SCORE }}%*
+_Type Safety Score: {{ TYPE_SAFETY_SCORE }}%_
 
 ### Type Safety Checklist
 
 #### Frontend (TypeScript)
+
 - [ ] No critical type errors (TS2307, TS2304)
 - [ ] High priority errors under threshold (TS2339, TS2345)
 - [ ] Component props properly typed
@@ -103,6 +111,7 @@ This guide explains how the comprehensive type checking methodology from `/docs/
 - [ ] Null/undefined safety implemented
 
 #### Backend (Python)
+
 - [ ] No critical type errors
 - [ ] Function signatures typed
 - [ ] Return types specified
@@ -110,6 +119,7 @@ This guide explains how the comprehensive type checking methodology from `/docs/
 - [ ] API request/response models typed
 
 #### Brazilian Market Types
+
 - [ ] BRL currency types defined
 - [ ] CPF/CNPJ validation types
 - [ ] Brazilian address types
@@ -125,6 +135,7 @@ This guide explains how the comprehensive type checking methodology from `/docs/
 **File**: `scripts/type-fix-automation.sh`
 
 **Usage**:
+
 ```bash
 # Analyze current state (no changes)
 bun run type-analysis
@@ -147,6 +158,7 @@ bun run type-safety:report
 ```
 
 **Features**:
+
 - Bulk error classification and analysis
 - Progressive fixing by priority
 - Brazilian market type validation
@@ -159,13 +171,13 @@ bun run type-safety:report
 
 ### Error Thresholds
 
-| Priority | Threshold | Action |
-|----------|-----------|--------|
-| 🔴 Critical | 0 | Block merge completely |
-| 🟡 High | 10 | Require review but allow with warnings |
-| 🟢 Medium | 25 | Allow with automated fixes |
-| ⚪ Low | 50 | Allow with warnings |
-| **Type Safety Score** | 80% | Minimum for production |
+| Priority              | Threshold | Action                                 |
+| --------------------- | --------- | -------------------------------------- |
+| 🔴 Critical           | 0         | Block merge completely                 |
+| 🟡 High               | 10        | Require review but allow with warnings |
+| 🟢 Medium             | 25        | Allow with automated fixes             |
+| ⚪ Low                | 50        | Allow with warnings                    |
+| **Type Safety Score** | 80%       | Minimum for production                 |
 
 ### Quality Gate Enforcement
 
@@ -205,10 +217,10 @@ bun run type-safety:report
 
 ```typescript
 // BRL Currency Type
-type BRLAmount = number & { readonly __brand: 'BRL' };
+type BRLAmount = number & { readonly __brand: "BRL" };
 
 // Brazilian Payment Method
-type BrazilianPaymentMethod = 'pix' | 'boleto' | 'credit_card' | 'debit_card';
+type BrazilianPaymentMethod = "pix" | "boleto" | "credit_card" | "debit_card";
 
 // Document Types
 interface CPF {
@@ -225,10 +237,10 @@ interface CNPJ {
 
 // PT-BR Translation Keys
 type PTBRTranslationKey =
-  | 'payment.amount'
-  | 'payment.method.pix'
-  | 'user.cpf.invalid'
-  | 'user.cnpj.invalid';
+  | "payment.amount"
+  | "payment.method.pix"
+  | "user.cpf.invalid"
+  | "user.cnpj.invalid";
 ```
 
 ---
@@ -270,18 +282,21 @@ Type Safety Score = max(0, 100 - (total_errors * 2))
 ### Daily Development
 
 1. **Before Starting Work**
+
    ```bash
    bun run type-analysis
    # Review current type safety state
    ```
 
 2. **During Development**
+
    ```bash
    bun run type-check:all
    # Check types as you work
    ```
 
 3. **Before Committing**
+
    ```bash
    bun run quality:check
    # Full quality check including types
@@ -296,11 +311,13 @@ Type Safety Score = max(0, 100 - (total_errors * 2))
 ### Feature Branch Workflow
 
 1. **Create Feature Branch**
+
    ```bash
    git checkout -b feature/new-feature
    ```
 
 2. **Develop with Type Safety**
+
    ```bash
    # Regular type checking
    bun run type-check:all
@@ -313,6 +330,7 @@ Type Safety Score = max(0, 100 - (total_errors * 2))
    ```
 
 3. **Before PR**
+
    ```bash
    # Comprehensive analysis
    bun run type-safety:report
@@ -329,11 +347,13 @@ Type Safety Score = max(0, 100 - (total_errors * 2))
 ### Release Branch Workflow
 
 1. **Create Release Branch**
+
    ```bash
    git checkout -b release/v1.2.0
    ```
 
 2. **Strict Type Validation**
+
    ```bash
    # Target 90%+ type safety score
    bun run type-fix:all

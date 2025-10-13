@@ -32,17 +32,19 @@ class TestWebhookServiceComprehensive:
             "id": "cs_test_123",
             "metadata": {"user_id": self.test_user_id},
             "amount_total": 2990,
-            "currency": "brl"
+            "currency": "brl",
         }
 
         # Mock event not processed
-        with patch.object(self.service, 'is_event_processed', return_value=False):
+        with patch.object(self.service, "is_event_processed", return_value=False):
             # Mock event logging
-            with patch.object(self.service, 'log_webhook_event', return_value={"success": True}):
+            with patch.object(self.service, "log_webhook_event", return_value={"success": True}):
                 # Mock specific event processing
-                with patch.object(self.service, '_process_specific_event', return_value={"success": True}):
+                with patch.object(
+                    self.service, "_process_specific_event", return_value={"success": True}
+                ):
                     # Mock marking as processed
-                    with patch.object(self.service, '_mark_event_processed'):
+                    with patch.object(self.service, "_mark_event_processed"):
                         result = await self.service.process_webhook_event(
                             event_type, event_data, self.test_event_id
                         )
@@ -60,7 +62,7 @@ class TestWebhookServiceComprehensive:
         event_data = {"id": "cs_test_123"}
 
         # Mock event already processed
-        with patch.object(self.service, 'is_event_processed', return_value=True):
+        with patch.object(self.service, "is_event_processed", return_value=True):
             result = await self.service.process_webhook_event(
                 event_type, event_data, self.test_event_id
             )
@@ -76,13 +78,17 @@ class TestWebhookServiceComprehensive:
         event_data = {"id": "cs_test_123"}
 
         # Mock event not processed
-        with patch.object(self.service, 'is_event_processed', return_value=False):
+        with patch.object(self.service, "is_event_processed", return_value=False):
             # Mock event logging
-            with patch.object(self.service, 'log_webhook_event', return_value={"success": True}):
+            with patch.object(self.service, "log_webhook_event", return_value={"success": True}):
                 # Mock specific event processing failure
-                with patch.object(self.service, '_process_specific_event', return_value={"success": False, "error": "Processing failed"}):
+                with patch.object(
+                    self.service,
+                    "_process_specific_event",
+                    return_value={"success": False, "error": "Processing failed"},
+                ):
                     # Mock marking as processed with error
-                    with patch.object(self.service, '_mark_event_processed'):
+                    with patch.object(self.service, "_mark_event_processed"):
                         result = await self.service.process_webhook_event(
                             event_type, event_data, self.test_event_id
                         )
@@ -98,13 +104,15 @@ class TestWebhookServiceComprehensive:
         event_data = {"id": "cs_test_123"}
 
         # Mock event not processed
-        with patch.object(self.service, 'is_event_processed', return_value=False):
+        with patch.object(self.service, "is_event_processed", return_value=False):
             # Mock event logging
-            with patch.object(self.service, 'log_webhook_event', return_value={"success": True}):
+            with patch.object(self.service, "log_webhook_event", return_value={"success": True}):
                 # Mock system error during processing
-                with patch.object(self.service, '_process_specific_event', side_effect=Exception("System error")):
+                with patch.object(
+                    self.service, "_process_specific_event", side_effect=Exception("System error")
+                ):
                     # Mock marking as processed with error
-                    with patch.object(self.service, '_mark_event_processed'):
+                    with patch.object(self.service, "_mark_event_processed"):
                         result = await self.service.process_webhook_event(
                             event_type, event_data, self.test_event_id
                         )
@@ -119,10 +127,10 @@ class TestWebhookServiceComprehensive:
         mock_event = {
             "id": "event_123",
             "processed": True,
-            "processed_at": datetime.now(UTC).isoformat()
+            "processed_at": datetime.now(UTC).isoformat(),
         }
 
-        with patch.object(self.service, '_get_by_field', return_value=mock_event):
+        with patch.object(self.service, "_get_by_field", return_value=mock_event):
             result = await self.service.is_event_processed(self.test_event_id)
 
         assert result is True
@@ -130,7 +138,7 @@ class TestWebhookServiceComprehensive:
     @pytest.mark.asyncio
     async def test_is_event_processed_false(self):
         """Test checking if event is processed returns False."""
-        with patch.object(self.service, '_get_by_field', return_value=None):
+        with patch.object(self.service, "_get_by_field", return_value=None):
             result = await self.service.is_event_processed(self.test_event_id)
 
         assert result is False
@@ -141,10 +149,10 @@ class TestWebhookServiceComprehensive:
         mock_event = {
             "id": "event_123",
             "processed": False,
-            "created_at": datetime.now(UTC).isoformat()
+            "created_at": datetime.now(UTC).isoformat(),
         }
 
-        with patch.object(self.service, '_get_by_field', return_value=mock_event):
+        with patch.object(self.service, "_get_by_field", return_value=mock_event):
             result = await self.service.is_event_processed(self.test_event_id)
 
         assert result is False
@@ -152,7 +160,7 @@ class TestWebhookServiceComprehensive:
     @pytest.mark.asyncio
     async def test_is_event_processed_database_error(self):
         """Test checking event processing status with database error."""
-        with patch.object(self.service, '_get_by_field', side_effect=Exception("Database error")):
+        with patch.object(self.service, "_get_by_field", side_effect=Exception("Database error")):
             result = await self.service.is_event_processed(self.test_event_id)
 
         assert result is False  # Should default to False on error
@@ -165,10 +173,10 @@ class TestWebhookServiceComprehensive:
             "customer": "cus_test_123",
             "amount_total": 2990,
             "currency": "brl",
-            "payment_status": "paid"
+            "payment_status": "paid",
         }
 
-        with patch.object(self.service, '_create', return_value={"id": "webhook_log_123"}):
+        with patch.object(self.service, "_create", return_value={"id": "webhook_log_123"}):
             result = await self.service.log_webhook_event(
                 self.test_event_id, "checkout.session.completed", event_data, False
             )
@@ -189,10 +197,10 @@ class TestWebhookServiceComprehensive:
                     "amount_total": 2990,
                     "currency": "brl",
                     "payment_status": "paid",
-                    "metadata": {"user_id": self.test_user_id}
+                    "metadata": {"user_id": self.test_user_id},
                 },
                 "expected_user_id": self.test_user_id,
-                "expected_amount": 2990
+                "expected_amount": 2990,
             },
             {
                 "event_type": "invoice.payment_succeeded",
@@ -202,10 +210,10 @@ class TestWebhookServiceComprehensive:
                     "subscription": "sub_test_123",
                     "amount_paid": 2990,
                     "currency": "brl",
-                    "metadata": {"user_id": self.test_user_id}
+                    "metadata": {"user_id": self.test_user_id},
                 },
                 "expected_user_id": self.test_user_id,
-                "expected_amount": 2990
+                "expected_amount": 2990,
             },
             {
                 "event_type": "payment_intent.succeeded",
@@ -214,21 +222,23 @@ class TestWebhookServiceComprehensive:
                     "customer": "cus_test_123",
                     "amount": 9990,
                     "currency": "brl",
-                    "metadata": {"user_id": self.test_user_id}
+                    "metadata": {"user_id": self.test_user_id},
                 },
                 "expected_user_id": self.test_user_id,
-                "expected_amount": 9990
-            }
+                "expected_amount": 9990,
+            },
         ]
 
         for case in test_cases:
             with self.subTest(event_type=case["event_type"]):
-                with patch.object(self.service, '_create', return_value={"id": "webhook_log_123"}) as mock_create:
+                with patch.object(
+                    self.service, "_create", return_value={"id": "webhook_log_123"}
+                ) as mock_create:
                     result = await self.service.log_webhook_event(
                         f"evt_test_{case['event_type']}",
                         case["event_type"],
                         case["event_data"],
-                        False
+                        False,
                     )
 
                     assert result["success"] is True
@@ -246,7 +256,7 @@ class TestWebhookServiceComprehensive:
         """Test logging webhook event for unsupported event type."""
         event_data = {"id": "test_123", "object": {"test": "data"}}
 
-        with patch.object(self.service, '_create', return_value={"id": "webhook_log_123"}):
+        with patch.object(self.service, "_create", return_value={"id": "webhook_log_123"}):
             result = await self.service.log_webhook_event(
                 self.test_event_id, "account.updated", event_data, False
             )
@@ -263,7 +273,7 @@ class TestWebhookServiceComprehensive:
         """Test webhook event logging with database error."""
         event_data = {"id": "cs_test_123"}
 
-        with patch.object(self.service, '_create', side_effect=Exception("Database error")):
+        with patch.object(self.service, "_create", side_effect=Exception("Database error")):
             result = await self.service.log_webhook_event(
                 self.test_event_id, "checkout.session.completed", event_data, False
             )
@@ -279,21 +289,21 @@ class TestWebhookServiceComprehensive:
             "customer": "cus_test_123",
             "amount_total": 2990,
             "currency": "brl",
-            "metadata": {"user_id": self.test_user_id, "plan": "pro"}
+            "metadata": {"user_id": self.test_user_id, "plan": "pro"},
         }
 
         # Mock user payment profile
         mock_user_profile = {
             "id": "profile_123",
             "user_id": self.test_user_id,
-            "stripe_customer_id": None
+            "stripe_customer_id": None,
         }
 
         # Mock dependencies
-        with patch.object(self.service, '_get_by_field', return_value=mock_user_profile):
-            with patch.object(self.service, '_update', return_value={"id": "profile_123"}):
-                with patch.object(self.service, '_create', return_value={"id": "payment_123"}):
-                    with patch.object(self.service, 'usage_limit_service') as mock_usage:
+        with patch.object(self.service, "_get_by_field", return_value=mock_user_profile):
+            with patch.object(self.service, "_update", return_value={"id": "profile_123"}):
+                with patch.object(self.service, "_create", return_value={"id": "payment_123"}):
+                    with patch.object(self.service, "usage_limit_service") as mock_usage:
                         mock_usage.add_credits.return_value = None
 
                         result = await self.service._process_specific_event(
@@ -314,7 +324,7 @@ class TestWebhookServiceComprehensive:
             "id": "cs_test_123",
             "customer": "cus_test_123",
             "amount_total": 2990,
-            "metadata": {}  # Missing user_id
+            "metadata": {},  # Missing user_id
         }
 
         result = await self.service._process_specific_event(
@@ -330,10 +340,10 @@ class TestWebhookServiceComprehensive:
         session_data = {
             "id": "cs_test_123",
             "customer": "cus_test_123",
-            "metadata": {"user_id": self.test_user_id}
+            "metadata": {"user_id": self.test_user_id},
         }
 
-        with patch.object(self.service, '_get_by_field', return_value=None):
+        with patch.object(self.service, "_get_by_field", return_value=None):
             result = await self.service._process_specific_event(
                 "checkout.session.completed", session_data
             )
@@ -347,17 +357,14 @@ class TestWebhookServiceComprehensive:
         session_data = {
             "id": "cs_test_123",
             "customer": "cus_test_123",
-            "metadata": {"user_id": self.test_user_id, "plan": "pro"}
+            "metadata": {"user_id": self.test_user_id, "plan": "pro"},
         }
 
         # Mock user profile
-        mock_user_profile = {
-            "id": "profile_123",
-            "user_id": self.test_user_id
-        }
+        mock_user_profile = {"id": "profile_123", "user_id": self.test_user_id}
 
-        with patch.object(self.service, '_get_by_field', return_value=mock_user_profile):
-            with patch.object(self.service, 'usage_limit_service') as mock_usage:
+        with patch.object(self.service, "_get_by_field", return_value=mock_user_profile):
+            with patch.object(self.service, "usage_limit_service") as mock_usage:
                 mock_usage.add_credits.side_effect = Exception("Credit addition failed")
 
                 result = await self.service._process_specific_event(
@@ -376,10 +383,12 @@ class TestWebhookServiceComprehensive:
             "status": "active",
             "current_period_start": int(datetime.now(UTC).timestamp()),
             "current_period_end": int((datetime.now(UTC) + timedelta(days=30)).timestamp()),
-            "metadata": {"user_id": self.test_user_id, "plan": "pro"}
+            "metadata": {"user_id": self.test_user_id, "plan": "pro"},
         }
 
-        with patch.object(self.service, '_create_subscription_record', return_value={"id": "subscription_123"}):
+        with patch.object(
+            self.service, "_create_subscription_record", return_value={"id": "subscription_123"}
+        ):
             result = await self.service._process_specific_event(
                 "customer.subscription.created", subscription_data
             )
@@ -397,18 +406,20 @@ class TestWebhookServiceComprehensive:
             "status": "past_due",
             "current_period_start": int(datetime.now(UTC).timestamp()),
             "current_period_end": int((datetime.now(UTC) + timedelta(days=30)).timestamp()),
-            "cancel_at_period_end": False
+            "cancel_at_period_end": False,
         }
 
         # Mock existing subscription
         mock_existing = {
             "id": "subscription_123",
             "stripe_subscription_id": "sub_test_123",
-            "user_id": self.test_user_id
+            "user_id": self.test_user_id,
         }
 
-        with patch.object(self.service, '_get_by_field', return_value=mock_existing):
-            with patch.object(self.service, '_update', return_value={**mock_existing, "status": "past_due"}):
+        with patch.object(self.service, "_get_by_field", return_value=mock_existing):
+            with patch.object(
+                self.service, "_update", return_value={**mock_existing, "status": "past_due"}
+            ):
                 result = await self.service._process_specific_event(
                     "customer.subscription.updated", subscription_data
                 )
@@ -420,12 +431,9 @@ class TestWebhookServiceComprehensive:
     @pytest.mark.asyncio
     async def test_process_subscription_updated_not_found(self):
         """Test processing subscription update when subscription not found."""
-        subscription_data = {
-            "id": "sub_test_123",
-            "status": "past_due"
-        }
+        subscription_data = {"id": "sub_test_123", "status": "past_due"}
 
-        with patch.object(self.service, '_get_by_field', return_value=None):
+        with patch.object(self.service, "_get_by_field", return_value=None):
             result = await self.service._process_specific_event(
                 "customer.subscription.updated", subscription_data
             )
@@ -438,18 +446,20 @@ class TestWebhookServiceComprehensive:
         """Test processing customer.subscription.deleted event."""
         subscription_data = {
             "id": "sub_test_123",
-            "canceled_at": int(datetime.now(UTC).timestamp())
+            "canceled_at": int(datetime.now(UTC).timestamp()),
         }
 
         # Mock existing subscription
         mock_existing = {
             "id": "subscription_123",
             "stripe_subscription_id": "sub_test_123",
-            "user_id": self.test_user_id
+            "user_id": self.test_user_id,
         }
 
-        with patch.object(self.service, '_get_by_field', return_value=mock_existing):
-            with patch.object(self.service, '_update', return_value={**mock_existing, "status": "canceled"}):
+        with patch.object(self.service, "_get_by_field", return_value=mock_existing):
+            with patch.object(
+                self.service, "_update", return_value={**mock_existing, "status": "canceled"}
+            ):
                 result = await self.service._process_specific_event(
                     "customer.subscription.deleted", subscription_data
                 )
@@ -467,19 +477,19 @@ class TestWebhookServiceComprehensive:
             "subscription": "sub_test_123",
             "amount_paid": 2990,
             "currency": "brl",
-            "metadata": {"user_id": self.test_user_id}
+            "metadata": {"user_id": self.test_user_id},
         }
 
         # Mock subscription lookup
         mock_subscription = {
             "id": "subscription_123",
             "stripe_subscription_id": "sub_test_123",
-            "user_id": self.test_user_id
+            "user_id": self.test_user_id,
         }
 
-        with patch.object(self.service, '_get_by_field', return_value=mock_subscription):
-            with patch.object(self.service, '_create', return_value={"id": "payment_123"}):
-                with patch.object(self.service, 'usage_limit_service') as mock_usage:
+        with patch.object(self.service, "_get_by_field", return_value=mock_subscription):
+            with patch.object(self.service, "_create", return_value={"id": "payment_123"}):
+                with patch.object(self.service, "usage_limit_service") as mock_usage:
                     mock_usage.add_credits.return_value = None
 
                     result = await self.service._process_specific_event(
@@ -499,7 +509,7 @@ class TestWebhookServiceComprehensive:
             "customer": "cus_test_123",
             "subscription": "sub_test_123",
             "amount_paid": 2990,
-            "currency": "brl"
+            "currency": "brl",
             # No user_id in metadata
         }
 
@@ -507,12 +517,12 @@ class TestWebhookServiceComprehensive:
         mock_subscription = {
             "id": "subscription_123",
             "stripe_subscription_id": "sub_test_123",
-            "user_id": self.test_user_id
+            "user_id": self.test_user_id,
         }
 
-        with patch.object(self.service, '_get_by_field', return_value=mock_subscription):
-            with patch.object(self.service, '_create', return_value={"id": "payment_123"}):
-                with patch.object(self.service, 'usage_limit_service') as mock_usage:
+        with patch.object(self.service, "_get_by_field", return_value=mock_subscription):
+            with patch.object(self.service, "_create", return_value={"id": "payment_123"}):
+                with patch.object(self.service, "usage_limit_service") as mock_usage:
                     mock_usage.add_credits.return_value = None
 
                     result = await self.service._process_specific_event(
@@ -530,11 +540,11 @@ class TestWebhookServiceComprehensive:
             "customer": "cus_test_123",
             "amount": 29900,  # R$ 297,00 - Lifetime plan
             "currency": "brl",
-            "metadata": {"user_id": self.test_user_id}
+            "metadata": {"user_id": self.test_user_id},
         }
 
-        with patch.object(self.service, '_create', return_value={"id": "payment_123"}):
-            with patch.object(self.service, 'usage_limit_service') as mock_usage:
+        with patch.object(self.service, "_create", return_value={"id": "payment_123"}):
+            with patch.object(self.service, "usage_limit_service") as mock_usage:
                 mock_usage.add_credits.return_value = None
 
                 result = await self.service._process_specific_event(
@@ -555,10 +565,10 @@ class TestWebhookServiceComprehensive:
             "customer": "cus_test_123",
             "amount": 2990,
             "currency": "brl",
-            "metadata": {"user_id": self.test_user_id}
+            "metadata": {"user_id": self.test_user_id},
         }
 
-        with patch.object(self.service, '_create', return_value={"id": "payment_failed_123"}):
+        with patch.object(self.service, "_create", return_value={"id": "payment_failed_123"}):
             result = await self.service._process_specific_event(
                 "payment_intent.payment_failed", intent_data
             )
@@ -588,18 +598,13 @@ class TestWebhookServiceComprehensive:
             "status": "active",
             "current_period_start": int(datetime.now(UTC).timestamp()),
             "current_period_end": int((datetime.now(UTC) + timedelta(days=30)).timestamp()),
-            "items": {
-                "data": [{
-                    "price": {
-                        "id": "price_test_123",
-                        "product": "prod_test_123"
-                    }
-                }]
-            }
+            "items": {"data": [{"price": {"id": "price_test_123", "product": "prod_test_123"}}]},
         }
 
-        with patch.object(self.service, '_create', return_value={"id": "subscription_123"}):
-            result = await self.service._create_subscription_record(subscription_data, self.test_user_id)
+        with patch.object(self.service, "_create", return_value={"id": "subscription_123"}):
+            result = await self.service._create_subscription_record(
+                subscription_data, self.test_user_id
+            )
 
         assert result["id"] == "subscription_123"
 
@@ -618,12 +623,14 @@ class TestWebhookServiceComprehensive:
         subscription_data = {
             "id": "sub_test_123",
             "customer": "cus_test_123",
-            "status": "active"
+            "status": "active",
             # Missing timestamps
         }
 
-        with patch.object(self.service, '_create', return_value={"id": "subscription_123"}):
-            result = await self.service._create_subscription_record(subscription_data, self.test_user_id)
+        with patch.object(self.service, "_create", return_value={"id": "subscription_123"}):
+            result = await self.service._create_subscription_record(
+                subscription_data, self.test_user_id
+            )
 
         assert result["id"] == "subscription_123"
 
@@ -632,20 +639,23 @@ class TestWebhookServiceComprehensive:
         assert call_args["current_period_start"] is not None
         assert call_args["current_period_end"] is not None
         # Should be 30 days from now
-        end_timestamp = datetime.fromisoformat(call_args["current_period_end"].replace('Z', '+00:00'))
-        start_timestamp = datetime.fromisoformat(call_args["current_period_start"].replace('Z', '+00:00'))
+        end_timestamp = datetime.fromisoformat(
+            call_args["current_period_end"].replace("Z", "+00:00")
+        )
+        start_timestamp = datetime.fromisoformat(
+            call_args["current_period_start"].replace("Z", "+00:00")
+        )
         assert (end_timestamp - start_timestamp).days == 30
 
     @pytest.mark.asyncio
     async def test_mark_event_processed_success(self):
         """Test marking event as processed successfully."""
-        mock_event = {
-            "id": "event_123",
-            "event_id": self.test_event_id
-        }
+        mock_event = {"id": "event_123", "event_id": self.test_event_id}
 
-        with patch.object(self.service, '_get_by_field', return_value=mock_event):
-            with patch.object(self.service, '_update', return_value={**mock_event, "processed": True}):
+        with patch.object(self.service, "_get_by_field", return_value=mock_event):
+            with patch.object(
+                self.service, "_update", return_value={**mock_event, "processed": True}
+            ):
                 await self.service._mark_event_processed(
                     self.test_event_id, processing_time_ms=150.5
                 )
@@ -659,13 +669,12 @@ class TestWebhookServiceComprehensive:
     @pytest.mark.asyncio
     async def test_mark_event_processed_with_error(self):
         """Test marking event as processed with error."""
-        mock_event = {
-            "id": "event_123",
-            "event_id": self.test_event_id
-        }
+        mock_event = {"id": "event_123", "event_id": self.test_event_id}
 
-        with patch.object(self.service, '_get_by_field', return_value=mock_event):
-            with patch.object(self.service, '_update', return_value={**mock_event, "processed": True}):
+        with patch.object(self.service, "_get_by_field", return_value=mock_event):
+            with patch.object(
+                self.service, "_update", return_value={**mock_event, "processed": True}
+            ):
                 await self.service._mark_event_processed(
                     self.test_event_id, processing_time_ms=100.0, error_message="Processing failed"
                 )
@@ -678,11 +687,9 @@ class TestWebhookServiceComprehensive:
     @pytest.mark.asyncio
     async def test_mark_event_processed_event_not_found(self):
         """Test marking event as processed when event not found."""
-        with patch.object(self.service, '_get_by_field', return_value=None):
+        with patch.object(self.service, "_get_by_field", return_value=None):
             # Should not raise exception
-            await self.service._mark_event_processed(
-                self.test_event_id, processing_time_ms=100.0
-            )
+            await self.service._mark_event_processed(self.test_event_id, processing_time_ms=100.0)
 
         # Verify update was not called
         self.service._update.assert_not_called()
@@ -691,31 +698,11 @@ class TestWebhookServiceComprehensive:
     async def test_get_payment_description(self):
         """Test payment description generation."""
         test_cases = [
-            {
-                "plan": "pro",
-                "amount": 2990,
-                "expected": "Plano Profissional - R$ 29.90"
-            },
-            {
-                "plan": "enterprise",
-                "amount": 9990,
-                "expected": "Plano Empresarial - R$ 99.90"
-            },
-            {
-                "plan": "lifetime",
-                "amount": 29700,
-                "expected": "Acesso Vitalício - R$ 297.00"
-            },
-            {
-                "plan": "free",
-                "amount": 0,
-                "expected": "Plano Grátis - R$ 0.00"
-            },
-            {
-                "plan": "unknown",
-                "amount": 5000,
-                "expected": "Plano unknown - R$ 50.00"
-            }
+            {"plan": "pro", "amount": 2990, "expected": "Plano Profissional - R$ 29.90"},
+            {"plan": "enterprise", "amount": 9990, "expected": "Plano Empresarial - R$ 99.90"},
+            {"plan": "lifetime", "amount": 29700, "expected": "Acesso Vitalício - R$ 297.00"},
+            {"plan": "free", "amount": 0, "expected": "Plano Grátis - R$ 0.00"},
+            {"plan": "unknown", "amount": 5000, "expected": "Plano unknown - R$ 50.00"},
         ]
 
         for case in test_cases:
@@ -723,7 +710,7 @@ class TestWebhookServiceComprehensive:
                 session_data = {
                     "metadata": {"plan": case["plan"]},
                     "amount_total": case["amount"],
-                    "currency": "brl"
+                    "currency": "brl",
                 }
 
                 result = self.service._get_payment_description(session_data)
@@ -754,10 +741,12 @@ class TestWebhookServiceComprehensive:
         event_data = {"id": "cs_test_123"}
 
         # Mock dependencies
-        with patch.object(self.service, 'is_event_processed', return_value=False):
-            with patch.object(self.service, 'log_webhook_event', return_value={"success": True}):
-                with patch.object(self.service, '_process_specific_event', return_value={"success": True}):
-                    with patch.object(self.service, '_mark_event_processed') as mock_mark:
+        with patch.object(self.service, "is_event_processed", return_value=False):
+            with patch.object(self.service, "log_webhook_event", return_value={"success": True}):
+                with patch.object(
+                    self.service, "_process_specific_event", return_value={"success": True}
+                ):
+                    with patch.object(self.service, "_mark_event_processed") as mock_mark:
                         await self.service.process_webhook_event(
                             event_type, event_data, self.test_event_id
                         )
@@ -777,24 +766,24 @@ class TestWebhookServiceComprehensive:
         test_cases = [
             {
                 "amount": 29900,  # R$ 297,00 - Lifetime
-                "expected_credits": 1000
+                "expected_credits": 1000,
             },
             {
-                "amount": 9990,   # R$ 99,90 - Enterprise
-                "expected_credits": 1000
+                "amount": 9990,  # R$ 99,90 - Enterprise
+                "expected_credits": 1000,
             },
             {
-                "amount": 2990,   # R$ 29,90 - Pro
-                "expected_credits": 50
+                "amount": 2990,  # R$ 29,90 - Pro
+                "expected_credits": 50,
             },
             {
-                "amount": 990,    # R$ 9,90 - Basic
-                "expected_credits": 10
+                "amount": 990,  # R$ 9,90 - Basic
+                "expected_credits": 10,
             },
             {
-                "amount": 500,    # Below threshold
-                "expected_credits": 0
-            }
+                "amount": 500,  # Below threshold
+                "expected_credits": 0,
+            },
         ]
 
         for case in test_cases:
@@ -804,11 +793,11 @@ class TestWebhookServiceComprehensive:
                     "customer": "cus_test_123",
                     "amount": case["amount"],
                     "currency": "brl",
-                    "metadata": {"user_id": self.test_user_id}
+                    "metadata": {"user_id": self.test_user_id},
                 }
 
-                with patch.object(self.service, '_create', return_value={"id": "payment_123"}):
-                    with patch.object(self.service, 'usage_limit_service') as mock_usage:
+                with patch.object(self.service, "_create", return_value={"id": "payment_123"}):
+                    with patch.object(self.service, "usage_limit_service") as mock_usage:
                         mock_usage.add_credits.return_value = None
 
                         result = await self.service._process_specific_event(
@@ -821,5 +810,5 @@ class TestWebhookServiceComprehensive:
                                 user_id=UUID(self.test_user_id),
                                 amount=case["expected_credits"],
                                 source="payment",
-                                description=f"Credits from one-time payment of R$ {case['amount']/100:.2f}"
+                                description=f"Credits from one-time payment of R$ {case['amount'] / 100:.2f}",
                             )

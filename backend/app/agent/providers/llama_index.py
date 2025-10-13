@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 from fastapi.concurrency import run_in_threadpool
+
 try:
     from llama_index.core.base.embeddings.base import BaseEmbedding
     from llama_index.core.base.llms.base import BaseLLM

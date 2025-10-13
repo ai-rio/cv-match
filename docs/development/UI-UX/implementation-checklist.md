@@ -1,7 +1,7 @@
 # ✅ CV-Match UI/UX Implementation Checklist
 
-**Start Date:** October 12, 2025  
-**Target Completion:** 4 weeks  
+**Start Date:** October 12, 2025
+**Target Completion:** 4 weeks
 **Owner:** Development Team
 
 ---
@@ -10,8 +10,8 @@
 
 ### Task 1.1: Protect /optimize Route ⏰ 2 hours
 
-**Priority:** 🔴 CRITICAL  
-**Impact:** High - Fixes core user flow issue  
+**Priority:** 🔴 CRITICAL
+**Impact:** High - Fixes core user flow issue
 **Effort:** Low
 
 **Implementation:**
@@ -19,68 +19,67 @@
 ```typescript
 // File: frontend/middleware.ts
 
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import createIntlMiddleware from 'next-intl/middleware';
+import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import createIntlMiddleware from "next-intl/middleware";
 
 // Create i18n middleware
 const intlMiddleware = createIntlMiddleware({
-  locales: ['pt-br', 'en'],
-  defaultLocale: 'pt-br',
-  localePrefix: 'always',
+  locales: ["pt-br", "en"],
+  defaultLocale: "pt-br",
+  localePrefix: "always",
 });
 
 export async function middleware(req: NextRequest) {
   // 1. Handle i18n first
   const response = intlMiddleware(req);
-  
+
   // 2. Define protected routes
   const protectedPaths = [
-    '/optimize',
-    '/dashboard', 
-    '/history',
-    '/settings',
-    '/results'
+    "/optimize",
+    "/dashboard",
+    "/history",
+    "/settings",
+    "/results",
   ];
-  
+
   const path = req.nextUrl.pathname;
-  const locale = path.split('/')[1]; // pt-br or en
-  
+  const locale = path.split("/")[1]; // pt-br or en
+
   // Check if current path is protected
-  const isProtected = protectedPaths.some(p => 
-    path.includes(`/${locale}${p}`)
+  const isProtected = protectedPaths.some((p) =>
+    path.includes(`/${locale}${p}`),
   );
-  
+
   if (isProtected) {
     // 3. Check authentication
     const res = NextResponse.next();
     const supabase = createMiddlewareClient({ req, res });
-    const { data: { session } } = await supabase.auth.getSession();
-    
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
     if (!session) {
       // 4. Redirect to signup with return URL
       const signupUrl = new URL(`/${locale}/auth/signup`, req.url);
-      signupUrl.searchParams.set('redirect', path);
-      signupUrl.searchParams.set('message', 'signup_required');
-      
+      signupUrl.searchParams.set("redirect", path);
+      signupUrl.searchParams.set("message", "signup_required");
+
       return NextResponse.redirect(signupUrl);
     }
   }
-  
+
   return response;
 }
 
 export const config = {
-  matcher: [
-    '/',
-    '/(pt-br|en)/:path*',
-    '/((?!_next|_vercel|.*\\..*).*)',
-  ],
+  matcher: ["/", "/(pt-br|en)/:path*", "/((?!_next|_vercel|.*\\..*).*)"],
 };
 ```
 
 **Checklist:**
+
 - [ ] Update `middleware.ts` with auth checks
 - [ ] Test protected routes redirect to signup
 - [ ] Test authenticated users can access protected routes
@@ -91,8 +90,8 @@ export const config = {
 
 ### Task 1.2: Remove Client-Side Auth from /optimize ⏰ 1 hour
 
-**Priority:** 🟡 High  
-**Impact:** Medium - Cleans up code  
+**Priority:** 🟡 High
+**Impact:** Medium - Cleans up code
 **Effort:** Low
 
 **Changes to make:**
@@ -105,7 +104,7 @@ export const config = {
 const handleJobDescriptionSubmit = useCallback(
   async (data: JobDescriptionData) => {
     // ... existing code ...
-    
+
     // DELETE THIS SECTION (lines ~255-276):
     /*
     try {
@@ -117,31 +116,32 @@ const handleJobDescriptionSubmit = useCallback(
         router.push('/auth/login');
         return;
       }
-      
+
       // ... credit check code ...
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to check usage limits');
     }
     */
-    
+
     // ✅ REPLACE with simple version:
     setJobDescription(data);
     setError(null);
-    
+
     // Check credits
     const hasCredits = await checkUserCredits();
     if (hasCredits) {
-      setCurrentStep('processing');
+      setCurrentStep("processing");
       await startOptimization();
     } else {
-      setCurrentStep('payment');
+      setCurrentStep("payment");
     }
   },
-  [router, startOptimization]
+  [router, startOptimization],
 );
 ```
 
 **Checklist:**
+
 - [ ] Remove auth check from `handleJobDescriptionSubmit`
 - [ ] Remove auth check from `handleResumeUploaded`
 - [ ] Simplify error handling (no auth errors needed)
@@ -152,8 +152,8 @@ const handleJobDescriptionSubmit = useCallback(
 
 ### Task 1.3: Update Landing Page CTAs ⏰ 1 hour
 
-**Priority:** 🟡 High  
-**Impact:** High - Improves conversion  
+**Priority:** 🟡 High
+**Impact:** High - Improves conversion
 **Effort:** Low
 
 **Changes:**
@@ -169,7 +169,7 @@ const handleJobDescriptionSubmit = useCallback(
   <p className="text-xl mt-4">
     3 otimizações grátis • Sem cartão de crédito • Resultados em minutos
   </p>
-  
+
   {/* Update CTA */}
   <div className="mt-8 flex gap-4 justify-center">
     <Button size="lg" asChild>
@@ -183,7 +183,7 @@ const handleJobDescriptionSubmit = useCallback(
       </Link>
     </Button>
   </div>
-  
+
   {/* Add trust badges */}
   <div className="mt-6 flex gap-6 justify-center text-sm text-gray-600">
     <span>✓ Sem cartão de crédito</span>
@@ -194,6 +194,7 @@ const handleJobDescriptionSubmit = useCallback(
 ```
 
 **Checklist:**
+
 - [ ] Update hero CTA to "Começar Grátis"
 - [ ] Add "3 créditos grátis" messaging
 - [ ] Add trust badges below CTA
@@ -204,8 +205,8 @@ const handleJobDescriptionSubmit = useCallback(
 
 ### Task 1.4: Add Credit Counter to Dashboard ⏰ 2 hours
 
-**Priority:** 🟡 High  
-**Impact:** High - Transparency  
+**Priority:** 🟡 High
+**Impact:** High - Transparency
 **Effort:** Low
 
 **Implementation:**
@@ -231,8 +232,8 @@ const handleJobDescriptionSubmit = useCallback(
         {totalCredits}
       </div>
       <div className="text-sm text-gray-600">
-        {totalCredits === 0 
-          ? 'Nenhum crédito disponível' 
+        {totalCredits === 0
+          ? 'Nenhum crédito disponível'
           : `crédito${totalCredits > 1 ? 's' : ''} disponível${totalCredits > 1 ? 'eis' : ''}`
         }
       </div>
@@ -295,6 +296,7 @@ const handleJobDescriptionSubmit = useCallback(
 ```
 
 **Checklist:**
+
 - [ ] Add large credit counter
 - [ ] Show free vs paid credits breakdown
 - [ ] Add progress bars
@@ -306,8 +308,8 @@ const handleJobDescriptionSubmit = useCallback(
 
 ### Task 1.5: Create Upgrade Modal Component ⏰ 3 hours
 
-**Priority:** 🟡 High  
-**Impact:** High - Key conversion point  
+**Priority:** 🟡 High
+**Impact:** High - Key conversion point
 **Effort:** Medium
 
 **New File:**
@@ -490,7 +492,7 @@ export function UpgradeModal({ isOpen, onClose, trigger, onUpgrade }: UpgradeMod
             </div>
           </div>
           <p className="text-sm text-gray-700 italic">
-            "Depois de otimizar meu currículo, consegui 3 entrevistas em uma semana. 
+            "Depois de otimizar meu currículo, consegui 3 entrevistas em uma semana.
             O investimento valeu muito a pena!"
           </p>
         </div>
@@ -548,7 +550,7 @@ if (credits === 1) {
 return (
   <>
     {/* Your page content */}
-    
+
     <UpgradeModal
       isOpen={showUpgradeModal}
       onClose={() => setShowUpgradeModal(false)}
@@ -563,6 +565,7 @@ return (
 ```
 
 **Checklist:**
+
 - [ ] Create UpgradeModal component
 - [ ] Add to `/optimize` page
 - [ ] Add to `/dashboard`
@@ -577,8 +580,8 @@ return (
 
 ### Task 2.1: Create Onboarding Flow ⏰ 8 hours
 
-**Priority:** 🟢 Medium  
-**Impact:** High - Better activation  
+**Priority:** 🟢 Medium
+**Impact:** High - Better activation
 **Effort:** High
 
 **New Files to Create:**
@@ -610,7 +613,7 @@ import { FirstOptimizationPrompt } from './steps/FirstOptimizationPrompt';
 export default function OnboardingPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
-  
+
   const steps = [
     <WelcomeStep key="welcome" onNext={() => setCurrentStep(1)} onSkip={handleSkip} />,
     <QuickTutorialStep key="tutorial" onNext={() => setCurrentStep(2)} onSkip={handleSkip} />,
@@ -657,6 +660,7 @@ export default function OnboardingPage() {
 ```
 
 **Checklist:**
+
 - [ ] Create onboarding page structure
 - [ ] Implement 3 steps (Welcome, Tutorial, Prompt)
 - [ ] Add skip button (accessible)
@@ -670,8 +674,8 @@ export default function OnboardingPage() {
 
 ### Task 2.2: First-Time User Tooltips ⏰ 4 hours
 
-**Priority:** 🟢 Medium  
-**Impact:** Medium - Helps activation  
+**Priority:** 🟢 Medium
+**Impact:** Medium - Helps activation
 **Effort:** Medium
 
 Use a library like **react-joyride** or **driver.js** for product tours.
@@ -766,6 +770,7 @@ export default function Dashboard() {
 ```
 
 **Checklist:**
+
 - [ ] Install tour library
 - [ ] Add data-tour attributes to key elements
 - [ ] Create tour steps
@@ -777,8 +782,8 @@ export default function Dashboard() {
 
 ### Task 2.3: Email Campaign Setup ⏰ 6 hours
 
-**Priority:** 🟢 Medium  
-**Impact:** High - Drives engagement  
+**Priority:** 🟢 Medium
+**Impact:** High - Drives engagement
 **Effort:** Medium
 
 **Tool:** Use Resend, SendGrid, or Mailgun
@@ -815,12 +820,12 @@ class EmailService:
                 <a href="https://cv-match.com/dashboard">Começar Agora</a>
             """
         })
-    
+
     @staticmethod
     async def send_credit_reminder(user_email: str, credits_left: int):
         """Send reminder about remaining credits"""
         # Implementation...
-    
+
     @staticmethod
     async def send_upgrade_offer(user_email: str):
         """Send upgrade offer after free credits exhausted"""
@@ -828,6 +833,7 @@ class EmailService:
 ```
 
 **Checklist:**
+
 - [ ] Choose email service provider
 - [ ] Set up API keys
 - [ ] Create email templates
@@ -843,8 +849,8 @@ class EmailService:
 
 ### Task 3.1: Install Analytics ⏰ 3 hours
 
-**Priority:** 🔴 CRITICAL  
-**Impact:** High - Data-driven decisions  
+**Priority:** 🔴 CRITICAL
+**Impact:** High - Data-driven decisions
 **Effort:** Low
 
 **Recommended:** PostHog (open-source, self-hostable)
@@ -856,15 +862,16 @@ bun install posthog-js
 ```typescript
 // File: frontend/lib/analytics.ts
 
-import posthog from 'posthog-js';
+import posthog from "posthog-js";
 
 export const initAnalytics = () => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
+      api_host:
+        process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://app.posthog.com",
       loaded: (posthog) => {
-        if (process.env.NODE_ENV === 'development') posthog.debug();
-      }
+        if (process.env.NODE_ENV === "development") posthog.debug();
+      },
     });
   }
 };
@@ -874,14 +881,14 @@ export const analytics = {
   track: (event: string, properties?: Record<string, any>) => {
     posthog.capture(event, properties);
   },
-  
+
   identify: (userId: string, traits?: Record<string, any>) => {
     posthog.identify(userId, traits);
   },
-  
+
   page: () => {
-    posthog.capture('$pageview');
-  }
+    posthog.capture("$pageview");
+  },
 };
 ```
 
@@ -889,28 +896,29 @@ export const analytics = {
 
 ```typescript
 // User lifecycle
-analytics.track('User Signed Up', { method: 'google', plan: 'free' });
-analytics.track('Onboarding Started');
-analytics.track('Onboarding Completed', { time_taken: 120 });
+analytics.track("User Signed Up", { method: "google", plan: "free" });
+analytics.track("Onboarding Started");
+analytics.track("Onboarding Completed", { time_taken: 120 });
 
 // Optimization flow
-analytics.track('Optimization Started', { credits_left: 2 });
-analytics.track('Resume Uploaded', { file_size: 1024, file_type: 'pdf' });
-analytics.track('Job Description Submitted', { char_count: 500 });
-analytics.track('Optimization Completed', { match_score: 85, time_taken: 180 });
+analytics.track("Optimization Started", { credits_left: 2 });
+analytics.track("Resume Uploaded", { file_size: 1024, file_type: "pdf" });
+analytics.track("Job Description Submitted", { char_count: 500 });
+analytics.track("Optimization Completed", { match_score: 85, time_taken: 180 });
 
 // Conversion
-analytics.track('Upgrade Modal Shown', { trigger: 'out_of_credits' });
-analytics.track('Upgrade Clicked', { tier: 'pro' });
-analytics.track('Payment Completed', { tier: 'pro', amount: 2990 });
+analytics.track("Upgrade Modal Shown", { trigger: "out_of_credits" });
+analytics.track("Upgrade Clicked", { tier: "pro" });
+analytics.track("Payment Completed", { tier: "pro", amount: 2990 });
 
 // Engagement
-analytics.track('Dashboard Viewed');
-analytics.track('History Viewed');
-analytics.track('Result Downloaded', { format: 'docx' });
+analytics.track("Dashboard Viewed");
+analytics.track("History Viewed");
+analytics.track("Result Downloaded", { format: "docx" });
 ```
 
 **Checklist:**
+
 - [ ] Install PostHog or similar
 - [ ] Initialize in app
 - [ ] Track key events
@@ -922,8 +930,8 @@ analytics.track('Result Downloaded', { format: 'docx' });
 
 ### Task 3.2: Set Up A/B Testing ⏰ 4 hours
 
-**Priority:** 🟢 Medium  
-**Impact:** High - Optimization  
+**Priority:** 🟢 Medium
+**Impact:** High - Optimization
 **Effort:** Medium
 
 **Tests to Run:**
@@ -931,7 +939,7 @@ analytics.track('Result Downloaded', { format: 'docx' });
 1. **CTA Copy Test**
    - A: "Começar Grátis"
    - B: "Experimentar Agora"
-   
+
 2. **Free Credit Amount**
    - A: 3 credits
    - B: 5 credits
@@ -949,7 +957,7 @@ analytics.track('Result Downloaded', { format: 'docx' });
 ```typescript
 // File: frontend/hooks/useFeatureFlag.ts
 
-import { usePostHog } from 'posthog-js/react';
+import { usePostHog } from "posthog-js/react";
 
 export function useFeatureFlag(flagKey: string): boolean | string {
   const posthog = usePostHog();
@@ -957,12 +965,14 @@ export function useFeatureFlag(flagKey: string): boolean | string {
 }
 
 // Usage:
-const ctaCopy = useFeatureFlag('cta_copy_test') === 'variant_b' 
-  ? 'Experimentar Agora' 
-  : 'Começar Grátis';
+const ctaCopy =
+  useFeatureFlag("cta_copy_test") === "variant_b"
+    ? "Experimentar Agora"
+    : "Começar Grátis";
 ```
 
 **Checklist:**
+
 - [ ] Set up feature flags
 - [ ] Implement variant logic
 - [ ] Track conversions for each variant
@@ -976,11 +986,12 @@ const ctaCopy = useFeatureFlag('cta_copy_test') === 'variant_b'
 
 ### Task 4.1: Mobile Optimization ⏰ 8 hours
 
-**Priority:** 🟡 High  
-**Impact:** High - 30-40% mobile traffic  
+**Priority:** 🟡 High
+**Impact:** High - 30-40% mobile traffic
 **Effort:** High
 
 **Focus Areas:**
+
 - [ ] Responsive navigation
 - [ ] Touch-friendly buttons (min 44x44px)
 - [ ] Optimize upload flow for mobile
@@ -993,19 +1004,21 @@ const ctaCopy = useFeatureFlag('cta_copy_test') === 'variant_b'
 
 ### Task 4.2: Performance Audit ⏰ 4 hours
 
-**Priority:** 🟡 High  
-**Impact:** Medium - SEO & UX  
+**Priority:** 🟡 High
+**Impact:** Medium - SEO & UX
 **Effort:** Low
 
 **Tools:** Lighthouse, WebPageTest
 
 **Targets:**
+
 - Performance: > 90
 - Accessibility: > 95
 - Best Practices: > 95
 - SEO: > 90
 
 **Checklist:**
+
 - [ ] Run Lighthouse audit
 - [ ] Optimize images (WebP, lazy load)
 - [ ] Minimize JavaScript bundles
@@ -1017,11 +1030,12 @@ const ctaCopy = useFeatureFlag('cta_copy_test') === 'variant_b'
 
 ### Task 4.3: Error Handling & Edge Cases ⏰ 6 hours
 
-**Priority:** 🟡 High  
-**Impact:** Medium - User trust  
+**Priority:** 🟡 High
+**Impact:** Medium - User trust
 **Effort:** Medium
 
 **Cases to Handle:**
+
 - [ ] File upload fails
 - [ ] API is down
 - [ ] Payment fails
@@ -1101,19 +1115,19 @@ export default function MetricsPage() {
   return (
     <div>
       <h1>Key Metrics</h1>
-      
+
       {/* Acquisition */}
       <MetricCard title="Weekly Signups" value={450} change={+12} />
       <MetricCard title="Signup Conversion" value="15%" change={+3} />
-      
+
       {/* Activation */}
       <MetricCard title="First Optimization %" value="68%" change={+8} />
       <MetricCard title="Time to First Optimization" value="4.2 min" change={-0.8} />
-      
+
       {/* Monetization */}
       <MetricCard title="Free → Paid %" value="12%" change={+4} />
       <MetricCard title="MRR" value="R$ 12.450" change={+25} />
-      
+
       {/* Retention */}
       <MetricCard title="30-day Retention" value="42%" change={+5} />
       <MetricCard title="Avg Credits Used" value="2.8/3" change={+0.3} />
@@ -1127,6 +1141,7 @@ export default function MetricsPage() {
 ## 🎯 Final Checklist
 
 ### Before Launch:
+
 - [ ] All Phase 1 tasks complete
 - [ ] Analytics tracking verified
 - [ ] Error handling tested
@@ -1136,6 +1151,7 @@ export default function MetricsPage() {
 - [ ] Backup and rollback plan ready
 
 ### Launch Day:
+
 - [ ] Monitor error rates
 - [ ] Watch conversion funnels
 - [ ] Be ready to rollback if issues
@@ -1143,12 +1159,14 @@ export default function MetricsPage() {
 - [ ] Monitor server load
 
 ### Week 1 Post-Launch:
+
 - [ ] Review analytics daily
 - [ ] Address critical bugs
 - [ ] Collect qualitative feedback
 - [ ] Start planning Phase 2
 
 ### Week 2-4 Post-Launch:
+
 - [ ] Run A/B tests
 - [ ] Optimize based on data
 - [ ] Plan next features
@@ -1158,16 +1176,17 @@ export default function MetricsPage() {
 
 ## 📞 Questions to Answer Before Starting
 
-1. **Free tier:** 3 or 5 credits? *Recommendation: 3*
-2. **Credits reset?** Monthly or lifetime? *Recommendation: Lifetime for free tier*
-3. **Onboarding:** Required or optional? *Recommendation: Optional with skip*
-4. **Analytics:** PostHog, Amplitude, or custom? *Recommendation: PostHog*
-5. **Email:** Resend, SendGrid, or other? *Recommendation: Resend*
-6. **A/B testing:** Built-in or tool? *Recommendation: PostHog feature flags*
+1. **Free tier:** 3 or 5 credits? _Recommendation: 3_
+2. **Credits reset?** Monthly or lifetime? _Recommendation: Lifetime for free tier_
+3. **Onboarding:** Required or optional? _Recommendation: Optional with skip_
+4. **Analytics:** PostHog, Amplitude, or custom? _Recommendation: PostHog_
+5. **Email:** Resend, SendGrid, or other? _Recommendation: Resend_
+6. **A/B testing:** Built-in or tool? _Recommendation: PostHog feature flags_
 
 ---
 
 **Priority Legend:**
+
 - 🔴 **CRITICAL** - Must have for MVP
 - 🟡 **High** - Important for launch
 - 🟢 **Medium** - Nice to have
@@ -1175,7 +1194,7 @@ export default function MetricsPage() {
 
 ---
 
-*This checklist is a living document. Update as tasks are completed and new requirements emerge.*
+_This checklist is a living document. Update as tasks are completed and new requirements emerge._
 
-**Last Updated:** October 12, 2025  
+**Last Updated:** October 12, 2025
 **Next Review:** Weekly during implementation

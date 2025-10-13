@@ -7,6 +7,7 @@ This document outlines the complete internationalization (i18n) setup for CV-Mat
 ## Installation
 
 ### Dependencies
+
 - **next-intl**: ^4.3.6
 - **Package Manager**: Bun (not npm)
 
@@ -17,36 +18,35 @@ bun add next-intl@4.3.6
 ## Configuration Files
 
 ### 1. `i18n.ts` - Core Configuration
+
 ```typescript
 import { getRequestConfig } from 'next-intl/server';
 
 export default getRequestConfig(async ({ locale }) => {
   return {
-    messages: (await import(`./locales/${locale}/common.json`)).default
+    messages: (await import(`./locales/${locale}/common.json`)).default,
   };
 });
 ```
 
 ### 2. `middleware.ts` - Locale Detection
+
 ```typescript
 import createMiddleware from 'next-intl/middleware';
 
 export default createMiddleware({
   locales: ['pt-br', 'en'],
   defaultLocale: 'pt-br',
-  localePrefix: 'always'
+  localePrefix: 'always',
 });
 
 export const config = {
-  matcher: [
-    '/',
-    '/(pt-br|en)/:path*',
-    '/((?!_next|_vercel|.*\\..*).*)'
-  ]
+  matcher: ['/', '/(pt-br|en)/:path*', '/((?!_next|_vercel|.*\\..*).*)'],
 };
 ```
 
 ### 3. `next.config.mjs` - Next.js Integration
+
 ```javascript
 import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./i18n.ts');
@@ -87,6 +87,7 @@ frontend/
 ## Translation Files
 
 ### Common Translations (`locales/pt-br/common.json`)
+
 - Navigation items
 - UI elements
 - Actions and buttons
@@ -95,6 +96,7 @@ frontend/
 - Units and currency
 
 ### Authentication Translations (`locales/pt-br/auth.json`)
+
 - Login form
 - Sign up form
 - Password reset
@@ -102,6 +104,7 @@ frontend/
 - Error messages
 
 ### Dashboard Translations (`locales/pt-br/dashboard.json`)
+
 - Dashboard overview
 - Analytics and insights
 - Settings and preferences
@@ -110,6 +113,7 @@ frontend/
 ## Components
 
 ### 1. Language Switcher Button
+
 ```typescript
 'use client';
 import { useLocale } from 'next-intl';
@@ -138,6 +142,7 @@ export default function LanguageSwitcherButton() {
 ```
 
 ### 2. Navigation Component
+
 ```typescript
 'use client';
 import { useTranslations } from 'next-intl';
@@ -160,6 +165,7 @@ export default function Navigation() {
 ## Usage Examples
 
 ### 1. Basic Translation Usage
+
 ```typescript
 'use client';
 import { useTranslations } from 'next-intl';
@@ -178,6 +184,7 @@ export default function MyComponent() {
 ```
 
 ### 2. Nested Translations
+
 ```typescript
 const t = useTranslations('auth.login');
 return (
@@ -190,6 +197,7 @@ return (
 ```
 
 ### 3. Parameterized Translations
+
 ```json
 {
   "welcome": "Welcome back, {name}!",
@@ -206,12 +214,14 @@ t('itemsCount', { count: 5 });
 ## Routing Structure
 
 ### URL Patterns
+
 - **Default locale**: `https://cv-match.com/pt-br/`
 - **English**: `https://cv-match.com/en/`
 - **Dashboard**: `https://cv-match.com/pt-br/dashboard`
 - **Auth**: `https://cv-match.com/pt-br/auth/login`
 
 ### Route Generation
+
 ```typescript
 export function generateStaticParams() {
   return [{ locale: 'pt-br' }, { locale: 'en' }];
@@ -221,6 +231,7 @@ export function generateStaticParams() {
 ## Brazilian Market Specifics
 
 ### 1. Currency Formatting
+
 ```json
 {
   "units": {
@@ -231,31 +242,37 @@ export function generateStaticParams() {
 ```
 
 ### 2. Date Formatting
+
 - PT-BR: `DD/MM/YYYY` (e.g., "08/10/2025")
 - EN: `MM/DD/YYYY` (e.g., "10/08/2025")
 
 ### 3. Number Formatting
+
 - PT-BR: `1.234,56` (comma as decimal separator)
 - EN: `1,234.56` (period as decimal separator)
 
 ## Best Practices
 
 ### 1. Translation Keys
+
 - Use descriptive, hierarchical keys
 - Group related translations together
 - Avoid concatenating translated strings
 
 ### 2. Component Structure
+
 - Keep translations close to components that use them
 - Use `useTranslations` hook in client components
 - Server components can use `getTranslations` directly
 
 ### 3. Performance
+
 - Static generation is used for all locales
 - Translation files are loaded on-demand
 - Language switching is client-side without page reload
 
 ### 4. SEO Optimization
+
 - Always include locale in URLs (`/pt-br/`, `/en/`)
 - Set proper `lang` attribute in HTML
 - Use `hreflang` tags for alternate languages
@@ -263,35 +280,43 @@ export function generateStaticParams() {
 ## Integration with Existing Systems
 
 ### 1. Supabase Authentication
+
 - Works seamlessly with existing auth flow
 - Language preference can be stored in user profile
 - Auth callbacks respect locale routing
 
 ### 2. Stripe Payments
+
 - Currency configured for BRL in PT-BR
 - Payment forms use localized labels
 - Error messages are translated
 
 ### 3. Sentry Error Tracking
+
 - Error reports include current locale
 - User feedback can be submitted in preferred language
 
 ## Testing
 
 ### 1. Development
+
 ```bash
 bun run dev
 ```
+
 Test URLs:
+
 - http://localhost:3000/pt-br/
 - http://localhost:3000/en/
 
 ### 2. Build
+
 ```bash
 bun run build
 ```
 
 ### 3. Production
+
 ```bash
 bun run start
 ```
@@ -299,6 +324,7 @@ bun run start
 ## Adding New Translations
 
 ### 1. Add Translation Keys
+
 ```json
 // locales/pt-br/common.json
 {
@@ -310,6 +336,7 @@ bun run start
 ```
 
 ### 2. Add English Version
+
 ```json
 // locales/en/common.json
 {
@@ -321,6 +348,7 @@ bun run start
 ```
 
 ### 3. Use in Component
+
 ```typescript
 const t = useTranslations('common.newFeature');
 return <div>
@@ -349,12 +377,13 @@ return <div>
    - Ensure file structure matches routes
 
 ### Debug Mode
+
 ```typescript
 // i18n.ts
 export default getRequestConfig(async ({ locale }) => {
   console.log('Loading locale:', locale);
   return {
-    messages: (await import(`./locales/${locale}/common.json`)).default
+    messages: (await import(`./locales/${locale}/common.json`)).default,
   };
 });
 ```
@@ -370,6 +399,7 @@ export default getRequestConfig(async ({ locale }) => {
 ## Support
 
 For issues related to next-intl setup:
+
 1. Check [next-intl documentation](https://next-intl-docs.vercel.app/)
 2. Review this configuration guide
 3. Contact the development team for CV-Match specific issues

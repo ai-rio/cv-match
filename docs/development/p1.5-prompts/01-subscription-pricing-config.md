@@ -1,8 +1,8 @@
 # 🎯 P1.5 Phase 1.1: Subscription Pricing Configuration
 
-**Agent**: payment-specialist  
-**Phase**: 1 (Parallel execution)  
-**Time Estimate**: 2 hours  
+**Agent**: payment-specialist
+**Phase**: 1 (Parallel execution)
+**Time Estimate**: 2 hours
 **Dependencies**: None - can start immediately
 
 **Why payment-specialist?** This task involves Stripe subscription products/pricing setup, which is payment infrastructure. The payment-specialist is the expert for all Stripe integration tasks.
@@ -14,6 +14,7 @@
 Create the subscription pricing configuration that defines the **Flow** subscription tiers for CV-Match. This builds on the existing credit-based (Flex) system to complete the Hybrid business model.
 
 **What You're Building:**
+
 - Subscription tier definitions (Flow Starter, Pro, Business, Enterprise)
 - Pricing configuration aligned with business model
 - Integration with existing pricing.py
@@ -24,19 +25,23 @@ Create the subscription pricing configuration that defines the **Flow** subscrip
 ## 🔍 Context
 
 ### Current State
+
 - ✅ Credit-based pricing exists in `/backend/app/config/pricing.py`
 - ✅ Stripe integration for one-time payments in `/backend/app/services/stripe_service.py`
 - ❌ No subscription tiers defined
 - ❌ No monthly recurring billing
 
 ### Target State
+
 - ✅ Hybrid model: Credits (Flex) + Subscriptions (Flow)
 - ✅ 4 subscription tiers: Starter, Pro, Business, Enterprise
 - ✅ Monthly recurring billing via Stripe
 - ✅ Usage limits per tier with rollover
 
 ### Reference Architecture
+
 You're adapting **QuoteKit's advanced Stripe subscription system** to CV-Match:
+
 - QuoteKit: `/home/carlos/projects/QuoteKit/src/constants/stripe-prices.ts`
 - QuoteKit: `/home/carlos/projects/QuoteKit/src/features/account/actions/subscription-actions.ts`
 
@@ -45,6 +50,7 @@ You're adapting **QuoteKit's advanced Stripe subscription system** to CV-Match:
 ## 🛠️ CRITICAL: Tools You MUST Use
 
 ### 1. Context7 - Library Documentation
+
 **ALWAYS check documentation before implementing!**
 
 ```bash
@@ -55,7 +61,9 @@ context7:get-library-docs --library-id="/stripe/stripe-python" --topic="subscrip
 ```
 
 ### 2. Python REPL Testing
+
 Test your config as you build:
+
 ```bash
 docker compose exec backend python -c "
 from app.config.pricing import pricing_config
@@ -72,12 +80,14 @@ print(pricing_config.get_subscription_tiers())
 **File**: `/backend/app/config/pricing.py`
 
 **What to do:**
+
 1. Add `is_subscription` field to `PricingTier` dataclass
 2. Add `analyses_per_month` field (for subscription usage limits)
 3. Add `rollover_limit` field (how many unused analyses can rollover)
 4. Create subscription tier definitions
 
 **Expected Result:**
+
 ```python
 @dataclass
 class PricingTier:
@@ -97,16 +107,17 @@ class PricingTier:
 ```
 
 **Add subscription tiers to the config:**
+
 ```python
 class BrazilianPricingConfig:
     def __init__(self):
         # ... existing code ...
-        
+
         # Add subscription tiers (Flow)
         self.tiers.update({
             # FLEX PACKAGES (existing - keep these!)
             # "free", "basic", "pro", "enterprise" remain unchanged
-            
+
             # FLOW SUBSCRIPTIONS (new!)
             "flow_starter": PricingTier(
                 id="flow_starter",
@@ -198,16 +209,16 @@ Add utility methods to `BrazilianPricingConfig`:
 def get_subscription_tiers(self) -> Dict[str, PricingTier]:
     """Get only subscription tiers (Flow)."""
     return {
-        tier_id: tier 
-        for tier_id, tier in self.tiers.items() 
+        tier_id: tier
+        for tier_id, tier in self.tiers.items()
         if tier.is_subscription
     }
 
 def get_credit_tiers(self) -> Dict[str, PricingTier]:
     """Get only credit tiers (Flex)."""
     return {
-        tier_id: tier 
-        for tier_id, tier in self.tiers.items() 
+        tier_id: tier
+        for tier_id, tier in self.tiers.items()
         if not tier.is_subscription
     }
 
@@ -219,12 +230,12 @@ def get_tier_by_type(self, tier_id: str, tier_type: str) -> PricingTier | None:
     tier = self.get_tier(tier_id)
     if not tier:
         return None
-    
+
     if tier_type == "subscription" and not tier.is_subscription:
         return None
     if tier_type == "credit" and tier.is_subscription:
         return None
-    
+
     return tier
 
 def validate_tier(self, tier_id: str) -> tuple[bool, str]:
@@ -233,13 +244,13 @@ def validate_tier(self, tier_id: str) -> tuple[bool, str]:
     Returns: (is_valid, error_message)
     """
     tier = self.get_tier(tier_id)
-    
+
     if not tier:
         return False, f"Invalid tier ID: {tier_id}"
-    
+
     if tier.price == 0 and tier_id not in ["free", "flow_enterprise"]:
         return False, f"Invalid pricing for tier: {tier_id}"
-    
+
     return True, ""
 
 def get_tier_usage_limit(self, tier_id: str) -> int:
@@ -247,7 +258,7 @@ def get_tier_usage_limit(self, tier_id: str) -> int:
     tier = self.get_tier(tier_id)
     if not tier:
         return 0
-    
+
     if tier.is_subscription:
         return tier.analyses_per_month
     else:
@@ -282,25 +293,25 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 def create_subscription_products():
     """Create Stripe products and prices for Flow subscriptions."""
-    
+
     print("🚀 Creating Stripe subscription products...")
     print(f"Mode: {'TEST' if stripe.api_key.startswith('sk_test_') else 'LIVE'}")
     print()
-    
+
     # Get subscription tiers
     subscription_tiers = pricing_config.get_subscription_tiers()
-    
+
     created_products = []
     created_prices = []
-    
+
     for tier_id, tier in subscription_tiers.items():
         # Skip enterprise (custom pricing)
         if tier_id == "flow_enterprise":
             print(f"⏭️  Skipping {tier.name} (custom pricing)")
             continue
-        
+
         print(f"📦 Creating product: {tier.name}")
-        
+
         # Create product
         try:
             product = stripe.Product.create(
@@ -314,10 +325,10 @@ def create_subscription_products():
                     "rollover_limit": str(tier.rollover_limit),
                 }
             )
-            
+
             print(f"  ✅ Product created: {product.id}")
             created_products.append(product)
-            
+
             # Create recurring price
             price = stripe.Price.create(
                 product=product.id,
@@ -329,18 +340,18 @@ def create_subscription_products():
                     "market": "brazil",
                 }
             )
-            
+
             print(f"  ✅ Price created: {price.id} (R$ {tier.price/100:.2f}/mês)")
             created_prices.append(price)
-            
+
             # Store price ID
             print(f"  💾 Update tier '{tier_id}' with stripe_price_id: {price.id}")
             print()
-            
+
         except stripe.StripeError as e:
             print(f"  ❌ Error creating {tier.name}: {e}")
             print()
-    
+
     print("\n" + "="*60)
     print("✅ Setup Complete!")
     print("="*60)
@@ -352,7 +363,7 @@ def create_subscription_products():
     print("2. Commit the changes")
     print("3. Proceed to Phase 1.2 (Subscription Management Service)")
     print()
-    
+
     return created_products, created_prices
 
 if __name__ == "__main__":
@@ -360,6 +371,7 @@ if __name__ == "__main__":
 ```
 
 **Run the script:**
+
 ```bash
 cd /home/carlos/projects/cv-match/backend
 python scripts/setup_stripe_subscriptions.py
@@ -392,20 +404,20 @@ async def get_all_pricing() -> Dict[str, Any]:
     Returns organized structure for frontend.
     """
     all_tiers = pricing_config.get_all_tiers()
-    
+
     # Separate into categories
     credit_tiers = {
-        tier_id: tier 
-        for tier_id, tier in all_tiers.items() 
+        tier_id: tier
+        for tier_id, tier in all_tiers.items()
         if not tier.get("is_subscription", False)
     }
-    
+
     subscription_tiers = {
-        tier_id: tier 
-        for tier_id, tier in all_tiers.items() 
+        tier_id: tier
+        for tier_id, tier in all_tiers.items()
         if tier.get("is_subscription", False)
     }
-    
+
     return {
         "success": True,
         "data": {
@@ -421,7 +433,7 @@ async def get_all_pricing() -> Dict[str, Any]:
 async def get_subscription_pricing() -> Dict[str, Any]:
     """Get only subscription pricing (Flow tiers)."""
     subscription_tiers = pricing_config.get_subscription_tiers()
-    
+
     return {
         "success": True,
         "data": {
@@ -446,7 +458,7 @@ async def get_subscription_pricing() -> Dict[str, Any]:
 async def get_credit_pricing() -> Dict[str, Any]:
     """Get only credit pricing (Flex packages)."""
     credit_tiers = pricing_config.get_credit_tiers()
-    
+
     return {
         "success": True,
         "data": {
@@ -470,10 +482,10 @@ async def get_credit_pricing() -> Dict[str, Any]:
 async def get_tier_details(tier_id: str) -> Dict[str, Any]:
     """Get details for a specific tier."""
     tier = pricing_config.get_tier(tier_id)
-    
+
     if not tier:
         raise HTTPException(status_code=404, detail=f"Tier not found: {tier_id}")
-    
+
     return {
         "success": True,
         "data": {
@@ -494,6 +506,7 @@ async def get_tier_details(tier_id: str) -> Dict[str, Any]:
 ```
 
 **Register the router in main.py:**
+
 ```python
 # In app/main.py
 from app.api.pricing import router as pricing_router
@@ -508,6 +521,7 @@ app.include_router(pricing_router)
 After completing all tasks:
 
 ### 1. Config Validation
+
 ```bash
 cd /home/carlos/projects/cv-match/backend
 
@@ -528,6 +542,7 @@ print('  Is subscription:', tier.is_subscription)
 ```
 
 **Expected output:**
+
 ```
 Total tiers: 8
 Subscription tiers: 4
@@ -541,6 +556,7 @@ Flow Pro:
 ```
 
 ### 2. Stripe Products Created
+
 ```bash
 # List Stripe products
 stripe products list --limit 10
@@ -549,6 +565,7 @@ stripe products list --limit 10
 Should see Flow Starter, Pro, Business products.
 
 ### 3. API Endpoint Working
+
 ```bash
 # Test pricing endpoint
 curl http://localhost:8000/api/pricing/subscriptions
@@ -557,6 +574,7 @@ curl http://localhost:8000/api/pricing/subscriptions
 ```
 
 ### 4. Type Checking
+
 ```bash
 docker compose exec backend mypy app/config/pricing.py
 docker compose exec backend mypy app/api/pricing.py
@@ -569,9 +587,11 @@ No errors should appear.
 ## 🚨 Common Issues & Solutions
 
 ### Issue 1: Stripe API Key Not Set
+
 **Error**: `ValueError: STRIPE_SECRET_KEY environment variable is required`
 
-**Solution**: 
+**Solution**:
+
 ```bash
 # Check .env file
 cat backend/.env | grep STRIPE_SECRET_KEY
@@ -580,9 +600,11 @@ cat backend/.env | grep STRIPE_SECRET_KEY
 ```
 
 ### Issue 2: Import Errors
+
 **Error**: `ModuleNotFoundError: No module named 'app.config.pricing'`
 
 **Solution**:
+
 ```bash
 # Restart backend
 docker compose restart backend
@@ -592,9 +614,11 @@ docker compose exec backend python -c "from app.config.pricing import pricing_co
 ```
 
 ### Issue 3: Stripe Products Already Exist
+
 **Error**: `stripe.error.InvalidRequestError: A product with this ID already exists`
 
 **Solution**:
+
 ```bash
 # List existing products
 stripe products list
@@ -609,6 +633,7 @@ stripe products list
 ## 📊 Success Criteria
 
 Phase 1.1 is complete when:
+
 - ✅ All 4 subscription tiers defined in pricing.py
 - ✅ Helper methods implemented and tested
 - ✅ Stripe products and prices created

@@ -2,7 +2,7 @@
 
 // Base API Response Types
 export interface BaseAPIResponse<T = unknown> {
-  status: 'success' | 'error';
+  status: "success" | "error";
   data?: T;
   error?: {
     message: string;
@@ -18,7 +18,7 @@ export interface UserProfile {
   email: string;
   full_name?: string;
   avatar_url?: string;
-  subscription_tier?: 'free' | 'premium' | 'enterprise';
+  subscription_tier?: "free" | "premium" | "enterprise";
   credits_remaining?: number;
   created_at?: string;
   updated_at?: string;
@@ -46,7 +46,7 @@ export interface TextGenerationRequest {
   model?: string;
   max_tokens?: number;
   temperature?: number;
-  provider?: 'openai' | 'anthropic';
+  provider?: "openai" | "anthropic";
 }
 
 export interface TextGenerationResponse {
@@ -60,7 +60,7 @@ export interface TextGenerationResponse {
 export interface EmbeddingRequest {
   text: string;
   model?: string;
-  provider?: 'openai' | 'anthropic';
+  provider?: "openai" | "anthropic";
 }
 
 export interface EmbeddingResponse {
@@ -115,10 +115,10 @@ export interface JobDescription {
 
 // Optimization Types
 export interface OptimizationStatus {
-  PENDING_PAYMENT: 'pending_payment';
-  PROCESSING: 'processing';
-  COMPLETED: 'completed';
-  FAILED: 'failed';
+  PENDING_PAYMENT: "pending_payment";
+  PROCESSING: "processing";
+  COMPLETED: "completed";
+  FAILED: "failed";
 }
 
 export interface StartOptimizationRequest {
@@ -147,7 +147,7 @@ export interface UserCredits {
   credits_remaining: number;
   total_credits: number;
   is_pro: boolean;
-  tier: 'free' | 'premium' | 'enterprise';
+  tier: "free" | "premium" | "enterprise";
 }
 
 export interface UsageLimitCheckResponse {
@@ -189,5 +189,5 @@ export interface APIError {
 
 export interface ValidationError extends APIError {
   field: string;
-  validation_type: 'required' | 'format' | 'length' | 'type' | 'custom';
+  validation_type: "required" | "format" | "length" | "type" | "custom";
 }

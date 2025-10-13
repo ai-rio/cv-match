@@ -34,9 +34,7 @@ class TestWebhookSecurity:
         """Generate a valid Stripe webhook signature."""
         signed_payload = f"{timestamp}.{payload}"
         return hmac.new(
-            self.webhook_secret.encode('utf-8'),
-            signed_payload.encode('utf-8'),
-            hashlib.sha256
+            self.webhook_secret.encode("utf-8"), signed_payload.encode("utf-8"), hashlib.sha256
         ).hexdigest()
 
     def generate_signature_header(self, payload: str, timestamp: int = None) -> str:
@@ -55,8 +53,7 @@ class TestWebhookSecurity:
         signature_header = self.generate_signature_header(payload, timestamp)
 
         result = await self.service.verify_webhook_signature(
-            payload=payload.encode('utf-8'),
-            signature=signature_header
+            payload=payload.encode("utf-8"), signature=signature_header
         )
 
         assert result["success"] is True
@@ -71,8 +68,7 @@ class TestWebhookSecurity:
         invalid_signature = "t=1234567890,v1=invalid_signature"
 
         result = await self.service.verify_webhook_signature(
-            payload=payload.encode('utf-8'),
-            signature=invalid_signature
+            payload=payload.encode("utf-8"), signature=invalid_signature
         )
 
         assert result["success"] is False
@@ -85,8 +81,7 @@ class TestWebhookSecurity:
         payload = '{"test": "data"}'
 
         result = await self.service.verify_webhook_signature(
-            payload=payload.encode('utf-8'),
-            signature=""
+            payload=payload.encode("utf-8"), signature=""
         )
 
         assert result["success"] is False
@@ -102,8 +97,7 @@ class TestWebhookSecurity:
         signature_header = self.generate_signature_header(payload, timestamp)
 
         result = await self.service.verify_webhook_signature(
-            payload=payload.encode('utf-8'),
-            signature=signature_header
+            payload=payload.encode("utf-8"), signature=signature_header
         )
 
         assert result["success"] is True
@@ -113,8 +107,7 @@ class TestWebhookSecurity:
         old_signature_header = self.generate_signature_header(payload, old_timestamp)
 
         result = await self.service.verify_webhook_signature(
-            payload=payload.encode('utf-8'),
-            signature=old_signature_header
+            payload=payload.encode("utf-8"), signature=old_signature_header
         )
 
         assert result["success"] is False
@@ -131,8 +124,7 @@ class TestWebhookSecurity:
         tampered_payload = '{"test": "data", "amount": 5000}'
 
         result = await self.service.verify_webhook_signature(
-            payload=tampered_payload.encode('utf-8'),
-            signature=signature_header
+            payload=tampered_payload.encode("utf-8"), signature=signature_header
         )
 
         assert result["success"] is False
@@ -146,24 +138,21 @@ class TestWebhookSecurity:
         # Test missing timestamp
         invalid_format_1 = "v1=signature123"
         result = await self.service.verify_webhook_signature(
-            payload=payload.encode('utf-8'),
-            signature=invalid_format_1
+            payload=payload.encode("utf-8"), signature=invalid_format_1
         )
         assert result["success"] is False
 
         # Test missing version
         invalid_format_2 = "t=1234567890"
         result = await self.service.verify_webhook_signature(
-            payload=payload.encode('utf-8'),
-            signature=invalid_format_2
+            payload=payload.encode("utf-8"), signature=invalid_format_2
         )
         assert result["success"] is False
 
         # Test empty signature
         invalid_format_3 = "t=1234567890,v1="
         result = await self.service.verify_webhook_signature(
-            payload=payload.encode('utf-8'),
-            signature=invalid_format_3
+            payload=payload.encode("utf-8"), signature=invalid_format_3
         )
         assert result["success"] is False
 
@@ -174,29 +163,27 @@ class TestWebhookSecurity:
         signature_header = self.generate_signature_header(payload)
 
         # First processing
-        with patch('stripe.Webhook.construct_event') as mock_construct:
+        with patch("stripe.Webhook.construct_event") as mock_construct:
             mock_event = MagicMock()
             mock_event.type = "test.replay"
             mock_event.id = "evt_test_replay_123"
             mock_construct.return_value = mock_event
 
             result1 = await self.service.verify_webhook_signature(
-                payload=payload.encode('utf-8'),
-                signature=signature_header
+                payload=payload.encode("utf-8"), signature=signature_header
             )
 
         assert result1["success"] is True
 
         # Second processing with same payload (replay attempt)
-        with patch('stripe.Webhook.construct_event') as mock_construct:
+        with patch("stripe.Webhook.construct_event") as mock_construct:
             mock_event = MagicMock()
             mock_event.type = "test.replay"
             mock_event.id = "evt_test_replay_123"
             mock_construct.return_value = mock_event
 
             result2 = await self.service.verify_webhook_signature(
-                payload=payload.encode('utf-8'),
-                signature=signature_header
+                payload=payload.encode("utf-8"), signature=signature_header
             )
 
         # Signature verification should still succeed (idempotency is handled at higher level)
@@ -211,11 +198,13 @@ class TestWebhookSecurity:
         event_data = {"id": "cs_test_123", "amount": 2990}
 
         # Mock event logging
-        with patch.object(webhook_service, 'log_webhook_event', return_value={"success": True}):
+        with patch.object(webhook_service, "log_webhook_event", return_value={"success": True}):
             # Mock event not processed initially
-            with patch.object(webhook_service, 'is_event_processed', return_value=False):
-                with patch.object(webhook_service, '_process_specific_event', return_value={"success": True}):
-                    with patch.object(webhook_service, '_mark_event_processed'):
+            with patch.object(webhook_service, "is_event_processed", return_value=False):
+                with patch.object(
+                    webhook_service, "_process_specific_event", return_value={"success": True}
+                ):
+                    with patch.object(webhook_service, "_mark_event_processed"):
                         result1 = await webhook_service.process_webhook_event(
                             event_type, event_data, event_id
                         )
@@ -224,7 +213,7 @@ class TestWebhookSecurity:
             assert result1["idempotent"] is not True
 
             # Mock event already processed
-            with patch.object(webhook_service, 'is_event_processed', return_value=True):
+            with patch.object(webhook_service, "is_event_processed", return_value=True):
                 result2 = await webhook_service.process_webhook_event(
                     event_type, event_data, event_id
                 )
@@ -241,7 +230,7 @@ class TestWebhookSecurity:
             "test": "data",
             "large_field": "x" * 100000,  # 100KB field
             "user_id": str(uuid4()),
-            "metadata": {f"key_{i}": f"value_{i}" * 1000 for i in range(100)}
+            "metadata": {f"key_{i}": f"value_{i}" * 1000 for i in range(100)},
         }
 
         payload_str = json.dumps(large_payload, separators=(",", ":"))
@@ -249,8 +238,7 @@ class TestWebhookSecurity:
 
         # Should handle large payloads gracefully
         result = await self.service.verify_webhook_signature(
-            payload=payload_str.encode('utf-8'),
-            signature=signature_header
+            payload=payload_str.encode("utf-8"), signature=signature_header
         )
 
         # Signature verification should succeed if signature is valid
@@ -262,9 +250,9 @@ class TestWebhookSecurity:
         malformed_payloads = [
             '{"test": "data"',  # Missing closing brace
             '{"test": "data",}',  # Trailing comma
-            'invalid json',  # Completely invalid
+            "invalid json",  # Completely invalid
             '{"test": \x00\x01\x02"}',  # Invalid characters
-            '',  # Empty payload
+            "",  # Empty payload
         ]
 
         for payload in malformed_payloads:
@@ -272,8 +260,7 @@ class TestWebhookSecurity:
                 signature_header = self.generate_signature_header(payload)
 
                 result = await self.service.verify_webhook_signature(
-                    payload=payload.encode('utf-8'),
-                    signature=signature_header
+                    payload=payload.encode("utf-8"), signature=signature_header
                 )
 
                 # Should handle malformed JSON gracefully or reject appropriately
@@ -289,15 +276,14 @@ class TestWebhookSecurity:
         signature_header = self.generate_signature_header(payload)
 
         async def verify_signature():
-            with patch('stripe.Webhook.construct_event') as mock_construct:
+            with patch("stripe.Webhook.construct_event") as mock_construct:
                 mock_event = MagicMock()
                 mock_event.type = "test.concurrent"
                 mock_event.id = "evt_test_concurrent_123"
                 mock_construct.return_value = mock_event
 
                 return await self.service.verify_webhook_signature(
-                    payload=payload.encode('utf-8'),
-                    signature=signature_header
+                    payload=payload.encode("utf-8"), signature=signature_header
                 )
 
         # Run concurrent signature verifications
@@ -317,8 +303,7 @@ class TestWebhookSecurity:
         signature_header = self.generate_signature_header(utf8_payload)
 
         result = await self.service.verify_webhook_signature(
-            payload=utf8_payload.encode('utf-8'),
-            signature=signature_header
+            payload=utf8_payload.encode("utf-8"), signature=signature_header
         )
 
         assert result["success"] is True
@@ -328,8 +313,7 @@ class TestWebhookSecurity:
         special_signature = self.generate_signature_header(special_payload)
 
         result = await self.service.verify_webhook_signature(
-            payload=special_payload.encode('utf-8'),
-            signature=special_signature
+            payload=special_payload.encode("utf-8"), signature=special_signature
         )
 
         assert result["success"] is True
@@ -345,8 +329,7 @@ class TestWebhookSecurity:
         signature_header = "t=1234567890,v1=signature123"
 
         result = await service_no_secret.verify_webhook_signature(
-            payload=payload.encode('utf-8'),
-            signature=signature_header
+            payload=payload.encode("utf-8"), signature=signature_header
         )
 
         assert result["success"] is False
@@ -358,8 +341,7 @@ class TestWebhookSecurity:
         service_empty_secret.webhook_secret = ""
 
         result = await service_empty_secret.verify_webhook_signature(
-            payload=payload.encode('utf-8'),
-            signature=signature_header
+            payload=payload.encode("utf-8"), signature=signature_header
         )
 
         assert result["success"] is False
@@ -376,15 +358,15 @@ class TestWebhookSecurity:
             "user_id": "user_123",
             "credit_card": "4242424242424242",  # Should not be logged
             "cvv": "123",  # Should not be logged
-            "amount": 2990
+            "amount": 2990,
         }
 
-        with patch.object(webhook_service, '_create') as mock_create:
+        with patch.object(webhook_service, "_create") as mock_create:
             await webhook_service.log_webhook_event(
                 stripe_event_id=event_id,
                 event_type="test.sensitive",
                 data=sensitive_payload,
-                processed=False
+                processed=False,
             )
 
             # Verify logging was called
@@ -425,8 +407,7 @@ class TestWebhookSecurity:
         future_signature = self.generate_signature_header(payload, future_timestamp)
 
         result = await self.service.verify_webhook_signature(
-            payload=payload.encode('utf-8'),
-            signature=future_signature
+            payload=payload.encode("utf-8"), signature=future_signature
         )
 
         # Should reject future timestamps
@@ -438,8 +419,7 @@ class TestWebhookSecurity:
         old_signature = self.generate_signature_header(payload, old_timestamp)
 
         result = await self.service.verify_webhook_signature(
-            payload=payload.encode('utf-8'),
-            signature=old_signature
+            payload=payload.encode("utf-8"), signature=old_signature
         )
 
         # Should reject very old timestamps
@@ -461,8 +441,7 @@ class TestWebhookSecurity:
         for signature in signatures:
             with self.subTest(signature=signature[:50]):
                 result = await self.service.verify_webhook_signature(
-                    payload=payload.encode('utf-8'),
-                    signature=signature
+                    payload=payload.encode("utf-8"), signature=signature
                 )
 
                 # Should handle valid signatures regardless of version format
@@ -481,14 +460,16 @@ class TestWebhookSecurity:
             payload = f'{{"test": "rate_limit", "event_id": "{event_id}"}}'
             signature_header = self.generate_signature_header(payload)
 
-            with patch.object(webhook_service, 'is_event_processed', return_value=False):
-                with patch.object(webhook_service, 'log_webhook_event', return_value={"success": True}):
-                    with patch.object(webhook_service, '_process_specific_event', return_value={"success": True}):
-                        with patch.object(webhook_service, '_mark_event_processed'):
+            with patch.object(webhook_service, "is_event_processed", return_value=False):
+                with patch.object(
+                    webhook_service, "log_webhook_event", return_value={"success": True}
+                ):
+                    with patch.object(
+                        webhook_service, "_process_specific_event", return_value={"success": True}
+                    ):
+                        with patch.object(webhook_service, "_mark_event_processed"):
                             return await webhook_service.process_webhook_event(
-                                "test.rate_limit",
-                                {"event_id": event_id},
-                                event_id
+                                "test.rate_limit", {"event_id": event_id}, event_id
                             )
 
         # Process webhooks concurrently
@@ -498,14 +479,18 @@ class TestWebhookSecurity:
         end_time = time.time()
 
         # Verify all webhooks were processed
-        successful_results = [r for r in results if not isinstance(r, Exception) and r.get("success")]
+        successful_results = [
+            r for r in results if not isinstance(r, Exception) and r.get("success")
+        ]
         assert len(successful_results) == len(event_ids)
 
         # Log processing time for performance analysis
         processing_time = end_time - start_time
         webhooks_per_second = len(event_ids) / processing_time
 
-        print(f"Processed {len(event_ids)} webhooks in {processing_time:.2f}s ({webhooks_per_second:.2f} webhooks/sec)")
+        print(
+            f"Processed {len(event_ids)} webhooks in {processing_time:.2f}s ({webhooks_per_second:.2f} webhooks/sec)"
+        )
 
         # This test helps identify performance bottlenecks
         # In production, you might implement rate limiting if needed

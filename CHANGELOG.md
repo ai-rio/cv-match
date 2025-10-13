@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Comprehensive Cursor Rules system (`.cursor/rules/`) for AI-assisted development
 - `AGENTS.md` file with consolidated AI agent instructions
 - Context-aware development guidance that automatically applies based on file patterns
@@ -21,12 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Development workflow automation and troubleshooting guides
 
 ### Changed
+
 - Updated README.md to include AI development support section
 - Reorganized project structure to highlight AI-powered development features
 - Enhanced documentation with links to new Cursor rules and agent instructions
 - Marked legacy context files in `llm-context/` as superseded by Cursor rules
 
 ### Improved
+
 - Development experience with automatic context-aware guidance
 - Code consistency through enforced patterns and templates
 - Onboarding for new developers with comprehensive AI assistance
@@ -35,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - Initial Release
 
 ### Added
+
 - Full-stack application template with Next.js frontend and FastAPI backend
 - Supabase integration for authentication, database, and storage
 - LLM integration with OpenAI and Anthropic support
@@ -49,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First-time setup script for easy onboarding
 
 ### Features
+
 - **Backend**: FastAPI with async/await patterns, service layer architecture
 - **Frontend**: Next.js with TypeScript, Tailwind CSS, and authentication
 - **Database**: Supabase PostgreSQL with Row Level Security (RLS)
@@ -67,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The addition of the Cursor Rules system represents a significant enhancement to the development experience:
 
 **Key Benefits:**
+
 - **Automatic Context**: Rules automatically apply based on the files you're working with
 - **Template System**: Production-ready code patterns accessible via `@template-name`
 - **Consistency**: Enforced coding standards and architectural patterns
@@ -74,11 +80,13 @@ The addition of the Cursor Rules system represents a significant enhancement to 
 - **Quality**: Built-in best practices and error handling patterns
 
 **Migration from Legacy Context:**
+
 - Legacy context files in `llm-context/` are still available but superseded
 - New development should use Cursor rules for better integration
 - `AGENTS.md` provides a simplified alternative for basic AI assistance
 
 **Getting Started:**
+
 1. Cursor rules work automatically - no setup required
 2. Reference templates when creating new components or endpoints
 3. Rules provide context-aware guidance based on current work

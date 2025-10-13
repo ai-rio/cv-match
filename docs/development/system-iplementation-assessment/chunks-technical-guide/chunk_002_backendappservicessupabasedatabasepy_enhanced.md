@@ -169,7 +169,6 @@ class EmbeddingService:
             raise Exception(f"Similarity calculation failed: {str(e)}")
 ```
 
-
 <!-- Context: backend/app/services/resume_matching/embedding_service.py > 3. Similarity Service -->
 
 #### 3. Similarity Service
@@ -316,16 +315,13 @@ class SimilarityService:
 
 ---
 
-
 <!-- Context: backend/app/services/resume_matching/similarity_service.py > Code Adaptation Guidelines -->
 
 ## Code Adaptation Guidelines
 
-
 <!-- Context: backend/app/services/resume_matching/similarity_service.py > Code Adaptation Guidelines > Integration with Existing Services -->
 
 ### Integration with Existing Services
-
 
 <!-- Context: backend/app/services/resume_matching/similarity_service.py > Code Adaptation Guidelines > Integration with Existing Services > 1. Supabase Service Extension -->
 
@@ -416,3 +412,4 @@ class SupabaseDatabaseService(Generic[T]):
             return [self.model_class(**item) for item in response.data]
         except Exception as e:
             raise Exception(f"Search operation failed: {str(e)}")
+```

@@ -20,6 +20,7 @@ export default [
       '*.config.cjs',
       '.lintstagedrc.js',
       'jest.setup.js',
+      'jest.config.js',
       'public/**',
       'build/**',
       '.git/**',
@@ -54,6 +55,9 @@ export default [
       'no-var': 'error',
       'no-debugger': 'error',
       'no-alert': 'error',
+
+      // React/Next.js best practices
+      // Note: React rules will be handled by Next.js config when needed
     },
     languageOptions: {
       parser: tseslint.parser,
@@ -61,6 +65,12 @@ export default [
         ecmaVersion: 'latest',
         sourceType: 'module',
         project: './tsconfig.json',
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+      globals: {
+        ...tseslint.configs.recommended[0].languageOptions?.globals,
       },
     },
   },

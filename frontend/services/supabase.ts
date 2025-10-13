@@ -114,7 +114,9 @@ export async function resetPassword(email: string): Promise<{ error: Error | nul
     });
     return { error };
   } catch (error) {
-    return { error: error instanceof Error ? error : new Error('Unknown error') };
+    return {
+      error: error instanceof Error ? error : new Error('Unknown error'),
+    };
   }
 }
 
@@ -123,7 +125,9 @@ export async function signOut(): Promise<{ error: Error | null }> {
     const { error } = await supabase.auth.signOut();
     return { error };
   } catch (error) {
-    return { error: error instanceof Error ? error : new Error('Unknown error') };
+    return {
+      error: error instanceof Error ? error : new Error('Unknown error'),
+    };
   }
 }
 

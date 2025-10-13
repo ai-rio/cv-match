@@ -2,10 +2,11 @@
 Enhanced usage middleware for credits AND subscriptions.
 """
 
-from fastapi import Request, HTTPException
+from fastapi import HTTPException, Request
+
+from app.core.database import SupabaseSession
 from app.services.subscription_service import subscription_service
 from app.services.usage_limit_service import UsageLimitService
-from app.core.database import SupabaseSession
 
 
 async def check_usage_limit(request: Request, user_id: str):
@@ -35,7 +36,7 @@ async def check_usage_limit(request: Request, user_id: str):
                 "message": "Limite de análises atingido para este mês.",
                 "tier": status.tier_id,
                 "can_upgrade": True,
-            }
+            },
         )
     else:
         raise HTTPException(
@@ -45,7 +46,7 @@ async def check_usage_limit(request: Request, user_id: str):
                 "message": "Sem créditos ou assinatura ativa. Compre créditos ou assine.",
                 "can_purchase_credits": True,
                 "can_subscribe": True,
-            }
+            },
         )
 
 

@@ -1,8 +1,8 @@
 # 08 - Optimize Flow UI
 
-**Agent**: `frontend-specialist`  
-**Phase**: 4  
-**Duration**: 4h  
+**Agent**: `frontend-specialist`
+**Phase**: 4
+**Duration**: 4h
 **Dependencies**: Previous phase complete
 
 ---

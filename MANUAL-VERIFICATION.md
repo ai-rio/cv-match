@@ -114,6 +114,7 @@ echo "======================="
 ## Expected Results Summary
 
 If all checks pass, you should see:
+
 - ✅ Docker services running
 - ✅ Backend responding with healthy status
 - ✅ 65 backend tests passing

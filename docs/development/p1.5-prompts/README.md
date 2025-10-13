@@ -1,8 +1,8 @@
 # 🚀 P1.5 Subscription System - Agent Swarm Deployment
 
-**Status**: ✅ READY FOR DEPLOYMENT  
-**Purpose**: Complete Hybrid Model (Credits + Subscriptions)  
-**Time Estimate**: 2-3 days (16-20 hours)  
+**Status**: ✅ READY FOR DEPLOYMENT
+**Purpose**: Complete Hybrid Model (Credits + Subscriptions)
+**Time Estimate**: 2-3 days (16-20 hours)
 **Priority**: HIGH - Adds recurring revenue (2.66x revenue increase)
 
 **📖 [READ THIS FIRST: Complete Execution Guide →](00-EXECUTION-GUIDE.md)**
@@ -13,9 +13,9 @@
 
 ## 📊 Executive Summary
 
-**Current State**: Credit-only system (45% business model alignment)  
-**Target State**: Full Hybrid "Flex & Flow" model (100% alignment)  
-**Revenue Impact**: +R$ 1,054K in Year 1  
+**Current State**: Credit-only system (45% business model alignment)
+**Target State**: Full Hybrid "Flex & Flow" model (100% alignment)
+**Revenue Impact**: +R$ 1,054K in Year 1
 **MRR Impact**: R$ 0 → R$ 119K (end of year)
 
 ---
@@ -23,24 +23,32 @@
 ## 🎯 Deployment Strategy
 
 ### Phase 1: Backend Subscription Services (Parallel - 4h)
+
 **Agents**: 2 agents working in parallel
+
 - Agent 1: Subscription pricing & Stripe integration
 - Agent 2: Subscription management service
 
 ### Phase 2: Database & Webhooks (Sequential - 3h)
+
 **Agent**: Database architect
+
 - Update pricing tables
 - Add subscription tracking
 - Enhance webhook handlers
 
 ### Phase 3: API Endpoints (Sequential - 4h)
+
 **Agent**: Backend specialist
+
 - Subscription CRUD endpoints
 - Usage tracking with limits
 - Rollover logic
 
 ### Phase 4: Frontend & Testing (Parallel - 5h)
+
 **Agents**: 2 agents working in parallel
+
 - Agent 1: Frontend subscription UI
 - Agent 2: Testing suite
 
@@ -48,14 +56,14 @@
 
 ## 📦 Complete Prompt Library
 
-| # | Prompt | Agent | Phase | Time | Status |
-|---|--------|-------|-------|------|--------|
-| 01 | Subscription Pricing Config | payment-specialist | 1 | 2h | ✅ Ready |
-| 02 | Subscription Service | backend-specialist | 1 | 2h | ✅ Ready |
-| 03 | Database Updates | database-architect | 2 | 3h | ✅ Ready |
-| 04 | Subscription Endpoints | backend-specialist | 3 | 4h | ✅ Ready |
-| 05 | Frontend Subscription UI | frontend-specialist | 4 | 3h | ✅ Ready |
-| 06 | Subscription Testing | test-writer-agent | 4 | 2h | ✅ Ready |
+| #   | Prompt                      | Agent               | Phase | Time | Status   |
+| --- | --------------------------- | ------------------- | ----- | ---- | -------- |
+| 01  | Subscription Pricing Config | payment-specialist  | 1     | 2h   | ✅ Ready |
+| 02  | Subscription Service        | backend-specialist  | 1     | 2h   | ✅ Ready |
+| 03  | Database Updates            | database-architect  | 2     | 3h   | ✅ Ready |
+| 04  | Subscription Endpoints      | backend-specialist  | 3     | 4h   | ✅ Ready |
+| 05  | Frontend Subscription UI    | frontend-specialist | 4     | 3h   | ✅ Ready |
+| 06  | Subscription Testing        | test-writer-agent   | 4     | 2h   | ✅ Ready |
 
 **Total**: 16 hours estimated (20h with buffers)
 
@@ -70,7 +78,7 @@
 Use: 01-subscription-pricing-config.md
 Agent: backend-specialist
 
-# Terminal 2 - Subscription Service  
+# Terminal 2 - Subscription Service
 Use: 02-subscription-management-service.md
 Agent: backend-specialist
 ```
@@ -122,6 +130,7 @@ Agent: test-writer-agent
 ## ✅ Pre-Flight Checklist
 
 Before starting:
+
 - [ ] P1 merged to main
 - [ ] Current pricing system working
 - [ ] Stripe test account active
@@ -133,6 +142,7 @@ Before starting:
 ## 🎯 Success Criteria
 
 P1.5 complete when:
+
 - [ ] Can create Stripe subscriptions (BRL)
 - [ ] Flow Starter/Pro/Business tiers working
 - [ ] Monthly billing automated
@@ -180,12 +190,14 @@ git checkout -b feature/p1.5-subscription-system
 ## 💰 Business Value
 
 ### Current (Credits Only):
+
 - Year 1 Revenue: R$ 634K
 - MRR: R$ 0
 - LTV: R$ 150/user
 - No investor metrics
 
 ### After P1.5 (Hybrid):
+
 - Year 1 Revenue: R$ 1,688K (+166%)
 - MRR: R$ 119K (end of year)
 - LTV: R$ 450/user (+200%)
@@ -198,6 +210,7 @@ git checkout -b feature/p1.5-subscription-system
 ## 🔗 Integration with Existing System
 
 ### What Stays the Same ✅
+
 - Credit system (Flex packages)
 - Payment infrastructure
 - Credit middleware
@@ -205,6 +218,7 @@ git checkout -b feature/p1.5-subscription-system
 - Authentication
 
 ### What Gets Added ➕
+
 - Subscription tiers (Flow)
 - Monthly billing
 - Usage limits per tier
@@ -213,6 +227,7 @@ git checkout -b feature/p1.5-subscription-system
 - Upgrade/downgrade flows
 
 ### What Gets Enhanced 🔧
+
 - Pricing page (combined Flex + Flow)
 - Dashboard (show subscription status)
 - User model (add subscription_tier)
@@ -236,6 +251,7 @@ All prompts in: `/docs/development/p1.5-prompts/`
 ## 🎊 Expected Outcome
 
 After completing P1.5:
+
 - ✅ Full Hybrid model operational
 - ✅ Credit packages (Flex) working
 - ✅ Subscription tiers (Flow) working
@@ -252,6 +268,7 @@ After completing P1.5:
 ### Backwards Compatibility
 
 **CRITICAL**: Must not break existing credit system!
+
 - Existing users keep their credits
 - Credit purchases still work
 - No data migration needed
@@ -260,6 +277,7 @@ After completing P1.5:
 ### Testing Strategy
 
 Test BOTH systems work:
+
 - [ ] Credit purchase flow
 - [ ] Subscription purchase flow
 - [ ] Credit usage
@@ -270,11 +288,13 @@ Test BOTH systems work:
 ### Deployment Strategy
 
 **Recommended**: Feature flag
+
 ```python
 SUBSCRIPTIONS_ENABLED = os.getenv("ENABLE_SUBSCRIPTIONS", "true")
 ```
 
 This allows:
+
 - Gradual rollout
 - A/B testing
 - Quick rollback if needed
@@ -284,12 +304,14 @@ This allows:
 ## 📞 Support & Troubleshooting
 
 Each prompt includes:
+
 - Detailed troubleshooting section
 - Verification checklist
 - Rollback procedures
 - Common issues & fixes
 
 If issues occur:
+
 1. Check prompt troubleshooting section
 2. Verify previous phase completed
 3. Run verification scripts
@@ -310,7 +332,7 @@ See detailed prompts in individual markdown files.
 
 **BEFORE starting ANY phase, ALL agents MUST read**:
 
-1. **`00-AGENT-TOOLS-GUIDE.md`** 
+1. **`00-AGENT-TOOLS-GUIDE.md`**
    - Context7 for documentation
    - Shadcn for UI components
    - Chrome DevTools for debugging
@@ -329,8 +351,8 @@ See detailed prompts in individual markdown files.
 ## 📝 Updated Prompt Files
 
 All prompts now include:
+
 - ✅ Tool usage requirements
 - ✅ Localization requirements
 - ✅ Testing with proper tools
 - ✅ Verification checklists
-

@@ -10,6 +10,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
 ### Current State Analysis
 
 **Resume-Matcher Project (Source)**:
+
 - ✅ 13 production-ready backend services (~3,264 lines of code)
 - ✅ Complete SaaS infrastructure (Stripe, usage tracking, multi-tenancy)
 - ✅ Full internationalization (PT-BR + EN with ~11 translation files)
@@ -18,6 +19,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
 - ✅ Agent system for LLM orchestration
 
 **cv-match Project (Target)**:
+
 - ⚠️ Basic infrastructure only (3 backend service folders, 7 service files)
 - ⚠️ Minimal frontend (4 pages: landing, dashboard, auth callbacks)
 - ❌ No internationalization (no locales directory)
@@ -32,9 +34,11 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
 ## 📋 Priority Tiers
 
 ### P0: MVP - Launch Blockers (Week 1-2)
+
 **Must-have for first paying customer**
 
 #### Backend Core Services (Week 1)
+
 - [ ] **Copy resume processing services**
   - `resume_service.py` - PDF/DOCX parsing
   - `job_service.py` - Job description processing
@@ -64,6 +68,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
   - Effort: 2 days
 
 #### Frontend Core Pages (Week 2)
+
 - [ ] **Copy optimization workflow**
   - `app/[locale]/optimize/page.tsx` - Main optimization page
   - `app/[locale]/optimizations/page.tsx` - History view
@@ -79,6 +84,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
   - Effort: 1 day (mostly copy-paste)
 
 #### Internationalization Setup (Week 2)
+
 - [ ] **Install next-intl**
   - `bun add next-intl@4.3.6`
   - Copy configuration from Resume-Matcher
@@ -96,9 +102,11 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
 ---
 
 ### P1: Revenue Enablement (Week 3)
+
 **Required to charge customers**
 
 #### Payment Infrastructure
+
 - [ ] **Copy Stripe services**
   - `stripe_service.py` - Payment processing
   - `payment_verification.py` - AI-triggered verification
@@ -121,6 +129,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
   - Effort: 2 days
 
 #### Usage Tracking
+
 - [ ] **Copy usage services**
   - `usage_tracking_service.py` - Track API usage
   - `paid_resume_improvement_service.py` - Credit deduction
@@ -137,9 +146,11 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
 ---
 
 ### P2: Growth & Optimization (Week 4+)
+
 **Post-launch improvements**
 
 #### Advanced Features
+
 - [ ] **DOCX generation**
   - Copy `docx_generation.py` - Generate improved resumes
   - Add download functionality
@@ -154,6 +165,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
   - Effort: 3 days
 
 #### User Experience
+
 - [ ] **Onboarding flow**
   - Copy onboarding pages
   - Add progress indicators
@@ -169,6 +181,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
   - Effort: 1 day
 
 #### Testing & Quality
+
 - [ ] **Integration tests**
   - Test resume upload → analysis → results flow
   - Test payment flow end-to-end
@@ -184,6 +197,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
   - Effort: 2 days
 
 #### Brazilian Market Specific
+
 - [ ] **PIX payment integration**
   - Research Stripe PIX support
   - Add PIX as payment method
@@ -201,6 +215,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
 ## 🗓️ 4-Week Timeline
 
 ### Week 1: Backend Foundation
+
 **Goal**: Core resume matching works locally
 
 - Days 1-2: Copy & test backend services
@@ -212,6 +227,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
 ---
 
 ### Week 2: Frontend & i18n
+
 **Goal**: Working UI in Portuguese
 
 - Days 1-2: Copy frontend pages and components
@@ -223,6 +239,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
 ---
 
 ### Week 3: Payments
+
 **Goal**: Can charge first customer
 
 - Days 1-2: Stripe service integration
@@ -234,6 +251,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
 ---
 
 ### Week 4: Polish & Launch
+
 **Goal**: Production-ready deployment
 
 - Days 1-2: Bug fixes from testing
@@ -248,6 +266,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
 ## 🚨 Critical Risks
 
 ### Technical Risks
+
 1. **Database Migration Complexity**
    - Risk: RLS policies break during migration
    - Mitigation: Test on staging database first
@@ -264,6 +283,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
    - Owner: Backend lead
 
 ### Business Risks
+
 1. **Brazilian Market Fit**
    - Risk: Pricing too high for Brazilian market
    - Mitigation: Start with proven Resume-Matcher pricing (R$ 49.90/mo)
@@ -279,18 +299,21 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
 ## 📊 Success Metrics
 
 ### Technical KPIs (Week 4)
+
 - [ ] Resume upload success rate > 95%
 - [ ] Average analysis time < 30 seconds
 - [ ] System uptime > 99%
 - [ ] Zero payment processing errors
 
 ### Business KPIs (Month 1)
+
 - [ ] 100 sign-ups
 - [ ] 10 paying customers (10% conversion)
 - [ ] R$ 500 MRR
 - [ ] 4.0+ user satisfaction rating
 
 ### Business KPIs (Month 3)
+
 - [ ] 500 sign-ups
 - [ ] 75 paying customers (15% conversion)
 - [ ] R$ 3,750 MRR
@@ -301,6 +324,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
 ## 🔄 Migration Strategy
 
 ### Code Migration Process
+
 1. **Copy files** from Resume-Matcher to cv-match
 2. **Update imports** to match cv-match structure
 3. **Run tests** to verify functionality
@@ -308,6 +332,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
 5. **Deploy to staging** for integration testing
 
 ### Database Migration Process
+
 1. **Backup** current cv-match database
 2. **Apply migrations** one by one
 3. **Verify RLS policies** with test users
@@ -315,6 +340,7 @@ This roadmap prioritizes migrating battle-tested code from Resume-Matcher (`/hom
 5. **Deploy to production** during low-traffic window
 
 ### Environment Variables
+
 Copy these from Resume-Matcher to cv-match:
 
 ```bash
@@ -349,6 +375,7 @@ NEXT_PUBLIC_MARKET=brasil
 ## ✅ Definition of Done
 
 ### P0 (MVP) Complete When:
+
 - [ ] User can upload resume in PT-BR interface
 - [ ] User gets match score and improvement suggestions
 - [ ] User can view optimization history
@@ -356,6 +383,7 @@ NEXT_PUBLIC_MARKET=brasil
 - [ ] Zero critical bugs in core flow
 
 ### P1 (Revenue) Complete When:
+
 - [ ] User can purchase credits with credit card (BRL)
 - [ ] Webhooks process payments reliably
 - [ ] Credits deduct correctly per optimization
@@ -363,6 +391,7 @@ NEXT_PUBLIC_MARKET=brasil
 - [ ] Payment reconciliation matches Stripe dashboard
 
 ### P2 (Growth) Complete When:
+
 - [ ] DOCX generation works for all resume formats
 - [ ] Blog has 10+ SEO-optimized articles
 - [ ] Onboarding flow has >80% completion rate

@@ -5,16 +5,17 @@ Tests cover various attack scenarios and edge cases to ensure
 robust protection against prompt injection and malicious inputs.
 """
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 from app.services.security.input_sanitizer import (
     InputSanitizer,
     SanitizationConfig,
     SanitizationResult,
+    default_sanitizer,
     sanitize_input,
     validate_request,
-    default_sanitizer,
 )
 
 

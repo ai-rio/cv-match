@@ -12,12 +12,14 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import stripe
 from dotenv import load_dotenv
+
 from app.config.pricing import pricing_config
 
 load_dotenv()
 
 # Initialize Stripe
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+
 
 def create_subscription_products():
     """Create Stripe products and prices for Flow subscriptions."""
@@ -51,7 +53,7 @@ def create_subscription_products():
                     "type": "subscription",
                     "analyses_per_month": str(tier.analyses_per_month),
                     "rollover_limit": str(tier.rollover_limit),
-                }
+                },
             )
 
             print(f"  ✅ Product created: {product.id}")
@@ -66,10 +68,10 @@ def create_subscription_products():
                 metadata={
                     "tier_id": tier_id,
                     "market": "brazil",
-                }
+                },
             )
 
-            print(f"  ✅ Price created: {price.id} (R$ {tier.price/100:.2f}/mês)")
+            print(f"  ✅ Price created: {price.id} (R$ {tier.price / 100:.2f}/mês)")
             created_prices.append(price)
 
             # Store price ID
@@ -80,9 +82,9 @@ def create_subscription_products():
             print(f"  ❌ Error creating {tier.name}: {e}")
             print()
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("✅ Setup Complete!")
-    print("="*60)
+    print("=" * 60)
     print(f"Products created: {len(created_products)}")
     print(f"Prices created: {len(created_prices)}")
     print()
@@ -93,6 +95,7 @@ def create_subscription_products():
     print()
 
     return created_products, created_prices
+
 
 if __name__ == "__main__":
     create_subscription_products()

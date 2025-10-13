@@ -4,12 +4,14 @@ Represents user subscriptions and their usage.
 """
 
 from datetime import datetime
-from typing import Optional, Literal
-from pydantic import BaseModel, Field
+from typing import Literal
+
+from pydantic import BaseModel
 
 
 class SubscriptionBase(BaseModel):
     """Base subscription model."""
+
     user_id: str
     tier_id: str  # e.g., "flow_pro"
     status: Literal["active", "canceled", "past_due", "paused"] = "active"
@@ -17,6 +19,7 @@ class SubscriptionBase(BaseModel):
 
 class SubscriptionCreate(SubscriptionBase):
     """Model for creating a new subscription."""
+
     stripe_subscription_id: str
     stripe_customer_id: str
     stripe_price_id: str
@@ -24,13 +27,15 @@ class SubscriptionCreate(SubscriptionBase):
 
 class SubscriptionUpdate(BaseModel):
     """Model for updating a subscription."""
-    tier_id: Optional[str] = None
-    status: Optional[Literal["active", "canceled", "past_due", "paused"]] = None
-    cancel_at_period_end: Optional[bool] = None
+
+    tier_id: str | None = None
+    status: Literal["active", "canceled", "past_due", "paused"] | None = None
+    cancel_at_period_end: bool | None = None
 
 
 class SubscriptionUsage(BaseModel):
     """Model for subscription usage tracking."""
+
     subscription_id: str
     user_id: str
     analyses_used_this_period: int = 0
@@ -41,6 +46,7 @@ class SubscriptionUsage(BaseModel):
 
 class SubscriptionDetails(SubscriptionBase):
     """Complete subscription details with usage."""
+
     id: str
     stripe_subscription_id: str
     stripe_customer_id: str
@@ -50,7 +56,7 @@ class SubscriptionDetails(SubscriptionBase):
     current_period_start: datetime
     current_period_end: datetime
     cancel_at_period_end: bool = False
-    canceled_at: Optional[datetime] = None
+    canceled_at: datetime | None = None
 
     # Usage tracking
     analyses_used_this_period: int = 0
@@ -72,7 +78,8 @@ class SubscriptionDetails(SubscriptionBase):
 
 class SubscriptionStatus(BaseModel):
     """Quick subscription status check."""
+
     has_active_subscription: bool
-    tier_id: Optional[str] = None
+    tier_id: str | None = None
     analyses_remaining: int = 0
     can_use_service: bool  # True if has subscription OR has credits

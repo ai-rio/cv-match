@@ -47,15 +47,19 @@ class TestUsageLimitService:
             "credits_remaining": 25,
             "total_credits": 50,
             "subscription_tier": "pro",
-            "is_pro": True
+            "is_pro": True,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         result = await service.get_user_credits(self.test_user_id)
 
         assert result == mock_credits
-        self.mock_db.client.table.return_value.select.return_value.eq.assert_called_once_with(str(self.test_user_id))
+        self.mock_db.client.table.return_value.select.return_value.eq.assert_called_once_with(
+            str(self.test_user_id)
+        )
 
     @pytest.mark.asyncio
     async def test_get_user_credits_new_user_creates_record(self):
@@ -72,10 +76,12 @@ class TestUsageLimitService:
             "credits_remaining": CREDIT_TIERS["free"],
             "total_credits": CREDIT_TIERS["free"],
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.insert.return_value.execute.return_value.data = [mock_created_credits]
+        self.mock_db.client.table.return_value.insert.return_value.execute.return_value.data = [
+            mock_created_credits
+        ]
 
         result = await service.get_user_credits(self.test_user_id)
 
@@ -100,7 +106,9 @@ class TestUsageLimitService:
         service = self.create_mock_service()
 
         # Mock database error
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.side_effect = Exception("Database error")
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.side_effect = Exception(
+            "Database error"
+        )
 
         with pytest.raises(UsageLimitError, match="Failed to retrieve user credits"):
             await service.get_user_credits(self.test_user_id)
@@ -117,10 +125,12 @@ class TestUsageLimitService:
             "credits_remaining": 100,
             "total_credits": 100,
             "subscription_tier": "pro",
-            "is_pro": True
+            "is_pro": True,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock usage tracking
         mock_usage = AsyncMock()
@@ -148,10 +158,12 @@ class TestUsageLimitService:
             "credits_remaining": 5,
             "total_credits": 10,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock usage tracking
         mock_usage = AsyncMock()
@@ -180,10 +192,12 @@ class TestUsageLimitService:
             "credits_remaining": 0,
             "total_credits": 3,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock usage tracking
         mock_usage = AsyncMock()
@@ -212,10 +226,12 @@ class TestUsageLimitService:
             "credits_remaining": 5,
             "total_credits": 5,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock no usage record initially, then create one
         service.usage_tracking_service.get_current_month_usage.return_value = None
@@ -228,7 +244,9 @@ class TestUsageLimitService:
 
         assert result.can_optimize is True
         assert result.free_optimizations_used == 0
-        service.usage_tracking_service.create_or_update_usage.assert_called_once_with(self.test_user_id)
+        service.usage_tracking_service.create_or_update_usage.assert_called_once_with(
+            self.test_user_id
+        )
 
     @pytest.mark.asyncio
     async def test_check_usage_limit_user_not_found(self):
@@ -254,14 +272,19 @@ class TestUsageLimitService:
             "credits_remaining": 5,
             "total_credits": 5,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock usage tracking error
         from app.services.usage_tracking_service import UsageTrackingError
-        service.usage_tracking_service.get_current_month_usage.side_effect = UsageTrackingError("Tracking error")
+
+        service.usage_tracking_service.get_current_month_usage.side_effect = UsageTrackingError(
+            "Tracking error"
+        )
 
         with pytest.raises(UsageLimitError, match="Failed to check usage limits"):
             await service.check_usage_limit(self.test_user_id)
@@ -278,10 +301,12 @@ class TestUsageLimitService:
             "credits_remaining": 3,
             "total_credits": 5,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock current usage
         mock_usage = AsyncMock()
@@ -313,10 +338,12 @@ class TestUsageLimitService:
             "credits_remaining": 5,
             "total_credits": 5,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock no usage record, create new one
         service.usage_tracking_service.get_current_month_usage.return_value = None
@@ -331,7 +358,9 @@ class TestUsageLimitService:
         assert result.free_optimizations_used == 0
         assert result.paid_optimizations_used == 0
         assert result.can_optimize is True
-        service.usage_tracking_service.create_or_update_usage.assert_called_once_with(self.test_user_id)
+        service.usage_tracking_service.create_or_update_usage.assert_called_once_with(
+            self.test_user_id
+        )
 
     @pytest.mark.asyncio
     async def test_get_usage_stats_pro_user(self):
@@ -345,10 +374,12 @@ class TestUsageLimitService:
             "credits_remaining": 100,
             "total_credits": 100,
             "subscription_tier": "pro",
-            "is_pro": True
+            "is_pro": True,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock current usage
         mock_usage = AsyncMock()
@@ -374,15 +405,16 @@ class TestUsageLimitService:
         self.mock_db.client.rpc.return_value.execute.return_value = mock_result
 
         # Mock transaction creation
-        self.mock_db.client.table.return_value.insert.return_value.execute.return_value.data = [{"id": "transaction_123"}]
+        self.mock_db.client.table.return_value.insert.return_value.execute.return_value.data = [
+            {"id": "transaction_123"}
+        ]
 
         result = await service.deduct_credits(self.test_user_id, 5, "operation_123")
 
         assert result is True
-        self.mock_db.client.rpc.assert_called_once_with("deduct_credits_atomically", {
-            "p_user_id": str(self.test_user_id),
-            "p_amount": 5
-        })
+        self.mock_db.client.rpc.assert_called_once_with(
+            "deduct_credits_atomically", {"p_user_id": str(self.test_user_id), "p_amount": 5}
+        )
 
     @pytest.mark.asyncio
     async def test_deduct_credits_atomic_insufficient_credits(self):
@@ -413,12 +445,18 @@ class TestUsageLimitService:
             "credits_remaining": 10,
             "total_credits": 10,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
-        self.mock_db.client.table.return_value.update.return_value.eq.return_value.eq.return_value.execute.return_value.data = [mock_credits]
-        self.mock_db.client.table.return_value.insert.return_value.execute.return_value.data = [{"id": "transaction_123"}]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
+        self.mock_db.client.table.return_value.update.return_value.eq.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
+        self.mock_db.client.table.return_value.insert.return_value.execute.return_value.data = [
+            {"id": "transaction_123"}
+        ]
 
         result = await service.deduct_credits(self.test_user_id, 5, "operation_123")
 
@@ -436,21 +474,23 @@ class TestUsageLimitService:
             "credits_remaining": 10,
             "total_credits": 10,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock race condition - first update fails (no rows), second succeeds via retry
         update_response = MagicMock()
         update_response.data = []  # No rows updated on first attempt
         self.mock_db.client.table.return_value.update.return_value.eq.return_value.eq.return_value.execute.side_effect = [
             update_response,  # First call fails
-            update_response   # Second call will be mocked in retry
+            update_response,  # Second call will be mocked in retry
         ]
 
         # Mock successful retry
-        with patch.object(service, 'deduct_credits', return_value=True) as mock_retry:
+        with patch.object(service, "deduct_credits", return_value=True) as mock_retry:
             result = await service.deduct_credits_fallback(self.test_user_id, 5, "operation_123")
 
         assert result is True
@@ -467,10 +507,12 @@ class TestUsageLimitService:
             "credits_remaining": 2,
             "total_credits": 5,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         result = await service.deduct_credits_fallback(self.test_user_id, 5, "operation_123")
 
@@ -488,19 +530,25 @@ class TestUsageLimitService:
             "credits_remaining": 10,
             "total_credits": 10,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock successful update
         updated_credits = mock_credits.copy()
         updated_credits["credits_remaining"] = 20
         updated_credits["total_credits"] = 20
-        self.mock_db.client.table.return_value.update.return_value.eq.return_value.execute.return_value.data = [updated_credits]
+        self.mock_db.client.table.return_value.update.return_value.eq.return_value.execute.return_value.data = [
+            updated_credits
+        ]
 
         # Mock transaction creation
-        self.mock_db.client.table.return_value.insert.return_value.execute.return_value.data = [{"id": "transaction_123"}]
+        self.mock_db.client.table.return_value.insert.return_value.execute.return_value.data = [
+            {"id": "transaction_123"}
+        ]
 
         result = await service.add_credits(self.test_user_id, 10, "payment", "Test payment")
 
@@ -520,10 +568,12 @@ class TestUsageLimitService:
             "credits_remaining": 10,
             "total_credits": 10,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock failed update
         self.mock_db.client.table.return_value.update.return_value.eq.return_value.execute.return_value.data = []
@@ -543,10 +593,12 @@ class TestUsageLimitService:
             "credits_remaining": 100,
             "total_credits": 100,
             "subscription_tier": "pro",
-            "is_pro": True
+            "is_pro": True,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock usage tracking
         mock_usage = AsyncMock()
@@ -560,8 +612,7 @@ class TestUsageLimitService:
         assert result.can_optimize is True
         assert result.is_pro is True
         service.usage_tracking_service.increment_usage.assert_called_once_with(
-            user_id=self.test_user_id,
-            optimization_type="paid"
+            user_id=self.test_user_id, optimization_type="paid"
         )
 
     @pytest.mark.asyncio
@@ -576,10 +627,12 @@ class TestUsageLimitService:
             "credits_remaining": 5,
             "total_credits": 10,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock usage tracking
         mock_usage = AsyncMock()
@@ -589,14 +642,13 @@ class TestUsageLimitService:
         service.usage_tracking_service.get_current_month_usage.return_value = mock_usage
 
         # Mock successful credit deduction
-        with patch.object(service, 'deduct_credits', return_value=True):
+        with patch.object(service, "deduct_credits", return_value=True):
             result = await service.check_and_track_usage(self.test_user_id, "free", 1)
 
         assert result.can_optimize is True
         assert result.is_pro is False
         service.usage_tracking_service.increment_usage.assert_called_once_with(
-            user_id=self.test_user_id,
-            optimization_type="free"
+            user_id=self.test_user_id, optimization_type="free"
         )
 
     @pytest.mark.asyncio
@@ -611,10 +663,12 @@ class TestUsageLimitService:
             "credits_remaining": 0,
             "total_credits": 3,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock usage tracking
         mock_usage = AsyncMock()
@@ -638,10 +692,12 @@ class TestUsageLimitService:
             "credits_remaining": 2,
             "total_credits": 5,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.mock_db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
         # Mock usage tracking
         mock_usage = AsyncMock()
@@ -651,7 +707,7 @@ class TestUsageLimitService:
         service.usage_tracking_service.get_current_month_usage.return_value = mock_usage
 
         # Mock failed credit deduction
-        with patch.object(service, 'deduct_credits', return_value=False):
+        with patch.object(service, "deduct_credits", return_value=False):
             with pytest.raises(UsageLimitExceededError, match="Failed to deduct credits"):
                 await service.check_and_track_usage(self.test_user_id, "free", 1)
 
@@ -681,7 +737,9 @@ class TestUsageLimitService:
         result = await service.reset_monthly_usage_if_needed(self.test_user_id)
 
         assert result is True
-        service.usage_tracking_service.create_or_update_usage.assert_called_once_with(self.test_user_id)
+        service.usage_tracking_service.create_or_update_usage.assert_called_once_with(
+            self.test_user_id
+        )
 
     @pytest.mark.asyncio
     async def test_reset_monthly_usage_tracking_error(self):
@@ -690,7 +748,10 @@ class TestUsageLimitService:
 
         # Mock tracking error
         from app.services.usage_tracking_service import UsageTrackingError
-        service.usage_tracking_service.get_current_month_usage.side_effect = UsageTrackingError("Tracking error")
+
+        service.usage_tracking_service.get_current_month_usage.side_effect = UsageTrackingError(
+            "Tracking error"
+        )
 
         with pytest.raises(UsageLimitError, match="Failed to reset monthly usage"):
             await service.reset_monthly_usage_if_needed(self.test_user_id)
@@ -708,4 +769,9 @@ class TestUsageLimitService:
         assert CREDIT_TIERS["enterprise"] == 1000
 
         # Verify progression
-        assert CREDIT_TIERS["free"] < CREDIT_TIERS["basic"] < CREDIT_TIERS["pro"] < CREDIT_TIERS["enterprise"]
+        assert (
+            CREDIT_TIERS["free"]
+            < CREDIT_TIERS["basic"]
+            < CREDIT_TIERS["pro"]
+            < CREDIT_TIERS["enterprise"]
+        )

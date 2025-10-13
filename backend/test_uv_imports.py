@@ -4,8 +4,8 @@ UV package manager import tests for CV-Match backend.
 Tests that all modules can be imported correctly.
 """
 
-import sys
 import importlib
+import sys
 
 
 def test_import(module_name: str, description: str = ""):

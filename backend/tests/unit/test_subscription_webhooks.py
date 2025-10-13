@@ -3,10 +3,11 @@ Tests for subscription webhook event handlers.
 Tests all subscription-specific webhook events with comprehensive scenarios.
 """
 
-import pytest
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import AsyncMock, Mock, patch
 from uuid import uuid4
+
+import pytest
 
 from app.services.webhook_service import WebhookService
 
@@ -14,10 +15,11 @@ from app.services.webhook_service import WebhookService
 @pytest.fixture
 def mock_webhook_service():
     """Mock webhook service with database dependencies."""
-    with patch('app.services.webhook_service.create_client') as mock_create_client, \
-         patch('app.services.webhook_service.UsageLimitService') as mock_usage_service, \
-         patch('app.services.webhook_service.SupabaseSession') as mock_session:
-
+    with (
+        patch("app.services.webhook_service.create_client") as mock_create_client,
+        patch("app.services.webhook_service.UsageLimitService") as mock_usage_service,
+        patch("app.services.webhook_service.SupabaseSession") as mock_session,
+    ):
         # Mock Supabase client
         mock_client = Mock()
         mock_create_client.return_value = mock_client
@@ -45,22 +47,13 @@ def sample_subscription_created_event():
                 "customer": "cus_123",
                 "status": "active",
                 "items": {
-                    "data": [{
-                        "price": {
-                            "id": "price_123",
-                            "currency": "brl",
-                            "unit_amount": 2990
-                        }
-                    }]
+                    "data": [{"price": {"id": "price_123", "currency": "brl", "unit_amount": 2990}}]
                 },
-                "metadata": {
-                    "user_id": "user_123",
-                    "tier_id": "flow_pro"
-                },
+                "metadata": {"user_id": "user_123", "tier_id": "flow_pro"},
                 "current_period_start": int(datetime.utcnow().timestamp()),
-                "current_period_end": int((datetime.utcnow() + timedelta(days=30)).timestamp())
+                "current_period_end": int((datetime.utcnow() + timedelta(days=30)).timestamp()),
             }
-        }
+        },
     }
 
 
@@ -76,21 +69,20 @@ def sample_subscription_updated_event():
                 "customer": "cus_123",
                 "status": "active",
                 "items": {
-                    "data": [{
-                        "price": {
-                            "id": "price_456",  # Different price (upgrade/downgrade)
-                            "currency": "brl",
-                            "unit_amount": 9990
+                    "data": [
+                        {
+                            "price": {
+                                "id": "price_456",  # Different price (upgrade/downgrade)
+                                "currency": "brl",
+                                "unit_amount": 9990,
+                            }
                         }
-                    }]
+                    ]
                 },
-                "metadata": {
-                    "user_id": "user_123",
-                    "tier_id": "flow_business"
-                },
-                "cancel_at_period_end": False
+                "metadata": {"user_id": "user_123", "tier_id": "flow_business"},
+                "cancel_at_period_end": False,
             }
-        }
+        },
     }
 
 
@@ -106,12 +98,9 @@ def sample_subscription_deleted_event():
                 "customer": "cus_123",
                 "status": "canceled",
                 "canceled_at": int(datetime.utcnow().timestamp()),
-                "metadata": {
-                    "user_id": "user_123",
-                    "tier_id": "flow_pro"
-                }
+                "metadata": {"user_id": "user_123", "tier_id": "flow_pro"},
             }
-        }
+        },
     }
 
 
@@ -130,13 +119,11 @@ def sample_invoice_payment_succeeded_event():
                 "amount_paid": 2990,
                 "currency": "brl",
                 "payment_intent": "pi_123",
-                "metadata": {
-                    "user_id": "user_123"
-                },
+                "metadata": {"user_id": "user_123"},
                 "period_start": int(datetime.utcnow().timestamp()),
-                "period_end": int((datetime.utcnow() + timedelta(days=30)).timestamp())
+                "period_end": int((datetime.utcnow() + timedelta(days=30)).timestamp()),
             }
-        }
+        },
     }
 
 
@@ -155,11 +142,9 @@ def sample_invoice_payment_failed_event():
                 "amount_due": 2990,
                 "currency": "brl",
                 "attempt_count": 1,
-                "metadata": {
-                    "user_id": "user_123"
-                }
+                "metadata": {"user_id": "user_123"},
             }
-        }
+        },
     }
 
 
@@ -167,19 +152,22 @@ class TestSubscriptionCreatedWebhook:
     """Test customer.subscription.created webhook event."""
 
     @pytest.mark.asyncio
-    async def test_subscription_created_success(self, mock_webhook_service, sample_subscription_created_event):
+    async def test_subscription_created_success(
+        self, mock_webhook_service, sample_subscription_created_event
+    ):
         """Test successful subscription creation webhook."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
         # Mock database responses
-        mock_client.table().select().execute.return_value = Mock(data=[])  # No existing subscription
+        mock_client.table().select().execute.return_value = Mock(
+            data=[]
+        )  # No existing subscription
         mock_client.table().insert().execute.return_value = Mock(data=[{"id": "sub_db_123"}])
 
         # Mock subscription service
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
             mock_sub_service.create_subscription.return_value = Mock(
-                id="sub_db_123",
-                tier_id="flow_pro"
+                id="sub_db_123", tier_id="flow_pro"
             )
 
             # Act
@@ -195,7 +183,9 @@ class TestSubscriptionCreatedWebhook:
             mock_sub_service.create_subscription.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_subscription_created_missing_user_id(self, mock_webhook_service, sample_subscription_created_event):
+    async def test_subscription_created_missing_user_id(
+        self, mock_webhook_service, sample_subscription_created_event
+    ):
         """Test subscription creation webhook with missing user_id."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
@@ -211,7 +201,9 @@ class TestSubscriptionCreatedWebhook:
         assert "User ID not found" in result["error"]
 
     @pytest.mark.asyncio
-    async def test_subscription_created_missing_price(self, mock_webhook_service, sample_subscription_created_event):
+    async def test_subscription_created_missing_price(
+        self, mock_webhook_service, sample_subscription_created_event
+    ):
         """Test subscription creation webhook with missing price information."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
@@ -224,7 +216,7 @@ class TestSubscriptionCreatedWebhook:
         mock_client.table().insert().execute.return_value = Mock(data=[{"id": "sub_db_123"}])
 
         # Mock subscription service
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
             mock_sub_service.create_subscription.return_value = Mock(id="sub_db_123")
 
             # Act
@@ -235,7 +227,9 @@ class TestSubscriptionCreatedWebhook:
             # Should handle missing price gracefully
 
     @pytest.mark.asyncio
-    async def test_subscription_created_service_error(self, mock_webhook_service, sample_subscription_created_event):
+    async def test_subscription_created_service_error(
+        self, mock_webhook_service, sample_subscription_created_event
+    ):
         """Test subscription creation webhook when service fails."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
@@ -243,7 +237,7 @@ class TestSubscriptionCreatedWebhook:
         mock_client.table().select().execute.return_value = Mock(data=[])
 
         # Mock subscription service to raise exception
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
             mock_sub_service.create_subscription.side_effect = Exception("Service error")
 
             # Act
@@ -260,24 +254,21 @@ class TestSubscriptionUpdatedWebhook:
     """Test customer.subscription.updated webhook event."""
 
     @pytest.mark.asyncio
-    async def test_subscription_updated_success(self, mock_webhook_service, sample_subscription_updated_event):
+    async def test_subscription_updated_success(
+        self, mock_webhook_service, sample_subscription_updated_event
+    ):
         """Test successful subscription update webhook."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
         # Mock existing subscription lookup
         mock_client.table().select().eq().execute.return_value = Mock(
-            data=[{
-                "id": "sub_db_123",
-                "stripe_subscription_id": "sub_123",
-                "user_id": "user_123"
-            }]
+            data=[{"id": "sub_db_123", "stripe_subscription_id": "sub_123", "user_id": "user_123"}]
         )
 
         # Mock subscription service
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
             mock_sub_service.update_subscription.return_value = Mock(
-                id="sub_db_123",
-                tier_id="flow_business"
+                id="sub_db_123", tier_id="flow_business"
             )
 
             # Act
@@ -292,7 +283,9 @@ class TestSubscriptionUpdatedWebhook:
             mock_sub_service.update_subscription.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_subscription_updated_not_found(self, mock_webhook_service, sample_subscription_updated_event):
+    async def test_subscription_updated_not_found(
+        self, mock_webhook_service, sample_subscription_updated_event
+    ):
         """Test subscription update webhook when subscription not found."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
@@ -309,25 +302,29 @@ class TestSubscriptionUpdatedWebhook:
         assert "not found" in result["error"]
 
     @pytest.mark.asyncio
-    async def test_subscription_updated_tier_change(self, mock_webhook_service, sample_subscription_updated_event):
+    async def test_subscription_updated_tier_change(
+        self, mock_webhook_service, sample_subscription_updated_event
+    ):
         """Test subscription update webhook with tier change."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
         # Mock existing subscription lookup
         mock_client.table().select().eq().execute.return_value = Mock(
-            data=[{
-                "id": "sub_db_123",
-                "stripe_subscription_id": "sub_123",
-                "user_id": "user_123",
-                "tier_id": "flow_pro"  # Old tier
-            }]
+            data=[
+                {
+                    "id": "sub_db_123",
+                    "stripe_subscription_id": "sub_123",
+                    "user_id": "user_123",
+                    "tier_id": "flow_pro",  # Old tier
+                }
+            ]
         )
 
         # Mock subscription service
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
             mock_sub_service.update_subscription.return_value = Mock(
                 id="sub_db_123",
-                tier_id="flow_business"  # New tier
+                tier_id="flow_business",  # New tier
             )
 
             # Act
@@ -354,7 +351,7 @@ class TestSubscriptionUpdatedWebhook:
             "customer": "cus_123",
             "status": "active",
             "cancel_at_period_end": True,  # Set to cancel at period end
-            "items": {"data": [{"price": {"id": "price_123"}}]}
+            "items": {"data": [{"price": {"id": "price_123"}}]},
         }
 
         # Mock existing subscription lookup
@@ -363,7 +360,7 @@ class TestSubscriptionUpdatedWebhook:
         )
 
         # Mock subscription service
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
             mock_sub_service.update_subscription.return_value = Mock(id="sub_db_123")
 
             # Act
@@ -382,24 +379,21 @@ class TestSubscriptionDeletedWebhook:
     """Test customer.subscription.deleted webhook event."""
 
     @pytest.mark.asyncio
-    async def test_subscription_deleted_success(self, mock_webhook_service, sample_subscription_deleted_event):
+    async def test_subscription_deleted_success(
+        self, mock_webhook_service, sample_subscription_deleted_event
+    ):
         """Test successful subscription deletion webhook."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
         # Mock existing subscription lookup
         mock_client.table().select().eq().execute.return_value = Mock(
-            data=[{
-                "id": "sub_db_123",
-                "stripe_subscription_id": "sub_123",
-                "user_id": "user_123"
-            }]
+            data=[{"id": "sub_db_123", "stripe_subscription_id": "sub_123", "user_id": "user_123"}]
         )
 
         # Mock subscription service
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
             mock_sub_service.cancel_subscription.return_value = Mock(
-                id="sub_db_123",
-                status="canceled"
+                id="sub_db_123", status="canceled"
             )
 
             # Act
@@ -411,10 +405,14 @@ class TestSubscriptionDeletedWebhook:
             assert result["success"] is True
             assert result["subscription_id"] == "sub_db_123"
             assert result["status"] == "canceled"
-            mock_sub_service.cancel_subscription.assert_called_once_with("sub_db_123", immediate=True)
+            mock_sub_service.cancel_subscription.assert_called_once_with(
+                "sub_db_123", immediate=True
+            )
 
     @pytest.mark.asyncio
-    async def test_subscription_deleted_not_found(self, mock_webhook_service, sample_subscription_deleted_event):
+    async def test_subscription_deleted_not_found(
+        self, mock_webhook_service, sample_subscription_deleted_event
+    ):
         """Test subscription deletion webhook when subscription not found."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
@@ -431,7 +429,9 @@ class TestSubscriptionDeletedWebhook:
         assert "not found" in result["error"]
 
     @pytest.mark.asyncio
-    async def test_subscription_deleted_service_error(self, mock_webhook_service, sample_subscription_deleted_event):
+    async def test_subscription_deleted_service_error(
+        self, mock_webhook_service, sample_subscription_deleted_event
+    ):
         """Test subscription deletion webhook when service fails."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
@@ -441,7 +441,7 @@ class TestSubscriptionDeletedWebhook:
         )
 
         # Mock subscription service to raise exception
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
             mock_sub_service.cancel_subscription.side_effect = Exception("Cancel failed")
 
             # Act
@@ -458,29 +458,24 @@ class TestInvoicePaymentSucceededWebhook:
     """Test invoice.payment_succeeded webhook event."""
 
     @pytest.mark.asyncio
-    async def test_invoice_payment_succeeded_with_subscription(self, mock_webhook_service, sample_invoice_payment_succeeded_event):
+    async def test_invoice_payment_succeeded_with_subscription(
+        self, mock_webhook_service, sample_invoice_payment_succeeded_event
+    ):
         """Test successful invoice payment with subscription renewal."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
         # Mock subscription lookup
         mock_client.table().select().eq().execute.return_value = Mock(
-            data=[{
-                "id": "sub_db_123",
-                "stripe_subscription_id": "sub_123",
-                "user_id": "user_123"
-            }]
+            data=[{"id": "sub_db_123", "stripe_subscription_id": "sub_123", "user_id": "user_123"}]
         )
 
         # Mock payment history creation
-        mock_client.table().insert().execute.return_value = Mock(
-            data=[{"id": "payment_hist_123"}]
-        )
+        mock_client.table().insert().execute.return_value = Mock(data=[{"id": "payment_hist_123"}])
 
         # Mock subscription service for renewal
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
             mock_sub_service.process_period_renewal.return_value = Mock(
-                id="sub_db_123",
-                analyses_rollover=25
+                id="sub_db_123", analyses_rollover=25
             )
 
             # Act
@@ -506,13 +501,11 @@ class TestInvoicePaymentSucceededWebhook:
             "amount_paid": 9990,
             "currency": "brl",
             "payment_intent": "pi_789",
-            "metadata": {"user_id": "user_123"}
+            "metadata": {"user_id": "user_123"},
         }
 
         # Mock payment history creation
-        mock_client.table().insert().execute.return_value = Mock(
-            data=[{"id": "payment_hist_789"}]
-        )
+        mock_client.table().insert().execute.return_value = Mock(data=[{"id": "payment_hist_789"}])
 
         # Act
         result = await webhook_service.process_invoice_payment_succeeded(event_data)
@@ -523,7 +516,9 @@ class TestInvoicePaymentSucceededWebhook:
         assert result["subscription_renewed"] is False
 
     @pytest.mark.asyncio
-    async def test_invoice_payment_succeeded_missing_user_id(self, mock_webhook_service, sample_invoice_payment_succeeded_event):
+    async def test_invoice_payment_succeeded_missing_user_id(
+        self, mock_webhook_service, sample_invoice_payment_succeeded_event
+    ):
         """Test invoice payment succeeded with missing user_id."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
@@ -533,17 +528,17 @@ class TestInvoicePaymentSucceededWebhook:
 
         # Mock subscription lookup to provide user_id
         mock_client.table().select().eq().execute.return_value = Mock(
-            data=[{
-                "id": "sub_db_123",
-                "stripe_subscription_id": "sub_123",
-                "user_id": "user_123"  # Found via subscription lookup
-            }]
+            data=[
+                {
+                    "id": "sub_db_123",
+                    "stripe_subscription_id": "sub_123",
+                    "user_id": "user_123",  # Found via subscription lookup
+                }
+            ]
         )
 
         # Mock payment history creation
-        mock_client.table().insert().execute.return_value = Mock(
-            data=[{"id": "payment_hist_123"}]
-        )
+        mock_client.table().insert().execute.return_value = Mock(data=[{"id": "payment_hist_123"}])
 
         # Act
         result = await webhook_service.process_invoice_payment_succeeded(event_data)
@@ -553,26 +548,22 @@ class TestInvoicePaymentSucceededWebhook:
         assert result["user_id"] == "user_123"
 
     @pytest.mark.asyncio
-    async def test_invoice_payment_succeeded_renewal_failure(self, mock_webhook_service, sample_invoice_payment_succeeded_event):
+    async def test_invoice_payment_succeeded_renewal_failure(
+        self, mock_webhook_service, sample_invoice_payment_succeeded_event
+    ):
         """Test invoice payment succeeded when renewal fails (should still record payment)."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
         # Mock subscription lookup
         mock_client.table().select().eq().execute.return_value = Mock(
-            data=[{
-                "id": "sub_db_123",
-                "stripe_subscription_id": "sub_123",
-                "user_id": "user_123"
-            }]
+            data=[{"id": "sub_db_123", "stripe_subscription_id": "sub_123", "user_id": "user_123"}]
         )
 
         # Mock payment history creation
-        mock_client.table().insert().execute.return_value = Mock(
-            data=[{"id": "payment_hist_123"}]
-        )
+        mock_client.table().insert().execute.return_value = Mock(data=[{"id": "payment_hist_123"}])
 
         # Mock subscription service to fail renewal
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
             mock_sub_service.process_period_renewal.side_effect = Exception("Renewal failed")
 
             # Act
@@ -589,24 +580,21 @@ class TestInvoicePaymentFailedWebhook:
     """Test invoice.payment_failed webhook event."""
 
     @pytest.mark.asyncio
-    async def test_invoice_payment_failed_success(self, mock_webhook_service, sample_invoice_payment_failed_event):
+    async def test_invoice_payment_failed_success(
+        self, mock_webhook_service, sample_invoice_payment_failed_event
+    ):
         """Test invoice payment failed webhook processing."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
         # Mock subscription lookup
         mock_client.table().select().eq().execute.return_value = Mock(
-            data=[{
-                "id": "sub_db_123",
-                "stripe_subscription_id": "sub_123",
-                "user_id": "user_123"
-            }]
+            data=[{"id": "sub_db_123", "stripe_subscription_id": "sub_123", "user_id": "user_123"}]
         )
 
         # Mock subscription service
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
             mock_sub_service.update_subscription.return_value = Mock(
-                id="sub_db_123",
-                status="past_due"
+                id="sub_db_123", status="past_due"
             )
 
             # Act
@@ -621,7 +609,9 @@ class TestInvoicePaymentFailedWebhook:
             mock_sub_service.update_subscription.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_invoice_payment_failed_subscription_not_found(self, mock_webhook_service, sample_invoice_payment_failed_event):
+    async def test_invoice_payment_failed_subscription_not_found(
+        self, mock_webhook_service, sample_invoice_payment_failed_event
+    ):
         """Test invoice payment failed when subscription not found."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
@@ -647,7 +637,7 @@ class TestInvoicePaymentFailedWebhook:
             "id": "in_no_sub",
             "customer": "cus_123",
             "amount_due": 2990,
-            "currency": "brl"
+            "currency": "brl",
         }
 
         # Act
@@ -672,13 +662,13 @@ class TestCompleteWebhookFlow:
             "customer": "cus_123",
             "status": "active",
             "items": {"data": [{"price": {"id": "price_123"}}]},
-            "metadata": {"user_id": "user_123", "tier_id": "flow_pro"}
+            "metadata": {"user_id": "user_123", "tier_id": "flow_pro"},
         }
 
         mock_client.table().select().execute.return_value = Mock(data=[])
         mock_client.table().insert().execute.return_value = Mock(data=[{"id": "sub_db_123"}])
 
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
             mock_sub_service.create_subscription.return_value = Mock(id="sub_db_123")
 
             result1 = await webhook_service.process_subscription_created(create_event)
@@ -691,7 +681,7 @@ class TestCompleteWebhookFlow:
             "subscription": "sub_123",
             "amount_paid": 2990,
             "currency": "brl",
-            "metadata": {"user_id": "user_123"}
+            "metadata": {"user_id": "user_123"},
         }
 
         mock_client.table().select().eq().execute.return_value = Mock(
@@ -699,7 +689,7 @@ class TestCompleteWebhookFlow:
         )
         mock_client.table().insert().execute.return_value = Mock(data=[{"id": "payment_hist_123"}])
 
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
             mock_sub_service.process_period_renewal.return_value = Mock(id="sub_db_123")
 
             result2 = await webhook_service.process_invoice_payment_succeeded(payment_event)
@@ -710,21 +700,25 @@ class TestCompleteWebhookFlow:
             "id": "sub_123",
             "customer": "cus_123",
             "status": "canceled",
-            "metadata": {"user_id": "user_123"}
+            "metadata": {"user_id": "user_123"},
         }
 
         mock_client.table().select().eq().execute.return_value = Mock(
             data=[{"id": "sub_db_123", "stripe_subscription_id": "sub_123"}]
         )
 
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
-            mock_sub_service.cancel_subscription.return_value = Mock(id="sub_db_123", status="canceled")
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
+            mock_sub_service.cancel_subscription.return_value = Mock(
+                id="sub_db_123", status="canceled"
+            )
 
             result3 = await webhook_service.process_subscription_deleted(delete_event)
             assert result3["success"] is True
 
     @pytest.mark.asyncio
-    async def test_webhook_idempotency(self, mock_webhook_service, sample_subscription_created_event):
+    async def test_webhook_idempotency(
+        self, mock_webhook_service, sample_subscription_created_event
+    ):
         """Test webhook event idempotency."""
         webhook_service, mock_client, mock_usage = mock_webhook_service
 
@@ -732,13 +726,13 @@ class TestCompleteWebhookFlow:
         mock_client.table().select().execute.return_value = Mock(data=[])
         mock_client.table().insert().execute.return_value = Mock(data=[{"id": "sub_db_123"}])
 
-        with patch('app.services.webhook_service.subscription_service') as mock_sub_service:
+        with patch("app.services.webhook_service.subscription_service") as mock_sub_service:
             mock_sub_service.create_subscription.return_value = Mock(id="sub_db_123")
 
             result1 = await webhook_service.process_webhook_event(
                 "customer.subscription.created",
                 sample_subscription_created_event["data"]["object"],
-                "evt_sub_created_123"
+                "evt_sub_created_123",
             )
             assert result1["success"] is True
             assert result1["processed"] is True
@@ -751,7 +745,7 @@ class TestCompleteWebhookFlow:
         result2 = await webhook_service.process_webhook_event(
             "customer.subscription.created",
             sample_subscription_created_event["data"]["object"],
-            "evt_sub_created_123"
+            "evt_sub_created_123",
         )
         assert result2["success"] is True
         assert result2["idempotent"] is True

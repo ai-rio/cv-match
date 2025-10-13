@@ -6,7 +6,6 @@ It integrates with user profiles to determine Pro status and checks monthly usag
 """
 
 import logging
-from datetime import date
 from typing import Any
 from uuid import UUID
 
@@ -23,12 +22,7 @@ from app.services.usage_tracking_service import (
 logger = logging.getLogger(__name__)
 
 # Credit tiers for cv-match pricing model
-CREDIT_TIERS = {
-    "free": 3,
-    "basic": 10,
-    "pro": 50,
-    "enterprise": 1000
-}
+CREDIT_TIERS = {"free": 3, "basic": 10, "pro": 50, "enterprise": 1000}
 
 
 class UsageLimitError(Exception):
@@ -76,7 +70,12 @@ class UsageLimitService:
         """
         try:
             # Get user credits from user_credits table
-            result = self.db.client.table("user_credits").select("*").eq("user_id", str(user_id)).execute()
+            result = (
+                self.db.client.table("user_credits")
+                .select("*")
+                .eq("user_id", str(user_id))
+                .execute()
+            )
 
             if not result.data:
                 # Create initial credits record for new user
@@ -85,7 +84,7 @@ class UsageLimitService:
                     "credits_remaining": CREDIT_TIERS["free"],
                     "total_credits": CREDIT_TIERS["free"],
                     "subscription_tier": "free",
-                    "is_pro": False
+                    "is_pro": False,
                 }
                 create_result = self.db.client.table("user_credits").insert(initial_data).execute()
                 if not create_result.data:
@@ -124,7 +123,9 @@ class UsageLimitService:
             if current_usage is None:
                 current_usage = await self.usage_tracking_service.create_or_update_usage(user_id)
 
-            total_used = current_usage.free_optimizations_used + current_usage.paid_optimizations_used
+            total_used = (
+                current_usage.free_optimizations_used + current_usage.paid_optimizations_used
+            )
 
             # Credit cost per optimization (1 credit for free users, 0 for pro users)
             credit_cost = 0 if is_pro else 1
@@ -134,7 +135,9 @@ class UsageLimitService:
 
             if not can_optimize:
                 reason = f"Insufficient credits. You have {credits_remaining} credits remaining."
-                upgrade_prompt = "Upgrade to Pro for unlimited optimizations or purchase more credits."
+                upgrade_prompt = (
+                    "Upgrade to Pro for unlimited optimizations or purchase more credits."
+                )
             else:
                 reason = None
                 upgrade_prompt = None
@@ -243,10 +246,7 @@ class UsageLimitService:
         try:
             # Use atomic database operation to prevent race conditions
             # This updates credits only if sufficient credits are available
-            rpc_params = {
-                "p_user_id": str(user_id),
-                "p_amount": amount
-            }
+            rpc_params = {"p_user_id": str(user_id), "p_amount": amount}
 
             # Call a PostgreSQL function for atomic credit deduction
             # This prevents race conditions by doing the check and update in one transaction
@@ -254,7 +254,9 @@ class UsageLimitService:
                 result = self.db.client.rpc("deduct_credits_atomically", rpc_params).execute()
             except Exception as rpc_error:
                 # RPC function might not exist, use fallback
-                logger.warning(f"Atomic credit deduction RPC not available, using fallback: {str(rpc_error)}")
+                logger.warning(
+                    f"Atomic credit deduction RPC not available, using fallback: {str(rpc_error)}"
+                )
                 return await self.deduct_credits_fallback(user_id, amount, operation_id)
 
             if not result.data or not result.data[0].get("success", False):
@@ -263,7 +265,11 @@ class UsageLimitService:
                     logger.warning(f"Insufficient credits for user {user_id}")
                     return False
                 else:
-                    error_msg = result.data[0].get("error", "Unknown error") if result.data else "No response"
+                    error_msg = (
+                        result.data[0].get("error", "Unknown error")
+                        if result.data
+                        else "No response"
+                    )
                     logger.warning(f"Atomic deduction failed, using fallback: {error_msg}")
                     return await self.deduct_credits_fallback(user_id, amount, operation_id)
 
@@ -277,14 +283,18 @@ class UsageLimitService:
                 "source": "optimization",
                 "description": f"Credit deduction for operation {operation_id}",
                 "operation_id": operation_id,
-                "balance_after": new_credits
+                "balance_after": new_credits,
             }
 
             # Insert transaction record - this is done after the atomic credit deduction
-            transaction_result = self.db.client.table("credit_transactions").insert(transaction_data).execute()
+            transaction_result = (
+                self.db.client.table("credit_transactions").insert(transaction_data).execute()
+            )
             if not transaction_result.data:
                 # Log warning but don't fail the operation - credits were already deducted
-                logger.warning(f"Failed to record credit transaction for user {user_id}, operation {operation_id}")
+                logger.warning(
+                    f"Failed to record credit transaction for user {user_id}, operation {operation_id}"
+                )
 
             logger.info(f"Deducted {amount} credits from user {user_id}, remaining: {new_credits}")
             return True
@@ -320,25 +330,33 @@ class UsageLimitService:
             current_credits = credits.get("credits_remaining", 0)
 
             if current_credits < amount:
-                logger.warning(f"Insufficient credits for user {user_id}: {current_credits} < {amount}")
+                logger.warning(
+                    f"Insufficient credits for user {user_id}: {current_credits} < {amount}"
+                )
                 return False
 
             # Use optimistic locking with a version check to prevent race conditions
             # Update with a condition that ensures credits haven't changed since we read them
-            result = self.db.client.table("user_credits").update({
-                "credits_remaining": current_credits - amount,
-                "updated_at": "now()"
-            }).eq("user_id", str(user_id)).eq("credits_remaining", current_credits).execute()
+            result = (
+                self.db.client.table("user_credits")
+                .update({"credits_remaining": current_credits - amount, "updated_at": "now()"})
+                .eq("user_id", str(user_id))
+                .eq("credits_remaining", current_credits)
+                .execute()
+            )
 
             if not result.data:
                 # If no rows were updated, it means either:
                 # 1. The user doesn't exist (shouldn't happen due to get_user_credits)
                 # 2. The credits changed between our read and update (race condition)
                 # 3. Another concurrent operation deducted credits
-                logger.warning(f"Concurrent credit modification detected for user {user_id}, retrying...")
+                logger.warning(
+                    f"Concurrent credit modification detected for user {user_id}, retrying..."
+                )
 
                 # Retry once after a brief delay
                 import asyncio
+
                 await asyncio.sleep(0.05)  # 50ms delay
 
                 # Try the atomic method as a fallback
@@ -354,7 +372,7 @@ class UsageLimitService:
                 "source": "optimization",
                 "description": f"Credit deduction for operation {operation_id}",
                 "operation_id": operation_id,
-                "balance_after": new_credits
+                "balance_after": new_credits,
             }
 
             self.db.client.table("credit_transactions").insert(transaction_data).execute()
@@ -366,7 +384,9 @@ class UsageLimitService:
             logger.error(f"Error in fallback credit deduction for user {user_id}: {str(e)}")
             raise UsageLimitError(f"Failed to deduct credits: {str(e)}")
 
-    async def add_credits(self, user_id: UUID, amount: int, source: str, description: str | None = None) -> bool:
+    async def add_credits(
+        self, user_id: UUID, amount: int, source: str, description: str | None = None
+    ) -> bool:
         """
         Add credits to user account.
 
@@ -391,10 +411,12 @@ class UsageLimitService:
             # Add credits
             new_credits = current_credits + amount
             new_total = total_credits + amount
-            result = self.db.client.table("user_credits").update({
-                "credits_remaining": new_credits,
-                "total_credits": new_total
-            }).eq("user_id", str(user_id)).execute()
+            result = (
+                self.db.client.table("user_credits")
+                .update({"credits_remaining": new_credits, "total_credits": new_total})
+                .eq("user_id", str(user_id))
+                .execute()
+            )
 
             if not result.data:
                 raise UsageLimitError("Failed to update user credits")
@@ -405,7 +427,7 @@ class UsageLimitService:
                 "amount": amount,  # Positive for addition
                 "type": "credit",
                 "source": source,
-                "description": description or f"Credit addition from {source}"
+                "description": description or f"Credit addition from {source}",
             }
             self.db.client.table("credit_transactions").insert(transaction_data).execute()
 
@@ -416,7 +438,9 @@ class UsageLimitService:
             logger.error(f"Error adding credits for user {user_id}: {str(e)}")
             raise UsageLimitError(f"Failed to add credits: {str(e)}")
 
-    async def check_and_track_usage(self, user_id: UUID, optimization_type: str = "free", cost_credits: int = 1) -> UsageLimitCheckResponse:
+    async def check_and_track_usage(
+        self, user_id: UUID, optimization_type: str = "free", cost_credits: int = 1
+    ) -> UsageLimitCheckResponse:
         """
         Check usage limits and track usage if allowed.
 
@@ -446,6 +470,7 @@ class UsageLimitService:
 
             # Generate operation ID for tracking
             import uuid
+
             operation_id = str(uuid.uuid4())
 
             # Deduct credits if not a Pro user
@@ -455,7 +480,9 @@ class UsageLimitService:
                     raise UsageLimitExceededError("Failed to deduct credits")
 
             # Track the usage
-            await self.usage_tracking_service.increment_usage(user_id=user_id, optimization_type=optimization_type)
+            await self.usage_tracking_service.increment_usage(
+                user_id=user_id, optimization_type=optimization_type
+            )
 
             # Update the response to reflect new usage
             limit_check.free_optimizations_used += 1
@@ -463,7 +490,9 @@ class UsageLimitService:
                 0, limit_check.remaining_free_optimizations - cost_credits
             )
 
-            logger.info(f"Tracked {optimization_type} usage for user {user_id}, cost: {cost_credits} credits")
+            logger.info(
+                f"Tracked {optimization_type} usage for user {user_id}, cost: {cost_credits} credits"
+            )
             return limit_check
 
         except (UserNotFoundError, UsageLimitExceededError, UsageTrackingError):

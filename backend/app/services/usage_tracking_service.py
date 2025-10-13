@@ -82,7 +82,9 @@ class UsageTrackingService:
             logger.error(f"Failed to get current month usage for user {user_id}: {str(e)}")
             raise UsageTrackingError(f"Failed to retrieve usage tracking: {str(e)}")
 
-    async def get_usage_for_month(self, user_id: UUID, month_date: date) -> UsageTrackingResponse | None:
+    async def get_usage_for_month(
+        self, user_id: UUID, month_date: date
+    ) -> UsageTrackingResponse | None:
         """
         Get usage tracking record for a specific month.
 
@@ -123,7 +125,9 @@ class UsageTrackingService:
             logger.error(f"Failed to get usage for user {user_id}, month {month_date}: {str(e)}")
             raise UsageTrackingError(f"Failed to retrieve usage tracking: {str(e)}")
 
-    async def create_or_update_usage(self, user_id: UUID, month_date: date | None = None) -> UsageTrackingResponse:
+    async def create_or_update_usage(
+        self, user_id: UUID, month_date: date | None = None
+    ) -> UsageTrackingResponse:
         """
         Create or update usage tracking record for a user (UPSERT operation).
 
@@ -145,12 +149,17 @@ class UsageTrackingService:
 
             if existing_usage:
                 # Record exists, return it
-                logger.debug(f"Usage tracking record already exists for user {user_id}, month {month_date}")
+                logger.debug(
+                    f"Usage tracking record already exists for user {user_id}, month {month_date}"
+                )
                 return existing_usage
             else:
                 # Create new record
                 usage_data = UsageTrackingCreate(
-                    user_id=user_id, month_date=month_date, free_optimizations_used=0, paid_optimizations_used=0
+                    user_id=user_id,
+                    month_date=month_date,
+                    free_optimizations_used=0,
+                    paid_optimizations_used=0,
                 )
 
                 result = (
@@ -170,7 +179,9 @@ class UsageTrackingService:
                     raise UsageTrackingError("Failed to create usage tracking record")
 
                 record = result.data[0]
-                logger.info(f"Created new usage tracking record for user {user_id}, month {month_date}")
+                logger.info(
+                    f"Created new usage tracking record for user {user_id}, month {month_date}"
+                )
 
                 return UsageTrackingResponse(
                     id=UUID(record["id"]),
@@ -233,7 +244,9 @@ class UsageTrackingService:
                 raise UsageTrackingError("Failed to update usage tracking record")
 
             updated_record = result.data[0]
-            logger.info(f"Incremented {optimization_type} usage for user {user_id}, month {month_date}")
+            logger.info(
+                f"Incremented {optimization_type} usage for user {user_id}, month {month_date}"
+            )
 
             return UsageTrackingResponse(
                 id=UUID(updated_record["id"]),
@@ -249,7 +262,9 @@ class UsageTrackingService:
             logger.error(f"Failed to increment usage for user {user_id}: {str(e)}")
             raise UsageTrackingError(f"Failed to increment usage: {str(e)}")
 
-    async def get_user_usage_history(self, user_id: UUID, months: int = 12) -> list[UsageTrackingResponse]:
+    async def get_user_usage_history(
+        self, user_id: UUID, months: int = 12
+    ) -> list[UsageTrackingResponse]:
         """
         Get usage history for a user for the past N months.
 

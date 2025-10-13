@@ -1,7 +1,7 @@
 # 🧩 CV-Match Component Inventory & Mapping
 
-**Version:** 1.0  
-**Last Updated:** October 12, 2025  
+**Version:** 1.0
+**Last Updated:** October 12, 2025
 **Purpose:** Map UI needs from UX strategy to available components
 
 ---
@@ -21,6 +21,7 @@
 Based on our [UX Strategy](/docs/development/UI-UX/ux-strategy.md), here are ALL components needed:
 
 ### Landing Page
+
 - [ ] Hero section with animation
 - [ ] Feature cards (3-column grid)
 - [ ] Pricing comparison table
@@ -31,13 +32,15 @@ Based on our [UX Strategy](/docs/development/UI-UX/ux-strategy.md), here are ALL
 - [ ] Footer
 
 ### Authentication
+
 - [ ] Login form
-- [ ] Signup form  
+- [ ] Signup form
 - [ ] OAuth buttons (Google, LinkedIn)
 - [ ] Password reset form
 - [ ] Email verification screen
 
 ### Dashboard
+
 - [ ] Stats cards (4 metrics)
 - [ ] Credit counter display
 - [ ] Recent optimizations list
@@ -47,6 +50,7 @@ Based on our [UX Strategy](/docs/development/UI-UX/ux-strategy.md), here are ALL
 - [ ] Empty states
 
 ### Optimize Flow
+
 - [ ] File upload dropzone
 - [ ] Form inputs (job title, company, description)
 - [ ] Character counter
@@ -57,6 +61,7 @@ Based on our [UX Strategy](/docs/development/UI-UX/ux-strategy.md), here are ALL
 - [ ] Match score gauge
 
 ### Upgrade Modal
+
 - [ ] Dialog/modal component
 - [ ] Pricing cards comparison
 - [ ] Feature checkmarks
@@ -66,6 +71,7 @@ Based on our [UX Strategy](/docs/development/UI-UX/ux-strategy.md), here are ALL
 - [ ] Trust badges
 
 ### Settings
+
 - [ ] Profile form
 - [ ] Billing information
 - [ ] Plan upgrade/downgrade
@@ -74,6 +80,7 @@ Based on our [UX Strategy](/docs/development/UI-UX/ux-strategy.md), here are ALL
 - [ ] Delete account (dangerous action)
 
 ### Common UI Elements
+
 - [ ] Buttons (variants)
 - [ ] Input fields
 - [ ] Textarea
@@ -95,6 +102,7 @@ Based on our [UX Strategy](/docs/development/UI-UX/ux-strategy.md), here are ALL
 Components already available via shadcn (installed or easy to add):
 
 ### ✅ Already Installed
+
 Based on your `components/ui/` directory:
 
 ```bash
@@ -111,39 +119,39 @@ components/ui/
 
 ### 📥 Need to Install
 
-| Component | Usage | Install Command |
-|-----------|-------|-----------------|
-| **Form** | All forms | `bunx  shadcn@latest add form` |
-| **Select** | Dropdowns | `bunx  shadcn@latest add select` |
-| **Radio Group** | Payment options | `bunx  shadcn@latest add radio-group` |
-| **Checkbox** | Feature lists | `bunx  shadcn@latest add checkbox` |
-| **Progress** | Credit usage | `bunx  shadcn@latest add progress` |
-| **Skeleton** | Loading states | `bunx  shadcn@latest add skeleton` |
-| **Toast** | Notifications | `bunx  shadcn@latest add toast` |
-| **Tooltip** | Help text | `bunx  shadcn@latest add tooltip` |
-| **Tabs** | Dashboard sections | `bunx  shadcn@latest add tabs` |
-| **Separator** | Visual dividers | `bunx  shadcn@latest add separator` |
-| **Avatar** | User profiles | `bunx  shadcn@latest add avatar` |
-| **Dropdown Menu** | User menu | `bunx  shadcn@latest add dropdown-menu` |
-| **Sheet** | Mobile navigation | `bunx  shadcn@latest add sheet` |
-| **Table** | Optimization history | `bunx  shadcn@latest add table` |
-| **Breadcrumb** | Navigation | `bunx  shadcn@latest add breadcrumb` |
-| **Command** | Search/command palette | `bunx  shadcn@latest add command` |
+| Component         | Usage                  | Install Command                         |
+| ----------------- | ---------------------- | --------------------------------------- |
+| **Form**          | All forms              | `bunx  shadcn@latest add form`          |
+| **Select**        | Dropdowns              | `bunx  shadcn@latest add select`        |
+| **Radio Group**   | Payment options        | `bunx  shadcn@latest add radio-group`   |
+| **Checkbox**      | Feature lists          | `bunx  shadcn@latest add checkbox`      |
+| **Progress**      | Credit usage           | `bunx  shadcn@latest add progress`      |
+| **Skeleton**      | Loading states         | `bunx  shadcn@latest add skeleton`      |
+| **Toast**         | Notifications          | `bunx  shadcn@latest add toast`         |
+| **Tooltip**       | Help text              | `bunx  shadcn@latest add tooltip`       |
+| **Tabs**          | Dashboard sections     | `bunx  shadcn@latest add tabs`          |
+| **Separator**     | Visual dividers        | `bunx  shadcn@latest add separator`     |
+| **Avatar**        | User profiles          | `bunx  shadcn@latest add avatar`        |
+| **Dropdown Menu** | User menu              | `bunx  shadcn@latest add dropdown-menu` |
+| **Sheet**         | Mobile navigation      | `bunx  shadcn@latest add sheet`         |
+| **Table**         | Optimization history   | `bunx  shadcn@latest add table`         |
+| **Breadcrumb**    | Navigation             | `bunx  shadcn@latest add breadcrumb`    |
+| **Command**       | Search/command palette | `bunx  shadcn@latest add command`       |
 
 ### Component Mapping Table
 
-| UI Need | shadcn Component | Status | Notes |
-|---------|------------------|--------|-------|
-| **Login Form** | Form + Input + Button | ✅ Ready | Standard form layout |
-| **Signup Form** | Form + Input + Button | ✅ Ready | Add OAuth buttons |
-| **Stats Cards** | Card | ✅ Ready | 2x2 grid layout |
-| **Credit Display** | Card + Progress | 📥 Need Progress | Large number + bar |
-| **Upload Zone** | Input (file) | ✅ Ready | Add drag-drop logic |
-| **Processing** | Skeleton + Spinner | 📥 Need Skeleton | Animated states |
-| **Results Table** | Table + Badge | 📥 Need Table | Past optimizations |
-| **Upgrade Modal** | Dialog + Card | ✅ Ready | Pricing comparison |
-| **Alerts** | Alert + Toast | 📥 Need Toast | Success/error messages |
-| **Settings Form** | Form + Tabs | 📥 Need Tabs | Organized settings |
+| UI Need            | shadcn Component      | Status           | Notes                  |
+| ------------------ | --------------------- | ---------------- | ---------------------- |
+| **Login Form**     | Form + Input + Button | ✅ Ready         | Standard form layout   |
+| **Signup Form**    | Form + Input + Button | ✅ Ready         | Add OAuth buttons      |
+| **Stats Cards**    | Card                  | ✅ Ready         | 2x2 grid layout        |
+| **Credit Display** | Card + Progress       | 📥 Need Progress | Large number + bar     |
+| **Upload Zone**    | Input (file)          | ✅ Ready         | Add drag-drop logic    |
+| **Processing**     | Skeleton + Spinner    | 📥 Need Skeleton | Animated states        |
+| **Results Table**  | Table + Badge         | 📥 Need Table    | Past optimizations     |
+| **Upgrade Modal**  | Dialog + Card         | ✅ Ready         | Pricing comparison     |
+| **Alerts**         | Alert + Toast         | 📥 Need Toast    | Success/error messages |
+| **Settings Form**  | Form + Tabs           | 📥 Need Tabs     | Organized settings     |
 
 ---
 
@@ -153,24 +161,24 @@ Premium animated components for visual appeal:
 
 ### 🌟 Recommended for CV-Match
 
-| Page | Component | Usage | Priority |
-|------|-----------|-------|----------|
-| **Landing Hero** | `@aceternity/hero-parallax` | Stunning hero with depth | 🔴 High |
-| **Landing Hero** | `@aceternity/spotlight` | Dramatic lighting effect | 🟡 Medium |
-| **Landing Features** | `@aceternity/bento-grid` | Feature showcase | 🔴 High |
-| **Landing Features** | `@aceternity/card-hover-effect` | Interactive cards | 🟡 Medium |
-| **Landing** | `@aceternity/wavy-background` | Animated background | 🟢 Low |
-| **Dashboard Cards** | `@aceternity/3d-card` | Elevated card effect | 🟡 Medium |
-| **Dashboard Stats** | `@aceternity/moving-border` | Animated borders | 🟢 Low |
-| **Dashboard** | `@aceternity/animated-tooltip` | Helpful tooltips | 🔴 High |
-| **Optimize Flow** | `@aceternity/tracing-beam` | Progress indicator | 🟡 Medium |
-| **Optimize Upload** | `@aceternity/file-upload` | Beautiful file upload | 🔴 High |
-| **Results** | `@aceternity/sparkles` | Celebration effect | 🟡 Medium |
-| **Results** | `@aceternity/text-generate-effect` | Animated text reveal | 🟢 Low |
-| **Upgrade Modal** | `@aceternity/moving-border` | Premium feel | 🟡 Medium |
-| **Pricing Page** | `@aceternity/bento-grid` | Pricing grid | 🔴 High |
-| **Navigation** | `@aceternity/floating-navbar` | Modern navbar | 🟡 Medium |
-| **All Pages** | `@aceternity/background-gradient` | Subtle backgrounds | 🟢 Low |
+| Page                 | Component                          | Usage                    | Priority  |
+| -------------------- | ---------------------------------- | ------------------------ | --------- |
+| **Landing Hero**     | `@aceternity/hero-parallax`        | Stunning hero with depth | 🔴 High   |
+| **Landing Hero**     | `@aceternity/spotlight`            | Dramatic lighting effect | 🟡 Medium |
+| **Landing Features** | `@aceternity/bento-grid`           | Feature showcase         | 🔴 High   |
+| **Landing Features** | `@aceternity/card-hover-effect`    | Interactive cards        | 🟡 Medium |
+| **Landing**          | `@aceternity/wavy-background`      | Animated background      | 🟢 Low    |
+| **Dashboard Cards**  | `@aceternity/3d-card`              | Elevated card effect     | 🟡 Medium |
+| **Dashboard Stats**  | `@aceternity/moving-border`        | Animated borders         | 🟢 Low    |
+| **Dashboard**        | `@aceternity/animated-tooltip`     | Helpful tooltips         | 🔴 High   |
+| **Optimize Flow**    | `@aceternity/tracing-beam`         | Progress indicator       | 🟡 Medium |
+| **Optimize Upload**  | `@aceternity/file-upload`          | Beautiful file upload    | 🔴 High   |
+| **Results**          | `@aceternity/sparkles`             | Celebration effect       | 🟡 Medium |
+| **Results**          | `@aceternity/text-generate-effect` | Animated text reveal     | 🟢 Low    |
+| **Upgrade Modal**    | `@aceternity/moving-border`        | Premium feel             | 🟡 Medium |
+| **Pricing Page**     | `@aceternity/bento-grid`           | Pricing grid             | 🔴 High   |
+| **Navigation**       | `@aceternity/floating-navbar`      | Modern navbar            | 🟡 Medium |
+| **All Pages**        | `@aceternity/background-gradient`  | Subtle backgrounds       | 🟢 Low    |
 
 ### Detailed Recommendations
 
@@ -185,15 +193,16 @@ bunx  shadcn@latest add @aceternity/spotlight
 ```
 
 **Usage:**
+
 ```tsx
-import { HeroParallax } from "@/components/ui/hero-parallax"
+import { HeroParallax } from "@/components/ui/hero-parallax";
 
 export function Hero() {
   const products = [
     { thumbnail: "/resume1.jpg" },
     { thumbnail: "/resume2.jpg" },
     // ... more examples
-  ]
+  ];
 
   return (
     <HeroParallax products={products}>
@@ -201,7 +210,7 @@ export function Hero() {
       <p>3 otimizações grátis • Sem cartão de crédito</p>
       <Button>Começar Agora</Button>
     </HeroParallax>
-  )
+  );
 }
 ```
 
@@ -212,6 +221,7 @@ bunx  shadcn@latest add @aceternity/bento-grid
 ```
 
 **Usage:**
+
 ```tsx
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid"
 
@@ -239,9 +249,10 @@ bunx  shadcn@latest add @aceternity/animated-tooltip
 ```
 
 **Usage:**
+
 ```tsx
-import { CardContainer, CardBody } from "@/components/ui/3d-card"
-import { AnimatedTooltip } from "@/components/ui/animated-tooltip"
+import { CardContainer, CardBody } from "@/components/ui/3d-card";
+import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
 
 <CardContainer>
   <CardBody>
@@ -249,7 +260,7 @@ import { AnimatedTooltip } from "@/components/ui/animated-tooltip"
       <div className="text-4xl font-bold">{credits}</div>
     </AnimatedTooltip>
   </CardBody>
-</CardContainer>
+</CardContainer>;
 ```
 
 #### **File Upload**
@@ -259,14 +270,15 @@ bunx  shadcn@latest add @aceternity/file-upload
 ```
 
 **Usage:**
+
 ```tsx
-import { FileUpload } from "@/components/ui/file-upload"
+import { FileUpload } from "@/components/ui/file-upload";
 
 <FileUpload
   onChange={handleFileChange}
   accept=".pdf,.docx"
   maxSize={2 * 1024 * 1024}
-/>
+/>;
 ```
 
 #### **Progress Indicator**
@@ -276,15 +288,16 @@ bunx  shadcn@latest add @aceternity/tracing-beam
 ```
 
 **Usage:**
+
 ```tsx
-import { TracingBeam } from "@/components/ui/tracing-beam"
+import { TracingBeam } from "@/components/ui/tracing-beam";
 
 <TracingBeam>
   <Step1 />
   <Step2 />
   <Step3 />
   <Step4 />
-</TracingBeam>
+</TracingBeam>;
 ```
 
 ---
@@ -294,9 +307,11 @@ import { TracingBeam } from "@/components/ui/tracing-beam"
 Components we'll need to build (can't use library as-is):
 
 ### 1. **Credit Counter Widget**
-**Complexity:** Low  
-**Based on:** shadcn Card + Progress  
+
+**Complexity:** Low
+**Based on:** shadcn Card + Progress
 **Features:**
+
 - Large number display
 - Free vs Paid credits breakdown
 - Progress bar
@@ -304,37 +319,35 @@ Components we'll need to build (can't use library as-is):
 
 ```tsx
 // components/dashboard/CreditCounter.tsx
-export function CreditCounter({ 
-  freeUsed, 
-  freeLimit, 
-  purchased 
-}) {
-  const total = (freeLimit - freeUsed) + purchased
-  
+export function CreditCounter({ freeUsed, freeLimit, purchased }) {
+  const total = freeLimit - freeUsed + purchased;
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Créditos Disponíveis</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-5xl font-bold text-primary mb-4">
-          {total}
-        </div>
+        <div className="text-5xl font-bold text-primary mb-4">{total}</div>
         <Progress value={(freeUsed / freeLimit) * 100} />
         <div className="mt-4 space-y-2">
-          <div>Grátis: {freeLimit - freeUsed}/{freeLimit}</div>
+          <div>
+            Grátis: {freeLimit - freeUsed}/{freeLimit}
+          </div>
           <div>Comprados: {purchased}</div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 ```
 
 ### 2. **Upgrade Modal**
-**Complexity:** Medium  
-**Based on:** shadcn Dialog + Card + Aceternity Moving Border  
+
+**Complexity:** Medium
+**Based on:** shadcn Dialog + Card + Aceternity Moving Border
 **Features:**
+
 - Pricing comparison
 - Social proof
 - Feature checkmarks
@@ -342,20 +355,16 @@ export function CreditCounter({
 
 ```tsx
 // components/upgrade/UpgradeModal.tsx
-import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { MovingBorder } from "@/components/ui/moving-border"
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { MovingBorder } from "@/components/ui/moving-border";
 
-export function UpgradeModal({ 
-  isOpen, 
-  onClose, 
-  trigger 
-}) {
+export function UpgradeModal({ isOpen, onClose, trigger }) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl">
         {/* Pricing cards with MovingBorder for selected tier */}
         <div className="grid md:grid-cols-3 gap-6">
-          {tiers.map(tier => (
+          {tiers.map((tier) => (
             <MovingBorder key={tier.id}>
               <PricingCard {...tier} />
             </MovingBorder>
@@ -363,14 +372,16 @@ export function UpgradeModal({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 ```
 
 ### 3. **Match Score Gauge**
-**Complexity:** Medium  
-**Based on:** Custom SVG + shadcn Card  
+
+**Complexity:** Medium
+**Based on:** Custom SVG + shadcn Card
 **Features:**
+
 - Circular progress indicator
 - Animated score reveal
 - Color-coded (red/yellow/green)
@@ -378,9 +389,13 @@ export function UpgradeModal({
 ```tsx
 // components/results/MatchScoreGauge.tsx
 export function MatchScoreGauge({ score }: { score: number }) {
-  const color = score >= 80 ? 'text-green-600' : 
-                score >= 60 ? 'text-yellow-600' : 'text-red-600'
-  
+  const color =
+    score >= 80
+      ? "text-green-600"
+      : score >= 60
+        ? "text-yellow-600"
+        : "text-red-600";
+
   return (
     <div className="relative w-48 h-48">
       <svg className="w-full h-full" viewBox="0 0 100 100">
@@ -402,21 +417,23 @@ export function MatchScoreGauge({ score }: { score: number }) {
           strokeWidth="8"
           strokeDasharray={`${score * 2.51} 251`}
           className={color}
-          style={{ transition: 'stroke-dasharray 1s ease' }}
+          style={{ transition: "stroke-dasharray 1s ease" }}
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
         <span className={`text-4xl font-bold ${color}`}>{score}%</span>
       </div>
     </div>
-  )
+  );
 }
 ```
 
 ### 4. **Optimization History Table**
-**Complexity:** Low  
-**Based on:** shadcn Table + Badge  
+
+**Complexity:** Low
+**Based on:** shadcn Table + Badge
 **Features:**
+
 - Sortable columns
 - Status badges
 - Action buttons
@@ -424,8 +441,8 @@ export function MatchScoreGauge({ score }: { score: number }) {
 
 ```tsx
 // components/history/OptimizationTable.tsx
-import { Table } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+import { Table } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 export function OptimizationTable({ optimizations }) {
   return (
@@ -441,12 +458,12 @@ export function OptimizationTable({ optimizations }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {optimizations.map(opt => (
+        {optimizations.map((opt) => (
           <TableRow key={opt.id}>
             <TableCell>{opt.resumeName}</TableCell>
             <TableCell>{opt.jobTitle}</TableCell>
             <TableCell>
-              <Badge variant={opt.score >= 80 ? 'default' : 'secondary'}>
+              <Badge variant={opt.score >= 80 ? "default" : "secondary"}>
                 {opt.score}%
               </Badge>
             </TableCell>
@@ -461,14 +478,16 @@ export function OptimizationTable({ optimizations }) {
         ))}
       </TableBody>
     </Table>
-  )
+  );
 }
 ```
 
 ### 5. **Onboarding Stepper**
-**Complexity:** Medium  
-**Based on:** Custom + Aceternity Tracing Beam  
+
+**Complexity:** Medium
+**Based on:** Custom + Aceternity Tracing Beam
 **Features:**
+
 - Multi-step wizard
 - Progress indicator
 - Skip functionality
@@ -476,18 +495,18 @@ export function OptimizationTable({ optimizations }) {
 
 ```tsx
 // components/onboarding/OnboardingStepper.tsx
-import { TracingBeam } from "@/components/ui/tracing-beam"
+import { TracingBeam } from "@/components/ui/tracing-beam";
 
 export function OnboardingStepper({ currentStep, steps }) {
   return (
     <TracingBeam>
       {steps.map((Step, index) => (
-        <div key={index} className={index === currentStep ? 'block' : 'hidden'}>
+        <div key={index} className={index === currentStep ? "block" : "hidden"}>
           <Step />
         </div>
       ))}
     </TracingBeam>
-  )
+  );
 }
 ```
 
@@ -571,6 +590,7 @@ bunx  shadcn@latest add @aceternity/meteors
 ## ✅ Implementation Checklist
 
 ### Week 1: Core Components
+
 - [ ] Install all Phase 1 shadcn components
 - [ ] Test each component in isolation
 - [ ] Create component playground/documentation page
@@ -578,6 +598,7 @@ bunx  shadcn@latest add @aceternity/meteors
 - [ ] Build basic UpgradeModal
 
 ### Week 2: Landing Page
+
 - [ ] Install Phase 2 Aceternity components
 - [ ] Build Hero section with parallax
 - [ ] Build Feature section with bento grid
@@ -585,6 +606,7 @@ bunx  shadcn@latest add @aceternity/meteors
 - [ ] Test on mobile
 
 ### Week 3: Dashboard & Flow
+
 - [ ] Install Phase 3 Aceternity components
 - [ ] Build Dashboard with 3D cards
 - [ ] Build Optimize flow with tracing beam
@@ -592,6 +614,7 @@ bunx  shadcn@latest add @aceternity/meteors
 - [ ] Build Results display
 
 ### Week 4: Polish
+
 - [ ] Add Phase 4 nice-to-have components
 - [ ] Build MatchScoreGauge
 - [ ] Build OptimizationTable
@@ -605,9 +628,9 @@ bunx  shadcn@latest add @aceternity/meteors
 ### Landing Page Hero
 
 ```tsx
-import { HeroParallax } from "@/components/ui/hero-parallax"
-import { Spotlight } from "@/components/ui/spotlight"
-import { Button } from "@/components/ui/button"
+import { HeroParallax } from "@/components/ui/hero-parallax";
+import { Spotlight } from "@/components/ui/spotlight";
+import { Button } from "@/components/ui/button";
 
 export function LandingHero() {
   return (
@@ -632,21 +655,21 @@ export function LandingHero() {
         </div>
       </HeroParallax>
     </div>
-  )
+  );
 }
 ```
 
 ### Dashboard Stats
 
 ```tsx
-import { Card } from "@/components/ui/card"
-import { CardContainer, CardBody } from "@/components/ui/3d-card"
-import { AnimatedTooltip } from "@/components/ui/animated-tooltip"
+import { Card } from "@/components/ui/card";
+import { CardContainer, CardBody } from "@/components/ui/3d-card";
+import { AnimatedTooltip } from "@/components/ui/animated-tooltip";
 
 export function StatsGrid({ stats }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {stats.map(stat => (
+      {stats.map((stat) => (
         <CardContainer key={stat.label}>
           <CardBody>
             <Card className="text-center p-6">
@@ -663,7 +686,7 @@ export function StatsGrid({ stats }) {
         </CardContainer>
       ))}
     </div>
-  )
+  );
 }
 ```
 
@@ -678,5 +701,5 @@ export function StatsGrid({ stats }) {
 
 ---
 
-**Last Updated:** October 12, 2025  
+**Last Updated:** October 12, 2025
 **Next Review:** After Phase 1 implementation

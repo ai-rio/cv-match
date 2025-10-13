@@ -37,7 +37,7 @@ describe('ResumeUploader', () => {
 
   it('should validate file size', async () => {
     render(<ResumeUploader onUpload={mockOnUpload} maxSize={1024} />);
-    
+
     const file = new File(['x'.repeat(2048)], 'large.pdf', {
       type: 'application/pdf'
     });
@@ -53,7 +53,7 @@ describe('ResumeUploader', () => {
 
   it('should accept valid PDF file', async () => {
     render(<ResumeUploader onUpload={mockOnUpload} />);
-    
+
     const file = new File(['content'], 'resume.pdf', {
       type: 'application/pdf'
     });

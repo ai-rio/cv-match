@@ -70,6 +70,7 @@ supabase db list
    - Confirm you're in test mode (URL shows `/test`)
 
 2. **Set Up Brazilian Business Profile**
+
    ```bash
    # In Stripe Dashboard > Settings > Business details
    Business name: "CV-Match Brasil"
@@ -85,6 +86,7 @@ supabase db list
 ### Step 2: Webhook Configuration
 
 1. **Set Up Webhook Endpoint**
+
    ```bash
    # Start local development server
    cd backend
@@ -99,6 +101,7 @@ supabase db list
    ```
 
 2. **Configure Webhook Events**
+
    ```bash
    # Select these events for Brazilian market testing:
    - checkout.session.completed
@@ -122,6 +125,7 @@ supabase db list
 ### Step 3: Test Payment Products Setup
 
 1. **Create Test Products**
+
    ```python
    # Use the Stripe CLI or Dashboard to create test products
    # Product 1: "CV-Match Plano Profissional"
@@ -248,21 +252,21 @@ python run_webhook_tests.py coverage
 
 ### Successful Payment Cards
 
-| Card Number | Brand | Description |
-|-------------|-------|-------------|
-| 4242424242424242 | Visa | Successful payment |
+| Card Number      | Brand      | Description        |
+| ---------------- | ---------- | ------------------ |
+| 4242424242424242 | Visa       | Successful payment |
 | 5555555555554444 | Mastercard | Successful payment |
-| 4000002500003155 | Visa | Requires 3D Secure |
+| 4000002500003155 | Visa       | Requires 3D Secure |
 | 4000000000000077 | Mastercard | Requires 3D Secure |
 
 ### Declined Payment Cards
 
-| Card Number | Brand | Decline Reason |
-|-------------|-------|----------------|
-| 4000000000000002 | Visa | Generic decline |
-| 4000000000009995 | Visa | Insufficient funds |
-| 4000000000009987 | Visa | Lost card |
-| 4000000000009979 | Visa | Stolen card |
+| Card Number      | Brand | Decline Reason     |
+| ---------------- | ----- | ------------------ |
+| 4000000000000002 | Visa  | Generic decline    |
+| 4000000000009995 | Visa  | Insufficient funds |
+| 4000000000009987 | Visa  | Lost card          |
+| 4000000000009979 | Visa  | Stolen card        |
 
 ### Special Test Scenarios
 
@@ -322,6 +326,7 @@ curl -X POST "http://localhost:8000/api/payments/create-payment-intent" \
 ### Common Issues and Solutions
 
 #### 1. "Invalid webhook signature" Error
+
 ```bash
 # Solution: Verify webhook secret matches Stripe dashboard
 # Check .env file:
@@ -332,6 +337,7 @@ stripe listen --forward-to localhost:8000/api/webhooks/stripe
 ```
 
 #### 2. "No such customer" Error
+
 ```bash
 # Solution: Create customer first
 curl -X POST "http://localhost:8000/api/payments/create-customer" \
@@ -344,6 +350,7 @@ curl -X POST "http://localhost:8000/api/payments/create-customer" \
 ```
 
 #### 3. Currency not supported error
+
 ```bash
 # Solution: Ensure BRL is configured in Stripe
 # In Stripe Dashboard > Settings > Payments
@@ -351,6 +358,7 @@ curl -X POST "http://localhost:8000/api/payments/create-customer" \
 ```
 
 #### 4. Webhook not receiving events
+
 ```bash
 # Solution: Check ngrok and webhook configuration
 # Verify ngrok is running
@@ -382,6 +390,7 @@ Document your manual test results:
 ## Test Results - [Date]
 
 ### Payment Flow Tests
+
 - [x] Checkout session creation: ✅ PASS
 - [x] Payment with Visa card: ✅ PASS
 - [x] Payment with Mastercard: ✅ PASS
@@ -389,6 +398,7 @@ Document your manual test results:
 - [x] Declined card handling: ✅ PASS
 
 ### Webhook Tests
+
 - [x] checkout.session.completed: ✅ PASS
 - [x] invoice.payment_succeeded: ✅ PASS
 - [x] invoice.payment_failed: ✅ PASS
@@ -397,6 +407,7 @@ Document your manual test results:
 - [x] customer.subscription.deleted: ✅ PASS
 
 ### Brazilian Market Tests
+
 - [x] BRL currency display: ✅ PASS
 - [x] Portuguese localization: ✅ PASS
 - [x] Brazilian pricing: ✅ PASS
@@ -417,6 +428,7 @@ Document your manual test results:
 ### Production Migration Steps
 
 1. **Switch to Live Mode**
+
    ```bash
    # Get live keys from Stripe Dashboard
    STRIPE_SECRET_KEY=sk_live_...
@@ -425,6 +437,7 @@ Document your manual test results:
    ```
 
 2. **Update Webhook Endpoints**
+
    ```bash
    # Update webhook URLs to production
    # Configure live webhook endpoints
@@ -441,16 +454,19 @@ Document your manual test results:
 ## 📚 Additional Resources
 
 ### Documentation
+
 - [Stripe Brazil Documentation](https://stripe.com/docs/br)
 - [Stripe Test Mode Cards](https://stripe.com/docs/testing#cards)
 - [Stripe Webhooks Guide](https://stripe.com/docs/webhooks)
 
 ### Tools
+
 - [Stripe CLI](https://stripe.com/docs/stripe-cli)
 - [ngrok](https://ngrok.com/)
 - [Postman](https://www.postman.com/) for API testing
 
 ### Support
+
 - Stripe Developer Support
 - CV-Match Development Team
 - Brazilian Market Specialist

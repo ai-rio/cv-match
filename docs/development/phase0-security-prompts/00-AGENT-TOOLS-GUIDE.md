@@ -64,6 +64,7 @@ which bun  # Frontend package manager
 ### 1. Static Application Security Testing (SAST)
 
 #### Backend Security Scanner
+
 ```bash
 # Python security scanning
 pip install bandit[toml]
@@ -77,6 +78,7 @@ bandit -r backend/app/ --severity-level high
 ```
 
 #### Frontend Security Scanner
+
 ```bash
 # Node.js security scanning
 bun install -g audit-ci
@@ -92,6 +94,7 @@ bun audit --audit-level high
 ### 2. Dynamic Application Security Testing (DAST)
 
 #### API Security Testing
+
 ```bash
 # Install OWASP ZAP or use cloud service
 # Basic API testing with curl:
@@ -107,6 +110,7 @@ curl -X GET http://localhost:8000/api/resumes/ \
 ```
 
 #### Web Application Security Testing
+
 ```bash
 # Use OWASP ZAP Baseline Scan
 docker run -t owasp/zap2docker-stable zap-baseline.py \
@@ -119,6 +123,7 @@ docker run -t owasp/zap2docker-stable zap-baseline.py \
 ### 3. Infrastructure Security Testing
 
 #### Container Security
+
 ```bash
 # Docker security scanning
 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
@@ -129,6 +134,7 @@ kubectl auth can-i --list --as=system:serviceaccount:default:default
 ```
 
 #### Database Security Testing
+
 ```bash
 # PostgreSQL security check
 psql $DATABASE_URL -c "\l+"  # List databases
@@ -143,6 +149,7 @@ psql $DATABASE_URL -c "SELECT table_name, row_security FROM pg_tables WHERE sche
 ### 1. Supabase/PostgreSQL Tools
 
 #### Database Migration Tools
+
 ```bash
 # Supabase CLI setup
 supabase login
@@ -153,6 +160,7 @@ supabase db reset  # Reset database (development only)
 ```
 
 #### Database Security Analysis
+
 ```bash
 # Check RLS policies
 psql $DATABASE_URL -c "
@@ -180,6 +188,7 @@ WHERE tc.constraint_type = 'FOREIGN KEY';
 ### 2. Database Schema Validation
 
 #### Schema Security Check
+
 ```bash
 # Create security check script
 cat > db_security_check.sql << 'EOF'
@@ -217,6 +226,7 @@ psql $DATABASE_URL -f db_security_check.sql
 ### 3. Data Migration Security
 
 #### Secure Migration Practices
+
 ```bash
 # Create backup before migration
 supabase db dump --data-only -f backup_$(date +%Y%m%d_%H%M%S).sql
@@ -242,6 +252,7 @@ SELECT COUNT(*) FROM user_profiles WHERE user_id IS NULL;
 ### 1. Security Code Review
 
 #### Backend Code Analysis
+
 ```bash
 # Python security analysis with bandit
 bandit -r backend/app/ \
@@ -262,6 +273,7 @@ grep -r -i "password\|secret\|key\|token" backend/app/ \
 ```
 
 #### Frontend Code Analysis
+
 ```bash
 # JavaScript/TypeScript security analysis
 bun install -g eslint-plugin-security
@@ -298,6 +310,7 @@ npx eslint . --ext .ts,.tsx --format json -o eslint-security-report.json
 ### 2. Dependency Security Scanning
 
 #### Python Dependencies
+
 ```bash
 # Safety scanner for Python vulnerabilities
 pip install safety
@@ -312,6 +325,7 @@ pip-review --local --interactive
 ```
 
 #### Node.js Dependencies
+
 ```bash
 # Audit Node.js dependencies
 cd frontend
@@ -328,6 +342,7 @@ bun audit fix
 ### 3. Code Quality Analysis
 
 #### Backend Code Quality
+
 ```bash
 # Python code quality
 pip install flake8 pydocstyle black isort
@@ -340,6 +355,7 @@ isort --check-only --diff backend/app/ > isort-report.txt
 ```
 
 #### Frontend Code Quality
+
 ```bash
 # TypeScript/JavaScript code quality
 cd frontend
@@ -358,6 +374,7 @@ npx tsc --noEmit --pretty false > typescript-report.txt
 ### 1. PII Detection and Analysis
 
 #### PII Detection Script
+
 ```bash
 # Create PII detection tool
 cat > pii_detector.py << 'EOF'
@@ -410,6 +427,7 @@ python pii_detector.py frontend/components/ResumeUpload.tsx
 ```
 
 #### Data Masking Tool
+
 ```bash
 # Create data masking utility
 cat > data_masker.py << 'EOF'
@@ -479,6 +497,7 @@ EOF
 ### 2. Consent Management Tools
 
 #### Consent Tracking Script
+
 ```bash
 # Create consent management utility
 cat > consent_manager.py << 'EOF'
@@ -578,6 +597,7 @@ EOF
 ### 3. Data Retention Management
 
 #### Retention Policy Tool
+
 ```bash
 # Create data retention management tool
 cat > retention_manager.py << 'EOF'
@@ -654,6 +674,7 @@ EOF
 ### 1. Security Documentation Generator
 
 #### Security Documentation Script
+
 ```bash
 # Create security documentation generator
 cat > security_docs_generator.py << 'EOF'
@@ -752,6 +773,7 @@ EOF
 ### 2. API Documentation Security
 
 #### OpenAPI Security Documentation
+
 ```bash
 # Create security-focused OpenAPI documentation generator
 cat > generate_security_docs.py << 'EOF'
@@ -865,6 +887,7 @@ EOF
 ### 1. Development Environment Security
 
 #### Secure Environment Configuration
+
 ```bash
 # Create secure environment setup script
 cat > setup_secure_env.sh << 'EOF'
@@ -969,6 +992,7 @@ chmod +x setup_secure_env.sh
 ### 2. Database Security Setup
 
 #### Secure Database Configuration
+
 ```bash
 # Create secure database setup script
 cat > setup_secure_db.sh << 'EOF'
@@ -1052,6 +1076,7 @@ chmod +x setup_secure_db.sh
 ### 1. Security Testing Configuration
 
 #### Bandit Configuration (Python)
+
 ```bash
 # Create .bandit configuration file
 cat > backend/.bandit << 'EOF'
@@ -1065,6 +1090,7 @@ EOF
 ```
 
 #### ESLint Security Configuration (TypeScript)
+
 ```bash
 # Create security-focused ESLint configuration
 cat > frontend/.eslintrc.security.js << 'EOF'
@@ -1107,6 +1133,7 @@ EOF
 ### 2. CI/CD Security Configuration
 
 #### GitHub Actions Security Workflow
+
 ```bash
 # Create security testing workflow
 mkdir -p .github/workflows
@@ -1189,6 +1216,7 @@ EOF
 ### 1. Pre-Implementation Verification
 
 #### Tool Setup Verification
+
 ```bash
 # Create tool verification script
 cat > verify_tools.sh << 'EOF'
@@ -1257,6 +1285,7 @@ chmod +x verify_tools.sh
 ### 2. Implementation Verification
 
 #### Security Implementation Checklist
+
 ```bash
 # Create security implementation verification script
 cat > verify_security_implementation.sh << 'EOF'
@@ -1344,6 +1373,7 @@ mkdir -p security-reports
 ### Common Tool Issues
 
 #### Bandit Issues
+
 ```bash
 # Problem: Bandit not finding files
 # Solution: Check file paths and configuration
@@ -1355,6 +1385,7 @@ bandit -r backend/app/ --skip B101,B601
 ```
 
 #### ESLint Security Issues
+
 ```bash
 # Problem: Security plugin not found
 # Solution: Install plugin locally
@@ -1367,6 +1398,7 @@ npx eslint . --parser-options '{"project": "./tsconfig.json"}'
 ```
 
 #### Database Issues
+
 ```bash
 # Problem: Supabase connection issues
 # Solution: Check local Supabase status
@@ -1381,6 +1413,7 @@ supabase db shell --command "ALTER TABLE resumes ENABLE ROW LEVEL SECURITY;"
 ### Performance Issues
 
 #### Slow Security Scans
+
 ```bash
 # Optimize bandit scan
 bandit -r backend/app/ --jobs 4  # Use multiple cores
@@ -1397,6 +1430,7 @@ bandit -r backend/app/ --baseline baseline.json
 ## 📚 Additional Resources
 
 ### Security Tool Documentation
+
 - [Bandit Python Security Scanner](https://bandit.readthedocs.io/)
 - [Safety Dependency Scanner](https://pyup.io/safety/)
 - [ESLint Security Plugin](https://github.com/nodesecurity/eslint-plugin-security)
@@ -1404,11 +1438,13 @@ bandit -r backend/app/ --baseline baseline.json
 - [Supabase Security](https://supabase.com/docs/guides/security)
 
 ### LGPD Compliance Resources
+
 - [LGPD Official Text (Portuguese)](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm)
 - [LGPD Compliance Guide](https://www.auth0.com/blog/lgpd-compliance-guide/)
 - [Data Protection Best Practices](https://gdpr.eu/data-protection-best-practices/)
 
 ### Security Testing Resources
+
 - [OWASP Testing Guide](https://owasp.org/www-project-web-security-testing-guide/)
 - [Security Testing Handbook](https://github.com/OWASP/Security-Testing-Handbook)
 - [API Security Testing](https://owasp.org/www-project-api-security/)

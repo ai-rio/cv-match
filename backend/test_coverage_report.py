@@ -12,13 +12,7 @@ from pathlib import Path
 def run_command(cmd, cwd=None):
     """Run a command and return the result."""
     try:
-        result = subprocess.run(
-            cmd,
-            shell=True,
-            capture_output=True,
-            text=True,
-            cwd=cwd
-        )
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=cwd)
         return result.returncode, result.stdout, result.stderr
     except Exception as e:
         return 1, "", str(e)
@@ -63,7 +57,7 @@ def analyze_test_coverage():
     print("-" * 40)
 
     # Extract coverage information from pytest output
-    coverage_lines = [line for line in stdout.split('\n') if '%' in line and 'app.' in line]
+    coverage_lines = [line for line in stdout.split("\n") if "%" in line and "app." in line]
 
     if coverage_lines:
         for line in coverage_lines:
@@ -80,7 +74,7 @@ def analyze_test_coverage():
         "app.api.endpoints.payments",
         "app.api.endpoints.webhooks",
         "app.models.payment",
-        "app.models.usage"
+        "app.models.usage",
     ]
 
     print("\n💳 Payment System Modules Coverage:")
@@ -115,15 +109,15 @@ def analyze_test_coverage():
         ("database", "Database tests"),
         ("security", "Security tests"),
         ("atomicity", "Atomicity tests"),
-        ("error_handling", "Error handling tests")
+        ("error_handling", "Error handling tests"),
     ]
 
     for marker, description in test_types:
-        cmd = f'python -m pytest tests/ -m {marker} --collect-only -q'
+        cmd = f"python -m pytest tests/ -m {marker} --collect-only -q"
         returncode, stdout, _ = run_command(cmd)
 
         if returncode == 0 and stdout:
-            count = len([line for line in stdout.split('\n') if 'test_' in line])
+            count = len([line for line in stdout.split("\n") if "test_" in line])
             print(f"  {description}: {count} tests")
         else:
             print(f"  {description}: 0 tests")
@@ -138,19 +132,23 @@ def analyze_test_coverage():
     print("✅ Integration and E2E workflow tests")
     print("✅ Security and race condition tests")
 
-    print(f"\n🎯 Target Coverage: 80%+")
+    print("\n🎯 Target Coverage: 80%+")
     print("📁 Coverage Reports: htmlcov/")
 
     # Check if we met the coverage target
-    if "coverage: 80%" in stdout.lower() or "coverage: 81%" in stdout.lower() or any(f"{i}%".lower() in stdout.lower() for i in range(80, 101)):
+    if (
+        "coverage: 80%" in stdout.lower()
+        or "coverage: 81%" in stdout.lower()
+        or any(f"{i}%".lower() in stdout.lower() for i in range(80, 101))
+    ):
         print("\n🎉 SUCCESS: Test coverage target achieved! (80%+)")
         return True
     elif "coverage:" in stdout.lower():
         # Extract percentage from output
-        for line in stdout.split('\n'):
+        for line in stdout.split("\n"):
             if "coverage:" in line.lower():
                 try:
-                    percentage = int(line.lower().split('coverage:')[1].split('%')[0].strip())
+                    percentage = int(line.lower().split("coverage:")[1].split("%")[0].strip())
                     if percentage >= 80:
                         print(f"\n🎉 SUCCESS: Test coverage target achieved! ({percentage}%)")
                         return True

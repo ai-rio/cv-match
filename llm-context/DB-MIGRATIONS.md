@@ -108,6 +108,7 @@ make db-status
 ```
 
 This command shows:
+
 1. The migration status table (same as `db-list`)
 2. A list of all migration files in your project
 

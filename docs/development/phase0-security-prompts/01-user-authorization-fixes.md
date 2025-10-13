@@ -17,6 +17,7 @@ Fix critical user authorization vulnerability that allows any authenticated user
 **Current Issue**: The resume endpoints have NO user authorization checks. Any authenticated user can access ANY resume by simply knowing the resume ID.
 
 **Evidence from Code Review**:
+
 ```python
 # From resumes.py, line 127-142
 @router.get("/{resume_id}", response_model=ResumeResponse)
@@ -35,6 +36,7 @@ async def get_resume(
 ```
 
 **Business Impact**:
+
 - **Legal Liability**: Violates LGPD (Brazilian data protection law)
 - **Data Breach**: Complete exposure of user resume data
 - **Market Entry**: Illegal to deploy in Brazil without this fix
@@ -42,16 +44,19 @@ async def get_resume(
 ## Context & Documentation References
 
 ### Security Assessment Findings
+
 - **Critical Finding**: User authorization gap allows any authenticated user to access any resume by ID
 - **Business Impact**: Data breach risk and LGPD violation
 - **Reference**: [`chunk_003_1_security_vulnerability_exploitation.md`](../system-iplementation-assessment/chunks/chunk_003_1_security_vulnerability_exploitation.md)
 
 ### Technical Implementation Context
+
 - **Related Implementation**: [`chunk_002_backendappservicessupabasedatabasepy_enhanced.md`](../system-iplementation-assessment/chunks-technical-guide/chunk_002_backendappservicessupabasedatabasepy_enhanced.md)
 - **Database Context**: [`chunk_003_database_schema_changes.md`](../system-iplementation-assessment/chunks-technical-guide/chunk_003_database_schema_changes.md)
 - **API Context**: [`chunk_004_2_resume_matching_endpoints.md`](../system-iplementation-assessment/chunks-technical-guide/chunk_004_2_resume_matching_endpoints.md)
 
 ### Phase Dependencies
+
 - **Must Complete Before**: Phase 0.2 (Data Protection)
 - **Can Run Parallel With**: Phase 0.1 database schema and input validation
 - **Enables**: All subsequent security phases
@@ -89,6 +94,7 @@ async def get_resume(
 ## Chunk Reading Order
 
 For this task, read these chunks in order:
+
 1. [`chunk_003_1_security_vulnerability_exploitation.md`](../system-iplementation-assessment/chunks/chunk_003_1_security_vulnerability_exploitation.md) - Security vulnerability details
 2. [`chunk_004_2_resume_matching_endpoints.md`](../system-iplementation-assessment/chunks-technical-guide/chunk_004_2_resume_matching_endpoints.md) - Current endpoint implementations
 3. [`chunk_003_database_schema_changes.md`](../system-iplementation-assessment/chunks-technical-guide/chunk_003_database_schema_changes.md) - Database schema for security context
@@ -106,10 +112,12 @@ For this task, read these chunks in order:
 ### 1. Fix Resume Endpoints (HIGH PRIORITY)
 
 **Files to Fix**:
+
 - `backend/app/api/endpoints/resumes.py`
 - `backend/app/services/resume_service.py`
 
 **Required Changes**:
+
 ```python
 # Add user authorization check in ALL resume endpoints
 @router.get("/{resume_id}", response_model=ResumeResponse)
@@ -133,6 +141,7 @@ async def get_resume(
 ### 2. Update Resume Service
 
 **Required Changes**:
+
 ```python
 # Add user authorization methods to ResumeService
 async def get_resume_with_user_check(self, resume_id: str, user_id: str) -> Optional[dict]:
@@ -150,6 +159,7 @@ async def get_resume_with_user_check(self, resume_id: str, user_id: str) -> Opti
 ### 3. Verify Database Schema
 
 **Check Current Schema**:
+
 ```sql
 -- Verify resumes table has user_id column
 SELECT column_name, data_type, is_nullable
@@ -160,6 +170,7 @@ WHERE table_name = 'resumes' AND column_name = 'user_id';
 ### 4. Update RLS Policies
 
 **Required Changes**:
+
 ```sql
 -- Ensure RLS policies enforce user isolation
 CREATE POLICY "Users can only access own resumes"
@@ -171,9 +182,11 @@ USING (auth.uid() = user_id);
 ### 5. Add Security Tests
 
 **Test Files to Create/Update**:
+
 - `tests/test_resume_authorization.py`
 
 **Required Tests**:
+
 ```python
 async def test_user_cannot_access_other_user_resume():
     """Verify user cannot access another user's resume"""
@@ -194,17 +207,20 @@ async def test_user_can_access_own_resume():
 After implementation, verify:
 
 ### Manual Testing
+
 - [ ] User A cannot access User B's resume (403/404 response)
 - [ ] User A can access their own resume (200 response)
 - [ ] Anonymous users cannot access any resume (401 response)
 - [ ] Error responses don't reveal resume existence
 
 ### Automated Testing
+
 - [ ] All authorization tests pass
 - [ ] Security scan shows no authorization vulnerabilities
 - [ ] Performance impact is minimal (<100ms additional latency)
 
 ### Database Security
+
 - [ ] user_id foreign key constraints enforced
 - [ ] RLS policies working correctly
 - [ ] Database queries filter by user_id correctly
@@ -212,6 +228,7 @@ After implementation, verify:
 ## Rollback Procedures
 
 If issues occur:
+
 1. **Immediate Rollback**: Revert to previous working commit
 2. **Database Rollback**: Reverse schema changes if applied
 3. **Service Rollback**: Restore previous service implementations
@@ -246,6 +263,7 @@ curl -H "Authorization: Bearer USER_A_TOKEN" \
 ## 🚨 CRITICAL REMINDER
 
 This security fix is **MANDATORY** before any other development:
+
 - **Legal Requirement**: LGPD compliance requires user data isolation
 - **Security Requirement**: Prevents data breaches
 - **Business Requirement**: Enables legal deployment in Brazil

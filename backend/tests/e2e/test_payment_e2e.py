@@ -3,8 +3,8 @@ End-to-end tests for complete payment workflow.
 Tests the full user journey from browsing to payment to credit usage.
 """
 
-import json
 import asyncio
+import json
 from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID, uuid4
@@ -13,8 +13,8 @@ import pytest
 from fastapi import status
 from httpx import AsyncClient
 
-from app.services.usage_limit_service import UsageLimitService
 from app.core.database import SupabaseSession
+from app.services.usage_limit_service import UsageLimitService
 
 
 @pytest.mark.e2e
@@ -26,11 +26,7 @@ class TestPaymentE2E:
     def setup_method(self):
         """Set up test method."""
         self.test_user_id = str(uuid4())
-        self.test_user = {
-            "id": self.test_user_id,
-            "email": "test@example.com",
-            "name": "Test User"
-        }
+        self.test_user = {"id": self.test_user_id, "email": "test@example.com", "name": "Test User"}
         self.db = SupabaseSession()
 
     @pytest.mark.asyncio
@@ -47,12 +43,12 @@ class TestPaymentE2E:
             "credits_remaining": 3,
             "total_credits": 3,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
         usage_service = UsageLimitService(self.db)
 
-        with patch.object(self.db.client.table, 'select') as mock_select:
+        with patch.object(self.db.client.table, "select") as mock_select:
             mock_select.return_value.eq.return_value.execute.return_value.data = [mock_free_credits]
             initial_credits = await usage_service.get_user_credits(UUID(self.test_user_id))
 
@@ -63,9 +59,11 @@ class TestPaymentE2E:
         # Step 2: User checks usage limits
         print("Step 2: User checks usage limits")
 
-        with patch.object(self.db.client.table, 'select') as mock_select:
+        with patch.object(self.db.client.table, "select") as mock_select:
             mock_select.return_value.eq.return_value.execute.return_value.data = [mock_free_credits]
-            with patch.object(usage_service.usage_tracking_service, 'get_current_month_usage') as mock_usage:
+            with patch.object(
+                usage_service.usage_tracking_service, "get_current_month_usage"
+            ) as mock_usage:
                 mock_usage.return_value = AsyncMock()
                 mock_usage.return_value.free_optimizations_used = 0
                 mock_usage.return_value.paid_optimizations_used = 0
@@ -80,23 +78,23 @@ class TestPaymentE2E:
         print("Step 3: User uses all free credits")
 
         for i in range(3):
-            with patch.object(self.db.client.table, 'select') as mock_select:
-                mock_select.return_value.eq.return_value.execute.return_value.data = [{
-                    **mock_free_credits,
-                    "credits_remaining": 3 - i - 1,
-                    "total_credits": 3
-                }]
-                with patch.object(usage_service, 'deduct_credits', return_value=True):
-                    with patch.object(usage_service.usage_tracking_service, 'increment_usage', return_value=None):
-                        with patch.object(usage_service.usage_tracking_service, 'get_current_month_usage') as mock_usage:
+            with patch.object(self.db.client.table, "select") as mock_select:
+                mock_select.return_value.eq.return_value.execute.return_value.data = [
+                    {**mock_free_credits, "credits_remaining": 3 - i - 1, "total_credits": 3}
+                ]
+                with patch.object(usage_service, "deduct_credits", return_value=True):
+                    with patch.object(
+                        usage_service.usage_tracking_service, "increment_usage", return_value=None
+                    ):
+                        with patch.object(
+                            usage_service.usage_tracking_service, "get_current_month_usage"
+                        ) as mock_usage:
                             mock_usage.return_value = AsyncMock()
                             mock_usage.return_value.free_optimizations_used = i + 1
                             mock_usage.return_value.paid_optimizations_used = 0
 
                             await usage_service.check_and_track_usage(
-                                UUID(self.test_user_id),
-                                "free",
-                                cost_credits=1
+                                UUID(self.test_user_id), "free", cost_credits=1
                             )
 
         # Step 4: User has no credits left, decides to upgrade
@@ -118,7 +116,7 @@ class TestPaymentE2E:
         checkout_request = {
             "tier": "pro",
             "success_url": "https://cv-match.com/sucesso",
-            "cancel_url": "https://cv-match.com/cancelar"
+            "cancel_url": "https://cv-match.com/cancelar",
         }
 
         mock_checkout_response = {
@@ -127,12 +125,17 @@ class TestPaymentE2E:
             "checkout_url": "https://checkout.stripe.com/pay/cs_test_e2e_123",
             "plan_type": "pro",
             "currency": "brl",
-            "amount": 2990
+            "amount": 2990,
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.create_checkout_session", return_value=mock_checkout_response):
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_checkout_session",
+            return_value=mock_checkout_response,
+        ):
             with patch("app.api.endpoints.payments.get_current_user", return_value=self.test_user):
-                checkout_response = await async_client.post("/api/payments/create-checkout", json=checkout_request)
+                checkout_response = await async_client.post(
+                    "/api/payments/create-checkout", json=checkout_request
+                )
 
         assert checkout_response.status_code == status.HTTP_200_OK
         checkout_data = checkout_response.json()
@@ -169,29 +172,51 @@ class TestPaymentE2E:
                         "credits": "50",
                         "tier": "pro",
                         "market": "brazil",
-                        "language": "pt-br"
-                    }
+                        "language": "pt-br",
+                    },
                 }
-            }
+            },
         }
 
         # Mock webhook processing
-        mock_user_profile = {"id": "profile_e2e_123", "user_id": self.test_user_id, "stripe_customer_id": None}
+        mock_user_profile = {
+            "id": "profile_e2e_123",
+            "user_id": self.test_user_id,
+            "stripe_customer_id": None,
+        }
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": MagicMock(),
-            "event_type": "checkout.session.completed",
-            "event_id": webhook_payload["id"]
-        }):
-            with patch("app.services.webhook_service.WebhookService._get_by_field", return_value=mock_user_profile):
-                with patch("app.services.webhook_service.WebhookService._update", return_value={"id": "profile_e2e_123"}):
-                    with patch("app.services.webhook_service.WebhookService._create", return_value={"id": "payment_e2e_123"}):
-                        with patch("app.services.usage_limit_service.UsageLimitService.add_credits", return_value=None):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": True,
+                "event": MagicMock(),
+                "event_type": "checkout.session.completed",
+                "event_id": webhook_payload["id"],
+            },
+        ):
+            with patch(
+                "app.services.webhook_service.WebhookService._get_by_field",
+                return_value=mock_user_profile,
+            ):
+                with patch(
+                    "app.services.webhook_service.WebhookService._update",
+                    return_value={"id": "profile_e2e_123"},
+                ):
+                    with patch(
+                        "app.services.webhook_service.WebhookService._create",
+                        return_value={"id": "payment_e2e_123"},
+                    ):
+                        with patch(
+                            "app.services.usage_limit_service.UsageLimitService.add_credits",
+                            return_value=None,
+                        ):
                             webhook_response = await async_client.post(
                                 "/api/webhooks/stripe",
                                 data=json.dumps(webhook_payload, separators=(",", ":")),
-                                headers={"stripe-signature": "t=1234567890,v1=signature123", "content-type": "application/json"}
+                                headers={
+                                    "stripe-signature": "t=1234567890,v1=signature123",
+                                    "content-type": "application/json",
+                                },
                             )
 
         assert webhook_response.status_code == status.HTTP_200_OK
@@ -207,10 +232,10 @@ class TestPaymentE2E:
             "credits_remaining": 50,  # Pro plan credits
             "total_credits": 53,  # 3 initial + 50 pro
             "subscription_tier": "pro",
-            "is_pro": True
+            "is_pro": True,
         }
 
-        with patch.object(self.db.client.table, 'select') as mock_select:
+        with patch.object(self.db.client.table, "select") as mock_select:
             mock_select.return_value.eq.return_value.execute.return_value.data = [mock_pro_credits]
             updated_credits = await usage_service.get_user_credits(UUID(self.test_user_id))
 
@@ -222,9 +247,11 @@ class TestPaymentE2E:
         # Step 8: User can now optimize with pro benefits
         print("Step 8: User can now optimize with pro benefits")
 
-        with patch.object(self.db.client.table, 'select') as mock_select:
+        with patch.object(self.db.client.table, "select") as mock_select:
             mock_select.return_value.eq.return_value.execute.return_value.data = [mock_pro_credits]
-            with patch.object(usage_service.usage_tracking_service, 'get_current_month_usage') as mock_usage:
+            with patch.object(
+                usage_service.usage_tracking_service, "get_current_month_usage"
+            ) as mock_usage:
                 mock_usage.return_value = AsyncMock()
                 mock_usage.return_value.free_optimizations_used = 3
                 mock_usage.return_value.paid_optimizations_used = 0
@@ -240,10 +267,14 @@ class TestPaymentE2E:
         print("Step 9: User uses optimization services")
 
         # Pro users don't need credit deduction for basic usage
-        with patch.object(self.db.client.table, 'select') as mock_select:
+        with patch.object(self.db.client.table, "select") as mock_select:
             mock_select.return_value.eq.return_value.execute.return_value.data = [mock_pro_credits]
-            with patch.object(usage_service.usage_tracking_service, 'increment_usage', return_value=None):
-                with patch.object(usage_service.usage_tracking_service, 'get_current_month_usage') as mock_usage:
+            with patch.object(
+                usage_service.usage_tracking_service, "increment_usage", return_value=None
+            ):
+                with patch.object(
+                    usage_service.usage_tracking_service, "get_current_month_usage"
+                ) as mock_usage:
                     mock_usage.return_value = AsyncMock()
                     mock_usage.return_value.free_optimizations_used = 4
                     mock_usage.return_value.paid_optimizations_used = 1
@@ -251,22 +282,28 @@ class TestPaymentE2E:
                     await usage_service.check_and_track_usage(
                         UUID(self.test_user_id),
                         "paid",
-                        cost_credits=0  # Pro users don't pay
+                        cost_credits=0,  # Pro users don't pay
                     )
 
         # Step 10: Check payment history
         print("Step 10: Check payment history")
 
-        with patch("app.services.payment_verification_service.payment_verification_service.payment_db.get_by_filters", return_value=[{
-            "id": "payment_e2e_123",
-            "user_id": self.test_user_id,
-            "amount": 2990,
-            "currency": "brl",
-            "status": "succeeded",
-            "payment_type": "subscription",
-            "created_at": datetime.now(UTC).isoformat()
-        }]):
+        with patch(
+            "app.services.payment_verification_service.payment_verification_service.payment_db.get_by_filters",
+            return_value=[
+                {
+                    "id": "payment_e2e_123",
+                    "user_id": self.test_user_id,
+                    "amount": 2990,
+                    "currency": "brl",
+                    "status": "succeeded",
+                    "payment_type": "subscription",
+                    "created_at": datetime.now(UTC).isoformat(),
+                }
+            ],
+        ):
             from app.services.payment_verification import payment_verification_service
+
             history = await payment_verification_service.get_user_payment_history(self.test_user_id)
 
         assert history["success"] is True
@@ -291,12 +328,17 @@ class TestPaymentE2E:
             "checkout_url": "https://checkout.stripe.com/pay/cs_test_sub_123",
             "plan_type": "enterprise",
             "currency": "brl",
-            "amount": 9990
+            "amount": 9990,
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.create_checkout_session", return_value=mock_checkout_response):
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_checkout_session",
+            return_value=mock_checkout_response,
+        ):
             with patch("app.api.endpoints.payments.get_current_user", return_value=self.test_user):
-                checkout_response = await async_client.post("/api/payments/create-checkout", json=checkout_request)
+                checkout_response = await async_client.post(
+                    "/api/payments/create-checkout", json=checkout_request
+                )
 
         assert checkout_response.status_code == status.HTTP_200_OK
 
@@ -314,28 +356,37 @@ class TestPaymentE2E:
                     "status": "active",
                     "current_period_start": int(datetime.now(UTC).timestamp()),
                     "current_period_end": int((datetime.now(UTC) + timedelta(days=30)).timestamp()),
-                    "metadata": {
-                        "user_id": self.test_user_id,
-                        "plan": "enterprise"
-                    }
+                    "metadata": {"user_id": self.test_user_id, "plan": "enterprise"},
                 }
-            }
+            },
         }
 
         mock_user_profile = {"id": "profile_lifecycle_123", "user_id": self.test_user_id}
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": MagicMock(),
-            "event_type": "customer.subscription.created",
-            "event_id": subscription_webhook["id"]
-        }):
-            with patch("app.services.webhook_service.WebhookService._get_by_field", return_value=mock_user_profile):
-                with patch("app.services.webhook_service.WebhookService._create_subscription_record", return_value={"id": "subscription_lifecycle_123"}):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": True,
+                "event": MagicMock(),
+                "event_type": "customer.subscription.created",
+                "event_id": subscription_webhook["id"],
+            },
+        ):
+            with patch(
+                "app.services.webhook_service.WebhookService._get_by_field",
+                return_value=mock_user_profile,
+            ):
+                with patch(
+                    "app.services.webhook_service.WebhookService._create_subscription_record",
+                    return_value={"id": "subscription_lifecycle_123"},
+                ):
                     webhook_response = await async_client.post(
                         "/api/webhooks/stripe",
                         data=json.dumps(subscription_webhook, separators=(",", ":")),
-                        headers={"stripe-signature": "t=1234567890,v1=signature123", "content-type": "application/json"}
+                        headers={
+                            "stripe-signature": "t=1234567890,v1=signature123",
+                            "content-type": "application/json",
+                        },
                     )
 
         assert webhook_response.status_code == status.HTTP_200_OK
@@ -357,30 +408,43 @@ class TestPaymentE2E:
                     "status": "paid",
                     "period_start": int(datetime.now(UTC).timestamp()),
                     "period_end": int((datetime.now(UTC) + timedelta(days=30)).timestamp()),
-                    "metadata": {
-                        "user_id": self.test_user_id
-                    }
+                    "metadata": {"user_id": self.test_user_id},
                 }
-            }
+            },
         }
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": MagicMock(),
-            "event_type": "invoice.payment_succeeded",
-            "event_id": renewal_webhook["id"]
-        }):
-            with patch("app.services.webhook_service.WebhookService._get_by_field", return_value={
-                "id": "subscription_lifecycle_123",
-                "stripe_subscription_id": "sub_test_lifecycle_123",
-                "user_id": self.test_user_id
-            }):
-                with patch("app.services.webhook_service.WebhookService._create", return_value={"id": "payment_renewal_123"}):
-                    with patch("app.services.usage_limit_service.UsageLimitService.add_credits", return_value=None):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": True,
+                "event": MagicMock(),
+                "event_type": "invoice.payment_succeeded",
+                "event_id": renewal_webhook["id"],
+            },
+        ):
+            with patch(
+                "app.services.webhook_service.WebhookService._get_by_field",
+                return_value={
+                    "id": "subscription_lifecycle_123",
+                    "stripe_subscription_id": "sub_test_lifecycle_123",
+                    "user_id": self.test_user_id,
+                },
+            ):
+                with patch(
+                    "app.services.webhook_service.WebhookService._create",
+                    return_value={"id": "payment_renewal_123"},
+                ):
+                    with patch(
+                        "app.services.usage_limit_service.UsageLimitService.add_credits",
+                        return_value=None,
+                    ):
                         renewal_response = await async_client.post(
                             "/api/webhooks/stripe",
                             data=json.dumps(renewal_webhook, separators=(",", ":")),
-                            headers={"stripe-signature": "t=1234567890,v1=signature123", "content-type": "application/json"}
+                            headers={
+                                "stripe-signature": "t=1234567890,v1=signature123",
+                                "content-type": "application/json",
+                            },
                         )
 
         assert renewal_response.status_code == status.HTTP_200_OK
@@ -398,27 +462,39 @@ class TestPaymentE2E:
                     "status": "active",
                     "current_period_start": int(datetime.now(UTC).timestamp()),
                     "current_period_end": int((datetime.now(UTC) + timedelta(days=30)).timestamp()),
-                    "cancel_at_period_end": False
+                    "cancel_at_period_end": False,
                 }
-            }
+            },
         }
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": MagicMock(),
-            "event_type": "customer.subscription.updated",
-            "event_id": update_webhook["id"]
-        }):
-            with patch("app.services.webhook_service.WebhookService._get_by_field", return_value={
-                "id": "subscription_lifecycle_123",
-                "stripe_subscription_id": "sub_test_lifecycle_123",
-                "user_id": self.test_user_id
-            }):
-                with patch("app.services.webhook_service.WebhookService._update", return_value={"id": "subscription_lifecycle_123"}):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": True,
+                "event": MagicMock(),
+                "event_type": "customer.subscription.updated",
+                "event_id": update_webhook["id"],
+            },
+        ):
+            with patch(
+                "app.services.webhook_service.WebhookService._get_by_field",
+                return_value={
+                    "id": "subscription_lifecycle_123",
+                    "stripe_subscription_id": "sub_test_lifecycle_123",
+                    "user_id": self.test_user_id,
+                },
+            ):
+                with patch(
+                    "app.services.webhook_service.WebhookService._update",
+                    return_value={"id": "subscription_lifecycle_123"},
+                ):
                     update_response = await async_client.post(
                         "/api/webhooks/stripe",
                         data=json.dumps(update_webhook, separators=(",", ":")),
-                        headers={"stripe-signature": "t=1234567890,v1=signature123", "content-type": "application/json"}
+                        headers={
+                            "stripe-signature": "t=1234567890,v1=signature123",
+                            "content-type": "application/json",
+                        },
                     )
 
         assert update_response.status_code == status.HTTP_200_OK
@@ -437,27 +513,39 @@ class TestPaymentE2E:
                     "subscription": "sub_test_lifecycle_123",
                     "status": "open",
                     "amount_paid": 0,
-                    "attempt_count": 1
+                    "attempt_count": 1,
                 }
-            }
+            },
         }
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": MagicMock(),
-            "event_type": "invoice.payment_failed",
-            "event_id": failure_webhook["id"]
-        }):
-            with patch("app.services.webhook_service.WebhookService._get_by_field", return_value={
-                "id": "subscription_lifecycle_123",
-                "stripe_subscription_id": "sub_test_lifecycle_123",
-                "user_id": self.test_user_id
-            }):
-                with patch("app.services.webhook_service.WebhookService._update", return_value={"id": "subscription_lifecycle_123"}):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": True,
+                "event": MagicMock(),
+                "event_type": "invoice.payment_failed",
+                "event_id": failure_webhook["id"],
+            },
+        ):
+            with patch(
+                "app.services.webhook_service.WebhookService._get_by_field",
+                return_value={
+                    "id": "subscription_lifecycle_123",
+                    "stripe_subscription_id": "sub_test_lifecycle_123",
+                    "user_id": self.test_user_id,
+                },
+            ):
+                with patch(
+                    "app.services.webhook_service.WebhookService._update",
+                    return_value={"id": "subscription_lifecycle_123"},
+                ):
                     failure_response = await async_client.post(
                         "/api/webhooks/stripe",
                         data=json.dumps(failure_webhook, separators=(",", ":")),
-                        headers={"stripe-signature": "t=1234567890,v1=signature123", "content-type": "application/json"}
+                        headers={
+                            "stripe-signature": "t=1234567890,v1=signature123",
+                            "content-type": "application/json",
+                        },
                     )
 
         assert failure_response.status_code == status.HTTP_200_OK
@@ -473,27 +561,39 @@ class TestPaymentE2E:
                 "object": {
                     "id": "sub_test_lifecycle_123",
                     "status": "canceled",
-                    "canceled_at": int(datetime.now(UTC).timestamp())
+                    "canceled_at": int(datetime.now(UTC).timestamp()),
                 }
-            }
+            },
         }
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": MagicMock(),
-            "event_type": "customer.subscription.deleted",
-            "event_id": cancellation_webhook["id"]
-        }):
-            with patch("app.services.webhook_service.WebhookService._get_by_field", return_value={
-                "id": "subscription_lifecycle_123",
-                "stripe_subscription_id": "sub_test_lifecycle_123",
-                "user_id": self.test_user_id
-            }):
-                with patch("app.services.webhook_service.WebhookService._update", return_value={"id": "subscription_lifecycle_123"}):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": True,
+                "event": MagicMock(),
+                "event_type": "customer.subscription.deleted",
+                "event_id": cancellation_webhook["id"],
+            },
+        ):
+            with patch(
+                "app.services.webhook_service.WebhookService._get_by_field",
+                return_value={
+                    "id": "subscription_lifecycle_123",
+                    "stripe_subscription_id": "sub_test_lifecycle_123",
+                    "user_id": self.test_user_id,
+                },
+            ):
+                with patch(
+                    "app.services.webhook_service.WebhookService._update",
+                    return_value={"id": "subscription_lifecycle_123"},
+                ):
                     cancellation_response = await async_client.post(
                         "/api/webhooks/stripe",
                         data=json.dumps(cancellation_webhook, separators=(",", ":")),
-                        headers={"stripe-signature": "t=1234567890,v1=signature123", "content-type": "application/json"}
+                        headers={
+                            "stripe-signature": "t=1234567890,v1=signature123",
+                            "content-type": "application/json",
+                        },
                     )
 
         assert cancellation_response.status_code == status.HTTP_200_OK
@@ -508,7 +608,7 @@ class TestPaymentE2E:
         brazilian_user = {
             "id": self.test_user_id,
             "email": "joao.silva@exemplo.com.br",
-            "name": "João Silva"
+            "name": "João Silva",
         }
 
         # Step 1: Check Brazilian pricing
@@ -532,11 +632,7 @@ class TestPaymentE2E:
 
         checkout_request = {
             "tier": "pro",
-            "metadata": {
-                "campaign": "verao_2024",
-                "utm_source": "google",
-                "market": "brazil"
-            }
+            "metadata": {"campaign": "verao_2024", "utm_source": "google", "market": "brazil"},
         }
 
         mock_checkout_response = {
@@ -545,12 +641,17 @@ class TestPaymentE2E:
             "checkout_url": "https://checkout.stripe.com/pay/cs_test_brazil_e2e_123",
             "plan_type": "pro",
             "currency": "brl",
-            "amount": 2990
+            "amount": 2990,
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.create_checkout_session", return_value=mock_checkout_response):
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_checkout_session",
+            return_value=mock_checkout_response,
+        ):
             with patch("app.api.endpoints.payments.get_current_user", return_value=brazilian_user):
-                checkout_response = await async_client.post("/api/payments/create-checkout", json=checkout_request)
+                checkout_response = await async_client.post(
+                    "/api/payments/create-checkout", json=checkout_request
+                )
 
         assert checkout_response.status_code == status.HTTP_200_OK
         checkout_data = checkout_response.json()
@@ -570,7 +671,9 @@ class TestPaymentE2E:
         assert methods_data["locale"] == "pt-BR"
 
         # Check for Brazilian card types
-        card_method = next((pm for pm in methods_data["payment_methods"] if pm["type"] == "card"), None)
+        card_method = next(
+            (pm for pm in methods_data["payment_methods"] if pm["type"] == "card"), None
+        )
         assert card_method is not None
         assert "Cartão de Crédito" in card_method["name"]
 
@@ -595,35 +698,53 @@ class TestPaymentE2E:
                             "state": "SP",
                             "city": "São Paulo",
                             "line1": "Rua das Flores, 123",
-                            "postal_code": "01234-567"
-                        }
+                            "postal_code": "01234-567",
+                        },
                     },
                     "metadata": {
                         "user_id": self.test_user_id,
                         "plan": "pro",
                         "market": "brazil",
-                        "language": "pt-br"
-                    }
+                        "language": "pt-br",
+                    },
                 }
-            }
+            },
         }
 
         mock_user_profile = {"id": "profile_brazil_123", "user_id": self.test_user_id}
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": MagicMock(),
-            "event_type": "checkout.session.completed",
-            "event_id": brazilian_webhook["id"]
-        }):
-            with patch("app.services.webhook_service.WebhookService._get_by_field", return_value=mock_user_profile):
-                with patch("app.services.webhook_service.WebhookService._update", return_value={"id": "profile_brazil_123"}):
-                    with patch("app.services.webhook_service.WebhookService._create", return_value={"id": "payment_brazil_123"}):
-                        with patch("app.services.usage_limit_service.UsageLimitService.add_credits", return_value=None):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": True,
+                "event": MagicMock(),
+                "event_type": "checkout.session.completed",
+                "event_id": brazilian_webhook["id"],
+            },
+        ):
+            with patch(
+                "app.services.webhook_service.WebhookService._get_by_field",
+                return_value=mock_user_profile,
+            ):
+                with patch(
+                    "app.services.webhook_service.WebhookService._update",
+                    return_value={"id": "profile_brazil_123"},
+                ):
+                    with patch(
+                        "app.services.webhook_service.WebhookService._create",
+                        return_value={"id": "payment_brazil_123"},
+                    ):
+                        with patch(
+                            "app.services.usage_limit_service.UsageLimitService.add_credits",
+                            return_value=None,
+                        ):
                             webhook_response = await async_client.post(
                                 "/api/webhooks/stripe",
                                 data=json.dumps(brazilian_webhook, separators=(",", ":")),
-                                headers={"stripe-signature": "t=1234567890,v1=signature123", "content-type": "application/json"}
+                                headers={
+                                    "stripe-signature": "t=1234567890,v1=signature123",
+                                    "content-type": "application/json",
+                                },
                             )
 
         assert webhook_response.status_code == status.HTTP_200_OK
@@ -639,11 +760,13 @@ class TestPaymentE2E:
             "credits_remaining": 50,
             "total_credits": 50,
             "subscription_tier": "pro",
-            "is_pro": True
+            "is_pro": True,
         }
 
-        with patch.object(self.db.client.table, 'select') as mock_select:
-            mock_select.return_value.eq.return_value.execute.return_value.data = [mock_brazilian_credits]
+        with patch.object(self.db.client.table, "select") as mock_select:
+            mock_select.return_value.eq.return_value.execute.return_value.data = [
+                mock_brazilian_credits
+            ]
             credits = await usage_service.get_user_credits(UUID(self.test_user_id))
 
         assert credits["credits_remaining"] == 50
@@ -652,10 +775,16 @@ class TestPaymentE2E:
         print("Step 6: Check health endpoints are configured for Brazil")
 
         payments_health = await async_client.get("/api/payments/health")
-        assert payments_health.status_code in [status.HTTP_200_OK, status.HTTP_503_SERVICE_UNAVAILABLE]
+        assert payments_health.status_code in [
+            status.HTTP_200_OK,
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+        ]
 
         webhooks_health = await async_client.get("/api/webhooks/stripe/health")
-        assert webhooks_health.status_code in [status.HTTP_200_OK, status.HTTP_503_SERVICE_UNAVAILABLE]
+        assert webhooks_health.status_code in [
+            status.HTTP_200_OK,
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+        ]
 
         print("✅ Brazilian market payment experience completed successfully!")
 
@@ -675,11 +804,13 @@ class TestPaymentE2E:
             "credits_remaining": initial_credits,
             "total_credits": initial_credits,
             "subscription_tier": "basic",
-            "is_pro": False
+            "is_pro": False,
         }
 
-        with patch.object(self.db.client.table, 'select') as mock_select:
-            mock_select.return_value.eq.return_value.execute.return_value.data = [mock_initial_credits]
+        with patch.object(self.db.client.table, "select") as mock_select:
+            mock_select.return_value.eq.return_value.execute.return_value.data = [
+                mock_initial_credits
+            ]
             credits = await usage_service.get_user_credits(UUID(self.test_user_id))
 
         assert credits["credits_remaining"] == initial_credits
@@ -692,31 +823,34 @@ class TestPaymentE2E:
         for i in range(initial_credits):
             remaining = initial_credits - i
 
-            with patch.object(self.db.client.table, 'select') as mock_select:
-                mock_select.return_value.eq.return_value.execute.return_value.data = [{
-                    **mock_initial_credits,
-                    "credits_remaining": remaining
-                }]
-                with patch.object(usage_service, 'deduct_credits', return_value=True):
-                    with patch.object(usage_service.usage_tracking_service, 'increment_usage', return_value=None):
-                        with patch.object(usage_service.usage_tracking_service, 'get_current_month_usage') as mock_usage:
+            with patch.object(self.db.client.table, "select") as mock_select:
+                mock_select.return_value.eq.return_value.execute.return_value.data = [
+                    {**mock_initial_credits, "credits_remaining": remaining}
+                ]
+                with patch.object(usage_service, "deduct_credits", return_value=True):
+                    with patch.object(
+                        usage_service.usage_tracking_service, "increment_usage", return_value=None
+                    ):
+                        with patch.object(
+                            usage_service.usage_tracking_service, "get_current_month_usage"
+                        ) as mock_usage:
                             mock_usage.return_value = AsyncMock()
                             mock_usage.return_value.free_optimizations_used = i + 1
                             mock_usage.return_value.paid_optimizations_used = 0
 
-                            operation_id = f"op_{i+1}"
+                            operation_id = f"op_{i + 1}"
                             result = await usage_service.check_and_track_usage(
-                                UUID(self.test_user_id),
-                                "free",
-                                cost_credits=1
+                                UUID(self.test_user_id), "free", cost_credits=1
                             )
 
-                            operations_performed.append({
-                                "operation_id": operation_id,
-                                "credits_before": remaining,
-                                "credits_after": remaining - 1,
-                                "can_optimize": result.can_optimize
-                            })
+                            operations_performed.append(
+                                {
+                                    "operation_id": operation_id,
+                                    "credits_before": remaining,
+                                    "credits_after": remaining - 1,
+                                    "can_optimize": result.can_optimize,
+                                }
+                            )
 
         # Verify all operations succeeded
         for op in operations_performed:
@@ -725,14 +859,13 @@ class TestPaymentE2E:
         # Step 3: User has no credits left
         print("Step 3: User has no credits left")
 
-        mock_no_credits = {
-            **mock_initial_credits,
-            "credits_remaining": 0
-        }
+        mock_no_credits = {**mock_initial_credits, "credits_remaining": 0}
 
-        with patch.object(self.db.client.table, 'select') as mock_select:
+        with patch.object(self.db.client.table, "select") as mock_select:
             mock_select.return_value.eq.return_value.execute.return_value.data = [mock_no_credits]
-            with patch.object(usage_service.usage_tracking_service, 'get_current_month_usage') as mock_usage:
+            with patch.object(
+                usage_service.usage_tracking_service, "get_current_month_usage"
+            ) as mock_usage:
                 mock_usage.return_value = AsyncMock()
                 mock_usage.return_value.free_optimizations_used = initial_credits
                 mock_usage.return_value.paid_optimizations_used = 0
@@ -745,10 +878,12 @@ class TestPaymentE2E:
         # Step 4: User attempts operation but fails
         print("Step 4: User attempts operation but fails")
 
-        with patch.object(self.db.client.table, 'select') as mock_select:
+        with patch.object(self.db.client.table, "select") as mock_select:
             mock_select.return_value.eq.return_value.execute.return_value.data = [mock_no_credits]
-            with patch.object(usage_service, 'deduct_credits', return_value=False):
-                with patch.object(usage_service.usage_tracking_service, 'get_current_month_usage') as mock_usage:
+            with patch.object(usage_service, "deduct_credits", return_value=False):
+                with patch.object(
+                    usage_service.usage_tracking_service, "get_current_month_usage"
+                ) as mock_usage:
                     mock_usage.return_value = AsyncMock()
                     mock_usage.return_value.free_optimizations_used = initial_credits
                     mock_usage.return_value.paid_optimizations_used = 0
@@ -757,9 +892,7 @@ class TestPaymentE2E:
 
                     with pytest.raises(UsageLimitExceededError):
                         await usage_service.check_and_track_usage(
-                            UUID(self.test_user_id),
-                            "free",
-                            cost_credits=1
+                            UUID(self.test_user_id), "free", cost_credits=1
                         )
 
         # Step 5: User purchases more credits
@@ -770,7 +903,7 @@ class TestPaymentE2E:
             "user_id": self.test_user_id,
             "user_email": self.test_user["email"],
             "amount": 2990,  # R$ 29,90 - Buy 50 credits
-            "metadata": {"purchase_type": "credits"}
+            "metadata": {"purchase_type": "credits"},
         }
 
         mock_payment_response = {
@@ -778,11 +911,16 @@ class TestPaymentE2E:
             "client_secret": "pi_test_cycle_123_secret",
             "payment_intent_id": "pi_test_cycle_123",
             "amount": 2990,
-            "currency": "brl"
+            "currency": "brl",
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.create_payment_intent", return_value=mock_payment_response):
-            payment_response = await async_client.post("/api/payments/create-payment-intent", json=payment_intent_request)
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_payment_intent",
+            return_value=mock_payment_response,
+        ):
+            payment_response = await async_client.post(
+                "/api/payments/create-payment-intent", json=payment_intent_request
+            )
 
         assert payment_response.status_code == status.HTTP_200_OK
         payment_data = payment_response.json()
@@ -801,26 +939,35 @@ class TestPaymentE2E:
                     "amount": 2990,
                     "currency": "brl",
                     "customer": "cus_test_cycle_123",
-                    "metadata": {
-                        "user_id": self.test_user_id,
-                        "purchase_type": "credits"
-                    }
+                    "metadata": {"user_id": self.test_user_id, "purchase_type": "credits"},
                 }
-            }
+            },
         }
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": MagicMock(),
-            "event_type": "payment_intent.succeeded",
-            "event_id": payment_webhook["id"]
-        }):
-            with patch("app.services.webhook_service.WebhookService._create", return_value={"id": "payment_cycle_123"}):
-                with patch("app.services.usage_limit_service.UsageLimitService.add_credits", return_value=None):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": True,
+                "event": MagicMock(),
+                "event_type": "payment_intent.succeeded",
+                "event_id": payment_webhook["id"],
+            },
+        ):
+            with patch(
+                "app.services.webhook_service.WebhookService._create",
+                return_value={"id": "payment_cycle_123"},
+            ):
+                with patch(
+                    "app.services.usage_limit_service.UsageLimitService.add_credits",
+                    return_value=None,
+                ):
                     webhook_response = await async_client.post(
                         "/api/webhooks/stripe",
                         data=json.dumps(payment_webhook, separators=(",", ":")),
-                        headers={"stripe-signature": "t=1234567890,v1=signature123", "content-type": "application/json"}
+                        headers={
+                            "stripe-signature": "t=1234567890,v1=signature123",
+                            "content-type": "application/json",
+                        },
                     )
 
         assert webhook_response.status_code == status.HTTP_200_OK
@@ -831,11 +978,13 @@ class TestPaymentE2E:
         mock_replenished_credits = {
             **mock_initial_credits,
             "credits_remaining": 50,  # New credits purchased
-            "total_credits": 60    # 10 initial + 50 purchased
+            "total_credits": 60,  # 10 initial + 50 purchased
         }
 
-        with patch.object(self.db.client.table, 'select') as mock_select:
-            mock_select.return_value.eq.return_value.execute.return_value.data = [mock_replenished_credits]
+        with patch.object(self.db.client.table, "select") as mock_select:
+            mock_select.return_value.eq.return_value.execute.return_value.data = [
+                mock_replenished_credits
+            ]
             replenished_credits = await usage_service.get_user_credits(UUID(self.test_user_id))
 
         assert replenished_credits["credits_remaining"] == 50
@@ -844,19 +993,23 @@ class TestPaymentE2E:
         # Step 8: User can optimize again
         print("Step 8: User can optimize again")
 
-        with patch.object(self.db.client.table, 'select') as mock_select:
-            mock_select.return_value.eq.return_value.execute.return_value.data = [mock_replenished_credits]
-            with patch.object(usage_service, 'deduct_credits', return_value=True):
-                with patch.object(usage_service.usage_tracking_service, 'increment_usage', return_value=None):
-                    with patch.object(usage_service.usage_tracking_service, 'get_current_month_usage') as mock_usage:
+        with patch.object(self.db.client.table, "select") as mock_select:
+            mock_select.return_value.eq.return_value.execute.return_value.data = [
+                mock_replenished_credits
+            ]
+            with patch.object(usage_service, "deduct_credits", return_value=True):
+                with patch.object(
+                    usage_service.usage_tracking_service, "increment_usage", return_value=None
+                ):
+                    with patch.object(
+                        usage_service.usage_tracking_service, "get_current_month_usage"
+                    ) as mock_usage:
                         mock_usage.return_value = AsyncMock()
                         mock_usage.return_value.free_optimizations_used = initial_credits + 1
                         mock_usage.return_value.paid_optimizations_used = 0
 
                         final_check = await usage_service.check_and_track_usage(
-                            UUID(self.test_user_id),
-                            "free",
-                            cost_credits=1
+                            UUID(self.test_user_id), "free", cost_credits=1
                         )
 
         assert final_check.can_optimize is True
@@ -879,12 +1032,17 @@ class TestPaymentE2E:
             "checkout_url": "https://checkout.stripe.com/pay/cs_test_declined_123",
             "plan_type": "pro",
             "currency": "brl",
-            "amount": 2990
+            "amount": 2990,
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.create_checkout_session", return_value=mock_checkout_response):
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_checkout_session",
+            return_value=mock_checkout_response,
+        ):
             with patch("app.api.endpoints.payments.get_current_user", return_value=self.test_user):
-                checkout_response = await async_client.post("/api/payments/create-checkout", json=checkout_request)
+                checkout_response = await async_client.post(
+                    "/api/payments/create-checkout", json=checkout_request
+                )
 
         assert checkout_response.status_code == status.HTTP_200_OK
 
@@ -901,26 +1059,33 @@ class TestPaymentE2E:
                     "status": "requires_payment_method",
                     "last_payment_error": {
                         "message": "Your card was declined.",
-                        "type": "card_error"
+                        "type": "card_error",
                     },
-                    "metadata": {
-                        "user_id": self.test_user_id
-                    }
+                    "metadata": {"user_id": self.test_user_id},
                 }
-            }
+            },
         }
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": MagicMock(),
-            "event_type": "payment_intent.payment_failed",
-            "event_id": failure_webhook["id"]
-        }):
-            with patch("app.services.webhook_service.WebhookService._create", return_value={"id": "payment_failed_123"}):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": True,
+                "event": MagicMock(),
+                "event_type": "payment_intent.payment_failed",
+                "event_id": failure_webhook["id"],
+            },
+        ):
+            with patch(
+                "app.services.webhook_service.WebhookService._create",
+                return_value={"id": "payment_failed_123"},
+            ):
                 failure_response = await async_client.post(
                     "/api/webhooks/stripe",
                     data=json.dumps(failure_webhook, separators=(",", ":")),
-                    headers={"stripe-signature": "t=1234567890,v1=signature123", "content-type": "application/json"}
+                    headers={
+                        "stripe-signature": "t=1234567890,v1=signature123",
+                        "content-type": "application/json",
+                    },
                 )
 
         assert failure_response.status_code == status.HTTP_200_OK
@@ -941,28 +1106,32 @@ class TestPaymentE2E:
                     "amount": 9990,
                     "currency": "brl",
                     "status": "requires_payment_method",
-                    "last_payment_error": {
-                        "message": "Insufficient funds.",
-                        "type": "card_error"
-                    },
-                    "metadata": {
-                        "user_id": self.test_user_id
-                    }
+                    "last_payment_error": {"message": "Insufficient funds.", "type": "card_error"},
+                    "metadata": {"user_id": self.test_user_id},
                 }
-            }
+            },
         }
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": MagicMock(),
-            "event_type": "payment_intent.payment_failed",
-            "event_id": insufficient_funds_webhook["id"]
-        }):
-            with patch("app.services.webhook_service.WebhookService._create", return_value={"id": "payment_insufficient_123"}):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": True,
+                "event": MagicMock(),
+                "event_type": "payment_intent.payment_failed",
+                "event_id": insufficient_funds_webhook["id"],
+            },
+        ):
+            with patch(
+                "app.services.webhook_service.WebhookService._create",
+                return_value={"id": "payment_insufficient_123"},
+            ):
                 insufficient_response = await async_client.post(
                     "/api/webhooks/stripe",
                     data=json.dumps(insufficient_funds_webhook, separators=(",", ":")),
-                    headers={"stripe-signature": "t=1234567890,v1=signature123", "content-type": "application/json"}
+                    headers={
+                        "stripe-signature": "t=1234567890,v1=signature123",
+                        "content-type": "application/json",
+                    },
                 )
 
         assert insufficient_response.status_code == status.HTTP_200_OK
@@ -977,12 +1146,17 @@ class TestPaymentE2E:
             "checkout_url": "https://checkout.stripe.com/pay/cs_test_retry_123",
             "plan_type": "basic",
             "currency": "brl",
-            "amount": 2990
+            "amount": 2990,
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.create_checkout_session", return_value=retry_checkout_response):
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_checkout_session",
+            return_value=retry_checkout_response,
+        ):
             with patch("app.api.endpoints.payments.get_current_user", return_value=self.test_user):
-                retry_response = await async_client.post("/api/payments/create-checkout", json={"tier": "basic"})
+                retry_response = await async_client.post(
+                    "/api/payments/create-checkout", json={"tier": "basic"}
+                )
 
         assert retry_response.status_code == status.HTTP_200_OK
 
@@ -1000,27 +1174,42 @@ class TestPaymentE2E:
                     "metadata": {
                         "user_id": self.test_user_id,
                         "tier": "basic",
-                        "retry_attempt": "2"
-                    }
+                        "retry_attempt": "2",
+                    },
                 }
-            }
+            },
         }
 
         mock_user_profile = {"id": "profile_retry_123", "user_id": self.test_user_id}
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": MagicMock(),
-            "event_type": "checkout.session.completed",
-            "event_id": success_webhook["id"]
-        }):
-            with patch("app.services.webhook_service.WebhookService._get_by_field", return_value=mock_user_profile):
-                with patch("app.services.webhook_service.WebhookService._create", return_value={"id": "payment_retry_success_123"}):
-                    with patch("app.services.usage_limit_service.UsageLimitService.add_credits", return_value=None):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": True,
+                "event": MagicMock(),
+                "event_type": "checkout.session.completed",
+                "event_id": success_webhook["id"],
+            },
+        ):
+            with patch(
+                "app.services.webhook_service.WebhookService._get_by_field",
+                return_value=mock_user_profile,
+            ):
+                with patch(
+                    "app.services.webhook_service.WebhookService._create",
+                    return_value={"id": "payment_retry_success_123"},
+                ):
+                    with patch(
+                        "app.services.usage_limit_service.UsageLimitService.add_credits",
+                        return_value=None,
+                    ):
                         success_response = await async_client.post(
                             "/api/webhooks/stripe",
                             data=json.dumps(success_webhook, separators=(",", ":")),
-                            headers={"stripe-signature": "t=1234567890,v1=signature123", "content-type": "application/json"}
+                            headers={
+                                "stripe-signature": "t=1234567890,v1=signature123",
+                                "content-type": "application/json",
+                            },
                         )
 
         assert success_response.status_code == status.HTTP_200_OK
@@ -1039,25 +1228,32 @@ class TestPaymentE2E:
                     "id": "cs_test_system_error_123",
                     "amount_total": 2990,
                     "payment_status": "paid",
-                    "metadata": {
-                        "user_id": self.test_user_id
-                    }
+                    "metadata": {"user_id": self.test_user_id},
                 }
-            }
+            },
         }
 
         # Mock webhook verification success but processing failure
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": MagicMock(),
-            "event_type": "checkout.session.completed",
-            "event_id": system_error_webhook["id"]
-        }):
-            with patch("app.services.webhook_service.WebhookService.process_webhook_event", side_effect=Exception("Database connection lost")):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": True,
+                "event": MagicMock(),
+                "event_type": "checkout.session.completed",
+                "event_id": system_error_webhook["id"],
+            },
+        ):
+            with patch(
+                "app.services.webhook_service.WebhookService.process_webhook_event",
+                side_effect=Exception("Database connection lost"),
+            ):
                 error_response = await async_client.post(
                     "/api/webhooks/stripe",
                     data=json.dumps(system_error_webhook, separators=(",", ":")),
-                    headers={"stripe-signature": "t=1234567890,v1=signature123", "content-type": "application/json"}
+                    headers={
+                        "stripe-signature": "t=1234567890,v1=signature123",
+                        "content-type": "application/json",
+                    },
                 )
 
         # Should still return 200 to prevent Stripe retries

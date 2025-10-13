@@ -5,9 +5,9 @@ This utility provides Brazilian market-specific context and localization
 for Sentry error tracking and performance monitoring in CV-Match backend.
 """
 
-from typing import Optional, Dict, Any, Union
 import logging
 from datetime import datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -18,12 +18,12 @@ class BrazilianUserContext:
     def __init__(
         self,
         id: str,
-        email: Optional[str] = None,
-        name: Optional[str] = None,
+        email: str | None = None,
+        name: str | None = None,
         locale: str = "pt-BR",
         currency: str = "BRL",
-        plan: Optional[str] = None,
-        subscription_status: Optional[str] = None
+        plan: str | None = None,
+        subscription_status: str | None = None,
     ):
         self.id = id
         self.email = email
@@ -42,9 +42,9 @@ class BrazilianTransactionContext:
         transaction_name: str,
         operation: str,
         currency: str = "BRL",
-        amount: Optional[float] = None,
-        payment_method: Optional[str] = None,
-        success: Optional[bool] = None
+        amount: float | None = None,
+        payment_method: str | None = None,
+        success: bool | None = None,
     ):
         self.transaction_name = transaction_name
         self.operation = operation
@@ -89,7 +89,7 @@ class SentryBrazilianContext:
                 # Additional context
                 "region": "latam",
                 "saas_type": "resume-matching",
-                "industry": "HR_Tech"
+                "industry": "HR_Tech",
             }
 
             # Only add email if provided
@@ -98,6 +98,7 @@ class SentryBrazilianContext:
 
             # Use Sentry SDK directly
             import sentry_sdk
+
             sentry_sdk.set_user(user_data)
 
             self.add_breadcrumb("User context set", "user", "info")
@@ -126,8 +127,8 @@ class SentryBrazilianContext:
                     "amount": transaction.amount,
                     "success": transaction.success,
                     "market": "brazil",
-                    "locale": "pt-BR"
-                }
+                    "locale": "pt-BR",
+                },
             )
 
             # Set transaction name with Brazilian context
@@ -145,7 +146,7 @@ class SentryBrazilianContext:
         message: str,
         category: str = "brazil-context",
         level: str = "info",
-        data: Optional[Dict[str, Any]] = None
+        data: dict[str, Any] | None = None,
     ) -> None:
         """
         Add Brazilian market breadcrumb
@@ -162,7 +163,7 @@ class SentryBrazilianContext:
                 "locale": "pt-BR",
                 "country": "BR",
                 "currency": "BRL",
-                "timezone": "America/Sao_Paulo"
+                "timezone": "America/Sao_Paulo",
             }
 
             if data:
@@ -173,11 +174,7 @@ class SentryBrazilianContext:
         except Exception as e:
             logger.error(f"Failed to add Brazilian breadcrumb: {e}")
 
-    def capture_exception(
-        self,
-        error: Exception,
-        context: Optional[Dict[str, Any]] = None
-    ) -> None:
+    def capture_exception(self, error: Exception, context: dict[str, Any] | None = None) -> None:
         """
         Capture exception with Brazilian context
 
@@ -192,7 +189,7 @@ class SentryBrazilianContext:
                 "country": "BR",
                 "currency": "BRL",
                 "application": "cv-match-backend",
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
             if context:
@@ -210,8 +207,8 @@ class SentryBrazilianContext:
                 {
                     "error_type": error.__class__.__name__,
                     "localized_message": localized_message,
-                    "original_message": str(error)
-                }
+                    "original_message": str(error),
+                },
             )
 
             logger.info(f"Brazilian exception captured: {error.__class__.__name__}")
@@ -220,10 +217,7 @@ class SentryBrazilianContext:
             logger.error(f"Failed to capture Brazilian exception: {e}")
 
     def capture_message(
-        self,
-        message: str,
-        level: str = "info",
-        context: Optional[Dict[str, Any]] = None
+        self, message: str, level: str = "info", context: dict[str, Any] | None = None
     ) -> None:
         """
         Capture message with Brazilian context
@@ -242,7 +236,7 @@ class SentryBrazilianContext:
                 "country": "BR",
                 "currency": "BRL",
                 "application": "cv-match-backend",
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
             if context:
@@ -254,10 +248,7 @@ class SentryBrazilianContext:
                 f"Message captured: {localized_message}",
                 "message",
                 level,
-                {
-                    "original_message": message,
-                    "localized_message": localized_message
-                }
+                {"original_message": message, "localized_message": localized_message},
             )
 
             logger.info(f"Brazilian message captured: {message}")
@@ -265,7 +256,7 @@ class SentryBrazilianContext:
         except Exception as e:
             logger.error(f"Failed to capture Brazilian message: {e}")
 
-    def set_brazilian_tags(self, tags: Dict[str, Any]) -> None:
+    def set_brazilian_tags(self, tags: dict[str, Any]) -> None:
         """
         Set Brazilian market tags
 
@@ -281,26 +272,21 @@ class SentryBrazilianContext:
                 "currency": "BRL",
                 "region": "latam",
                 "saas_type": "resume-matching",
-                "industry": "HR_Tech"
+                "industry": "HR_Tech",
             }
 
             # Combine with custom tags
             all_tags = {**base_tags, **tags}
 
             # Add breadcrumb for tag setting
-            self.add_breadcrumb(
-                "Brazilian tags set",
-                "tagging",
-                "info",
-                {"tags": all_tags}
-            )
+            self.add_breadcrumb("Brazilian tags set", "tagging", "info", {"tags": all_tags})
 
             logger.info(f"Brazilian tags set: {list(all_tags.keys())}")
 
         except Exception as e:
             logger.error(f"Failed to set Brazilian tags: {e}")
 
-    def add_business_context(self, context: Dict[str, Any]) -> None:
+    def add_business_context(self, context: dict[str, Any]) -> None:
         """
         Add Brazilian business context
 
@@ -315,22 +301,17 @@ class SentryBrazilianContext:
                 "country": "BR",
                 "currency": "BRL",
                 "timezone": "America/Sao_Paulo",
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
-            self.add_breadcrumb(
-                "Business context added",
-                "business",
-                "info",
-                business_context
-            )
+            self.add_breadcrumb("Business context added", "business", "info", business_context)
 
             logger.info("Brazilian business context added")
 
         except Exception as e:
             logger.error(f"Failed to add Brazilian business context: {e}")
 
-    def _localize_error_message(self, message: str, context: Dict[str, Any]) -> str:
+    def _localize_error_message(self, message: str, context: dict[str, Any]) -> str:
         """
         Localize error messages for Brazilian market
 
@@ -431,7 +412,7 @@ class SentryBrazilianContext:
             "database query executed": "Consulta ao banco de dados executada",
             "cache updated": "Cache atualizado",
             "background job started": "Tarefa em segundo plano iniciada",
-            "background job completed": "Tarefa em segundo plano concluída"
+            "background job completed": "Tarefa em segundo plano concluída",
         }
 
         for english, portuguese in translations.items():
@@ -443,11 +424,7 @@ class SentryBrazilianContext:
     def clear_user_context(self) -> None:
         """Clear user context (for logout)"""
         try:
-            self.sentry_config.add_breadcrumb(
-                "User context cleared",
-                "auth",
-                "info"
-            )
+            self.sentry_config.add_breadcrumb("User context cleared", "auth", "info")
             logger.info("Brazilian user context cleared")
 
         except Exception as e:

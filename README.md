@@ -11,18 +11,21 @@ Dont waste your time and tokens on boilerplate code. Use it to build your app
 This template includes comprehensive **Cursor Rules** and **Agent Instructions** to supercharge your AI-assisted development:
 
 ### Cursor Rules (`.cursor/rules/`)
+
 - **Context-aware guidance** that automatically applies based on the files you're editing
 - **Template system** with production-ready code patterns (`@api-endpoint-template`, `@react-component-template`)
 - **Best practices enforcement** for FastAPI, Next.js, Supabase, and LLM integration
 - **Automatic rule application** - no manual setup required
 
 ### AGENTS.md
+
 - **Simplified instructions** for AI coding assistants
 - **Project patterns** and common code examples
 - **Architecture overview** and development standards
 - **Quick reference** for established patterns
 
 ### Benefits
+
 - ⚡ **Faster Development** - Templates and patterns accelerate coding
 - 🎯 **Consistency** - All code follows established patterns
 - 🛡️ **Quality** - Built-in best practices and error handling
@@ -32,6 +35,7 @@ This template includes comprehensive **Cursor Rules** and **Agent Instructions**
 ## Features
 
 ### Backend (Python FastAPI)
+
 - **FastAPI REST API** - Fast, type-checked API development
 - **Supabase Integration**
   - Authentication (Google, LinkedIn, Email/Password)
@@ -49,6 +53,7 @@ This template includes comprehensive **Cursor Rules** and **Agent Instructions**
   - Automatic fallback to local in-memory database
 
 ### Frontend (Next.js)
+
 - **Next.js** - React framework with routing, SSR, and more
 - **Tailwind CSS** - Utility-first CSS framework
 - **Responsive design** - Mobile-first approach
@@ -58,6 +63,7 @@ This template includes comprehensive **Cursor Rules** and **Agent Instructions**
 ## Getting Started
 
 ### Prerequisites
+
 - Docker and Docker Compose
 - Make
 - Node.js 18+ (for local frontend development)
@@ -67,21 +73,25 @@ This template includes comprehensive **Cursor Rules** and **Agent Instructions**
 ### Quick Start
 
 1. Clone this repository:
+
    ```bash
    git clone https://github.com/humanstack/vibe-coding-boilerplate
    cd vibe-coding-boilerplate
    ```
 
 2. Run the first-time setup script to configure your environment:
+
    ```bash
    ./first-time.sh
    ```
+
    This will:
    - Check for required tools
    - Guide you through setting up API keys
    - Generate the necessary .env files
 
 3. Start the development environment:
+
    ```bash
    make dev
    ```
@@ -96,11 +106,13 @@ This template includes comprehensive **Cursor Rules** and **Agent Instructions**
 If you prefer to set up manually:
 
 1. Copy the `.env.example` file to `.env`:
+
    ```bash
    cp .env.example .env
    ```
 
 2. Create a frontend environment file:
+
    ```bash
    cp .env.example frontend/.env.local
    ```
@@ -191,6 +203,7 @@ See `supabase/README.md` for more details on database migrations.
 ## AI Development Support
 
 ### Using Cursor Rules
+
 The project includes comprehensive Cursor rules that automatically provide context-aware guidance:
 
 - **Automatic Application**: Rules apply automatically based on the files you're editing
@@ -198,7 +211,9 @@ The project includes comprehensive Cursor rules that automatically provide conte
 - **Best Practices**: Built-in patterns for FastAPI, Next.js, Supabase, and LLM integration
 
 ### Using AGENTS.md
+
 For simpler AI assistance, use the consolidated `AGENTS.md` file that provides:
+
 - Project overview and architecture
 - Common patterns and examples
 - Development standards and workflows
@@ -213,6 +228,7 @@ For simpler AI assistance, use the consolidated `AGENTS.md` file that provides:
 - [Future Improvements](./FutureImprovements.md)
 
 ### Legacy Documentation (replaced by Cursor rules)
+
 - [Backend Context](./llm-context/BACKEND-CONTEXT.md)
 - [Frontend Context](./llm-context/FRONTEND-CONTEXT.md)
 - [Database Migrations Context](./llm-context/DB-MIGRATIONS.md)

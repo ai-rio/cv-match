@@ -304,11 +304,9 @@ async def update_suggestion_status(
 
 ---
 
-
 <!-- Context: backend/app/api/endpoints/resume_matching.py > File Structure Organization -->
 
 ## File Structure Organization
-
 
 <!-- Context: backend/app/api/endpoints/resume_matching.py > File Structure Organization > Frontend Component Structure -->
 

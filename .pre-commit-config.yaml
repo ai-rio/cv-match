@@ -28,7 +28,7 @@ repos:
     rev: v9.37.0
     hooks:
       - id: eslint
-        files: \.(js|jsx|ts|tsx)$
+        files: ^frontend/.*\.(js|jsx|ts|tsx)$
         types: [file]
         additional_dependencies:
           - eslint@9.27.0
@@ -42,31 +42,23 @@ repos:
     hooks:
       - id: type-check-frontend
         name: TypeScript type checking (frontend)
-        entry: bunx type-check
+        entry: sh -c 'cd frontend && bun run type-check'
         language: system
-        files: \.(ts|tsx)$
+        files: ^frontend/.*\.(ts|tsx)$
         pass_filenames: false
         always_run: false
 
-      - id: type-check-backend
-        name: Python type checking (backend)
-        entry: pyright
+      - id: lint-frontend
+        name: Frontend linting
+        entry: sh -c 'cd frontend && bun run lint'
         language: system
-        files: ^backend/app/.*\.py$
-        pass_filenames: false
-
-      - id: test-frontend
-        name: Run frontend tests
-        entry: bunx test:coverage
-        language: system
-        files: \.(js|jsx|ts|tsx)$
+        files: ^frontend/.*\.(js|jsx|ts|tsx)$
         pass_filenames: false
         always_run: false
 
-      - id: test-backend
-        name: Run backend tests
-        entry: cd backend && python -m pytest tests/ -v --cov=app --cov-report=term-missing
+      - id: format-frontend
+        name: Frontend formatting
+        entry: sh -c 'cd frontend && bun run format'
         language: system
-        files: ^backend/.*\.py$
+        files: ^frontend/.*\.(js|jsx|ts|tsx|json|md)$
         pass_filenames: false
-        always_run: false

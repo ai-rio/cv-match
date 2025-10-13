@@ -7,6 +7,7 @@ This document outlines the comprehensive Git Flow workflow implemented for CV-Ma
 ## 🚀 Architecture
 
 Our Git Flow workflow uses:
+
 - **Git Flow** branching strategy for systematic development
 - **GitHub Actions** for automated quality checks and CI/CD
 - **Husky** for local pre-commit hooks
@@ -88,6 +89,7 @@ package.json         # Global scripts and dependencies
 We use **conventional commits** with Brazilian market context:
 
 ### Format:
+
 ```
 type(scope): description
 
@@ -97,6 +99,7 @@ type(scope): description
 ```
 
 ### Available Types:
+
 - `feat`: New features
 - `fix`: Bug fixes
 - `docs`: Documentation changes
@@ -116,6 +119,7 @@ type(scope): description
 - `wip`: Work in progress
 
 ### Examples:
+
 ```bash
 feat(auth): add Brazilian Portuguese translations
 fix(payment): handle BRL currency conversion errors
@@ -127,11 +131,13 @@ refactor(database): optimize query performance for large datasets
 ## 🎯 Brazilian Market Specifics
 
 ### Commit Context:
+
 - Use BRL- prefix for Brazilian market tickets
 - Reference PT-BR translations in i18n commits
 - Document currency handling for Brazilian real
 
 ### Examples:
+
 ```bash
 feat(i18n): add PT-BR translations for payment flow
 fix(currency): handle BRL decimal formatting correctly
@@ -141,6 +147,7 @@ docs(BRL-123): update Brazilian payment methods documentation
 ## 🛠 Available bun Scripts
 
 ### Setup Commands:
+
 ```bash
 bun run dev:setup          # Install all dependencies
 bun run install:frontend   # Install frontend deps with bun
@@ -149,6 +156,7 @@ bun run hooks:install      # Install Git hooks
 ```
 
 ### Quality Assurance:
+
 ```bash
 bun run lint:all          # Lint frontend and backend
 bun run format:all        # Format all code
@@ -166,6 +174,7 @@ bun run quality:check     # Run complete quality check
 ```
 
 ### Build Commands:
+
 ```bash
 bun run build:frontend    # Build frontend for production
 ```
@@ -173,6 +182,7 @@ bun run build:frontend    # Build frontend for production
 ## 🔄 Daily Workflow
 
 ### 1. Development Setup:
+
 ```bash
 # Clone and setup
 git clone <repository-url>
@@ -182,6 +192,7 @@ bun run hooks:install
 ```
 
 ### 2. Feature Development:
+
 ```bash
 # Create feature branch
 git checkout -b feat/brazilian-payment-flow
@@ -198,6 +209,7 @@ git commit -m "feat(payment): implement Brazilian PIX payment method"
 ```
 
 ### 3. Quality Assurance:
+
 ```bash
 # Run comprehensive checks before pushing
 bun run quality:check
@@ -209,6 +221,7 @@ git push origin feat/brazilian-payment-flow
 ## 🔍 Troubleshooting
 
 ### Hook Execution Issues:
+
 ```bash
 # Reinstall hooks if they're not working
 bun run hooks:uninstall
@@ -220,6 +233,7 @@ chmod +x .husky/*
 ```
 
 ### Bypassing Hooks (Emergency Only):
+
 ```bash
 # WARNING: Use only in emergency situations
 git commit -m "emergency fix" --no-verify
@@ -227,6 +241,7 @@ git push --no-verify
 ```
 
 ### Lint-staged Issues:
+
 ```bash
 # Debug lint-staged configuration
 bunx  lint-staged --verbose
@@ -238,6 +253,7 @@ cat .lintstagedrc.js
 ## 📊 Metrics and Monitoring
 
 The workflow automatically tracks:
+
 - Commit frequency and author statistics
 - File change patterns
 - Test coverage trends
@@ -249,12 +265,14 @@ The workflow automatically tracks:
 Our comprehensive type checking system is integrated throughout the CI/CD pipeline:
 
 ### Type Error Classification
+
 - **🔴 Critical**: Build-blocking errors (TS2307, TS2304, undefined names)
 - **🟡 High**: Affects multiple files (TS2339, TS2345, type incompatibilities)
 - **🟢 Medium**: Local to component/function (TS18047, TS2322)
 - **⚪ Low**: Cosmetic/warnings (TS7006, TS6133, unused variables)
 
 ### Quality Gates
+
 - Critical errors: 0 allowed (blocks merge)
 - High priority: Maximum 10 allowed
 - Medium priority: Maximum 25 allowed
@@ -262,12 +280,14 @@ Our comprehensive type checking system is integrated throughout the CI/CD pipeli
 - Type safety score: Minimum 80% for production
 
 ### Automated Workflows
+
 1. **Type Error Analysis**: Runs on every PR and push
 2. **Progressive Fixing**: Automated fixes for non-critical errors
 3. **Brazilian Market Validation**: PT-BR and BRL type checking
 4. **PR Metrics**: Type safety scores in PR descriptions
 
 ### Manual Bulk Fixes
+
 ```bash
 # Analyze current state
 bun run type-analysis
@@ -286,6 +306,7 @@ bun run type-safety:report
 ```
 
 ### Integration with Git Flow
+
 - **Feature branches**: Type checking runs on every push
 - **Release branches**: Strict type gates (90%+ safety score required)
 - **Hotfix branches**: Critical errors only (rapid fixes prioritized)

@@ -168,11 +168,9 @@ export async function uploadResume(formData: FormData) {
 
 ---
 
-
 <!-- Context: backend/app/api/endpoints/resume_matching.py > Integration Patterns and Best Practices -->
 
 ## Integration Patterns and Best Practices
-
 
 <!-- Context: backend/app/api/endpoints/resume_matching.py > Integration Patterns and Best Practices > 1. Error Handling Patterns -->
 
@@ -245,7 +243,6 @@ from app.api.exception_handlers import resume_matching_exception_handler
 app = FastAPI()
 app.add_exception_handler(ResumeMatchingException, resume_matching_exception_handler)
 ```
-
 
 <!-- Context: backend/app/main.py > 2. Caching Strategies -->
 
@@ -326,7 +323,6 @@ class EmbeddingService:
         return embedding
 ```
 
-
 <!-- Context: Usage in services > 3. Rate Limiting -->
 
 ### 3. Rate Limiting
@@ -399,7 +395,6 @@ async def analyze_match(
     # ... rest of the function
 ```
 
-
 <!-- Context: Usage in endpoints > 4. Background Job Processing -->
 
 ### 4. Background Job Processing
@@ -458,11 +453,9 @@ def generate_suggestions_task(self, match_result_id: str, resume_text: str,
 
 ---
 
-
 <!-- Context: backend/app/services/background_jobs.py > Testing Strategies -->
 
 ## Testing Strategies
-
 
 <!-- Context: backend/app/services/background_jobs.py > Testing Strategies > Unit Testing Examples -->
 
@@ -548,3 +541,4 @@ class TestDocumentProcessingService:
         assert contact_info['email'] == 'john.doe@example.com'
         assert contact_info['phone'] == '(11) 98765-4321'
         assert contact_info['linkedin'] == 'linkedin.com/in/johndoe'
+```

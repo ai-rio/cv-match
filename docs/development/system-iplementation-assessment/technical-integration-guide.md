@@ -10,6 +10,7 @@
 This technical integration guide provides detailed specifications for implementing Resume-Matcher's AI-powered features into the CV-Match SaaS platform. The guide covers service architecture, code adaptation patterns, database schema changes, API specifications, and integration best practices.
 
 **Integration Scope:**
+
 - Document processing and parsing pipeline
 - Vector similarity matching with Qdrant
 - LLM-powered analysis and suggestions
@@ -17,6 +18,7 @@ This technical integration guide provides detailed specifications for implementi
 - Comprehensive API endpoints
 
 **Technical Stack:**
+
 - **Backend:** FastAPI with async/await patterns
 - **Database:** Supabase PostgreSQL + Qdrant vector database
 - **AI Services:** OpenAI GPT-4 + Embeddings API
@@ -2551,6 +2553,7 @@ async def get_match_history(
 This technical integration guide provides comprehensive specifications for implementing Resume-Matcher features into the CV-Match platform. The guide covers all aspects from service architecture to testing strategies, ensuring a successful integration with minimal disruption to existing functionality.
 
 **Key Implementation Points:**
+
 - Follow the existing service layer patterns
 - Implement comprehensive error handling
 - Use caching strategies for performance optimization

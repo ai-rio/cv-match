@@ -9,6 +9,7 @@ This document covers the comprehensive next-intl internationalization implementa
 ### **✅ Production-Ready Features Found**
 
 #### **1. Core Internationalization Setup**
+
 - **next-intl v4.3.6**: Latest stable version
 - **Multi-locale support**: English (en) + Brazilian Portuguese (pt-br)
 - **Automatic locale detection**: Based on browser preferences and URL prefixes
@@ -16,6 +17,7 @@ This document covers the comprehensive next-intl internationalization implementa
 - **Fallback system**: English as default locale with error handling
 
 #### **2. Translation Infrastructure**
+
 ```
 locales/
 ├── en/                     # English translations
@@ -43,6 +45,7 @@ locales/
 ```
 
 #### **3. Advanced Features**
+
 - **Modular translation loading**: Separate JSON files per feature
 - **Deep merge functionality**: Combines translation modules properly
 - **Error handling**: Fallback to English if locale loading fails
@@ -51,6 +54,7 @@ locales/
 - **Middleware integration**: Combines auth and i18n middleware
 
 #### **4. Brazilian Market Optimizations**
+
 - **Currency formatting**: Brazilian Real (R$) with proper locale formatting
 - **Date/time formatting**: Brazilian format (DD/MM/YYYY)
 - **Cultural adaptations**: Uses formal "você" instead of "tu"
@@ -62,18 +66,21 @@ locales/
 ### **Step 1: Core Internationalization Setup**
 
 #### **1.1 Install Required Dependencies**
+
 ```bash
 cd /home/carlos/projects/cv-match/frontend
 bun install next-intl@4.3.6
 ```
 
 #### **1.2 Create i18n Directory Structure**
+
 ```bash
 mkdir -p /home/carlos/projects/cv-match/frontend/src/i18n
 mkdir -p /home/carlos/projects/cv-match/frontend/locales/{en,pt-br}
 ```
 
 #### **1.3 Copy Core Configuration Files**
+
 ```bash
 # Copy routing configuration
 cp /home/carlos/projects/Resume-Matcher/apps/frontend/src/i18n/routing.ts \
@@ -85,15 +92,16 @@ cp /home/carlos/projects/Resume-Matcher/apps/frontend/src/i18n/request.ts \
 ```
 
 #### **1.4 Update Next.js Configuration**
+
 ```typescript
 // /home/carlos/projects/cv-match/frontend/next.config.ts
-const createNextIntlPlugin = require('next-intl/plugin');
+const createNextIntlPlugin = require("next-intl/plugin");
 
-const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig = {
   // Your existing config...
-  transpilePackages: ['next-intl'],
+  transpilePackages: ["next-intl"],
 };
 
 export default withNextIntl(nextConfig);
@@ -102,6 +110,7 @@ export default withNextIntl(nextConfig);
 ### **Step 2: Translation File Migration**
 
 #### **2.1 Copy Translation Files**
+
 ```bash
 # Copy all translation files
 cp -r /home/carlos/projects/Resume-Matcher/apps/frontend/locales/* \
@@ -111,6 +120,7 @@ cp -r /home/carlos/projects/Resume-Matcher/apps/frontend/locales/* \
 #### **2.2 Enhance for CV-Match Specific Features**
 
 **Create enhanced auth.json for cv-match:**
+
 ```json
 {
   "auth": {
@@ -131,6 +141,7 @@ cp -r /home/carlos/projects/Resume-Matcher/apps/frontend/locales/* \
 ```
 
 **Create cv-match specific dashboard.json:**
+
 ```json
 {
   "dashboard": {
@@ -148,13 +159,14 @@ cp -r /home/carlos/projects/Resume-Matcher/apps/frontend/locales/* \
 ### **Step 3: Brazilian Market Enhancements**
 
 #### **3.1 Currency and Number Formatting**
+
 ```typescript
 // /home/carlos/projects/cv-match/frontend/src/lib/pt-br-formatters.ts
 
 export function formatCurrencyBRL(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
@@ -165,7 +177,7 @@ export function formatPercentageBRL(value: number): string {
 }
 
 export function formatFileSizePT(bytes: number): string {
-  const units = ['B', 'KB', 'MB', 'GB'];
+  const units = ["B", "KB", "MB", "GB"];
   const size = bytes / 1024;
   const unitIndex = Math.floor(Math.log(size) / Math.log(1024));
   return `${size.toFixed(2)} ${units[unitIndex]}`;
@@ -173,30 +185,32 @@ export function formatFileSizePT(bytes: number): string {
 ```
 
 #### **3.2 Date and Time Formatting**
+
 ```typescript
 // Enhanced date formatting for Brazilian market
 export function formatDateBrazil(date: Date | string): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
   }).format(dateObj);
 }
 
 export function formatDateTimeBrazil(date: Date | string): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(dateObj);
 }
 ```
 
 #### **3.3 Brazilian Market-Specific Content**
+
 ```json
 {
   "pricing": {
@@ -240,29 +254,31 @@ export function formatDateTimeBrazil(date: Date | string): string {
 ### **Step 4: Middleware Integration**
 
 #### **4.1 Enhanced Middleware**
+
 ```typescript
 // /home/carlos/projects/cv-match/frontend/middleware.ts
-import createMiddleware from 'next-intl/middleware';
-import { routing } from './src/i18n/routing';
+import createMiddleware from "next-intl/middleware";
+import { routing } from "./src/i18n/routing";
 
 const intlMiddleware = createMiddleware(routing);
 
 export default intlMiddleware;
 
 export const config = {
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'],
+  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
 };
 ```
 
 #### **4.2 Route Structure Setup**
+
 ```typescript
 // /home/carlos/projects/cv-match/frontend/src/i18n/routing.ts
-import { defineRouting } from 'next-intl/routing';
+import { defineRouting } from "next-intl/routing";
 
 export const routing = defineRouting({
-  locales: ['en', 'pt-br'],
-  defaultLocale: 'en',
-  localePrefix: 'always', // Always show locale in URL
+  locales: ["en", "pt-br"],
+  defaultLocale: "en",
+  localePrefix: "always", // Always show locale in URL
 });
 
 export type Locale = (typeof routing.locales)[number];
@@ -271,6 +287,7 @@ export type Locale = (typeof routing.locales)[number];
 ### **Step 5: Component Integration**
 
 #### **5.1 Layout Setup**
+
 ```typescript
 // /home/carlos/projects/cv-match/frontend/app/[locale]/layout.tsx
 import { NextIntlClientProvider } from 'next-intl';
@@ -304,18 +321,19 @@ export default async function LocaleLayout({
 ```
 
 #### **5.2 Component Usage Example**
+
 ```tsx
 // /home/carlos/projects/cv-match/frontend/components/resume-upload.tsx
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 export default function ResumeUpload() {
-  const t = useTranslations('upload');
+  const t = useTranslations("upload");
 
   return (
     <div>
-      <h1>{t('title')}</h1>
-      <p>{t('subtitle')}</p>
-      <button>{t('button')}</button>
+      <h1>{t("title")}</h1>
+      <p>{t("subtitle")}</p>
+      <button>{t("button")}</button>
     </div>
   );
 }
@@ -326,11 +344,13 @@ export default function ResumeUpload() {
 ### **1. Cultural Adaptations**
 
 #### **Formal Language Guidelines**
+
 - Use "você" instead of "tu" for formal communication
 - Proper job market terminology (currículo instead of resumo)
 - Brazilian Portuguese grammar and spelling
 
 #### **Job Market Specific Terms**
+
 ```json
 {
   "resume": {
@@ -356,6 +376,7 @@ export default function ResumeUpload() {
 ### **2. Payment Integration**
 
 #### **Brazilian Payment Methods**
+
 ```json
 {
   "payment": {
@@ -374,14 +395,16 @@ export default function ResumeUpload() {
 ### **3. SEO Optimization for Brazil**
 
 #### **Meta Tags and Descriptions**
+
 ```typescript
 // Dynamic SEO for Brazilian market
 export function getBrazilianSEOMetadata(pathname: string) {
   return {
-    title: 'CV-Match Brasil: Otimizador de Currículos com IA',
-    description: 'Aumente suas chances de contratação no mercado brasileiro com análise de currículo inteligente',
-    keywords: 'currículo, emprego, brasil, otimização, ia, recrutamento',
-    locale: 'pt-BR',
+    title: "CV-Match Brasil: Otimizador de Currículos com IA",
+    description:
+      "Aumente suas chances de contratação no mercado brasileiro com análise de currículo inteligente",
+    keywords: "currículo, emprego, brasil, otimização, ia, recrutamento",
+    locale: "pt-BR",
   };
 }
 ```
@@ -389,25 +412,27 @@ export function getBrazilianSEOMetadata(pathname: string) {
 ## Testing and Validation
 
 ### **1. Locale Testing Strategy**
+
 ```typescript
 // Test locale-specific functionality
-describe('Brazilian Portuguese Localization', () => {
-  test('Currency formatting', () => {
-    expect(formatCurrencyBRL(29.90)).toBe('R$ 29,90');
+describe("Brazilian Portuguese Localization", () => {
+  test("Currency formatting", () => {
+    expect(formatCurrencyBRL(29.9)).toBe("R$ 29,90");
   });
 
-  test('Date formatting', () => {
-    expect(formatDateBrazil('2024-01-15')).toBe('15/01/2024');
+  test("Date formatting", () => {
+    expect(formatDateBrazil("2024-01-15")).toBe("15/01/2024");
   });
 
-  test('Translation loading', async () => {
-    const messages = await getMessages('pt-br');
-    expect(messages.dashboard.title).toBe('Painel CV-Match');
+  test("Translation loading", async () => {
+    const messages = await getMessages("pt-br");
+    expect(messages.dashboard.title).toBe("Painel CV-Match");
   });
 });
 ```
 
 ### **2. User Acceptance Testing**
+
 - Test all user flows in Brazilian Portuguese
 - Validate payment flows with BRL currency
 - Check form validations with Brazilian-specific inputs
@@ -416,6 +441,7 @@ describe('Brazilian Portuguese Localization', () => {
 ## Deployment Configuration
 
 ### **1. Environment Variables**
+
 ```bash
 # Frontend .env.local
 NEXT_PUBLIC_DEFAULT_LOCALE=pt-br
@@ -424,6 +450,7 @@ NEXT_PUBLIC_MARKET=brasil
 ```
 
 ### **2. Build Configuration**
+
 ```json
 {
   "scripts": {
@@ -438,6 +465,7 @@ NEXT_PUBLIC_MARKET=brasil
 ## Migration Checklist
 
 ### **✅ Must-Have Features**
+
 - [ ] next-intl v4.3.6+ installed
 - [ ] Locale routing configured
 - [ ] Brazilian Portuguese translations copied
@@ -447,6 +475,7 @@ NEXT_PUBLIC_MARKET=brasil
 - [ ] SEO optimization for Brazilian market
 
 ### **🎯 Brazilian Market Enhancements**
+
 - [ ] PIX payment method integration
 - [ ] Brazilian job market terminology
 - [ ] Cultural adaptations (formal language)
@@ -455,6 +484,7 @@ NEXT_PUBLIC_MARKET=brasil
 - [ ] Portuguese email templates
 
 ### **🔧 Technical Requirements**
+
 - [ ] Type-safe locale definitions
 - [ ] Fallback system working
 - [ ] SSR with locale detection

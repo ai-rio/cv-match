@@ -16,10 +16,10 @@ This document outlines the comprehensive branch protection configuration impleme
 
 ### Main Branches
 
-| Branch | Purpose | Protection Level | Brazilian Context |
-|--------|---------|------------------|-------------------|
-| `main` | Production code | 🔒 Maximum protection | Production Brazilian SaaS |
-| `develop` | Integration branch | 🔒 High protection | Staging Brazilian features |
+| Branch    | Purpose            | Protection Level      | Brazilian Context          |
+| --------- | ------------------ | --------------------- | -------------------------- |
+| `main`    | Production code    | 🔒 Maximum protection | Production Brazilian SaaS  |
+| `develop` | Integration branch | 🔒 High protection    | Staging Brazilian features |
 
 ### Protection Rules Summary
 
@@ -61,6 +61,7 @@ develop:
 ### Main Branch Protection
 
 #### Basic Settings
+
 - **Require pull request reviews before merging**: Enabled
 - **Required approving reviews**: 2
 - **Dismiss stale PR approvals when new commits are pushed**: Enabled
@@ -69,16 +70,19 @@ develop:
 - **Require linear history**: Enabled
 
 #### Additional Restrictions
+
 - **Limit who can push to matching branches**: Enabled
 - **Allowed to push**: Maintainers and Admins only
 - **Allow force pushes**: Disabled
 - **Allow deletions**: Disabled
 
 #### Required Status Checks
+
 - **Require status checks to pass before merging**: Enabled
 - **Required status checks**: All selected
 
 #### Brazilian Market Specific Checks
+
 ```yaml
 brazilian-market-compliance:
   - Portuguese localization verification
@@ -91,6 +95,7 @@ brazilian-market-compliance:
 ### Develop Branch Protection
 
 #### Basic Settings
+
 - **Require pull request reviews before merging**: Enabled
 - **Required approving reviews**: 1
 - **Dismiss stale PR approvals when new commits are pushed**: Enabled
@@ -99,18 +104,21 @@ brazilian-market-compliance:
 - **Require conversation resolution before merging**: Enabled
 
 #### Additional Restrictions
+
 - **Limit who can push to matching branches**: Enabled
 - **Allowed to push**: Maintainers, Developers, and Admins
 - **Allow force pushes**: Disabled
 - **Allow deletions**: Disabled
 
 #### Required Status Checks
+
 - **Require status checks to pass before merging**: Enabled
 - **Required status checks**: Core checks only
 
 ## 🔧 Status Checks Configuration
 
 ### Frontend Quality Checks
+
 ```yaml
 frontend-quality:
   description: "Frontend code quality and build validation"
@@ -146,6 +154,7 @@ frontend-quality:
 ```
 
 ### Backend Quality Checks
+
 ```yaml
 backend-quality:
   description: "Backend code quality and API validation"
@@ -178,6 +187,7 @@ backend-quality:
 ```
 
 ### Security Scan
+
 ```yaml
 security-scan:
   description: "Security vulnerability scanning"
@@ -205,6 +215,7 @@ security-scan:
 ```
 
 ### Database Migration Check
+
 ```yaml
 database-migration:
   description: "Database migration validation"
@@ -230,6 +241,7 @@ database-migration:
 ```
 
 ### Brazilian Market Compliance
+
 ```yaml
 brazilian-market-compliance:
   description: "Brazilian market specific validations"
@@ -268,13 +280,13 @@ brazilian-market-compliance:
 
 ### Permission Levels
 
-| Role | Main Branch | Develop Branch | Description |
-|------|-------------|----------------|-------------|
-| **Admin** | ✅ Full Access | ✅ Full Access | Repository administrators |
-| **Maintainer** | ✅ Merge + Push | ✅ Full Access | Senior developers, tech leads |
-| **Developer** | ❌ No Direct Push | ✅ Push + PR | Regular developers |
-| **Brazilian Team** | ❌ No Direct Push | ✅ Push + PR | Market specialists |
-| **External Contributor** | ❌ No Access | ✅ PR Only | Community contributors |
+| Role                     | Main Branch       | Develop Branch | Description                   |
+| ------------------------ | ----------------- | -------------- | ----------------------------- |
+| **Admin**                | ✅ Full Access    | ✅ Full Access | Repository administrators     |
+| **Maintainer**           | ✅ Merge + Push   | ✅ Full Access | Senior developers, tech leads |
+| **Developer**            | ❌ No Direct Push | ✅ Push + PR   | Regular developers            |
+| **Brazilian Team**       | ❌ No Direct Push | ✅ Push + PR   | Market specialists            |
+| **External Contributor** | ❌ No Access      | ✅ PR Only     | Community contributors        |
 
 ### Code Ownership Configuration
 
@@ -315,6 +327,7 @@ README.md @cv-match/maintainers
 ### Pull Request Automation
 
 #### PR Validation Workflow
+
 ```yaml
 name: PR Validation and Automation
 
@@ -327,39 +340,40 @@ jobs:
   validate-pr:
     runs-on: ubuntu-latest
     steps:
-    - name: Validate PR structure
-      uses: actions/github-script@v6
-      with:
-        script: |
-          // Validate PR title follows conventional commits
-          // Validate PR description completeness
-          // Check for Brazilian market considerations
-          // Verify required reviewers assigned
+      - name: Validate PR structure
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // Validate PR title follows conventional commits
+            // Validate PR description completeness
+            // Check for Brazilian market considerations
+            // Verify required reviewers assigned
 
-    - name: Add Brazilian market labels
-      if: contains(github.event.pull_request.title, 'brazilian') || contains(github.event.pull_request.title, 'BRL')
-      uses: actions/github-script@v6
-      with:
-        script: |
-          github.rest.issues.addLabels({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            labels: ['brazilian-market', 'priority-high']
-          })
+      - name: Add Brazilian market labels
+        if: contains(github.event.pull_request.title, 'brazilian') || contains(github.event.pull_request.title, 'BRL')
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['brazilian-market', 'priority-high']
+            })
 
-    - name: Request required reviewers
-      uses: actions/github-script@v6
-      with:
-        script: |
-          // Automatically request reviews based on files changed
-          // Brazilian market changes require Brazilian team review
-          // Security changes require security team review
+      - name: Request required reviewers
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // Automatically request reviews based on files changed
+            // Brazilian market changes require Brazilian team review
+            // Security changes require security team review
 ```
 
 ### Quality Gate Automation
 
 #### Branch Protection Enforcement
+
 ```yaml
 name: Branch Protection Enforcement
 
@@ -371,29 +385,30 @@ jobs:
   quality-gate:
     runs-on: ubuntu-latest
     steps:
-    - name: Check quality gates
-      run: |
-        # Ensure all quality checks pass
-        # Verify Brazilian market compliance
-        # Check documentation completeness
-        # Validate security requirements
+      - name: Check quality gates
+        run: |
+          # Ensure all quality checks pass
+          # Verify Brazilian market compliance
+          # Check documentation completeness
+          # Validate security requirements
 
-    - name: Block merge if requirements not met
-      if: failure()
-      uses: actions/github-script@v6
-      with:
-        script: |
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: '❌ **Quality gates not met**. Please address all failing checks before merging.'
-          })
+      - name: Block merge if requirements not met
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '❌ **Quality gates not met**. Please address all failing checks before merging.'
+            })
 ```
 
 ## 🇧🇷 Brazilian Market Specific Protections
 
 ### LGPD Compliance Enforcement
+
 ```yaml
 lgpd_protection:
   description: "LGPD compliance enforcement for Brazilian market"
@@ -427,6 +442,7 @@ lgpd_protection:
 ```
 
 ### BRL Payment Protection
+
 ```yaml
 brl_payment_protection:
   description: "BRL payment method protection"
@@ -464,6 +480,7 @@ brl_payment_protection:
 ## 🔍 Monitoring and Enforcement
 
 ### Compliance Monitoring
+
 ```yaml
 compliance_monitoring:
   description: "Continuous compliance monitoring"
@@ -492,6 +509,7 @@ compliance_monitoring:
 ```
 
 ### Enforcement Actions
+
 ```yaml
 enforcement_actions:
   automatic:
@@ -517,6 +535,7 @@ enforcement_actions:
 ## 📋 Configuration Files
 
 ### GitHub Branch Protection API
+
 ```bash
 # Set up main branch protection
 curl -X PUT \
@@ -548,6 +567,7 @@ curl -X PUT \
 ```
 
 ### GitHub Configuration as Code
+
 ```yaml
 # .github/branch-protection.yml
 protection_rules:
@@ -589,11 +609,13 @@ protection_rules:
 ## 🔄 Maintenance and Updates
 
 ### Regular Review Schedule
+
 - **Monthly**: Review and update protection rules
 - **Quarterly**: Comprehensive compliance audit
 - **Ad-hoc**: Update when new requirements emerge
 
 ### Update Process
+
 1. **Assess Changes**: Evaluate new requirements
 2. **Update Configuration**: Modify protection rules
 3. **Test Changes**: Validate in develop branch
@@ -602,6 +624,7 @@ protection_rules:
 6. **Monitor**: Track effectiveness
 
 ### Rollback Procedures
+
 ```bash
 # Emergency rollback of protection rules
 curl -X DELETE \
@@ -620,6 +643,7 @@ curl -X PUT \
 ## 📊 Reporting and Analytics
 
 ### Compliance Dashboard
+
 ```yaml
 compliance_dashboard:
   metrics:
@@ -636,6 +660,7 @@ compliance_dashboard:
 ```
 
 ### Monthly Reports
+
 - **Branch Protection Effectiveness**: Success rates, bypass attempts
 - **Quality Metrics**: Test coverage, code quality trends
 - **Brazilian Market Compliance**: Localization completeness, payment integration status
@@ -645,6 +670,7 @@ compliance_dashboard:
 ## 🎯 Best Practices
 
 ### DO ✅
+
 1. **Regular Reviews**: Monthly review of protection rules
 2. **Brazilian Context**: Include market-specific requirements
 3. **Compliance Focus**: LGPD and regulatory compliance
@@ -657,6 +683,7 @@ compliance_dashboard:
 10. **Audit Trail**: Log all protection rule changes
 
 ### DON'T ❌
+
 1. **Bypass Protection**: Never disable protection without justification
 2. **Ignore Brazilian Requirements**: Market-specific compliance is critical
 3. **Skip Reviews**: All changes must be properly reviewed

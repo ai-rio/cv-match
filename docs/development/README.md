@@ -11,6 +11,7 @@
 
 **Phase**: Infrastructure Complete ✅ → Core Services (P0) Pending ⏳
 **Completed**:
+
 - ✅ Security hardening (LLM sanitization, rate limiting) - 100% test coverage
 - ✅ Stripe payment infrastructure (services, webhooks, DB migrations) - Production ready
 - ✅ Sentry error tracking (fully integrated and live)
@@ -18,6 +19,7 @@
 - ✅ **ACHIEVEMENT**: 59/59 tests passing (100% pass rate)
 
 **Pending** (P0 Core Services - Est. 1-2 days):
+
 - ⏳ Resume processing services (copy from Resume-Matcher)
 - ⏳ Job matching algorithm (copy from Resume-Matcher)
 - ⏳ LLM orchestration (agent system)
@@ -29,6 +31,7 @@
 ## 🗂️ Documentation Index
 
 ### 🎯 Planning & Strategy
+
 - **[ROADMAP.md](./ROADMAP.md)** - Prioritized implementation plan (P0/P1/P2 tiers)
   - Original 4-week timeline with weekly milestones
   - Gap analysis: Resume-Matcher vs cv-match
@@ -54,6 +57,7 @@
   - Financial projections (R$ 20M+ valuation by Year 3)
 
 ### 🔧 Integration Guides
+
 - **[Resume-Matcher Integration Strategy](./resume-matcher-integration.md)**
   - Complete codebase analysis
   - Time savings breakdown (90% reduction)
@@ -65,6 +69,7 @@
   - Testing procedures
 
 ### ✅ Verification & Quality Assurance
+
 - **[STATUS-UPDATE-SUMMARY.md](./STATUS-UPDATE-SUMMARY.md)** - Current status clarification ⭐ UPDATED
   - What's actually complete (infrastructure)
   - What's pending (core services)
@@ -107,6 +112,7 @@
   - Security and scalability
 
 ### 🌎 Brazilian Market
+
 - **[Next-Intl Integration](./next-intl-integration.md)**
   - PT-BR internationalization setup
   - Translation infrastructure
@@ -128,6 +134,7 @@
   - Webhook testing procedures
 
 ### 🔒 Security & Infrastructure
+
 - **[LLM Security Implementation](./llm-security-implementation.md)** ✅ NEW
   - Input sanitization patterns
   - Rate limiting configuration
@@ -147,6 +154,7 @@
 ## 🚀 Quick Commands
 
 ### Development
+
 ```bash
 # Start full stack
 make dev
@@ -163,6 +171,7 @@ make install-backend   # Uses uv
 ```
 
 ### Database
+
 ```bash
 # Create migration
 make db-migration-new name=description
@@ -175,6 +184,7 @@ make db-status
 ```
 
 ### Testing
+
 ```bash
 # Backend tests (Docker container)
 docker compose exec backend python -m pytest -v
@@ -193,6 +203,7 @@ cd frontend && bun dev
 ## 📊 Progress Tracking
 
 ### ✅ Week 0-2: Infrastructure (COMPLETE - 3 weeks early!)
+
 - [x] Security hardening (LLM sanitization, rate limiting) - 29/29 tests passing ✅
 - [x] Stripe payment services (473 LOC) - Production ready ✅
 - [x] Webhook processing (707 LOC) - Enterprise-grade ✅
@@ -205,6 +216,7 @@ cd frontend && bun dev
 - [x] **ACHIEVEMENT**: 65/65 tests passing (100% coverage) 🏆
 
 ### Week 1 (Revised): Frontend Migration (P0)
+
 - [ ] Copy optimization pages from Resume-Matcher
 - [ ] Copy UI components (shadcn/ui)
 - [ ] Install next-intl
@@ -212,6 +224,7 @@ cd frontend && bun dev
 - [ ] Test end-to-end flow: upload → analyze → pay → results
 
 ### Week 2 (Revised): Polish & Soft Launch (P1)
+
 - [ ] UI/UX polish
 - [ ] Soft launch to beta users
 - [ ] Monitor Sentry for issues (already live)
@@ -224,17 +237,20 @@ cd frontend && bun dev
 ## 🎓 Learning Resources
 
 ### Source Code
+
 - **Resume-Matcher**: `/home/carlos/projects/Resume-Matcher/apps/`
   - Backend: `backend/app/services/` (13 services, ~3,264 LOC)
   - Frontend: `frontend/app/` (30+ pages)
   - i18n: `frontend/locales/` (PT-BR + EN)
 
 ### Environment Setup
+
 - **Backend**: Python 3.12+, FastAPI, Supabase
 - **Frontend**: Node 18+, Next.js 15, Bun, next-intl v4.3.6
 - **Database**: Local Supabase with RLS
 
 ### Key Dependencies
+
 ```bash
 # Backend
 openai>=1.0.0
@@ -258,6 +274,7 @@ next-intl@4.3.6
 ## 📞 Support
 
 ### Common Issues
+
 - **Import Errors**: Check Python path and dependencies
 - **Database Errors**: Verify Supabase connection and migrations
 - **Auth Issues**: Check Supabase auth configuration
@@ -265,6 +282,7 @@ next-intl@4.3.6
 - **Payment Issues**: Check Stripe webhook configuration
 
 ### Debug Mode
+
 ```bash
 LOG_LEVEL=DEBUG
 RESUME_MATCHER_DEBUG=true

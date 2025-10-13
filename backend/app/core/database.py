@@ -2,7 +2,7 @@
 Database session and operations for cv-match backend.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from supabase import Client, create_client
 
@@ -22,7 +22,9 @@ class DatabaseOperations:
     def __init__(self, db: SupabaseSession):
         self.db = db
 
-    async def select_by_id(self, table: str, id_column: str, id_value: str) -> Optional[Dict[str, Any]]:
+    async def select_by_id(
+        self, table: str, id_column: str, id_value: str
+    ) -> dict[str, Any] | None:
         """
         Select a record by ID.
 
@@ -37,7 +39,7 @@ class DatabaseOperations:
         result = self.db.client.table(table).select("*").eq(id_column, id_value).execute()
         return result.data[0] if result.data else None
 
-    async def insert(self, table: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def insert(self, table: str, data: dict[str, Any]) -> dict[str, Any]:
         """
         Insert a new record.
 
@@ -53,7 +55,9 @@ class DatabaseOperations:
             raise ValueError(f"Failed to insert record into {table}")
         return result.data[0]
 
-    async def update(self, table: str, id_column: str, id_value: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def update(
+        self, table: str, id_column: str, id_value: str, data: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Update a record.
 

@@ -1,8 +1,8 @@
 # 09 - Theme Testing
 
-**Agent**: `frontend-specialist`  
-**Phase**: 5  
-**Duration**: 2h  
+**Agent**: `frontend-specialist`
+**Phase**: 5
+**Duration**: 2h
 **Dependencies**: Previous phase complete
 
 ---

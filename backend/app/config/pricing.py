@@ -3,13 +3,14 @@ Centralized pricing configuration for CV-Match Brazilian market.
 Used by both frontend and backend to ensure consistency.
 """
 
-from typing import Dict, Any, List
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
 class PricingTier:
     """Pricing tier configuration for Brazilian market."""
+
     id: str
     name: str
     description: str
@@ -20,7 +21,7 @@ class PricingTier:
     is_subscription: bool = False  # True for Flow, False for Flex
     currency: str = "brl"
     stripe_price_id: str | None = None
-    features: List[str] | None = None
+    features: list[str] | None = None
     popular: bool = False
 
     def __post_init__(self):
@@ -37,7 +38,7 @@ class BrazilianPricingConfig:
         self.locale = "pt-BR"
 
         # Brazilian pricing tiers
-        self.tiers: Dict[str, PricingTier] = {
+        self.tiers: dict[str, PricingTier] = {
             # FLEX PACKAGES (credit-based - existing)
             "free": PricingTier(
                 id="free",
@@ -50,7 +51,7 @@ class BrazilianPricingConfig:
                 features=[
                     "3 otimizações gratuitas",
                     "Pontuação básica de compatibilidade ATS",
-                    "Exportação em formato .txt"
+                    "Exportação em formato .txt",
                 ],
             ),
             "basic": PricingTier(
@@ -68,7 +69,7 @@ class BrazilianPricingConfig:
                     "Análise avançada com IA",
                     "Exportação em PDF e DOCX",
                     "Foco no mercado brasileiro",
-                    "Créditos não expiram"
+                    "Créditos não expiram",
                 ],
             ),
             "pro": PricingTier(
@@ -91,7 +92,7 @@ class BrazilianPricingConfig:
                     "Análise detalhada de compatibilidade",
                     "Otimização de palavras-chave",
                     "LGPD Compliance",
-                    "Créditos não expiram"
+                    "Créditos não expiram",
                 ],
             ),
             "enterprise": PricingTier(
@@ -112,10 +113,9 @@ class BrazilianPricingConfig:
                     "Relatórios detalhados",
                     "Suporte dedicado",
                     "LGPD Compliance completo",
-                    "Créditos não expiram"
+                    "Créditos não expiram",
                 ],
             ),
-
             # FLOW SUBSCRIPTIONS (recurring - new!)
             "flow_starter": PricingTier(
                 id="flow_starter",
@@ -133,7 +133,7 @@ class BrazilianPricingConfig:
                     "Rollover de até 5 análises",
                     "Análise avançada com IA",
                     "Suporte por email",
-                    "Cancele quando quiser"
+                    "Cancele quando quiser",
                 ],
             ),
             "flow_pro": PricingTier(
@@ -155,7 +155,7 @@ class BrazilianPricingConfig:
                     "Modelos de currículo profissionais",
                     "Suporte prioritário",
                     "Análise de mercado",
-                    "Cancele quando quiser"
+                    "Cancele quando quiser",
                 ],
             ),
             "flow_business": PricingTier(
@@ -176,7 +176,7 @@ class BrazilianPricingConfig:
                     "API de integração",
                     "Dashboard avançado",
                     "Suporte dedicado",
-                    "Cancele quando quiser"
+                    "Cancele quando quiser",
                 ],
             ),
             "flow_enterprise": PricingTier(
@@ -197,7 +197,7 @@ class BrazilianPricingConfig:
                     "White-label disponível",
                     "SLA 99,9%",
                     "CSM dedicado",
-                    "Suporte 24/7"
+                    "Suporte 24/7",
                 ],
             ),
         }
@@ -225,7 +225,7 @@ class BrazilianPricingConfig:
         }
         return tier_mapping.get(tier_id, "basic")
 
-    def get_all_tiers(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_tiers(self) -> dict[str, dict[str, Any]]:
         """Get all pricing tiers as dictionary for API responses."""
         return {
             tier_id: {
@@ -245,21 +245,13 @@ class BrazilianPricingConfig:
             for tier_id, tier in self.tiers.items()
         }
 
-    def get_subscription_tiers(self) -> Dict[str, PricingTier]:
+    def get_subscription_tiers(self) -> dict[str, PricingTier]:
         """Get only subscription tiers (Flow)."""
-        return {
-            tier_id: tier
-            for tier_id, tier in self.tiers.items()
-            if tier.is_subscription
-        }
+        return {tier_id: tier for tier_id, tier in self.tiers.items() if tier.is_subscription}
 
-    def get_credit_tiers(self) -> Dict[str, PricingTier]:
+    def get_credit_tiers(self) -> dict[str, PricingTier]:
         """Get only credit tiers (Flex)."""
-        return {
-            tier_id: tier
-            for tier_id, tier in self.tiers.items()
-            if not tier.is_subscription
-        }
+        return {tier_id: tier for tier_id, tier in self.tiers.items() if not tier.is_subscription}
 
     def get_tier_by_type(self, tier_id: str, tier_type: str) -> PricingTier | None:
         """

@@ -1,9 +1,9 @@
 # Agent Prompt: Payment Services Migration
 
-**Agent**: payment-specialist (primary) + backend-specialist (supporting)  
-**Phase**: 1 - Payment Services (Parallel with usage services)  
-**Priority**: P0 - CRITICAL (Financial security)  
-**Estimated Time**: 2 hours  
+**Agent**: payment-specialist (primary) + backend-specialist (supporting)
+**Phase**: 1 - Payment Services (Parallel with usage services)
+**Priority**: P0 - CRITICAL (Financial security)
+**Estimated Time**: 2 hours
 **Dependencies**: None (can start immediately after P0 merge)
 
 ---
@@ -20,11 +20,13 @@ Copy and adapt Stripe payment services from Resume-Matcher to cv-match, ensuring
 
 ### Task 1: Copy Stripe Service (1 hour)
 
-**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/stripe_service.py`  
+**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/stripe_service.py`
 **Target**: `/home/carlos/projects/cv-match/backend/app/services/stripe_service.py`
 
 **Actions**:
+
 1. Copy the file:
+
    ```bash
    cp /home/carlos/projects/Resume-Matcher/apps/backend/app/services/stripe_service.py \
       /home/carlos/projects/cv-match/backend/app/services/stripe_service.py
@@ -33,6 +35,7 @@ Copy and adapt Stripe payment services from Resume-Matcher to cv-match, ensuring
 2. Update imports to match cv-match structure
 
 3. Verify Stripe package is installed:
+
    ```bash
    cd /home/carlos/projects/cv-match/backend
    grep "stripe" pyproject.toml || echo "stripe>=5.0.0" >> pyproject.toml
@@ -40,6 +43,7 @@ Copy and adapt Stripe payment services from Resume-Matcher to cv-match, ensuring
    ```
 
 4. Add environment variables to `.env`:
+
    ```bash
    # Add to backend/.env
    STRIPE_SECRET_KEY=sk_test_your_key_here
@@ -58,6 +62,7 @@ Copy and adapt Stripe payment services from Resume-Matcher to cv-match, ensuring
    ```
 
 **Success Criteria**:
+
 - [x] File copied and adapted
 - [x] Imports working
 - [x] Stripe package installed
@@ -68,11 +73,13 @@ Copy and adapt Stripe payment services from Resume-Matcher to cv-match, ensuring
 
 ### Task 2: Copy Payment Verification Service (30 min)
 
-**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/payment_verification.py`  
+**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/payment_verification.py`
 **Target**: `/home/carlos/projects/cv-match/backend/app/services/payment_verification.py`
 
 **Actions**:
+
 1. Copy the file:
+
    ```bash
    cp /home/carlos/projects/Resume-Matcher/apps/backend/app/services/payment_verification.py \
       /home/carlos/projects/cv-match/backend/app/services/payment_verification.py
@@ -91,6 +98,7 @@ Copy and adapt Stripe payment services from Resume-Matcher to cv-match, ensuring
    ```
 
 **Success Criteria**:
+
 - [x] File copied
 - [x] Imports working
 - [x] Integrates with StripeService
@@ -103,6 +111,7 @@ Copy and adapt Stripe payment services from Resume-Matcher to cv-match, ensuring
 **Critical Security Checklist**:
 
 1. **Webhook Signature Verification**:
+
    ```python
    # Verify this exists in stripe_service.py
    def verify_webhook_signature(self, payload: str, sig_header: str) -> bool:
@@ -116,6 +125,7 @@ Copy and adapt Stripe payment services from Resume-Matcher to cv-match, ensuring
    ```
 
 2. **Idempotency Key Usage**:
+
    ```python
    # Verify idempotency keys are used
    stripe.PaymentIntent.create(
@@ -125,6 +135,7 @@ Copy and adapt Stripe payment services from Resume-Matcher to cv-match, ensuring
    ```
 
 3. **No Sensitive Data in Logs**:
+
    ```python
    # Check that card details are NEVER logged
    logger.info(f"Payment succeeded for user {user_id}")  # ✅ OK
@@ -136,6 +147,7 @@ Copy and adapt Stripe payment services from Resume-Matcher to cv-match, ensuring
    - Document this requirement
 
 **Success Criteria**:
+
 - [x] Webhook signature verification present
 - [x] Idempotency keys used
 - [x] No sensitive data logging
@@ -155,7 +167,7 @@ class StripeService:
         self.api_key = os.getenv("STRIPE_SECRET_KEY")
         self.webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
         stripe.api_key = self.api_key
-    
+
     async def create_checkout_session(
         self,
         price_id: str,
@@ -174,15 +186,15 @@ class StripeService:
             metadata=metadata
         )
         return session.id
-    
+
     async def verify_payment(self, session_id: str) -> bool:
         """Verify payment was successful"""
         session = stripe.checkout.Session.retrieve(session_id)
         return session.payment_status == "paid"
-    
+
     def verify_webhook_signature(
-        self, 
-        payload: str, 
+        self,
+        payload: str,
         sig_header: str
     ) -> Optional[stripe.Event]:
         """Verify webhook signature and return event"""
@@ -204,21 +216,21 @@ class StripeService:
 class PaymentVerificationService:
     def __init__(self):
         self.stripe_service = StripeService()
-    
+
     async def verify_and_activate(
-        self, 
-        session_id: str, 
+        self,
+        session_id: str,
         user_id: str
     ) -> bool:
         """Verify payment and activate credits"""
         # Verify payment succeeded
         if not await self.stripe_service.verify_payment(session_id):
             return False
-        
+
         # Add credits to user (handled in usage_limit_service)
         # Log for audit trail
         logger.info(f"Payment verified for user {user_id}, session {session_id}")
-        
+
         return True
 ```
 
@@ -258,11 +270,11 @@ async def webhook(request: Request):
 async def webhook(request: Request):
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
-    
+
     event = stripe_service.verify_webhook_signature(payload, sig_header)
     if not event:
         raise HTTPException(401, "Invalid signature")
-    
+
     await process_payment(event.data.object)
 ```
 
@@ -276,7 +288,7 @@ def add_credits(user_id: str, amount: int, payment_id: str):
     if existing:
         logger.info(f"Payment {payment_id} already processed")
         return existing
-    
+
     # Process payment
     transaction = CreditTransaction(
         user_id=user_id,
@@ -340,19 +352,23 @@ except Exception as e:
 ## 📝 Deliverables
 
 ### Files to Create:
+
 1. `/backend/app/services/stripe_service.py`
 2. `/backend/app/services/payment_verification.py`
 
 ### Files to Update:
+
 1. `/backend/.env` - Add Stripe keys
 2. `/backend/pyproject.toml` - Add stripe dependency (if missing)
 3. `/backend/app/services/__init__.py` - Export new services
 
 ### Documentation to Create:
+
 - `PAYMENT_SETUP.md` - How to configure Stripe
 - Security checklist for payment handling
 
 ### Git Commit:
+
 ```bash
 git add backend/app/services/stripe_service.py
 git add backend/app/services/payment_verification.py
@@ -392,6 +408,7 @@ Tested: Imports verified, Stripe API connected"
 ## 🎯 Success Definition
 
 Mission complete when:
+
 1. Both services copied and working
 2. Stripe package installed
 3. Environment variables configured
@@ -405,10 +422,12 @@ Mission complete when:
 ## 🔄 Handoff to Next Phase
 
 After completion, notify:
+
 - **database-architect**: Payment services ready, need tables for usage tracking
 - **backend-specialist**: Services ready for API endpoint integration
 
 **Provide**:
+
 - ✅ StripeService interface
 - ✅ PaymentVerificationService interface
 - ✅ Environment variables needed
@@ -426,6 +445,6 @@ After completion, notify:
 
 ---
 
-**Status**: Ready for deployment 🚀  
-**Risk Level**: 🔴 HIGH (Financial)  
+**Status**: Ready for deployment 🚀
+**Risk Level**: 🔴 HIGH (Financial)
 **Review Required**: YES (Security review before production)

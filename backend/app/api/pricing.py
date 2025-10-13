@@ -3,8 +3,9 @@ Pricing API endpoints for CV-Match.
 Returns both credit packages (Flex) and subscriptions (Flow).
 """
 
+from typing import Any
+
 from fastapi import APIRouter, HTTPException
-from typing import Dict, Any
 
 from app.config.pricing import pricing_config
 
@@ -12,7 +13,7 @@ router = APIRouter(tags=["pricing"])
 
 
 @router.get("/")
-async def get_all_pricing() -> Dict[str, Any]:
+async def get_all_pricing() -> dict[str, Any]:
     """
     Get all pricing tiers (credits + subscriptions).
     Returns organized structure for frontend.
@@ -27,9 +28,7 @@ async def get_all_pricing() -> Dict[str, Any]:
     }
 
     subscription_tiers = {
-        tier_id: tier
-        for tier_id, tier in all_tiers.items()
-        if tier.get("is_subscription", False)
+        tier_id: tier for tier_id, tier in all_tiers.items() if tier.get("is_subscription", False)
     }
 
     return {
@@ -39,12 +38,12 @@ async def get_all_pricing() -> Dict[str, Any]:
             "subscriptions": subscription_tiers,
             "currency": "brl",
             "market": "brazil",
-        }
+        },
     }
 
 
 @router.get("/subscriptions")
-async def get_subscription_pricing() -> Dict[str, Any]:
+async def get_subscription_pricing() -> dict[str, Any]:
     """Get only subscription pricing (Flow tiers)."""
     subscription_tiers = pricing_config.get_subscription_tiers()
 
@@ -64,12 +63,12 @@ async def get_subscription_pricing() -> Dict[str, Any]:
                 "popular": tier.popular,
             }
             for tier_id, tier in subscription_tiers.items()
-        }
+        },
     }
 
 
 @router.get("/credits")
-async def get_credit_pricing() -> Dict[str, Any]:
+async def get_credit_pricing() -> dict[str, Any]:
     """Get only credit pricing (Flex packages)."""
     credit_tiers = pricing_config.get_credit_tiers()
 
@@ -88,12 +87,12 @@ async def get_credit_pricing() -> Dict[str, Any]:
                 "popular": tier.popular,
             }
             for tier_id, tier in credit_tiers.items()
-        }
+        },
     }
 
 
 @router.get("/tier/{tier_id}")
-async def get_tier_details(tier_id: str) -> Dict[str, Any]:
+async def get_tier_details(tier_id: str) -> dict[str, Any]:
     """Get details for a specific tier."""
     tier = pricing_config.get_tier(tier_id)
 
@@ -115,5 +114,5 @@ async def get_tier_details(tier_id: str) -> Dict[str, Any]:
             "stripe_price_id": tier.stripe_price_id,
             "features": tier.features or [],
             "popular": tier.popular,
-        }
+        },
     }

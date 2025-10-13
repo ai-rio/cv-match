@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from app.api.endpoints import auth, llm, optimizations, payments, resumes, users, vectordb, webhooks
 from app.api import pricing, subscriptions
+from app.api.endpoints import auth, llm, optimizations, payments, resumes, users, vectordb, webhooks
 
 api_router = APIRouter()
 

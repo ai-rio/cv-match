@@ -34,12 +34,9 @@ class TestWebhookEndpoints:
                     "amount_total": 2990,
                     "currency": "brl",
                     "payment_status": "paid",
-                    "metadata": {
-                        "user_id": "user_1234567890",
-                        "plan": "pro"
-                    }
+                    "metadata": {"user_id": "user_1234567890", "plan": "pro"},
                 }
-            }
+            },
         }
 
     @pytest.mark.asyncio
@@ -49,7 +46,7 @@ class TestWebhookEndpoints:
         headers = {
             "stripe-signature": "t=1234567890,v1=signature123",
             "content-type": "application/json",
-            "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)"
+            "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
         }
 
         # Mock signature verification
@@ -57,24 +54,32 @@ class TestWebhookEndpoints:
         mock_event.__getitem__.side_effect = lambda key: {
             "type": self.test_payload["type"],
             "id": self.test_payload["id"],
-            "data": self.test_payload["data"]
+            "data": self.test_payload["data"],
         }[key]
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": mock_event,
-            "event_type": self.test_payload["type"],
-            "event_id": self.test_payload["id"]
-        }):
-            # Mock webhook processing
-            with patch("app.api.endpoints.webhooks.webhook_service.process_webhook_event", return_value={
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
                 "success": True,
-                "processed": True,
-                "payment_id": "payment_123",
-                "user_id": "user_1234567890",
-                "credits_added": 50
-            }):
-                response = await async_client.post("/api/webhooks/stripe", data=payload, headers=headers)
+                "event": mock_event,
+                "event_type": self.test_payload["type"],
+                "event_id": self.test_payload["id"],
+            },
+        ):
+            # Mock webhook processing
+            with patch(
+                "app.api.endpoints.webhooks.webhook_service.process_webhook_event",
+                return_value={
+                    "success": True,
+                    "processed": True,
+                    "payment_id": "payment_123",
+                    "user_id": "user_1234567890",
+                    "credits_added": 50,
+                },
+            ):
+                response = await async_client.post(
+                    "/api/webhooks/stripe", data=payload, headers=headers
+                )
 
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -89,17 +94,19 @@ class TestWebhookEndpoints:
     async def test_stripe_webhook_signature_verification_failure(self, async_client: AsyncClient):
         """Test Stripe webhook with invalid signature."""
         payload = json.dumps(self.test_payload)
-        headers = {
-            "stripe-signature": "invalid_signature",
-            "content-type": "application/json"
-        }
+        headers = {"stripe-signature": "invalid_signature", "content-type": "application/json"}
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": False,
-            "error": "Invalid signature",
-            "error_type": "signature_error"
-        }):
-            response = await async_client.post("/api/webhooks/stripe", data=payload, headers=headers)
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": False,
+                "error": "Invalid signature",
+                "error_type": "signature_error",
+            },
+        ):
+            response = await async_client.post(
+                "/api/webhooks/stripe", data=payload, headers=headers
+            )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         response_data = response.json()
@@ -124,7 +131,7 @@ class TestWebhookEndpoints:
         payload = json.dumps(self.test_payload, separators=(",", ":"))
         headers = {
             "stripe-signature": "t=1234567890,v1=signature123",
-            "content-type": "application/json"
+            "content-type": "application/json",
         }
 
         # Mock signature verification success
@@ -132,22 +139,30 @@ class TestWebhookEndpoints:
         mock_event.__getitem__.side_effect = lambda key: {
             "type": self.test_payload["type"],
             "id": self.test_payload["id"],
-            "data": self.test_payload["data"]
+            "data": self.test_payload["data"],
         }[key]
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": mock_event,
-            "event_type": self.test_payload["type"],
-            "event_id": self.test_payload["id"]
-        }):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": True,
+                "event": mock_event,
+                "event_type": self.test_payload["type"],
+                "event_id": self.test_payload["id"],
+            },
+        ):
             # Mock webhook processing failure
-            with patch("app.api.endpoints.webhooks.webhook_service.process_webhook_event", return_value={
-                "success": False,
-                "error": "User not found",
-                "processing_time_ms": 150.5
-            }):
-                response = await async_client.post("/api/webhooks/stripe", data=payload, headers=headers)
+            with patch(
+                "app.api.endpoints.webhooks.webhook_service.process_webhook_event",
+                return_value={
+                    "success": False,
+                    "error": "User not found",
+                    "processing_time_ms": 150.5,
+                },
+            ):
+                response = await async_client.post(
+                    "/api/webhooks/stripe", data=payload, headers=headers
+                )
 
         # Should still return 200 to acknowledge receipt
         assert response.status_code == status.HTTP_200_OK
@@ -163,7 +178,7 @@ class TestWebhookEndpoints:
         payload = json.dumps(self.test_payload, separators=(",", ":"))
         headers = {
             "stripe-signature": "t=1234567890,v1=signature123",
-            "content-type": "application/json"
+            "content-type": "application/json",
         }
 
         # Mock signature verification success
@@ -171,18 +186,26 @@ class TestWebhookEndpoints:
         mock_event.__getitem__.side_effect = lambda key: {
             "type": self.test_payload["type"],
             "id": self.test_payload["id"],
-            "data": self.test_payload["data"]
+            "data": self.test_payload["data"],
         }[key]
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": mock_event,
-            "event_type": self.test_payload["type"],
-            "event_id": self.test_payload["id"]
-        }):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
+                "success": True,
+                "event": mock_event,
+                "event_type": self.test_payload["type"],
+                "event_id": self.test_payload["id"],
+            },
+        ):
             # Mock system error during processing
-            with patch("app.api.endpoints.webhooks.webhook_service.process_webhook_event", side_effect=Exception("System error")):
-                response = await async_client.post("/api/webhooks/stripe", data=payload, headers=headers)
+            with patch(
+                "app.api.endpoints.webhooks.webhook_service.process_webhook_event",
+                side_effect=Exception("System error"),
+            ):
+                response = await async_client.post(
+                    "/api/webhooks/stripe", data=payload, headers=headers
+                )
 
         # Should still return 200 to prevent retries
         assert response.status_code == status.HTTP_200_OK
@@ -197,7 +220,7 @@ class TestWebhookEndpoints:
         payload = json.dumps(self.test_payload, separators=(",", ":"))
         headers = {
             "stripe-signature": "t=1234567890,v1=signature123",
-            "content-type": "application/json"
+            "content-type": "application/json",
         }
 
         # Mock signature verification
@@ -205,23 +228,31 @@ class TestWebhookEndpoints:
         mock_event.__getitem__.side_effect = lambda key: {
             "type": self.test_payload["type"],
             "id": self.test_payload["id"],
-            "data": self.test_payload["data"]
+            "data": self.test_payload["data"],
         }[key]
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": mock_event,
-            "event_type": self.test_payload["type"],
-            "event_id": self.test_payload["id"]
-        }):
-            # Mock webhook service returns already processed
-            with patch("app.api.endpoints.webhooks.webhook_service.process_webhook_event", return_value={
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
                 "success": True,
-                "idempotent": True,
-                "message": "Event already processed",
-                "event_id": self.test_event_id
-            }):
-                response = await async_client.post("/api/webhooks/stripe", data=payload, headers=headers)
+                "event": mock_event,
+                "event_type": self.test_payload["type"],
+                "event_id": self.test_payload["id"],
+            },
+        ):
+            # Mock webhook service returns already processed
+            with patch(
+                "app.api.endpoints.webhooks.webhook_service.process_webhook_event",
+                return_value={
+                    "success": True,
+                    "idempotent": True,
+                    "message": "Event already processed",
+                    "event_id": self.test_event_id,
+                },
+            ):
+                response = await async_client.post(
+                    "/api/webhooks/stripe", data=payload, headers=headers
+                )
 
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -235,10 +266,12 @@ class TestWebhookEndpoints:
         invalid_payload = "{ invalid json }"
         headers = {
             "stripe-signature": "t=1234567890,v1=signature123",
-            "content-type": "application/json"
+            "content-type": "application/json",
         }
 
-        response = await async_client.post("/api/webhooks/stripe", data=invalid_payload, headers=headers)
+        response = await async_client.post(
+            "/api/webhooks/stripe", data=invalid_payload, headers=headers
+        )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -253,7 +286,7 @@ class TestWebhookEndpoints:
             "customer.subscription.updated",
             "customer.subscription.deleted",
             "payment_intent.succeeded",
-            "payment_intent.payment_failed"
+            "payment_intent.payment_failed",
         ]
 
         for event_type in event_types:
@@ -264,7 +297,7 @@ class TestWebhookEndpoints:
                 payload = json.dumps(test_payload, separators=(",", ":"))
                 headers = {
                     "stripe-signature": "t=1234567890,v1=signature123",
-                    "content-type": "application/json"
+                    "content-type": "application/json",
                 }
 
                 # Mock signature verification
@@ -272,22 +305,26 @@ class TestWebhookEndpoints:
                 mock_event.__getitem__.side_effect = lambda key: {
                     "type": event_type,
                     "id": test_payload["id"],
-                    "data": test_payload["data"]
+                    "data": test_payload["data"],
                 }[key]
 
-                with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-                    "success": True,
-                    "event": mock_event,
-                    "event_type": event_type,
-                    "event_id": test_payload["id"]
-                }):
-                    # Mock webhook processing
-                    with patch("app.api.endpoints.webhooks.webhook_service.process_webhook_event", return_value={
+                with patch(
+                    "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+                    return_value={
                         "success": True,
-                        "processed": True,
-                        "event_type": event_type
-                    }):
-                        response = await async_client.post("/api/webhooks/stripe", data=payload, headers=headers)
+                        "event": mock_event,
+                        "event_type": event_type,
+                        "event_id": test_payload["id"],
+                    },
+                ):
+                    # Mock webhook processing
+                    with patch(
+                        "app.api.endpoints.webhooks.webhook_service.process_webhook_event",
+                        return_value={"success": True, "processed": True, "event_type": event_type},
+                    ):
+                        response = await async_client.post(
+                            "/api/webhooks/stripe", data=payload, headers=headers
+                        )
 
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
@@ -303,7 +340,7 @@ class TestWebhookEndpoints:
         payload = json.dumps(test_payload, separators=(",", ":"))
         headers = {
             "stripe-signature": "t=1234567890,v1=signature123",
-            "content-type": "application/json"
+            "content-type": "application/json",
         }
 
         # Mock signature verification
@@ -311,23 +348,31 @@ class TestWebhookEndpoints:
         mock_event.__getitem__.side_effect = lambda key: {
             "type": test_payload["type"],
             "id": test_payload["id"],
-            "data": test_payload["data"]
+            "data": test_payload["data"],
         }[key]
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": mock_event,
-            "event_type": test_payload["type"],
-            "event_id": test_payload["id"]
-        }):
-            # Mock webhook processing returns not handled
-            with patch("app.api.endpoints.webhooks.webhook_service.process_webhook_event", return_value={
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
                 "success": True,
-                "processed": True,
-                "message": "Event type account.updated not handled",
-                "handled": False
-            }):
-                response = await async_client.post("/api/webhooks/stripe", data=payload, headers=headers)
+                "event": mock_event,
+                "event_type": test_payload["type"],
+                "event_id": test_payload["id"],
+            },
+        ):
+            # Mock webhook processing returns not handled
+            with patch(
+                "app.api.endpoints.webhooks.webhook_service.process_webhook_event",
+                return_value={
+                    "success": True,
+                    "processed": True,
+                    "message": "Event type account.updated not handled",
+                    "handled": False,
+                },
+            ):
+                response = await async_client.post(
+                    "/api/webhooks/stripe", data=payload, headers=headers
+                )
 
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -342,7 +387,7 @@ class TestWebhookEndpoints:
             "stripe-signature": "t=1234567890,v1=signature123",
             "content-type": "application/json",
             "user-agent": "Stripe/1.0 (+https://stripe.com/docs/webhooks)",
-            "x-forwarded-for": "192.168.1.1"
+            "x-forwarded-for": "192.168.1.1",
         }
 
         # Mock signature verification
@@ -350,20 +395,25 @@ class TestWebhookEndpoints:
         mock_event.__getitem__.side_effect = lambda key: {
             "type": self.test_payload["type"],
             "id": self.test_payload["id"],
-            "data": self.test_payload["data"]
+            "data": self.test_payload["data"],
         }[key]
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": mock_event,
-            "event_type": self.test_payload["type"],
-            "event_id": self.test_payload["id"]
-        }):
-            with patch("app.api.endpoints.webhooks.webhook_service.process_webhook_event", return_value={
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
                 "success": True,
-                "processed": True
-            }):
-                response = await async_client.post("/api/webhooks/stripe", data=payload, headers=headers)
+                "event": mock_event,
+                "event_type": self.test_payload["type"],
+                "event_id": self.test_payload["id"],
+            },
+        ):
+            with patch(
+                "app.api.endpoints.webhooks.webhook_service.process_webhook_event",
+                return_value={"success": True, "processed": True},
+            ):
+                response = await async_client.post(
+                    "/api/webhooks/stripe", data=payload, headers=headers
+                )
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -411,7 +461,9 @@ class TestWebhookEndpoints:
     @pytest.mark.asyncio
     async def test_webhook_health_check_system_error(self, async_client: AsyncClient):
         """Test webhook health check with system error."""
-        with patch("app.api.endpoints.webhooks.stripe_service", side_effect=Exception("System error")):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service", side_effect=Exception("System error")
+        ):
             response = await async_client.get("/api/webhooks/stripe/health")
 
         assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
@@ -422,14 +474,17 @@ class TestWebhookEndpoints:
     @pytest.mark.asyncio
     async def test_webhook_test_endpoint_success(self, async_client: AsyncClient):
         """Test webhook test endpoint success."""
-        with patch("app.api.endpoints.webhooks.webhook_service.process_webhook_event", return_value={
-            "success": True,
-            "processed": True,
-            "event_type": "checkout.session.completed",
-            "payment_id": "payment_test_123",
-            "user_id": "user_test_123",
-            "credits_added": 50
-        }):
+        with patch(
+            "app.api.endpoints.webhooks.webhook_service.process_webhook_event",
+            return_value={
+                "success": True,
+                "processed": True,
+                "event_type": "checkout.session.completed",
+                "payment_id": "payment_test_123",
+                "user_id": "user_test_123",
+                "credits_added": 50,
+            },
+        ):
             response = await async_client.post("/api/webhooks/stripe/test")
 
         assert response.status_code == status.HTTP_200_OK
@@ -443,7 +498,10 @@ class TestWebhookEndpoints:
     @pytest.mark.asyncio
     async def test_webhook_test_endpoint_failure(self, async_client: AsyncClient):
         """Test webhook test endpoint failure."""
-        with patch("app.api.endpoints.webhooks.webhook_service.process_webhook_event", side_effect=Exception("Test error")):
+        with patch(
+            "app.api.endpoints.webhooks.webhook_service.process_webhook_event",
+            side_effect=Exception("Test error"),
+        ):
             response = await async_client.post("/api/webhooks/stripe/test")
 
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -466,17 +524,20 @@ class TestWebhookEndpoints:
                             "number": "4242424242424242",
                             "brand": "Visa",
                             "status": "success",
-                            "description": "Visa sucesso"
+                            "description": "Visa sucesso",
                         }
-                    ]
+                    ],
                 }
             ],
             "currency": "brl",
             "country": "BR",
-            "locale": "pt-BR"
+            "locale": "pt-BR",
         }
 
-        with patch("app.api.endpoints.webhooks.stripe_service.get_test_payment_methods", return_value=mock_methods):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.get_test_payment_methods",
+            return_value=mock_methods,
+        ):
             response = await async_client.get("/api/webhooks/stripe/test-payment-methods")
 
         assert response.status_code == status.HTTP_200_OK
@@ -490,7 +551,10 @@ class TestWebhookEndpoints:
     @pytest.mark.asyncio
     async def test_get_test_payment_methods_error(self, async_client: AsyncClient):
         """Test getting test payment methods with error."""
-        with patch("app.api.endpoints.webhooks.stripe_service.get_test_payment_methods", side_effect=Exception("Service error")):
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.get_test_payment_methods",
+            side_effect=Exception("Service error"),
+        ):
             response = await async_client.get("/api/webhooks/stripe/test-payment-methods")
 
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -514,26 +578,22 @@ class TestWebhookEndpoints:
                     "customer_details": {
                         "email": "usuario@exemplo.com.br",
                         "name": "João Silva",
-                        "address": {
-                            "country": "BR",
-                            "state": "SP",
-                            "city": "São Paulo"
-                        }
+                        "address": {"country": "BR", "state": "SP", "city": "São Paulo"},
                     },
                     "metadata": {
                         "user_id": "user_brazil_123",
                         "plan": "pro",
                         "market": "brazil",
-                        "language": "pt-br"
-                    }
+                        "language": "pt-br",
+                    },
                 }
-            }
+            },
         }
 
         payload = json.dumps(brazilian_payload, separators=(",", ":"))
         headers = {
             "stripe-signature": "t=1234567890,v1=signature123",
-            "content-type": "application/json"
+            "content-type": "application/json",
         }
 
         # Mock signature verification
@@ -541,26 +601,34 @@ class TestWebhookEndpoints:
         mock_event.__getitem__.side_effect = lambda key: {
             "type": brazilian_payload["type"],
             "id": brazilian_payload["id"],
-            "data": brazilian_payload["data"]
+            "data": brazilian_payload["data"],
         }[key]
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": mock_event,
-            "event_type": brazilian_payload["type"],
-            "event_id": brazilian_payload["id"]
-        }):
-            # Mock successful Brazilian webhook processing
-            with patch("app.api.endpoints.webhooks.webhook_service.process_webhook_event", return_value={
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
                 "success": True,
-                "processed": True,
-                "user_id": "user_brazil_123",
-                "amount": 2990,
-                "currency": "brl",
-                "credits_added": 50,
-                "plan_type": "pro"
-            }):
-                response = await async_client.post("/api/webhooks/stripe", data=payload, headers=headers)
+                "event": mock_event,
+                "event_type": brazilian_payload["type"],
+                "event_id": brazilian_payload["id"],
+            },
+        ):
+            # Mock successful Brazilian webhook processing
+            with patch(
+                "app.api.endpoints.webhooks.webhook_service.process_webhook_event",
+                return_value={
+                    "success": True,
+                    "processed": True,
+                    "user_id": "user_brazil_123",
+                    "amount": 2990,
+                    "currency": "brl",
+                    "credits_added": 50,
+                    "plan_type": "pro",
+                },
+            ):
+                response = await async_client.post(
+                    "/api/webhooks/stripe", data=payload, headers=headers
+                )
 
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -573,9 +641,18 @@ class TestWebhookEndpoints:
 
         # Test with different timestamp formats
         headers_list = [
-            {"stripe-signature": "t=1234567890,v1=signature123", "content-type": "application/json"},
-            {"stripe-signature": "t=1704067200,v1=signature456", "content-type": "application/json"},
-            {"stripe-signature": "t=1704153600,v1=signature789", "content-type": "application/json"},
+            {
+                "stripe-signature": "t=1234567890,v1=signature123",
+                "content-type": "application/json",
+            },
+            {
+                "stripe-signature": "t=1704067200,v1=signature456",
+                "content-type": "application/json",
+            },
+            {
+                "stripe-signature": "t=1704153600,v1=signature789",
+                "content-type": "application/json",
+            },
         ]
 
         for headers in headers_list:
@@ -585,20 +662,25 @@ class TestWebhookEndpoints:
                 mock_event.__getitem__.side_effect = lambda key: {
                     "type": self.test_payload["type"],
                     "id": self.test_payload["id"],
-                    "data": self.test_payload["data"]
+                    "data": self.test_payload["data"],
                 }[key]
 
-                with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-                    "success": True,
-                    "event": mock_event,
-                    "event_type": self.test_payload["type"],
-                    "event_id": self.test_payload["id"]
-                }):
-                    with patch("app.api.endpoints.webhooks.webhook_service.process_webhook_event", return_value={
+                with patch(
+                    "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+                    return_value={
                         "success": True,
-                        "processed": True
-                    }):
-                        response = await async_client.post("/api/webhooks/stripe", data=payload, headers=headers)
+                        "event": mock_event,
+                        "event_type": self.test_payload["type"],
+                        "event_id": self.test_payload["id"],
+                    },
+                ):
+                    with patch(
+                        "app.api.endpoints.webhooks.webhook_service.process_webhook_event",
+                        return_value={"success": True, "processed": True},
+                    ):
+                        response = await async_client.post(
+                            "/api/webhooks/stripe", data=payload, headers=headers
+                        )
 
                 assert response.status_code == status.HTTP_200_OK
 
@@ -615,7 +697,7 @@ class TestWebhookEndpoints:
         payload = json.dumps(large_payload, separators=(",", ":"))
         headers = {
             "stripe-signature": "t=1234567890,v1=signature123",
-            "content-type": "application/json"
+            "content-type": "application/json",
         }
 
         # Mock signature verification
@@ -623,20 +705,25 @@ class TestWebhookEndpoints:
         mock_event.__getitem__.side_effect = lambda key: {
             "type": large_payload["type"],
             "id": large_payload["id"],
-            "data": large_payload["data"]
+            "data": large_payload["data"],
         }[key]
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": mock_event,
-            "event_type": large_payload["type"],
-            "event_id": large_payload["id"]
-        }):
-            with patch("app.api.endpoints.webhooks.webhook_service.process_webhook_event", return_value={
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
                 "success": True,
-                "processed": True
-            }):
-                response = await async_client.post("/api/webhooks/stripe", data=payload, headers=headers)
+                "event": mock_event,
+                "event_type": large_payload["type"],
+                "event_id": large_payload["id"],
+            },
+        ):
+            with patch(
+                "app.api.endpoints.webhooks.webhook_service.process_webhook_event",
+                return_value={"success": True, "processed": True},
+            ):
+                response = await async_client.post(
+                    "/api/webhooks/stripe", data=payload, headers=headers
+                )
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -648,7 +735,7 @@ class TestWebhookEndpoints:
         payload = json.dumps(self.test_payload, separators=(",", ":"))
         headers = {
             "stripe-signature": "t=1234567890,v1=signature123",
-            "content-type": "application/json"
+            "content-type": "application/json",
         }
 
         # Mock signature verification
@@ -656,19 +743,22 @@ class TestWebhookEndpoints:
         mock_event.__getitem__.side_effect = lambda key: {
             "type": self.test_payload["type"],
             "id": self.test_payload["id"],
-            "data": self.test_payload["data"]
+            "data": self.test_payload["data"],
         }[key]
 
-        with patch("app.api.endpoints.webhooks.stripe_service.verify_webhook_signature", return_value={
-            "success": True,
-            "event": mock_event,
-            "event_type": self.test_payload["type"],
-            "event_id": self.test_payload["id"]
-        }):
-            with patch("app.api.endpoints.webhooks.webhook_service.process_webhook_event", return_value={
+        with patch(
+            "app.api.endpoints.webhooks.stripe_service.verify_webhook_signature",
+            return_value={
                 "success": True,
-                "processed": True
-            }):
+                "event": mock_event,
+                "event_type": self.test_payload["type"],
+                "event_id": self.test_payload["id"],
+            },
+        ):
+            with patch(
+                "app.api.endpoints.webhooks.webhook_service.process_webhook_event",
+                return_value={"success": True, "processed": True},
+            ):
                 # Send concurrent requests
                 tasks = [
                     async_client.post("/api/webhooks/stripe", data=payload, headers=headers)

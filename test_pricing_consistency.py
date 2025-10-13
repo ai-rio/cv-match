@@ -4,7 +4,6 @@ Test script to verify pricing consistency between frontend and backend.
 """
 
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -48,15 +47,19 @@ def test_pricing_consistency():
         print(f"{status} {tier_id.title()}: {tier.credits} credits, {tier.price} cents")
 
         if not price_match:
-            print(f"   ❌ Price mismatch: expected {expected['price']}, got {tier.price}")
+            print(
+                f"   ❌ Price mismatch: expected {expected['price']}, got {tier.price}"
+            )
         if not credits_match:
-            print(f"   ❌ Credits mismatch: expected {expected['credits']}, got {tier.credits}")
+            print(
+                f"   ❌ Credits mismatch: expected {expected['credits']}, got {tier.credits}"
+            )
 
     # Test frontend translation file
     print("\n📱 Frontend Translation Configuration:")
     pricing_file = Path("frontend/locales/pt-br/pricing.json")
     if pricing_file.exists():
-        with open(pricing_file, 'r', encoding='utf-8') as f:
+        with open(pricing_file, "r", encoding="utf-8") as f:
             translations = json.load(f)
 
         plans = translations.get("plans", {})
@@ -77,9 +80,13 @@ def test_pricing_consistency():
             print(f"{status} {tier_id.title()}: {actual_display}, {actual_credits}")
 
             if not display_match:
-                print(f"   ❌ Display mismatch: expected '{expected_display}', got '{actual_display}'")
+                print(
+                    f"   ❌ Display mismatch: expected '{expected_display}', got '{actual_display}'"
+                )
             if not credits_in_display:
-                print(f"   ❌ Credits not found in display: expected '{expected['credits']}' credits")
+                print(
+                    f"   ❌ Credits not found in display: expected '{expected['credits']}' credits"
+                )
     else:
         print("❌ Frontend pricing translation file not found")
 

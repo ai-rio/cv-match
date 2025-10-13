@@ -1,7 +1,7 @@
 # 🎯 P1.5 Complete Execution Guide
 
-**Created**: 2025-10-11  
-**Status**: ✅ ALL 6 PROMPTS READY  
+**Created**: 2025-10-11
+**Status**: ✅ ALL 6 PROMPTS READY
 **Total Time**: 12 hours wall time (2-3 days realistic)
 
 ---
@@ -78,17 +78,17 @@
 
 ## 📋 Agent Assignment Summary
 
-| Prompt | Agent | Phase | Time | Execution |
-|--------|-------|-------|------|-----------|
-| **01** | `payment-specialist` | 1 | 2h | PARALLEL with 02 |
-| **02** | `backend-specialist` | 1 | 2h | PARALLEL with 01 |
-| **03** | `database-architect` | 2 | 3h | SEQUENTIAL |
-| **04** | `backend-specialist` | 3 | 4h | SEQUENTIAL |
-| **05** | `frontend-specialist` | 4 | 3h | PARALLEL with 06 |
-| **06** | `test-writer-agent` | 4 | 2h | PARALLEL with 05 |
+| Prompt | Agent                 | Phase | Time | Execution        |
+| ------ | --------------------- | ----- | ---- | ---------------- |
+| **01** | `payment-specialist`  | 1     | 2h   | PARALLEL with 02 |
+| **02** | `backend-specialist`  | 1     | 2h   | PARALLEL with 01 |
+| **03** | `database-architect`  | 2     | 3h   | SEQUENTIAL       |
+| **04** | `backend-specialist`  | 3     | 4h   | SEQUENTIAL       |
+| **05** | `frontend-specialist` | 4     | 3h   | PARALLEL with 06 |
+| **06** | `test-writer-agent`   | 4     | 2h   | PARALLEL with 05 |
 
-**Total Sequential Time**: 16 hours  
-**Total Wall Time**: ~12 hours (with parallel execution)  
+**Total Sequential Time**: 16 hours
+**Total Wall Time**: ~12 hours (with parallel execution)
 **Realistic Time**: 2-3 days (with breaks, testing, debugging)
 
 ---
@@ -158,6 +158,7 @@ cd /home/carlos/projects/cv-match/backend
 ## ✅ Phase Completion Checklist
 
 ### Phase 1 Complete When:
+
 - [ ] Pricing config has all Flow tiers
 - [ ] Stripe products created
 - [ ] Pricing API endpoint works
@@ -166,6 +167,7 @@ cd /home/carlos/projects/cv-match/backend
 - [ ] All tests pass
 
 ### Phase 2 Complete When:
+
 - [ ] Migration applied successfully
 - [ ] All tables created
 - [ ] RLS policies working
@@ -174,6 +176,7 @@ cd /home/carlos/projects/cv-match/backend
 - [ ] Test data can be inserted
 
 ### Phase 3 Complete When:
+
 - [ ] All endpoints registered
 - [ ] Swagger docs show routes
 - [ ] Checkout creates sessions
@@ -181,6 +184,7 @@ cd /home/carlos/projects/cv-match/backend
 - [ ] All verification tests pass
 
 ### Phase 4 Complete When:
+
 - [ ] Pricing page displays
 - [ ] Tabs switch correctly
 - [ ] Checkout flow works
@@ -219,12 +223,14 @@ cd frontend && bun run dev
 ## 📊 Business Impact
 
 ### Before P1.5:
+
 - ❌ Credits only (45% business model alignment)
 - ❌ No recurring revenue
 - ❌ No subscription metrics
 - ❌ Limited retention
 
 ### After P1.5:
+
 - ✅ Full Hybrid model (100% alignment)
 - ✅ Monthly recurring revenue
 - ✅ MRR/ARR metrics for investors
@@ -233,6 +239,7 @@ cd frontend && bun run dev
 - ✅ Higher LTV ($250 → $450)
 
 **Expected Year 1 Impact:**
+
 - Revenue: R$ 634K → R$ 1,688K (+166%)
 - MRR: R$ 0 → R$ 119K (end of year)
 - Ready for VC fundraising with SaaS metrics
@@ -242,6 +249,7 @@ cd frontend && bun run dev
 ## 🚨 Critical Reminders
 
 ### Before Starting ANY Phase:
+
 1. ✅ Check dependencies completed
 2. ✅ Read tool guides (00-AGENT-TOOLS-GUIDE.md, 00-LOCALIZATION-GUIDE.md)
 3. ✅ Use Context7 for documentation
@@ -249,6 +257,7 @@ cd frontend && bun run dev
 5. ✅ All text via next-intl (NO hardcoded strings)
 
 ### During Execution:
+
 - 🔄 Test incrementally after each task
 - 💾 Commit after each major task
 - 🐛 Debug step-by-step if issues arise
@@ -256,6 +265,7 @@ cd frontend && bun run dev
 - ⏱️ Track time against estimates
 
 ### Parallel Execution:
+
 - ✅ Phase 1: Prompts 01 + 02 can run simultaneously
 - ✅ Phase 4: Prompts 05 + 06 can run simultaneously
 - ❌ Phases 2 and 3 MUST be sequential
@@ -266,6 +276,7 @@ cd frontend && bun run dev
 ## 📞 Getting Help
 
 If stuck:
+
 1. Check prompt's troubleshooting section
 2. Run verification checklist
 3. Review logs for errors
@@ -277,6 +288,7 @@ If stuck:
 ## 🎉 Success!
 
 When all phases complete:
+
 - ✅ Full subscription system operational
 - ✅ Hybrid business model implemented
 - ✅ Ready for customer onboarding
@@ -290,6 +302,7 @@ You've successfully implemented the CV-Match subscription system and unlocked th
 ---
 
 **Next Steps:**
+
 1. Deploy to production
 2. Configure Stripe webhooks
 3. Set up monitoring

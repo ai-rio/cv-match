@@ -13,12 +13,14 @@ This roadmap outlines a comprehensive 4-phase implementation plan for integratin
 **🚨 CRITICAL UPDATE:** The independent security verification revealed 8 critical security vulnerabilities that make the current system **ILLEGAL to deploy in Brazil** under LGPD regulations. These must be fixed first.
 
 **Key Milestones:**
+
 - **Phase 0 (Weeks 0-1):** Emergency Security Fixes - **MUST COMPLETE FIRST**
 - **Phase 1 (Weeks 2-7):** Core AI Foundation - Document processing and vector similarity
 - **Phase 2 (Weeks 8-11):** Enhanced Features - LLM integration and advanced scoring
 - **Phase 3 (Weeks 12-14):** UI/UX Integration - Complete user interface and testing
 
 **Success Metrics:**
+
 - Phase 0 security fixes completed and verified
 - On-time delivery of all subsequent phases
 - 90%+ test coverage achieved
@@ -30,25 +32,30 @@ This roadmap outlines a comprehensive 4-phase implementation plan for integratin
 ## Phase 0: Emergency Security Fixes (Weeks 0-1)
 
 ### Objective
+
 **CRITICAL:** Address all security vulnerabilities identified in the independent verification. This phase **BLOCKS ALL OTHER WORK** and must be completed before any additional features can be implemented.
 
 ### Duration: 1-2 weeks
+
 **Start Date:** Week 0 (IMMEDIATE)
 **End Date:** Week 1
 **Team Required:** 2 Backend Developers, 1 Security Engineer, 1 QA Engineer
 
 ### Critical Path Dependencies
+
 ```
 Security Fixes → All Other Work (BLOCKED until complete)
 ```
 
 ### Security Status: PRODUCTION ILLEGAL
+
 **Current State:** Cannot legally deploy in Brazil due to LGPD violations
 **Risk Level:** 🔴 **CRITICAL** - Legal liability and data breach risk
 
 ### Week-by-Week Breakdown
 
 #### Week 0: Critical Security Fixes (Days 1-3)
+
 **Duration:** 3 days
 **Priority:** 🔴 **URGENT** - Must complete before any other work
 **Focus:** Fix user authorization and data access controls
@@ -62,6 +69,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
    - Add authorization tests
 
    **Code Changes Required:**
+
    ```python
    # Fix in backend/app/api/endpoints/resumes.py
    @router.get("/{resume_id}", response_model=ResumeResponse)
@@ -88,6 +96,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
    - Database migration scripts
 
    **Database Migration:**
+
    ```sql
    -- Add user_id to resumes table
    ALTER TABLE public.resumes
@@ -113,6 +122,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
    - Update all mock data references
 
    **Code Changes:**
+
    ```python
    # Fix in backend/app/services/job_service.py
    async def _extract_structured_json(self, job_description_text: str):
@@ -142,6 +152,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
    - Create bias monitoring system
 
    **Code Changes:**
+
    ```python
    # Fix in backend/app/services/score_improvement_service.py
    def _build_score_prompt(self, resume_text: str, job_description: str) -> str:
@@ -165,6 +176,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
    - PII logging prevention
 
    **Code Changes:**
+
    ```python
    # Add new service: backend/app/services/pii_detection.py
    import re
@@ -199,6 +211,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
    - CORS configuration fixes
 
    **Code Changes:**
+
    ```python
    # Add validation models
    from pydantic import BaseModel, Field, validator
@@ -251,6 +264,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
    - Prepare security audit report
 
 **Deliverables:**
+
 - Complete security fixes implementation
 - Updated database schema with proper constraints
 - PII detection and masking system
@@ -260,6 +274,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
 - LGPD compliance documentation
 
 **Acceptance Criteria:**
+
 - ✅ All security vulnerabilities resolved
 - ✅ User authorization working correctly
 - ✅ Database schema properly constrained
@@ -270,6 +285,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
 - ✅ LGPD compliance verified
 
 **Files to Create/Modify:**
+
 ```python
 backend/app/api/endpoints/resumes.py (fixed)
 backend/app/services/job_service.py (fixed)
@@ -282,6 +298,7 @@ docs/compliance/lgpd-compliance.md (new)
 ```
 
 ### Phase 0 Success Criteria
+
 - [ ] **CRITICAL**: User authorization implemented and tested
 - [ ] **CRITICAL**: Database schema fixed with foreign keys
 - [ ] **CRITICAL**: Mock data removed from production code
@@ -298,15 +315,18 @@ docs/compliance/lgpd-compliance.md (new)
 ## Phase 1: Core AI Foundation (Weeks 2-7)
 
 ### Objective
+
 Establish the fundamental infrastructure for document processing, vector embeddings, and basic similarity matching.
 
 ### Duration: 6 weeks
+
 **Start Date:** Week 2 (AFTER Phase 0 completion)
 **End Date:** Week 7
 **Team Required:** 2 Backend Developers, 1 Frontend Developer, 1 QA Engineer
 **Prerequisite:** Phase 0 Emergency Security Fixes **MUST** be completed first
 
 ### Critical Path Dependencies
+
 ```
 Phase 0 Complete → Document Processing → Vector Database → Basic Matching Algorithm
 ```
@@ -314,10 +334,12 @@ Phase 0 Complete → Document Processing → Vector Database → Basic Matching 
 ### Week-by-Week Breakdown
 
 #### Week 2: Project Setup and Document Processing Foundation
+
 **Duration:** 5 days
 **Focus:** Infrastructure setup and basic document processing
 
 **Tasks:**
+
 1. **Project Infrastructure (2 days)**
    - Set up development environments
    - Configure Qdrant vector database
@@ -336,18 +358,21 @@ Phase 0 Complete → Document Processing → Vector Database → Basic Matching 
    - Add error handling for corrupted files
 
 **Deliverables:**
+
 - Enhanced document upload API endpoint
 - Basic PDF parsing service
 - Qdrant database configuration
 - Development environment setup guide
 
 **Acceptance Criteria:**
+
 - Users can upload PDF and DOCX files up to 10MB
 - PDF text extraction works with 95% accuracy
 - Qdrant database is accessible and configured
 - All new APIs have basic test coverage
 
 **Files to Create/Modify:**
+
 ```python
 backend/app/services/document_processing.py
 backend/app/api/endpoints/documents.py
@@ -356,10 +381,12 @@ frontend/app/components/DocumentUpload.tsx
 ```
 
 #### Week 3: Advanced Document Processing
+
 **Duration:** 5 days
 **Focus:** Complete document parsing pipeline
 
 **Tasks:**
+
 1. **DOCX Parsing Implementation (2 days)**
    - Integrate python-docx library
    - Implement text and metadata extraction
@@ -376,18 +403,21 @@ frontend/app/components/DocumentUpload.tsx
    - Create document structure analysis
 
 **Deliverables:**
+
 - Complete document parsing service
 - Text cleaning and normalization pipeline
 - Document quality validation system
 - Comprehensive document processing tests
 
 **Acceptance Criteria:**
+
 - Both PDF and DOCX parsing with 90%+ accuracy
 - Text cleaning removes formatting artifacts
 - Quality validation rejects low-quality documents
 - Document processing completes in <5 seconds
 
 **Files to Create/Modify:**
+
 ```python
 backend/app/services/text_extraction.py
 backend/app/services/metadata_extraction.py
@@ -396,10 +426,12 @@ tests/test_document_processing.py
 ```
 
 #### Week 4: Vector Database Setup and Embedding Service
+
 **Duration:** 5 days
 **Focus:** Vector storage and text embeddings
 
 **Tasks:**
+
 1. **Qdrant Database Setup (2 days)**
    - Create collections for resumes and job descriptions
    - Configure vector indexes and parameters
@@ -416,18 +448,21 @@ tests/test_document_processing.py
    - Create vector search functionality
 
 **Deliverables:**
+
 - Configured Qdrant vector database
 - OpenAI embeddings service
 - Vector storage and retrieval system
 - Embedding cache implementation
 
 **Acceptance Criteria:**
+
 - Qdrant collections created with proper indexing
 - Embeddings generated for text chunks in <2 seconds
 - Vector similarity search returns accurate results
 - Cache reduces API calls by 80%+
 
 **Files to Create/Modify:**
+
 ```python
 backend/app/services/vectordb/qdrant_service.py
 backend/app/services/embedding_service.py
@@ -436,10 +471,12 @@ backend/app/models/embedding.py
 ```
 
 #### Week 5: Similarity Calculation Engine
+
 **Duration:** 5 days
 **Focus:** Vector similarity and basic matching
 
 **Tasks:**
+
 1. **Cosine Similarity Implementation (2 days)**
    - Implement vector similarity calculations
    - Add batch similarity processing
@@ -456,18 +493,21 @@ backend/app/models/embedding.py
    - Create result ranking system
 
 **Deliverables:**
+
 - Vector similarity calculation engine
 - Keyword extraction service
 - Basic match scoring algorithm
 - Results ranking system
 
 **Acceptance Criteria:**
+
 - Cosine similarity calculations accurate to 4 decimal places
 - Keyword extraction identifies relevant terms with 85%+ accuracy
 - Basic scoring produces consistent results
 - Ranking system sorts results appropriately
 
 **Files to Create/Modify:**
+
 ```python
 backend/app/services/similarity_service.py
 backend/app/services/keyword_extraction.py
@@ -476,10 +516,12 @@ backend/app/models/match_result.py
 ```
 
 #### Week 6: Job Description Processing
+
 **Duration:** 5 days
 **Focus:** Job description analysis and processing
 
 **Tasks:**
+
 1. **Job Description Input System (2 days)**
    - Create job description input interface
    - Implement text validation and formatting
@@ -496,18 +538,21 @@ backend/app/models/match_result.py
    - Add match result storage
 
 **Deliverables:**
+
 - Job description input API
 - Job content analysis service
 - Integrated matching workflow
 - Job description database schema
 
 **Acceptance Criteria:**
+
 - Job descriptions can be input via API and UI
 - Content analysis extracts requirements with 80%+ accuracy
 - Matching workflow produces results in <10 seconds
 - Job descriptions stored with proper metadata
 
 **Files to Create/Modify:**
+
 ```python
 backend/app/api/endpoints/job_descriptions.py
 backend/app/services/job_analysis.py
@@ -516,10 +561,12 @@ frontend/app/components/JobInput.tsx
 ```
 
 #### Week 7: Basic Matching Integration and Testing
+
 **Duration:** 5 days
 **Focus:** System integration and comprehensive testing
 
 **Tasks:**
+
 1. **End-to-End Integration (2 days)**
    - Connect all components in workflow
    - Implement error handling and recovery
@@ -536,18 +583,21 @@ frontend/app/components/JobInput.tsx
    - Prepare staging environment
 
 **Deliverables:**
+
 - Complete integrated matching system
 - Comprehensive test suite (>80% coverage)
 - Updated documentation
 - Staging deployment ready
 
 **Acceptance Criteria:**
+
 - End-to-end workflow processes documents in <15 seconds
 - All tests pass with 80%+ coverage
 - Documentation is complete and accurate
 - System deployed to staging environment
 
 **Files to Create/Modify:**
+
 ```python
 backend/app/api/endpoints/resume_matching.py
 tests/test_integration.py
@@ -556,6 +606,7 @@ docker-compose.staging.yml
 ```
 
 ### Phase 1 Success Criteria
+
 - [ ] Phase 0 security fixes completed and verified
 - [ ] Document processing pipeline complete with 90%+ accuracy
 - [ ] Vector database operational with similarity search
@@ -569,15 +620,18 @@ docker-compose.staging.yml
 ## Phase 2: Enhanced Features (Weeks 8-11)
 
 ### Objective
+
 Implement advanced AI features including LLM-powered suggestions, sophisticated scoring algorithms, and enhanced matching capabilities.
 
 ### Duration: 4 weeks
+
 **Start Date:** Week 8
 **End Date:** Week 11
 **Team Required:** 2 Backend Developers, 1 Frontend Developer, 1 ML Engineer, 1 QA Engineer
 **Prerequisite:** Phase 1 complete + Phase 0 security maintained
 
 ### Critical Path Dependencies
+
 ```
 Phase 1 Complete → LLM Integration → Advanced Scoring → Improvement Suggestions
 ```
@@ -585,10 +639,12 @@ Phase 1 Complete → LLM Integration → Advanced Scoring → Improvement Sugges
 ### Week-by-Week Breakdown
 
 #### Week 8: LLM Integration and Prompt Engineering
+
 **Duration:** 5 days
 **Focus:** OpenAI GPT integration and sophisticated analysis
 
 **Tasks:**
+
 1. **OpenAI GPT Integration (2 days)**
    - Set up GPT-4 API integration
    - Implement prompt management system
@@ -605,18 +661,21 @@ Phase 1 Complete → LLM Integration → Advanced Scoring → Improvement Sugges
    - Add career path recommendations
 
 **Deliverables:**
+
 - LLM integration service
 - Comprehensive prompt library
 - Resume and job analysis capabilities
 - Response validation system
 
 **Acceptance Criteria:**
+
 - LLM integration completes with 95%+ reliability
 - Analysis prompts provide valuable insights
 - Response validation filters inappropriate content
 - API response times <10 seconds
 
 **Files to Create/Modify:**
+
 ```python
 backend/app/services/llm/openai_service.py
 backend/app/services/llm/prompt_manager.py
@@ -625,10 +684,12 @@ backend/app/services/job_analysis_llm.py
 ```
 
 #### Week 9: Advanced Scoring System
+
 **Duration:** 5 days
 **Focus:** Multi-dimensional scoring and confidence algorithms
 
 **Tasks:**
+
 1. **Multi-dimensional Scoring Algorithm (2 days)**
    - Implement skills matching score
    - Add experience relevance scoring
@@ -645,18 +706,21 @@ backend/app/services/job_analysis_llm.py
    - Add industry classification system
 
 **Deliverables:**
+
 - Advanced scoring algorithm
 - Confidence interval system
 - Industry-specific weightings
 - Scoring calibration tools
 
 **Acceptance Criteria:**
+
 - Multi-dimensional scores calculated accurately
 - Confidence intervals reflect true uncertainty
 - Industry weights improve match relevance by 20%+
 - Scoring system calibrated against expert ratings
 
 **Files to Create/Modify:**
+
 ```python
 backend/app/services/advanced_scoring.py
 backend/app/services/confidence_scoring.py
@@ -665,10 +729,12 @@ backend/app/models/advanced_score.py
 ```
 
 #### Week 10: AI-Powered Improvement Suggestions
+
 **Duration:** 5 days
 **Focus:** Resume optimization and improvement recommendations
 
 **Tasks:**
+
 1. **Improvement Suggestion Engine (2 days)**
    - Implement keyword gap analysis
    - Create experience improvement suggestions
@@ -685,18 +751,21 @@ backend/app/models/advanced_score.py
    - Create actionable recommendation system
 
 **Deliverables:**
+
 - AI suggestion engine
 - Content optimization service
 - Suggestion prioritization system
 - Actionable recommendation framework
 
 **Acceptance Criteria:**
+
 - Suggestions are specific and actionable
 - Optimization improves match scores by 15%+
 - Prioritization focuses on high-impact changes
 - Users can implement suggestions easily
 
 **Files to Create/Modify:**
+
 ```python
 backend/app/services/improvement_service.py
 backend/app/services/content_optimization.py
@@ -705,10 +774,12 @@ backend/app/models/suggestion.py
 ```
 
 #### Week 11: Advanced Features Integration
+
 **Duration:** 5 days
 **Focus:** System integration and advanced feature testing
 
 **Tasks:**
+
 1. **Feature Integration (2 days)**
    - Connect LLM services with scoring
    - Integrate suggestions with matching results
@@ -725,18 +796,21 @@ backend/app/models/suggestion.py
    - Verify suggestion quality
 
 **Deliverables:**
+
 - Fully integrated advanced features
 - Optimized performance system
 - Comprehensive QA results
 - Feature validation reports
 
 **Acceptance Criteria:**
+
 - All features integrated seamlessly
 - Performance optimized (<5 seconds for most operations)
 - QA testing passes with 95%+ success rate
 - Feature accuracy validated against expert assessments
 
 **Files to Create/Modify:**
+
 ```python
 backend/app/services/integrated_matching.py
 backend/app/services/performance_optimizer.py
@@ -745,6 +819,7 @@ qa/validation_reports.md
 ```
 
 ### Phase 2 Success Criteria
+
 - [ ] Phase 0 security maintained (no regressions)
 - [ ] LLM integration operational with reliable analysis
 - [ ] Advanced scoring system implemented and calibrated
@@ -758,15 +833,18 @@ qa/validation_reports.md
 ## Phase 3: UI/UX Integration (Weeks 12-14)
 
 ### Objective
+
 Create a complete, intuitive user interface for all resume matching features with excellent user experience and accessibility.
 
 ### Duration: 3 weeks
+
 **Start Date:** Week 12
 **End Date:** Week 14
 **Team Required:** 2 Frontend Developers, 1 UX Designer, 1 QA Engineer
 **Prerequisite:** Phase 2 complete + All security measures maintained
 
 ### Critical Path Dependencies
+
 ```
 Phase 2 Complete → Component Development → Integration → Testing & Polish
 ```
@@ -774,10 +852,12 @@ Phase 2 Complete → Component Development → Integration → Testing & Polish
 ### Week-by-Week Breakdown
 
 #### Week 12: Core UI Components Development
+
 **Duration:** 5 days
 **Focus:** Essential user interface components
 
 **Tasks:**
+
 1. **Resume Upload Component (2 days)**
    - Enhanced file upload with drag-and-drop
    - Real-time parsing progress indicators
@@ -794,30 +874,35 @@ Phase 2 Complete → Component Development → Integration → Testing & Polish
    - Accessibility implementation
 
 **Deliverables:**
+
 - Enhanced resume upload component
 - Job description input interface
 - Results display framework
 - Component library documentation
 
 **Acceptance Criteria:**
+
 - Components responsive across all devices
 - Accessibility WCAG 2.1 AA compliant
 - Loading states provide clear feedback
 - Error handling is user-friendly
 
 **Files to Create/Modify:**
+
 ```typescript
-frontend/app/components/ResumeUpload.tsx
-frontend/app/components/JobDescriptionInput.tsx
-frontend/app/components/ResultsFramework.tsx
-frontend/app/components/ui/index.ts
+frontend / app / components / ResumeUpload.tsx;
+frontend / app / components / JobDescriptionInput.tsx;
+frontend / app / components / ResultsFramework.tsx;
+frontend / app / components / ui / index.ts;
 ```
 
 #### Week 13: Advanced UI Features and Visualizations
+
 **Duration:** 5 days
 **Focus:** Data visualization and interactive features
 
 **Tasks:**
+
 1. **Match Results Visualization (2 days)**
    - Score visualization with charts
    - Interactive skill gap displays
@@ -834,30 +919,35 @@ frontend/app/components/ui/index.ts
    - Settings and preferences management
 
 **Deliverables:**
+
 - Interactive results visualizations
 - Comprehensive suggestions panel
 - User dashboard integration
 - Analytics display components
 
 **Acceptance Criteria:**
+
 - Visualizations are clear and informative
 - Interactive elements respond smoothly
 - Dashboard provides valuable insights
 - All components load in <2 seconds
 
 **Files to Create/Modify:**
+
 ```typescript
-frontend/app/components/MatchVisualization.tsx
-frontend/app/components/SuggestionsPanel.tsx
-frontend/app/components/UserDashboard.tsx
-frontend/app/components/Analytics.tsx
+frontend / app / components / MatchVisualization.tsx;
+frontend / app / components / SuggestionsPanel.tsx;
+frontend / app / components / UserDashboard.tsx;
+frontend / app / components / Analytics.tsx;
 ```
 
 #### Week 14: Testing, Polish, and Launch Preparation
+
 **Duration:** 5 days
 **Focus:** Comprehensive testing and final polish
 
 **Tasks:**
+
 1. **Comprehensive Testing (2 days)**
    - End-to-end user flow testing
    - Cross-browser compatibility
@@ -877,26 +967,30 @@ frontend/app/components/Analytics.tsx
    - Launch checklist completion
 
 **Deliverables:**
+
 - Comprehensive test results
 - Optimized production build
 - Complete documentation set
 - Launch-ready application
 
 **Acceptance Criteria:**
+
 - All tests pass with 95%+ success rate
 - Performance scores >90 on Lighthouse
 - Documentation complete and accurate
 - Launch checklist fully completed
 
 **Files to Create/Modify:**
+
 ```typescript
-frontend/app/__tests__/e2e/user-flows.test.ts
-frontend/next.config.js (optimized)
-frontend/docs/user-guide.md
-launch/checklist.md
+frontend / app / __tests__ / e2e / user - flows.test.ts;
+frontend / next.config.js(optimized);
+frontend / docs / user - guide.md;
+launch / checklist.md;
 ```
 
 ### Phase 3 Success Criteria
+
 - [ ] Phase 0 security maintained throughout development
 - [ ] Complete user interface implemented
 - [ ] All components responsive and accessible
@@ -939,6 +1033,7 @@ Phase 3: UI/UX Integration (3 weeks)
 ### Dependencies and Prerequisites
 
 #### Phase Dependencies
+
 1. **Phase 0 MUST BE COMPLETE** before any other phase can start
 2. Phase 0 security fixes must pass all security audits
 3. Phase 1 requires Phase 0 completion
@@ -946,6 +1041,7 @@ Phase 3: UI/UX Integration (3 weeks)
 5. Phase 3 requires Phase 2 completion
 
 #### Technical Dependencies
+
 1. **Infrastructure Prerequisites**
    - Qdrant vector database access
    - OpenAI API keys and billing setup
@@ -967,6 +1063,7 @@ Phase 3: UI/UX Integration (3 weeks)
    - **Security fixes must be integrated into all phases**
 
 #### External Dependencies
+
 1. **Third-Party Services**
    - OpenAI API reliability and pricing
    - Qdrant cloud service availability
@@ -986,6 +1083,7 @@ Phase 3: UI/UX Integration (3 weeks)
 ### Human Resources
 
 #### Core Team Structure (REVISED)
+
 ```
 Project Manager (1.0 FTE)
 ├── Backend Development Team
@@ -1004,6 +1102,7 @@ Project Manager (1.0 FTE)
 ```
 
 #### Skill Requirements
+
 - **Backend Developers:** Python, FastAPI, PostgreSQL, Vector Databases, Security
 - **Security Engineer:** Penetration testing, LGPD compliance, Security auditing
 - **ML Engineer:** OpenAI APIs, NLP, Machine Learning, Prompt Engineering
@@ -1014,6 +1113,7 @@ Project Manager (1.0 FTE)
 ### Technical Resources
 
 #### Infrastructure Requirements
+
 ```yaml
 Development Environment:
   - Development servers (2x)
@@ -1031,6 +1131,7 @@ Production Environment:
 ```
 
 #### Software and Tools
+
 ```yaml
 Development Tools:
   - IDEs and development environments
@@ -1049,38 +1150,42 @@ Testing Tools:
 ### Budget Requirements (REVISED)
 
 #### Development Costs (14-15 weeks)
-| Role | FTE | Weekly Rate | Weeks | Total Cost |
-|------|-----|-------------|-------|------------|
-| Project Manager | 1.0 | $2,000 | 15 | $30,000 |
-| Senior Backend Developer | 1.0 | $2,500 | 15 | $37,500 |
-| Backend Developer | 1.0 | $1,800 | 15 | $27,000 |
-| **Security Engineer (NEW)** | **0.5** | **$3,000** | **2** | **$3,000** |
-| ML Engineer | 0.5 | $3,000 | 5 | $7,500 |
-| Senior Frontend Developer | 1.0 | $2,200 | 15 | $33,000 |
-| Frontend Developer | 1.0 | $1,600 | 15 | $24,000 |
-| QA Engineer | 0.5 | $1,500 | 15 | $11,250 |
-| UX Designer | 0.3 | $2,000 | 4 | $2,400 |
-| **Total Development** | - | - | - | **$175,650** |
+
+| Role                        | FTE     | Weekly Rate | Weeks | Total Cost   |
+| --------------------------- | ------- | ----------- | ----- | ------------ |
+| Project Manager             | 1.0     | $2,000      | 15    | $30,000      |
+| Senior Backend Developer    | 1.0     | $2,500      | 15    | $37,500      |
+| Backend Developer           | 1.0     | $1,800      | 15    | $27,000      |
+| **Security Engineer (NEW)** | **0.5** | **$3,000**  | **2** | **$3,000**   |
+| ML Engineer                 | 0.5     | $3,000      | 5     | $7,500       |
+| Senior Frontend Developer   | 1.0     | $2,200      | 15    | $33,000      |
+| Frontend Developer          | 1.0     | $1,600      | 15    | $24,000      |
+| QA Engineer                 | 0.5     | $1,500      | 15    | $11,250      |
+| UX Designer                 | 0.3     | $2,000      | 4     | $2,400       |
+| **Total Development**       | -       | -           | -     | **$175,650** |
 
 #### Infrastructure Costs (4 months)
-| Service | Monthly Cost | Months | Total Cost |
-|---------|--------------|---------|------------|
-| OpenAI API | $500 | 4 | $2,000 |
-| Qdrant Cloud | $300 | 4 | $1,200 |
-| Supabase Pro | $100 | 4 | $400 |
-| AWS Services | $400 | 4 | $1,600 |
-| Monitoring Tools | $200 | 4 | $800 |
-| **Security Audit Services (NEW)** | **$500** | **1** | **$500** |
-| **LGPD Compliance Review (NEW)** | **$1,000** | **1** | **$1,000** |
-| **Total Infrastructure** | - | - | **$7,500** |
+
+| Service                           | Monthly Cost | Months | Total Cost |
+| --------------------------------- | ------------ | ------ | ---------- |
+| OpenAI API                        | $500         | 4      | $2,000     |
+| Qdrant Cloud                      | $300         | 4      | $1,200     |
+| Supabase Pro                      | $100         | 4      | $400       |
+| AWS Services                      | $400         | 4      | $1,600     |
+| Monitoring Tools                  | $200         | 4      | $800       |
+| **Security Audit Services (NEW)** | **$500**     | **1**  | **$500**   |
+| **LGPD Compliance Review (NEW)**  | **$1,000**   | **1**  | **$1,000** |
+| **Total Infrastructure**          | -            | -      | **$7,500** |
 
 #### Total Project Budget (REVISED)
+
 - **Development Costs:** $175,650 (+$7,300 from original)
 - **Infrastructure Costs:** $7,500 (+$3,000 from original)
 - **Contingency (15%):** $27,523
 - **Total Project Budget:** $210,673 (+$25,000 from original)
 
 **Budget Increase Justification:**
+
 - Security Engineer for Phase 0: $3,000
 - Security audit services: $500
 - LGPD compliance review: $1,000
@@ -1093,7 +1198,9 @@ Testing Tools:
 ### Major Milestones (REVISED)
 
 #### Milestone 0: Emergency Security Fixes Complete (Week 1)
+
 **Deliverables:**
+
 - All security vulnerabilities fixed
 - User authorization implemented
 - Database schema updated
@@ -1102,19 +1209,23 @@ Testing Tools:
 - Security audit passed
 
 **Success Metrics:**
+
 - Zero critical security vulnerabilities
 - User authorization working correctly
 - LGPD compliance verified
 - Security audit passed
 
 #### Milestone 1: Core Infrastructure Complete (Week 7)
+
 **Deliverables:**
+
 - Document processing pipeline operational
 - Vector database configured and populated
 - Basic matching algorithm functional
 - Staging environment deployed
 
 **Success Metrics:**
+
 - Documents processed with 90%+ accuracy
 - Vector similarity search returns relevant results
 - Basic match scores calculated correctly
@@ -1122,13 +1233,16 @@ Testing Tools:
 - Security maintained from Phase 0
 
 #### Milestone 2: Advanced Features Integrated (Week 11)
+
 **Deliverables:**
+
 - LLM integration operational
 - Advanced scoring system implemented
 - AI suggestion engine functional
 - Performance optimized
 
 **Success Metrics:**
+
 - LLM analysis provides valuable insights
 - Advanced scoring improves accuracy by 25%+
 - AI suggestions are actionable and effective
@@ -1136,13 +1250,16 @@ Testing Tools:
 - Security maintained throughout
 
 #### Milestone 3: Production Launch Ready (Week 14)
+
 **Deliverables:**
+
 - Complete user interface implemented
 - Comprehensive testing completed
 - Documentation finished
 - Production deployment ready
 
 **Success Metrics:**
+
 - User interface intuitive and responsive
 - Test coverage >90%
 - Documentation complete and accurate
@@ -1152,6 +1269,7 @@ Testing Tools:
 ### Success Criteria (REVISED)
 
 #### Security Success Metrics (NEW)
+
 - **Security Audit:** Zero critical vulnerabilities
 - **Authorization:** 100% user data isolation
 - **PII Protection:** 100% PII detection and masking
@@ -1160,6 +1278,7 @@ Testing Tools:
 - **Input Validation:** 100% endpoint validation
 
 #### Technical Success Metrics
+
 - **Performance:** 95% of operations complete in <5 seconds
 - **Accuracy:** Match accuracy >85% compared to expert assessment
 - **Reliability:** System uptime >99.5%
@@ -1167,6 +1286,7 @@ Testing Tools:
 - **Security:** Zero critical vulnerabilities (maintained throughout)
 
 #### Business Success Metrics
+
 - **User Adoption:** 500+ beta users in first month
 - **User Satisfaction:** 4.5+ star rating from user feedback
 - **Feature Usage:** 80%+ of users utilize core features
@@ -1174,6 +1294,7 @@ Testing Tools:
 - **Retention Rate:** 70%+ user retention after 30 days
 
 #### Quality Success Metrics
+
 - **Test Coverage:** >90% code coverage
 - **Defect Rate:** <5 critical bugs per 1000 users
 - **Accessibility:** WCAG 2.1 AA compliance
@@ -1186,11 +1307,13 @@ Testing Tools:
 ### Critical Security Risks (NEW)
 
 #### 1. Security Vulnerability Exploitation
+
 **Risk Level:** 🔴 CRITICAL
 **Impact:** Legal liability, data breach, reputational damage
 **Probability:** High (currently present)
 
 **Mitigation Strategies:**
+
 ```python
 # Phase 0: Immediate fixes required
 class SecurityFixes:
@@ -1212,11 +1335,13 @@ class SecurityFixes:
 ```
 
 #### 2. LGPD Compliance Violation
+
 **Risk Level:** 🔴 CRITICAL
 **Impact:** Legal liability, fines, business closure
 **Probability:** High (currently non-compliant)
 
 **Mitigation Strategies:**
+
 ```python
 class LGPDComplianceService:
     def __init__(self):
@@ -1236,11 +1361,13 @@ class LGPDComplianceService:
 ```
 
 #### 3. Data Breach Potential
+
 **Risk Level:** 🔴 CRITICAL
 **Impact:** Legal liability, user harm, business failure
 **Probability:** Medium-High (due to current vulnerabilities)
 
 **Mitigation Strategies:**
+
 ```python
 class DataProtectionService:
     def __init__(self):
@@ -1262,11 +1389,13 @@ class DataProtectionService:
 ### High-Impact Risks
 
 #### 1. LLM API Performance and Cost
+
 **Risk Level:** High
 **Impact:** High
 **Probability:** Medium
 
 **Mitigation Strategies:**
+
 ```python
 # Implement multiple provider fallback
 class LLMProviderManager:
@@ -1299,11 +1428,13 @@ class CostManager:
 ```
 
 #### 2. Vector Database Performance at Scale
+
 **Risk Level:** High
 **Impact:** Medium
 **Probability:** Medium
 
 **Mitigation Strategies:**
+
 ```python
 # Implement intelligent caching
 class EmbeddingCache:
@@ -1332,11 +1463,13 @@ class BatchProcessor:
 ```
 
 #### 3. Document Parsing Accuracy
+
 **Risk Level:** Medium
 **Impact:** High
 **Probability:** High
 
 **Mitigation Strategies:**
+
 ```python
 # Implement multiple parsing strategies with confidence scoring
 class DocumentParser:
@@ -1364,33 +1497,39 @@ class DocumentParser:
 ### Medium-Impact Risks
 
 #### 1. Team Resource Availability
+
 **Risk Level:** Medium
 **Impact:** Medium
 **Probability:** Medium
 
 **Mitigation Strategies:**
+
 - Cross-train team members on critical skills
 - Maintain backup resource pool
 - Document all processes and knowledge
 - Implement knowledge sharing sessions
 
 #### 2. Third-Party Service Dependencies
+
 **Risk Level:** Medium
 **Impact:** Medium
 **Probability:** Low
 
 **Mitigation Strategies:**
+
 - Implement multiple providers for critical services
 - Maintain service level agreements (SLAs)
 - Create fallback mechanisms
 - Monitor service performance continuously
 
 #### 3. Scope Creep
+
 **Risk Level:** Medium
 **Impact:** Medium
 **Probability**: Medium
 
 **Mitigation Strategies:**
+
 - Implement strict change control process
 - Maintain detailed project scope documentation
 - Regular stakeholder communication
@@ -1403,6 +1542,7 @@ class DocumentParser:
 ### Decision-Making Structure (REVISED)
 
 #### Project Steering Committee
+
 - **Project Sponsor:** Executive stakeholder
 - **Project Manager:** Day-to-day oversight
 - **Technical Lead:** Technical decisions
@@ -1410,6 +1550,7 @@ class DocumentParser:
 - **Product Owner:** Feature prioritization
 
 #### Security Decision Process (NEW)
+
 1. **Security Decisions:** Security Lead with veto power
 2. **Compliance Decisions:** Legal review required
 3. **Security Gates:** Must pass before phase transitions
@@ -1418,36 +1559,43 @@ class DocumentParser:
 ### Reporting Structure (REVISED)
 
 #### Weekly Progress Reports
+
 ```markdown
 ## Weekly Progress Report - Week X
 
 ### Accomplishments
+
 - [ ] Completed Phase 0 security fixes
 - [ ] Implemented user authorization
 - [ ] Fixed database schema
 - [ ] Added PII detection
 
 ### Security Status
+
 - Security Audit: [ ] PASSED/[ ] FAILED
 - LGPD Compliance: [ ] VERIFIED/[ ] PENDING
 - Critical Vulnerabilities: [ ] RESOLVED/[ ] REMAINING
 
 ### Challenges
+
 - LLM API rate limiting causing delays
 - Team member availability issues
 
 ### Next Week's Goals
+
 - [ ] Complete document processing service
 - [ ] Begin vector database integration
 - [ ] Address performance issues
 
 ### Security Actions
+
 - [ ] Security review completed
 - [ ] Penetration testing scheduled
 - [ ] Compliance documentation updated
 ```
 
 #### Milestone Reviews
+
 - **Stakeholder Presentation:** Demo of completed features
 - **Technical Review:** Architecture and performance assessment
 - **Security Review:** Security audit and compliance verification
@@ -1457,6 +1605,7 @@ class DocumentParser:
 ### Change Management Process (REVISED)
 
 #### Security Change Request Procedure (NEW)
+
 1. **Security Change Request:** Immediate priority for all security issues
 2. **Security Assessment:** Risk impact analysis
 3. **Emergency Implementation:** Immediate fixes for critical issues
@@ -1464,14 +1613,15 @@ class DocumentParser:
 5. **Documentation Update:** Security documentation updated
 
 #### Change Impact Matrix (REVISED)
-| Change Type | Impact Level | Approval Required | Timeline Impact |
-|-------------|--------------|-------------------|-----------------|
+
+| Change Type               | Impact Level | Approval Required             | Timeline Impact       |
+| ------------------------- | ------------ | ----------------------------- | --------------------- |
 | **Critical Security Fix** | **Critical** | **Security Lead (Immediate)** | **Blocks Other Work** |
-| **LGPD Compliance Issue** | **Critical** | **Legal + Security Lead** | **Blocks Other Work** |
-| Critical Bug Fix | High | Technical Lead | Immediate |
-| Feature Enhancement | Medium | Steering Committee | +1-2 weeks |
-| Major Feature Addition | High | Project Sponsor | +3-4 weeks |
-| Architecture Change | High | Steering Committee | +4-6 weeks |
+| **LGPD Compliance Issue** | **Critical** | **Legal + Security Lead**     | **Blocks Other Work** |
+| Critical Bug Fix          | High         | Technical Lead                | Immediate             |
+| Feature Enhancement       | Medium       | Steering Committee            | +1-2 weeks            |
+| Major Feature Addition    | High         | Project Sponsor               | +3-4 weeks            |
+| Architecture Change       | High         | Steering Committee            | +4-6 weeks            |
 
 ---
 
@@ -1480,6 +1630,7 @@ class DocumentParser:
 This implementation roadmap provides a comprehensive, security-first approach to integrating Resume-Matcher's advanced AI capabilities into the CV-Match platform. Following the independent security verification, the plan now includes a mandatory **Phase 0: Emergency Security Fixes** that addresses all critical vulnerabilities before any feature development.
 
 ### Key Success Factors
+
 1. **Security-First Approach:** Phase 0 critical fixes must be completed first
 2. **Strong Technical Foundation:** Current architecture provides excellent starting point
 3. **Clear Phase Structure:** Logical progression with security gates
@@ -1488,6 +1639,7 @@ This implementation roadmap provides a comprehensive, security-first approach to
 6. **Resource Planning:** Detailed budget including security resources
 
 ### Expected Outcomes
+
 - **Technical Excellence:** Production-ready system with advanced AI capabilities
 - **Security Compliance:** Full LGPD compliance and security verification
 - **Business Value:** Enhanced competitive positioning in Brazilian market
@@ -1495,6 +1647,7 @@ This implementation roadmap provides a comprehensive, security-first approach to
 - **Scalability:** Architecture ready for growth and expansion
 
 ### Next Steps
+
 1. **IMMEDIATE ACTIONS:** Begin Phase 0 Emergency Security Fixes
 2. **Week 0 Kickoff:** Security team deployment and vulnerability fixes
 3. **Security Gates:** Must pass Phase 0 before proceeding to Phase 1

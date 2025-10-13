@@ -1,8 +1,8 @@
 # 03 - shadcn/ui Component Installation
 
-**Agent**: `frontend-specialist`  
-**Phase**: 2 (Components)  
-**Duration**: 3 hours  
+**Agent**: `frontend-specialist`
+**Phase**: 2 (Components)
+**Duration**: 3 hours
 **Dependencies**: Phase 1 complete
 
 ---
@@ -36,25 +36,30 @@ Install and configure 15 essential shadcn/ui components with design system themi
 ## 🔧 Steps
 
 ### 1. Initialize shadcn (15 min)
+
 ```bash
 npx shadcn@latest init
 ```
 
 Choose options:
+
 - Style: Default
 - Base color: Neutral
 - CSS variables: Yes
 
 ### 2. Install Components (90 min)
+
 ```bash
 # Install all at once
 npx shadcn@latest add form select radio-group checkbox progress skeleton toast tooltip tabs separator avatar dropdown-menu sheet table command
 ```
 
 ### 3. Theme Components (45 min)
+
 Update each component to use design system colors.
 
 ### 4. Create Component Playground (30 min)
+
 Build `/components-test` page showing all components.
 
 ---

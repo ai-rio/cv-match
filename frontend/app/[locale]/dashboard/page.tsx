@@ -54,7 +54,12 @@ function DashboardContent() {
           },
         });
 
-        let creditsData = { credits: 0, free_used: 0, free_limit: 3, purchased: 0 };
+        let creditsData = {
+          credits: 0,
+          free_used: 0,
+          free_limit: 3,
+          purchased: 0,
+        };
         if (creditsResponse.ok) {
           creditsData = await creditsResponse.json();
         }

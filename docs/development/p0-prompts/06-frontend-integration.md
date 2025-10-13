@@ -1,9 +1,9 @@
 # Agent Prompt: Frontend Integration
 
-**Agent**: frontend-specialist  
-**Phase**: 4 - Frontend (Parallel with Testing)  
-**Priority**: P0  
-**Estimated Time**: 1.5 hours  
+**Agent**: frontend-specialist
+**Phase**: 4 - Frontend (Parallel with Testing)
+**Priority**: P0
+**Estimated Time**: 1.5 hours
 **Dependencies**: Phase 3 complete (API endpoints must exist)
 
 ---
@@ -21,16 +21,18 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
 **File**: `frontend/app/optimize/page.tsx`
 
 **Actions**:
+
 1. Update the file to use real API calls:
+
    ```typescript
    // frontend/app/optimize/page.tsx
-   
+
    'use client';
-   
+
    import { useState } from 'react';
    import { useRouter } from 'next/navigation';
    import { createClient } from '@/lib/supabase/client';
-   
+
    export default function OptimizePage() {
      const [resumeFile, setResumeFile] = useState<File | null>(null);
      const [jobDescription, setJobDescription] = useState({
@@ -42,30 +44,30 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
      const [isOptimizing, setIsOptimizing] = useState(false);
      const [error, setError] = useState<string | null>(null);
      const router = useRouter();
-     
+
      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-     
+
      // Get Supabase session for auth token
      const getAuthToken = async () => {
        const supabase = createClient();
        const { data: { session } } = await supabase.auth.getSession();
        return session?.access_token;
      };
-     
+
      // Step 1: Upload Resume
      const handleResumeUpload = async (file: File) => {
        setIsUploading(true);
        setError(null);
-       
+
        try {
          const token = await getAuthToken();
          if (!token) {
            throw new Error('Você precisa estar autenticado');
          }
-         
+
          const formData = new FormData();
          formData.append('file', file);
-         
+
          const response = await fetch(`${API_URL}/api/resumes/upload`, {
            method: 'POST',
            headers: {
@@ -73,15 +75,15 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
            },
            body: formData
          });
-         
+
          if (!response.ok) {
            const error = await response.json();
            throw new Error(error.detail || 'Erro ao enviar currículo');
          }
-         
+
          const data = await response.json();
          return data.resume_id;
-         
+
        } catch (err: any) {
          setError(err.message);
          throw err;
@@ -89,18 +91,18 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
          setIsUploading(false);
        }
      };
-     
+
      // Step 2: Start Optimization
      const handleStartOptimization = async (resumeId: string) => {
        setIsOptimizing(true);
        setError(null);
-       
+
        try {
          const token = await getAuthToken();
          if (!token) {
            throw new Error('Você precisa estar autenticado');
          }
-         
+
          const response = await fetch(`${API_URL}/api/optimizations/start`, {
            method: 'POST',
            headers: {
@@ -114,15 +116,15 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
              job_description: jobDescription.description
            })
          });
-         
+
          if (!response.ok) {
            const error = await response.json();
            throw new Error(error.detail || 'Erro ao iniciar otimização');
          }
-         
+
          const data = await response.json();
          return data.optimization_id;
-         
+
        } catch (err: any) {
          setError(err.message);
          throw err;
@@ -130,46 +132,46 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
          setIsOptimizing(false);
        }
      };
-     
+
      // Step 3: Handle Form Submit
      const handleSubmit = async (e: React.FormEvent) => {
        e.preventDefault();
-       
+
        if (!resumeFile) {
          setError('Por favor, envie seu currículo');
          return;
        }
-       
+
        if (!jobDescription.title || !jobDescription.company || !jobDescription.description) {
          setError('Por favor, preencha todos os campos da vaga');
          return;
        }
-       
+
        try {
          // Upload resume
          const resumeId = await handleResumeUpload(resumeFile);
-         
+
          // Start optimization
          const optimizationId = await handleStartOptimization(resumeId);
-         
+
          // Redirect to results page
          router.push(`/results/${optimizationId}`);
-         
+
        } catch (err) {
          console.error('Optimization error:', err);
        }
      };
-     
+
      return (
        <div className="container mx-auto px-4 py-8">
          <h1 className="text-3xl font-bold mb-8">Otimize seu Currículo</h1>
-         
+
          {error && (
            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
              {error}
            </div>
          )}
-         
+
          <form onSubmit={handleSubmit} className="space-y-6">
            {/* Resume Upload */}
            <div>
@@ -184,7 +186,7 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
                disabled={isUploading || isOptimizing}
              />
            </div>
-           
+
            {/* Job Title */}
            <div>
              <label className="block text-sm font-medium mb-2">
@@ -199,7 +201,7 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
                disabled={isUploading || isOptimizing}
              />
            </div>
-           
+
            {/* Company */}
            <div>
              <label className="block text-sm font-medium mb-2">
@@ -214,7 +216,7 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
                disabled={isUploading || isOptimizing}
              />
            </div>
-           
+
            {/* Job Description */}
            <div>
              <label className="block text-sm font-medium mb-2">
@@ -229,7 +231,7 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
                disabled={isUploading || isOptimizing}
              />
            </div>
-           
+
            {/* Submit Button */}
            <button
              type="submit"
@@ -247,6 +249,7 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
    ```
 
 **Success Criteria**:
+
 - [x] File updated with real API calls
 - [x] Authentication integrated
 - [x] Error handling implemented
@@ -260,16 +263,18 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
 **File**: `frontend/app/results/[id]/page.tsx`
 
 **Actions**:
+
 1. Update to fetch real optimization results:
+
    ```typescript
    // frontend/app/results/[id]/page.tsx
-   
+
    'use client';
-   
+
    import { useEffect, useState } from 'react';
    import { useParams } from 'next/navigation';
    import { createClient } from '@/lib/supabase/client';
-   
+
    interface OptimizationResult {
      id: string;
      match_score: number;
@@ -279,26 +284,26 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
      weaknesses: string[];
      status: string;
    }
-   
+
    export default function ResultsPage() {
      const params = useParams();
      const optimizationId = params.id as string;
      const [result, setResult] = useState<OptimizationResult | null>(null);
      const [loading, setLoading] = useState(true);
      const [error, setError] = useState<string | null>(null);
-     
+
      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-     
+
      useEffect(() => {
        const fetchResult = async () => {
          try {
            const supabase = createClient();
            const { data: { session } } = await supabase.auth.getSession();
-           
+
            if (!session) {
              throw new Error('Não autenticado');
            }
-           
+
            const response = await fetch(
              `${API_URL}/api/optimizations/${optimizationId}`,
              {
@@ -307,29 +312,29 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
                }
              }
            );
-           
+
            if (!response.ok) {
              throw new Error('Erro ao carregar resultados');
            }
-           
+
            const data = await response.json();
            setResult(data);
-           
+
            // Poll if still processing
            if (data.status === 'processing' || data.status === 'pending_payment') {
              setTimeout(fetchResult, 3000); // Poll every 3 seconds
            }
-           
+
          } catch (err: any) {
            setError(err.message);
          } finally {
            setLoading(false);
          }
        };
-       
+
        fetchResult();
      }, [optimizationId]);
-     
+
      if (loading) {
        return (
          <div className="container mx-auto px-4 py-8">
@@ -340,7 +345,7 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
          </div>
        );
      }
-     
+
      if (error) {
        return (
          <div className="container mx-auto px-4 py-8">
@@ -350,7 +355,7 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
          </div>
        );
      }
-     
+
      if (!result) {
        return (
          <div className="container mx-auto px-4 py-8">
@@ -358,7 +363,7 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
          </div>
        );
      }
-     
+
      if (result.status === 'processing' || result.status === 'pending_payment') {
        return (
          <div className="container mx-auto px-4 py-8">
@@ -370,11 +375,11 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
          </div>
        );
      }
-     
+
      return (
        <div className="container mx-auto px-4 py-8">
          <h1 className="text-3xl font-bold mb-8">Resultados da Otimização</h1>
-         
+
          {/* Match Score */}
          <div className="bg-white rounded-lg shadow p-6 mb-6">
            <h2 className="text-xl font-semibold mb-4">Score de Compatibilidade</h2>
@@ -382,7 +387,7 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
              {result.match_score}%
            </div>
          </div>
-         
+
          {/* Keywords */}
          {result.keywords && result.keywords.length > 0 && (
            <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -396,7 +401,7 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
              </div>
            </div>
          )}
-         
+
          {/* Improvements */}
          {result.improvements && result.improvements.length > 0 && (
            <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -417,6 +422,7 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
    ```
 
 **Success Criteria**:
+
 - [x] Results page fetches real data
 - [x] Polling for processing status
 - [x] Loading states shown
@@ -428,12 +434,14 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
 ### Task 3: Test End-to-End Workflow (15 min)
 
 **Actions**:
+
 1. Test complete workflow manually:
+
    ```bash
    # Start frontend
    cd /home/carlos/projects/cv-match/frontend
    bun run dev
-   
+
    # Navigate to optimize page
    open http://localhost:3001/pt-br/optimize
    ```
@@ -454,6 +462,7 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
    - All text in Portuguese
 
 **Success Criteria**:
+
 - [x] Can complete full workflow
 - [x] No console errors
 - [x] All UI elements work
@@ -467,6 +476,7 @@ Update the frontend optimize page to use real API endpoints instead of mocks, in
 ### Environment Variables
 
 Ensure these are set in `frontend/.env.local`:
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
@@ -478,18 +488,17 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 ```typescript
 try {
   const response = await fetch(url, options);
-  
+
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.detail || 'Erro desconhecido');
+    throw new Error(error.detail || "Erro desconhecido");
   }
-  
+
   const data = await response.json();
   return data;
-  
 } catch (err: any) {
   setError(err.message);
-  console.error('API Error:', err);
+  console.error("API Error:", err);
 }
 ```
 
@@ -525,10 +534,12 @@ open http://localhost:3001/pt-br/optimize
 ## 📝 Deliverables
 
 ### Files to Update:
+
 1. `frontend/app/optimize/page.tsx`
 2. `frontend/app/results/[id]/page.tsx`
 
 ### Git Commit:
+
 ```bash
 git add frontend/app/optimize/page.tsx
 git add frontend/app/results/[id]/page.tsx
@@ -563,6 +574,7 @@ Tested: Full workflow verified in Portuguese"
 ## 🎯 Success Definition
 
 Mission complete when:
+
 1. Optimize page uses real APIs
 2. Results page fetches real data
 3. Authentication integrated

@@ -9,8 +9,10 @@
 ### Backend Specialist Tools
 
 #### 1. Context7 - Library Documentation
+
 **When to use**: Before implementing ANY library integration
 **How to use**:
+
 ```bash
 # Step 1: Resolve library ID
 context7:resolve-library-id --library-name="stripe"
@@ -20,12 +22,14 @@ context7:get-library-docs --library-id="/stripe/stripe-python" --topic="subscrip
 ```
 
 **Use cases**:
+
 - Stripe subscription creation → Search "stripe subscriptions python"
 - FastAPI endpoints → Search "fastapi router dependencies"
 - Pydantic models → Search "pydantic dataclass validation"
 - Supabase queries → Search "supabase python client"
 
 **Example**:
+
 ```python
 # WRONG: Guessing Stripe API
 stripe.create_subscription(...)  # ❌ Guessing
@@ -42,6 +46,7 @@ stripe.Subscription.create(
 ```
 
 #### 2. Python Environment Tools
+
 **When to use**: Testing imports, running verification scripts
 
 ```bash
@@ -56,6 +61,7 @@ docker compose exec backend mypy app/config/pricing.py
 ```
 
 #### 3. Database Tools
+
 **When to use**: Creating migrations, testing queries
 
 ```bash
@@ -76,6 +82,7 @@ print(result.data)
 ### Frontend Specialist Tools
 
 #### 1. Shadcn/ui - UI Components
+
 **When to use**: Building ANY UI component
 **How to use**:
 
@@ -90,6 +97,7 @@ bunx  shadcn-ui@latest add dialog
 ```
 
 **Use cases**:
+
 - Subscription cards → Use `Card`, `CardHeader`, `CardContent`
 - Pricing tiers → Use `Tabs` for Flex/Flow switching
 - Popular badge → Use `Badge` component
@@ -97,6 +105,7 @@ bunx  shadcn-ui@latest add dialog
 - Cancel dialog → Use `Dialog`, `AlertDialog`
 
 **Example**:
+
 ```tsx
 // WRONG: Creating custom card from scratch
 <div className="border rounded p-4">  // ❌ Don't do this
@@ -112,22 +121,26 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 ```
 
 #### 2. Shadcn Blocks - Pre-built Sections
+
 **When to use**: Need common UI patterns
 **Where to find**: https://ui.shadcn.com/blocks
 
 **Available blocks**:
+
 - Pricing sections → Use pricing block
 - Dashboard layouts → Use dashboard block
 - Authentication forms → Use auth block
 - Settings pages → Use settings block
 
 **How to copy**:
+
 1. Go to https://ui.shadcn.com/blocks
 2. Find "Pricing" or relevant block
 3. Copy the code
 4. Adapt for your needs
 
 #### 3. Chrome DevTools
+
 **When to use**: Debugging, testing, validation
 **How to use**:
 
@@ -135,12 +148,12 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 // In browser console:
 
 // Test API call
-fetch('/api/payments/pricing')
-  .then(r => r.json())
-  .then(console.log)
+fetch("/api/payments/pricing")
+  .then((r) => r.json())
+  .then(console.log);
 
 // Test authentication
-localStorage.getItem('supabase.auth.token')
+localStorage.getItem("supabase.auth.token");
 
 // Debug component state
 // In React DevTools: Select component → See state/props
@@ -150,6 +163,7 @@ localStorage.getItem('supabase.auth.token')
 ```
 
 **Use for**:
+
 - Network requests (check API calls)
 - Console errors (catch runtime errors)
 - React DevTools (inspect component state)
@@ -157,6 +171,7 @@ localStorage.getItem('supabase.auth.token')
 - Responsive design testing
 
 #### 4. Context7 - Library Documentation
+
 **When to use**: Using any frontend library
 
 ```bash
@@ -171,6 +186,7 @@ context7:get-library-docs --library-id="/stripe/stripe-js" --topic="payment elem
 ```
 
 #### 5. Browser Testing
+
 **When to use**: Validating UI works correctly
 
 ```bash
@@ -195,10 +211,12 @@ bun run dev
 ### Database Architect Tools
 
 #### 1. Supabase Studio
+
 **When to use**: Viewing data, testing queries
 **How to access**: http://localhost:54323
 
 **Use for**:
+
 - View table schemas
 - Test SQL queries
 - Check RLS policies
@@ -206,6 +224,7 @@ bun run dev
 - Test migrations
 
 #### 2. Migration Tools
+
 ```bash
 # Create migration
 supabase migration new description
@@ -218,6 +237,7 @@ supabase db push
 ```
 
 #### 3. PostgreSQL Tools
+
 ```bash
 # Connect to DB
 supabase db remote psql
@@ -234,6 +254,7 @@ psql -h localhost -p 54322 -U postgres -d postgres -c "SELECT * FROM subscriptio
 ### Test Writer Tools
 
 #### 1. Pytest Tools
+
 ```bash
 # Run specific test
 docker compose exec backend pytest tests/unit/test_pricing.py -v
@@ -249,7 +270,9 @@ docker compose exec backend pytest tests/unit/test_pricing.py -v -s --pdb
 ```
 
 #### 2. Testing Libraries
+
 **Use Context7 to understand**:
+
 ```bash
 # Pytest
 context7:get-library-docs --library-id="/pytest-dev/pytest" --topic="fixtures"
@@ -262,6 +285,7 @@ context7:get-library-docs --library-id="/tiangolo/fastapi" --topic="testing"
 ```
 
 #### 3. Mock Tools
+
 ```python
 # Use unittest.mock for mocking
 from unittest.mock import Mock, patch, AsyncMock
@@ -279,12 +303,14 @@ with patch('app.services.stripe_service.stripe.Subscription.create') as mock_cre
 ### Before Starting ANY Task:
 
 1. **Identify Required Libraries**
+
    ```
    Task: Create subscription endpoint
    Libraries: FastAPI, Stripe, Pydantic
    ```
 
 2. **Use Context7 for Documentation**
+
    ```bash
    context7:resolve-library-id --library-name="stripe"
    context7:get-library-docs --library-id="/stripe/stripe-python" --topic="subscriptions"
@@ -311,6 +337,7 @@ with patch('app.services.stripe_service.stripe.Subscription.create') as mock_cre
 ## 🚨 CRITICAL Rules
 
 ### ❌ DON'T:
+
 - ❌ Guess library APIs - USE Context7
 - ❌ Create UI from scratch - USE Shadcn
 - ❌ Skip testing - USE test tools
@@ -318,6 +345,7 @@ with patch('app.services.stripe_service.stripe.Subscription.create') as mock_cre
 - ❌ Copy-paste without understanding - USE docs
 
 ### ✅ DO:
+
 - ✅ Always check Context7 first
 - ✅ Use Shadcn for all UI components
 - ✅ Test with Chrome DevTools
@@ -331,6 +359,7 @@ with patch('app.services.stripe_service.stripe.Subscription.create') as mock_cre
 ## 📋 Tool Checklist by Phase
 
 ### Phase 1: Backend Services
+
 - [ ] Context7: Stripe Python docs
 - [ ] Context7: FastAPI docs
 - [ ] Context7: Pydantic docs
@@ -338,18 +367,21 @@ with patch('app.services.stripe_service.stripe.Subscription.create') as mock_cre
 - [ ] Type checker (mypy)
 
 ### Phase 2: Database
+
 - [ ] Supabase Studio for schema
 - [ ] Migration tools
 - [ ] PostgreSQL CLI for testing
 - [ ] Context7: Supabase docs
 
 ### Phase 3: API Endpoints
+
 - [ ] Context7: FastAPI router docs
 - [ ] Context7: Stripe webhook docs
 - [ ] Pytest for testing
 - [ ] Python REPL for verification
 
 ### Phase 4: Frontend
+
 - [ ] Shadcn/ui components
 - [ ] Shadcn blocks (pricing)
 - [ ] Chrome DevTools
@@ -359,6 +391,7 @@ with patch('app.services.stripe_service.stripe.Subscription.create') as mock_cre
 - [ ] Browser testing
 
 ### Phase 5: Testing
+
 - [ ] Pytest
 - [ ] Coverage tools
 - [ ] Mock tools
@@ -408,15 +441,20 @@ async def create_subscription(
 <div className="border-2 rounded-lg p-6 shadow-md">
   <h3 className="text-2xl font-bold">Flow Pro</h3>
   <p className="text-gray-600">R$ 49,90/mês</p>
-  <button className="bg-blue-500 text-white px-4 py-2 rounded">
-    Assinar
-  </button>
-</div>
+  <button className="bg-blue-500 text-white px-4 py-2 rounded">Assinar</button>
+</div>;
 
 // ✅ RIGHT WAY - Using Shadcn components
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 <Card>
   <CardHeader>
@@ -424,9 +462,7 @@ import { Badge } from '@/components/ui/badge';
       <CardTitle>Flow Pro</CardTitle>
       <Badge variant="secondary">Popular</Badge>
     </div>
-    <CardDescription>
-      Para quem busca muitas oportunidades
-    </CardDescription>
+    <CardDescription>Para quem busca muitas oportunidades</CardDescription>
   </CardHeader>
   <CardContent>
     <div className="text-3xl font-bold">
@@ -436,7 +472,7 @@ import { Badge } from '@/components/ui/badge';
   <CardFooter>
     <Button className="w-full">Assinar Agora</Button>
   </CardFooter>
-</Card>
+</Card>;
 ```
 
 ### Example 3: Testing with Tools
@@ -451,13 +487,13 @@ def test_flow_pro_subscription():
     tier = pricing_config.get_tier("flow_pro")
     assert tier is not None
     assert tier.is_subscription == True
-    
+
     # Test pricing
     assert tier.price == 4990  # R$ 49,90 in cents
-    
+
     # Test analyses limit
     assert tier.analyses_per_month == 60
-    
+
     # Test rollover
     assert tier.rollover_limit == 30
 
@@ -469,6 +505,7 @@ def test_flow_pro_subscription():
 ## 🎯 Success Criteria
 
 Agent successfully uses tools when:
+
 - [ ] Context7 consulted before implementing library code
 - [ ] Shadcn components used for all UI
 - [ ] Chrome DevTools used for debugging

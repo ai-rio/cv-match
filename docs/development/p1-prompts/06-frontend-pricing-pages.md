@@ -1,20 +1,23 @@
 # Agent Prompt: Frontend Pricing Pages
 
-**Agent**: frontend-specialist  
-**Phase**: 4 - Frontend (Parallel with testing)  
-**Priority**: P0  
-**Time**: 1.5 hours  
+**Agent**: frontend-specialist
+**Phase**: 4 - Frontend (Parallel with testing)
+**Priority**: P0
+**Time**: 1.5 hours
 
 ## Mission
+
 Create pricing page in Portuguese with BRL pricing and Stripe Checkout integration.
 
 ## Tasks
 
 ### Task 1: Copy Pricing Page (1h)
+
 **Source**: Resume-Matcher `app/[locale]/pricing/page.tsx`
 **Target**: cv-match `frontend/app/[locale]/pricing/page.tsx`
 
 Update with:
+
 - BRL currency (R$)
 - Portuguese translations
 - Stripe checkout integration
@@ -23,6 +26,7 @@ Update with:
 ### Task 2: Create Payment Pages (30min)
 
 **Success Page** (`app/payment/success/page.tsx`):
+
 ```tsx
 export default function PaymentSuccess() {
   return (
@@ -37,6 +41,7 @@ export default function PaymentSuccess() {
 ```
 
 **Cancel Page** (`app/payment/canceled/page.tsx`):
+
 ```tsx
 export default function PaymentCanceled() {
   return (
@@ -51,16 +56,17 @@ export default function PaymentCanceled() {
 ```
 
 ### Task 3: Add Credit Display to Dashboard (30min)
+
 ```tsx
 export default function Dashboard() {
   const [credits, setCredits] = useState(0);
-  
+
   useEffect(() => {
-    fetch('/api/credits')
-      .then(r => r.json())
-      .then(data => setCredits(data.credits));
+    fetch("/api/credits")
+      .then((r) => r.json())
+      .then((data) => setCredits(data.credits));
   }, []);
-  
+
   return (
     <div>
       <Card>
@@ -77,6 +83,7 @@ export default function Dashboard() {
 ```
 
 ## Success Criteria
+
 - Pricing page in Portuguese
 - BRL currency displayed correctly
 - Stripe checkout works

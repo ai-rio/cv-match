@@ -9,6 +9,7 @@ This directory contains automation scripts for verifying the cv-match applicatio
 **Purpose**: Automated verification of P0 (Frontend Migration) completion before moving to P1 (Payment Integration).
 
 **What it checks**:
+
 - ✅ Infrastructure health (Docker services, database connectivity)
 - ✅ Backend services and imports
 - ✅ Backend unit tests (65/65 tests)
@@ -32,12 +33,14 @@ chmod +x scripts/verify-p0.sh
 bash scripts/verify-p0.sh
 ```
 
-**Output**: 
+**Output**:
+
 - Colored output showing passed ✅, failed ❌, and warnings ⚠️
 - Summary report with success rate
 - Exit code 0 if all critical checks pass, 1 if any fail
 
 **When to use**:
+
 - After completing P0 (Frontend Migration) tasks
 - Before starting P1 (Payment Integration)
 - After making significant changes to verify nothing broke
@@ -53,16 +56,18 @@ For detailed manual verification steps, see: `docs/development/P0-VERIFICATION-C
 Before running verification scripts:
 
 1. **Docker services running**:
+
    ```bash
    docker compose up -d
    ```
 
 2. **Dependencies installed**:
+
    ```bash
    # Backend
    cd backend && pip install -r requirements.txt && cd ..
-   
-   # Frontend  
+
+   # Frontend
    cd frontend && bun install && cd ..
    ```
 
@@ -77,6 +82,7 @@ Before running verification scripts:
 ### Script fails with "command not found"
 
 Make script executable:
+
 ```bash
 chmod +x scripts/verify-p0.sh
 ```
@@ -84,11 +90,13 @@ chmod +x scripts/verify-p0.sh
 ### Docker services not running
 
 Start services:
+
 ```bash
 docker compose up -d
 ```
 
 Check status:
+
 ```bash
 docker compose ps
 ```
@@ -96,6 +104,7 @@ docker compose ps
 ### Backend tests fail
 
 Run tests manually to see detailed errors:
+
 ```bash
 cd backend
 docker compose exec backend python -m pytest tests/unit/ -vv --tb=long
@@ -104,12 +113,14 @@ docker compose exec backend python -m pytest tests/unit/ -vv --tb=long
 ### Frontend build fails
 
 Check build logs:
+
 ```bash
 cd frontend
 bun run build
 ```
 
 Common issues:
+
 - Missing dependencies: Run `bun install`
 - TypeScript errors: Check `bun run type-check`
 - Missing environment variables: Check `.env.local`
@@ -137,33 +148,33 @@ name: P0 Verification
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   verify-p0:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up services
-      run: |
-        docker compose up -d
-        sleep 10  # Wait for services to be ready
-    
-    - name: Run P0 verification
-      run: |
-        chmod +x scripts/verify-p0.sh
-        ./scripts/verify-p0.sh
-    
-    - name: Upload test results
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: verification-results
-        path: /tmp/pytest_output.log
+      - uses: actions/checkout@v3
+
+      - name: Set up services
+        run: |
+          docker compose up -d
+          sleep 10  # Wait for services to be ready
+
+      - name: Run P0 verification
+        run: |
+          chmod +x scripts/verify-p0.sh
+          ./scripts/verify-p0.sh
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: verification-results
+          path: /tmp/pytest_output.log
 ```
 
 ---
@@ -177,5 +188,5 @@ jobs:
 
 ---
 
-**Last Updated**: 2025-10-09  
+**Last Updated**: 2025-10-09
 **Maintained by**: Development Team

@@ -2,19 +2,20 @@
 Unit tests for subscription service.
 """
 
-import pytest
 from datetime import datetime, timedelta
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 from uuid import uuid4
 
-from app.services.subscription_service import subscription_service
+import pytest
+
 from app.models.subscription import SubscriptionCreate, SubscriptionUpdate
+from app.services.subscription_service import subscription_service
 
 
 @pytest.fixture
 def mock_supabase():
     """Mock Supabase client."""
-    with patch('app.services.subscription_service.get_supabase_client') as mock:
+    with patch("app.services.subscription_service.get_supabase_client") as mock:
         client = Mock()
         # Mock the table chain to prevent actual HTTP calls
         table_mock = Mock()
@@ -26,7 +27,7 @@ def mock_supabase():
 @pytest.fixture
 def mock_pricing_config():
     """Mock pricing configuration."""
-    with patch('app.services.subscription_service.pricing_config') as mock:
+    with patch("app.services.subscription_service.pricing_config") as mock:
         tier = Mock()
         tier.name = "Flow Pro"
         tier.analyses_per_month = 60
@@ -41,20 +42,19 @@ async def test_create_subscription_success(mock_supabase):
     """Test successful subscription creation."""
     # Arrange
     mock_supabase.table().insert().execute.return_value = Mock(
-        data=[{
-            "id": "sub_123",
-            "user_id": "user_123",
-            "tier_id": "flow_pro",
-            "status": "active",
-        }]
+        data=[
+            {
+                "id": "sub_123",
+                "user_id": "user_123",
+                "tier_id": "flow_pro",
+                "status": "active",
+            }
+        ]
     )
 
     # Mock get_subscription_details to avoid the actual call
-    with patch.object(subscription_service, 'get_subscription_details') as mock_get_details:
-        mock_get_details.return_value = Mock(
-            tier_id="flow_pro",
-            analyses_available=60
-        )
+    with patch.object(subscription_service, "get_subscription_details") as mock_get_details:
+        mock_get_details.return_value = Mock(tier_id="flow_pro", analyses_available=60)
 
         subscription_data = SubscriptionCreate(
             user_id="user_123",
@@ -132,9 +132,7 @@ async def test_get_subscription_details_success(mock_supabase, mock_pricing_conf
         "updated_at": now.isoformat(),
     }
 
-    mock_supabase.table().select().eq().single().execute.return_value = Mock(
-        data=subscription_data
-    )
+    mock_supabase.table().select().eq().single().execute.return_value = Mock(data=subscription_data)
 
     # Act
     result = await subscription_service.get_subscription_details("sub_123")
@@ -153,9 +151,7 @@ async def test_get_subscription_details_success(mock_supabase, mock_pricing_conf
 async def test_get_subscription_details_not_found(mock_supabase):
     """Test getting subscription details when not found."""
     # Arrange
-    mock_supabase.table().select().eq().single().execute.return_value = Mock(
-        data=None
-    )
+    mock_supabase.table().select().eq().single().execute.return_value = Mock(data=None)
 
     # Act & Assert
     with pytest.raises(ValueError, match="Subscription not found"):
@@ -209,7 +205,7 @@ async def test_use_analysis_limit_reached(mock_supabase):
     )
 
     # Mock pricing config
-    with patch('app.services.subscription_service.pricing_config') as mock_pricing:
+    with patch("app.services.subscription_service.pricing_config") as mock_pricing:
         mock_tier = Mock()
         mock_tier.name = "Flow Starter"
         mock_tier.analyses_per_month = 15
@@ -226,12 +222,7 @@ async def test_get_active_subscription(mock_supabase):
     """Test getting active subscription for user."""
     # Arrange
     mock_supabase.table().select().eq().eq().order().limit().execute.return_value = Mock(
-        data=[{
-            "id": "sub_123",
-            "user_id": "user_123",
-            "tier_id": "flow_pro",
-            "status": "active"
-        }]
+        data=[{"id": "sub_123", "user_id": "user_123", "tier_id": "flow_pro", "status": "active"}]
     )
 
     # Act
@@ -247,9 +238,7 @@ async def test_get_active_subscription(mock_supabase):
 async def test_get_active_subscription_none(mock_supabase):
     """Test getting active subscription when none exists."""
     # Arrange
-    mock_supabase.table().select().eq().eq().order().limit().execute.return_value = Mock(
-        data=[]
-    )
+    mock_supabase.table().select().eq().eq().order().limit().execute.return_value = Mock(data=[])
 
     # Act
     result = await subscription_service.get_active_subscription("user_123")
@@ -266,7 +255,7 @@ async def test_update_subscription(mock_supabase):
         data=[{"id": "sub_123", "tier_id": "flow_business"}]
     )
 
-    with patch.object(subscription_service, 'get_subscription_details') as mock_get_details:
+    with patch.object(subscription_service, "get_subscription_details") as mock_get_details:
         mock_get_details.return_value = Mock(tier_id="flow_business")
 
         update_data = SubscriptionUpdate(tier_id="flow_business")
@@ -288,7 +277,7 @@ async def test_cancel_subscription_immediate(mock_supabase):
         data=[{"id": "sub_123", "status": "canceled"}]
     )
 
-    with patch.object(subscription_service, 'get_subscription_details') as mock_get_details:
+    with patch.object(subscription_service, "get_subscription_details") as mock_get_details:
         mock_get_details.return_value = Mock(status="canceled")
 
         # Act
@@ -314,7 +303,7 @@ async def test_cancel_subscription_at_period_end(mock_supabase):
         data=[{"id": "sub_123", "status": "active"}]
     )
 
-    with patch.object(subscription_service, 'get_subscription_details') as mock_get_details:
+    with patch.object(subscription_service, "get_subscription_details") as mock_get_details:
         mock_get_details.return_value = Mock(status="active")
 
         # Act
@@ -349,11 +338,9 @@ async def test_process_period_renewal_with_rollover(mock_supabase, mock_pricing_
         current_period_end=period_end,
     )
 
-    mock_supabase.table().update().eq().execute.return_value = Mock(
-        data=[{"id": "sub_123"}]
-    )
+    mock_supabase.table().update().eq().execute.return_value = Mock(data=[{"id": "sub_123"}])
 
-    with patch.object(subscription_service, 'get_subscription_details') as mock_get_details:
+    with patch.object(subscription_service, "get_subscription_details") as mock_get_details:
         mock_get_details.return_value = subscription_details
 
         # Act
@@ -386,11 +373,9 @@ async def test_process_period_renewal_exceeds_limit(mock_supabase, mock_pricing_
         current_period_end=period_end,
     )
 
-    mock_supabase.table().update().eq().execute.return_value = Mock(
-        data=[{"id": "sub_123"}]
-    )
+    mock_supabase.table().update().eq().execute.return_value = Mock(data=[{"id": "sub_123"}])
 
-    with patch.object(subscription_service, 'get_subscription_details') as mock_get_details:
+    with patch.object(subscription_service, "get_subscription_details") as mock_get_details:
         mock_get_details.return_value = subscription_details
 
         # Act
@@ -410,19 +395,11 @@ async def test_get_subscription_status_with_active_subscription(mock_supabase, m
     # Arrange
     now = datetime.utcnow()
     mock_supabase.table().select().eq().eq().order().limit().execute.return_value = Mock(
-        data=[{
-            "id": "sub_123",
-            "user_id": "user_123",
-            "tier_id": "flow_pro",
-            "status": "active"
-        }]
+        data=[{"id": "sub_123", "user_id": "user_123", "tier_id": "flow_pro", "status": "active"}]
     )
 
-    with patch.object(subscription_service, 'get_subscription_details') as mock_get_details:
-        mock_get_details.return_value = Mock(
-            tier_id="flow_pro",
-            analyses_available=25
-        )
+    with patch.object(subscription_service, "get_subscription_details") as mock_get_details:
+        mock_get_details.return_value = Mock(tier_id="flow_pro", analyses_available=25)
 
         # Act
         result = await subscription_service.get_subscription_status("user_123")
@@ -444,7 +421,7 @@ async def test_get_subscription_status_with_credits_only(mock_supabase):
     )
 
     # Mock usage limit service for credits
-    with patch('app.services.usage_limit_service.UsageLimitService') as mock_usage_service:
+    with patch("app.services.usage_limit_service.UsageLimitService") as mock_usage_service:
         mock_service_instance = Mock()
         mock_service_instance.get_user_credits.return_value = {"credits_remaining": 15}
         mock_usage_service.return_value = mock_service_instance
@@ -469,7 +446,7 @@ async def test_get_subscription_status_no_subscription_no_credits(mock_supabase)
     )
 
     # Mock usage limit service for credits
-    with patch('app.services.usage_limit_service.UsageLimitService') as mock_usage_service:
+    with patch("app.services.usage_limit_service.UsageLimitService") as mock_usage_service:
         mock_service_instance = Mock()
         mock_service_instance.get_user_credits.return_value = {"credits_remaining": 0}
         mock_usage_service.return_value = mock_service_instance
@@ -532,7 +509,7 @@ async def test_use_analysis_exactly_at_limit(mock_supabase):
     )
 
     # Mock pricing config
-    with patch('app.services.subscription_service.pricing_config') as mock_pricing:
+    with patch("app.services.subscription_service.pricing_config") as mock_pricing:
         mock_tier = Mock()
         mock_tier.name = "Flow Pro"
         mock_tier.analyses_per_month = 60
@@ -597,7 +574,7 @@ async def test_cancel_subscription_not_found(mock_supabase):
 async def test_process_period_renewal_not_found(mock_supabase):
     """Test period renewal when subscription not found."""
     # Arrange
-    with patch.object(subscription_service, 'get_subscription_details') as mock_get_details:
+    with patch.object(subscription_service, "get_subscription_details") as mock_get_details:
         mock_get_details.side_effect = ValueError("Subscription not found")
 
         # Act & Assert

@@ -87,10 +87,10 @@ tools: TodoWrite, Read, Write, Bash, Grep, Glob
 ### ⚠️ Issues
 1. **Security**: File size validation happens client-side only
    - Add server-side validation in backend
-   
+
 2. **LGPD**: Missing user consent for file storage
    - Add consent checkbox before upload
-   
+
 3. **Accessibility**: Missing aria-label for file input
    - Add: aria-label="Selecionar arquivo de currículo"
 

@@ -1,8 +1,8 @@
 # 10 - Mobile & Accessibility
 
-**Agent**: `frontend-specialist`  
-**Phase**: 5  
-**Duration**: 2h  
+**Agent**: `frontend-specialist`
+**Phase**: 5
+**Duration**: 2h
 **Dependencies**: Previous phase complete
 
 ---

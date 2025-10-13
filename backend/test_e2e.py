@@ -9,9 +9,9 @@ This script tests the complete optimization workflow including:
 """
 
 import asyncio
-import httpx
 import json
-from typing import Optional
+
+import httpx
 
 # Test configuration
 BASE_URL = "http://localhost:8000"
@@ -83,7 +83,7 @@ class CVMatchAPITester:
 
     def __init__(self):
         self.client = httpx.AsyncClient(timeout=30.0)
-        self.auth_token: Optional[str] = None
+        self.auth_token: str | None = None
         self.test_results = []
 
     async def __aenter__(self):

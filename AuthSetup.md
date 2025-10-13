@@ -34,6 +34,7 @@ For all OAuth providers, you'll need to:
 3. Add the provider credentials to Supabase
 
 The general callback URL format for Supabase is:
+
 ```
 https://[YOUR_PROJECT_REF].supabase.co/auth/v1/callback
 ```
@@ -71,7 +72,7 @@ The boilerplate already includes Google authentication in the frontend code:
 // frontend/services/supabase.ts
 export async function signInWithGoogle() {
   return supabase.auth.signInWithOAuth({
-    provider: 'google',
+    provider: "google",
     options: {
       redirectTo: `${window.location.origin}/auth/callback`,
     },
@@ -112,7 +113,7 @@ The boilerplate already includes LinkedIn authentication in the frontend code:
 // frontend/services/supabase.ts
 export async function signInWithLinkedIn() {
   return supabase.auth.signInWithOAuth({
-    provider: 'linkedin',
+    provider: "linkedin",
     options: {
       redirectTo: `${window.location.origin}/auth/callback`,
     },
@@ -153,7 +154,7 @@ Add GitHub authentication to your frontend code:
 // Add to frontend/services/supabase.ts
 export async function signInWithGitHub() {
   return supabase.auth.signInWithOAuth({
-    provider: 'github',
+    provider: "github",
     options: {
       redirectTo: `${window.location.origin}/auth/callback`,
     },
@@ -192,7 +193,7 @@ Add Twitter authentication to your frontend code:
 // Add to frontend/services/supabase.ts
 export async function signInWithTwitter() {
   return supabase.auth.signInWithOAuth({
-    provider: 'twitter',
+    provider: "twitter",
     options: {
       redirectTo: `${window.location.origin}/auth/callback`,
     },
@@ -226,6 +227,7 @@ To enable email/password authentication:
 ## Advanced Configuration
 
 For more advanced authentication configuration, such as:
+
 - Custom email templates
 - Custom redirect URLs
 - Multi-factor authentication

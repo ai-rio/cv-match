@@ -17,6 +17,7 @@ Fix critical database schema vulnerabilities that prevent user data isolation an
 **Current Issue**: Database tables lack proper user_id foreign keys and constraints, making user data isolation impossible at the database level.
 
 **Evidence from Code Review**:
+
 ```sql
 -- From 20251010185206_create_resumes_table.sql
 CREATE TABLE IF NOT EXISTS public.resumes (
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS public.resumes (
 ```
 
 **Business Impact**:
+
 - **Legal Liability**: Cannot enforce LGPD data protection at database level
 - **Data Integrity**: Orphaned records and inconsistent relationships
 - **Security Foundation**: No database-level security for user data isolation
@@ -35,16 +37,19 @@ CREATE TABLE IF NOT EXISTS public.resumes (
 ## Context & Documentation References
 
 ### Security Assessment Findings
+
 - **Critical Finding**: Missing user_id foreign key on resumes table
 - **Business Impact**: Cannot associate data with users, data breach risk
 - **Reference**: [`chunk_003_1_security_vulnerability_exploitation.md`](../system-iplementation-assessment/chunks/chunk_003_1_security_vulnerability_exploitation.md)
 
 ### Technical Implementation Context
+
 - **Related Implementation**: [`chunk_003_database_schema_changes.md`](../system-iplementation-assessment/chunks-technical-guide/chunk_003_database_schema_changes.md)
 - **Database Service**: [`chunk_002_backendappservicessupabasedatabasepy_enhanced.md`](../system-iplementation-assessment/chunks-technical-guide/chunk_002_backendappservicessupabasedatabasepy_enhanced.md)
 - **Schema Context**: [`chunk_004_2_resume_matching_endpoints.md`](../system-iplementation-assessment/chunks-technical-guide/chunk_004_2_resume_matching_endpoints.md)
 
 ### Phase Dependencies
+
 - **Must Complete Before**: Phase 0.2 (Data Protection)
 - **Can Run Parallel With**: Phase 0.1 user authorization and input validation
 - **Enables**: User authorization fixes and all subsequent security phases
@@ -83,6 +88,7 @@ CREATE TABLE IF NOT EXISTS public.resumes (
 ## Chunk Reading Order
 
 For this task, read these chunks in order:
+
 1. [`chunk_003_1_security_vulnerability_exploitation.md`](../system-iplementation-assessment/chunks/chunk_003_1_security_vulnerability_exploitation.md) - Security vulnerability details
 2. [`chunk_003_database_schema_changes.md`](../system-iplementation-assessment/chunks-technical-guide/chunk_003_database_schema_changes.md) - Database schema requirements
 3. [`chunk_002_backendappservicessupabasedatabasepy_enhanced.md`](../system-iplementation-assessment/chunks-technical-guide/chunk_002_backendappservicessupabasedatabasepy_enhanced.md) - Database service context
@@ -101,6 +107,7 @@ For this task, read these chunks in order:
 ### 1. Schema Assessment (HIGH PRIORITY)
 
 **Current State Analysis**:
+
 ```sql
 -- Check existing table schemas
 SELECT table_name, column_name, data_type, is_nullable
@@ -120,6 +127,7 @@ WHERE schemaname = 'public'
 **Migration File**: `supabase/migrations/20251013_add_user_security_columns.sql`
 
 **Required Changes**:
+
 ```sql
 -- Add user_id columns to existing tables
 ALTER TABLE public.resumes
@@ -148,6 +156,7 @@ WITH CHECK (auth.uid() = user_id);
 ### 3. Data Migration Strategy
 
 **Handle Existing Data**:
+
 ```sql
 -- For existing resumes without user_id, assign to system user for now
 UPDATE public.resumes
@@ -165,6 +174,7 @@ ADD CONSTRAINT chk_confidence_score_range CHECK (confidence_score >= 0 AND confi
 ### 4. Create Security Indexes
 
 **Performance Optimization**:
+
 ```sql
 -- Create security indexes
 CREATE INDEX IF NOT EXISTS idx_resumes_user_id ON public.resumes(user_id);
@@ -179,6 +189,7 @@ CREATE INDEX IF NOT EXISTS idx_match_results_user_job ON public.match_results(us
 ### 5. Implement Audit Logging
 
 **Audit Trail Setup**:
+
 ```sql
 -- Create audit table
 CREATE TABLE IF NOT EXISTS public.data_access_audit (
@@ -201,6 +212,7 @@ ALTER TABLE public.data_access_audit ENABLE ROW LEVEL SECURITY;
 ### 6. Update Application Services
 
 **Service Layer Changes**:
+
 ```python
 # Update SupabaseDatabaseService to enforce user_id
 class SupabaseDatabaseService(Generic[T]):
@@ -227,23 +239,27 @@ class SupabaseDatabaseService(Generic[T]):
 After implementation, verify:
 
 ### Database Security
+
 - [ ] All user-data tables have user_id foreign key constraints
 - [ ] RLS policies enforce strict user ownership
 - [ ] Security indexes created and performing well
 - [ ] Data integrity constraints preventing invalid data
 
 ### Access Control Testing
+
 - [ ] Cross-user SELECT queries return no data
 - [ ] Cross-user UPDATE/DELETE operations are blocked
 - [ ] Users can only access their own data
 - [ ] System can handle user data association correctly
 
 ### Performance Testing
+
 - [ ] Query performance impact <20ms per query
 - [ ] Indexes are being used by query planner
 - [ ] RLS policies don't significantly impact performance
 
 ### Data Integrity
+
 - [ ] Foreign key constraints prevent orphaned records
 - [ ] Check constraints validate score ranges
 - [ ] NOT NULL constraints enforced
@@ -252,6 +268,7 @@ After implementation, verify:
 ## Rollback Procedures
 
 If issues occur:
+
 1. **Migration Rollback**: Apply reverse migration to remove user_id columns
 2. **Service Rollback**: Revert service implementations to previous version
 3. **Data Recovery**: Restore from backup if data corruption occurs
@@ -286,6 +303,7 @@ psql $DATABASE_URL -c "EXPLAIN ANALYZE SELECT * FROM public.resumes WHERE user_i
 ## 🚨 CRITICAL REMINDER
 
 This database security fix is **MANDATORY** before any other development:
+
 - **Legal Requirement**: LGPD compliance requires database-level data protection
 - **Security Foundation**: Database security enables all other security measures
 - **Business Requirement**: Enables legal deployment in Brazil

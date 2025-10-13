@@ -33,6 +33,7 @@ python run_webhook_tests.py webhook
 ### 3. Check Results
 
 If all tests pass, you'll see:
+
 ```
 ✅ All webhook tests passed!
 ```
@@ -118,11 +119,13 @@ export $(cat .env.test | xargs)
 ### Common Issues
 
 1. **Import Errors**
+
    ```bash
    pip install -r requirements-test.txt
    ```
 
 2. **Module Not Found**
+
    ```bash
    # Ensure you're in the backend directory
    cd backend
@@ -130,6 +133,7 @@ export $(cat .env.test | xargs)
    ```
 
 3. **Test Database Issues**
+
    ```bash
    # Tests use mocks by default, no database needed
    # For integration with real database, configure SUPABASE_URL
@@ -164,6 +168,7 @@ pytest tests/ -k "checkout_session"
 ## What the Tests Cover
 
 ### Webhook Events Tested
+
 - ✅ `checkout.session.completed`
 - ✅ `invoice.payment_succeeded`
 - ✅ `invoice.payment_failed`
@@ -172,12 +177,14 @@ pytest tests/ -k "checkout_session"
 - ✅ `customer.subscription.deleted`
 
 ### Security Features Tested
+
 - ✅ Webhook signature verification
 - ✅ Idempotency protection
 - ✅ Error handling and logging
 - ✅ Invalid payload rejection
 
 ### Brazilian Market Features
+
 - ✅ BRL currency handling
 - ✅ Portuguese language support
 - ✅ Brazilian customer data
@@ -202,15 +209,17 @@ For issues:
 ## Performance Benchmarks
 
 Expected performance:
+
 - Webhook processing: < 500ms
 - Test suite completion: < 30 seconds
 - Coverage: > 80% of webhook code
 
 Run performance tests:
+
 ```bash
 make test-webhook-performance
 ```
 
 ---
 
-*This guide covers the essentials. For comprehensive documentation, see `tests/README.md`.*
+_This guide covers the essentials. For comprehensive documentation, see `tests/README.md`._

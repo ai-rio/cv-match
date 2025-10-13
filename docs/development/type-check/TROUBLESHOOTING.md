@@ -36,10 +36,10 @@ const result = undefinedVariable;
 
 // ✅ Solutions:
 // 1. Define the variable
-const undefinedVariable = 'value';
+const undefinedVariable = "value";
 
 // 2. Import the variable
-import { undefinedVariable } from './module';
+import { undefinedVariable } from "./module";
 
 // 3. Use type assertion
 const result = (window as any).undefinedVariable;
@@ -170,7 +170,7 @@ console.log(user?.name);
 const userName = user?.name ?? "Unknown";
 
 // 4. Type assertion (when you know it's not null)
-console.log((user!).name);
+console.log(user!.name);
 
 // 5. Non-null assertion operator
 console.log(user!.name);
@@ -240,7 +240,8 @@ if hasattr(user, 'email'):
 
 ```typescript
 // ❌ Error
-function processData(data) { // Parameter 'data' implicitly has 'any' type
+function processData(data) {
+  // Parameter 'data' implicitly has 'any' type
   return data.length;
 }
 
@@ -283,7 +284,7 @@ console.log(unusedVariable);
 const _unusedVariable = "value";
 
 // 4. Add type-only import
-import type { UnusedType } from './module';
+import type { UnusedType } from "./module";
 ```
 
 ---
@@ -302,12 +303,12 @@ interface Payment {
 // ✅ Brazilian-specific types
 interface BRLPayment {
   amount: number; // In centavos (integers)
-  currency: 'BRL';
+  currency: "BRL";
   formattedAmount: string; // "R$ 1.234,56"
 }
 
 // Helper type for BRL values
-type BRLAmount = number & { readonly __brand: 'BRL' };
+type BRLAmount = number & { readonly __brand: "BRL" };
 
 function createBRLAmount(value: number): BRLAmount {
   return Math.round(value * 100) as BRLAmount;
@@ -324,11 +325,11 @@ interface Translations {
 
 // ✅ PT-BR specific types
 interface PTBRTranslations {
-  'payment.amount': string;
-  'payment.method.pix': string;
-  'payment.method.boleto': string;
-  'user.cpf.invalid': string;
-  'user.cnpj.invalid': string;
+  "payment.amount": string;
+  "payment.method.pix": string;
+  "payment.method.boleto": string;
+  "user.cpf.invalid": string;
+  "user.cnpj.invalid": string;
 }
 
 // Type-safe translation keys
@@ -373,7 +374,7 @@ function validateBrazilianDocument(doc: BrazilianDocument): boolean {
 const userEmail = user.profile.email;
 
 // After
-const userEmail = user?.profile?.email ?? 'no-email@example.com';
+const userEmail = user?.profile?.email ?? "no-email@example.com";
 ```
 
 ### Pattern 2: Use Type Guards
@@ -386,7 +387,7 @@ function processValue(value: string | number) {
 
 // After
 function processValue(value: string | number) {
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     return value.toUpperCase();
   }
   return value.toString().toUpperCase();
@@ -427,9 +428,9 @@ interface Payment {
 
 // Brazilian-specific payment
 interface BrazilianPayment extends Payment {
-  currency: 'BRL';
+  currency: "BRL";
   amountInCentavos: number;
-  paymentMethod: 'pix' | 'boleto' | 'credit_card';
+  paymentMethod: "pix" | "boleto" | "credit_card";
   installments?: number;
 }
 ```

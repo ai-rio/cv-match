@@ -4,13 +4,12 @@ Configures error tracking and performance monitoring for FastAPI application
 """
 
 import logging
-from typing import Optional
 
 import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
-from sentry_sdk.integrations.starlette import StarletteIntegration
-from sentry_sdk.integrations.logging import LoggingIntegration
 from sentry_sdk.integrations.httpx import HttpxIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
+from sentry_sdk.integrations.starlette import StarletteIntegration
 
 from app.core.config import settings
 
@@ -21,8 +20,8 @@ class SentryConfig:
     """Sentry configuration management for CV-Match backend"""
 
     def __init__(self):
-        self.dsn: Optional[str] = None
-        self.environment: Optional[str] = None
+        self.dsn: str | None = None
+        self.environment: str | None = None
         self.enabled: bool = False
 
     def load_config(self):
@@ -45,50 +44,38 @@ class SentryConfig:
         try:
             # Configure logging integration
             logging_integration = LoggingIntegration(
-                level=logging.INFO,        # Capture info and above as breadcrumbs
-                event_level=logging.ERROR  # Send errors as events
+                level=logging.INFO,  # Capture info and above as breadcrumbs
+                event_level=logging.ERROR,  # Send errors as events
             )
 
             sentry_sdk.init(
                 dsn=self.dsn,
                 environment=self.environment,
-
                 # Set traces_sample_rate to 1.0 to capture 100%
                 # of transactions for performance monitoring.
                 traces_sample_rate=1.0,
-
                 # Configure profiles_sample_rate to capture performance profiles
                 profiles_sample_rate=1.0,
-
                 # Integrations for FastAPI ecosystem
                 integrations=[
                     FastApiIntegration(
-                        auto_enabling_integrations=False,
-                        transaction_style="endpoint"
+                        auto_enabling_integrations=False, transaction_style="endpoint"
                     ),
-                    StarletteIntegration(
-                        transaction_style="url"
-                    ),
+                    StarletteIntegration(transaction_style="url"),
                     logging_integration,
                     HttpxIntegration(),
                 ],
-
                 # Brazilian market context
                 before_send=self._add_brazilian_context,
                 before_breadcrumb=self._add_brazilian_breadcrumb_context,
-
                 # Custom tags for Brazilian SaaS context
                 release=self._get_release_version(),
-
                 # Performance monitoring settings
                 send_default_pii=False,  # Privacy compliance for LGPD
-
                 # Debug mode for development
                 debug=self.environment == "development",
-
                 # Maximum number of breadcrumbs to capture
                 max_breadcrumbs=50,
-
                 # Error sampling rate
                 sample_rate=1.0,
             )
@@ -104,26 +91,30 @@ class SentryConfig:
             return event
 
         # Add Brazilian market tags
-        event.setdefault("tags", {}).update({
-            "market": "brazil",
-            "currency": "BRL",
-            "locale": "pt-BR",
-            "region": "latam",
-            "saas_type": "resume-matching",
-            "compliance": "LGPD"
-        })
+        event.setdefault("tags", {}).update(
+            {
+                "market": "brazil",
+                "currency": "BRL",
+                "locale": "pt-BR",
+                "region": "latam",
+                "saas_type": "resume-matching",
+                "compliance": "LGPD",
+            }
+        )
 
         # Add custom context for Brazilian business logic
-        event.setdefault("extra", {}).update({
-            "market_context": {
-                "country": "BR",
-                "currency": "BRL",
-                "language": "pt-BR",
-                "timezone": "America/Sao_Paulo",
-                "business_model": "SaaS",
-                "industry": "HR_Tech"
+        event.setdefault("extra", {}).update(
+            {
+                "market_context": {
+                    "country": "BR",
+                    "currency": "BRL",
+                    "language": "pt-BR",
+                    "timezone": "America/Sao_Paulo",
+                    "business_model": "SaaS",
+                    "industry": "HR_Tech",
+                }
             }
-        })
+        )
 
         # Localize error messages for development
         if self.environment == "development" and "exception" in event:
@@ -147,16 +138,14 @@ class SentryConfig:
             return breadcrumb
 
         # Add market context to breadcrumbs
-        breadcrumb.setdefault("data", {}).update({
-            "market": "brazil",
-            "locale": "pt-BR"
-        })
+        breadcrumb.setdefault("data", {}).update({"market": "brazil", "locale": "pt-BR"})
 
         return breadcrumb
 
     def _get_release_version(self) -> str:
         """Get release version from environment or default"""
         import os
+
         return os.getenv("APP_VERSION", "cv-match@1.0.0")
 
     def set_user_context(self, user_id: str, email: str = None, **kwargs):
@@ -164,21 +153,13 @@ class SentryConfig:
         if not self.enabled:
             return
 
-        user_data = {
-            "id": user_id,
-            "locale": "pt-BR",
-            "market": "brazil"
-        }
+        user_data = {"id": user_id, "locale": "pt-BR", "market": "brazil"}
 
         if email:
             user_data["email"] = email
 
         # Add Brazilian-specific user context
-        brazilian_context = {
-            "currency": "BRL",
-            "country": "BR",
-            "timezone": "America/Sao_Paulo"
-        }
+        brazilian_context = {"currency": "BRL", "country": "BR", "timezone": "America/Sao_Paulo"}
         user_data.update(brazilian_context)
         user_data.update(kwargs)
 
@@ -196,10 +177,7 @@ class SentryConfig:
                 message=message,
                 category=category,
                 level=level,
-                data={
-                    "market": "brazil",
-                    "locale": "pt-BR"
-                }
+                data={"market": "brazil", "locale": "pt-BR"},
             )
 
     def capture_exception(self, exception: Exception, context: dict = None):
@@ -207,11 +185,7 @@ class SentryConfig:
         if not self.enabled:
             return
 
-        extra_data = {
-            "market": "brazil",
-            "locale": "pt-BR",
-            "application": "cv-match-backend"
-        }
+        extra_data = {"market": "brazil", "locale": "pt-BR", "application": "cv-match-backend"}
 
         if context:
             extra_data.update(context)
@@ -223,11 +197,7 @@ class SentryConfig:
         if not self.enabled:
             return
 
-        extra_data = {
-            "market": "brazil",
-            "locale": "pt-BR",
-            "application": "cv-match-backend"
-        }
+        extra_data = {"market": "brazil", "locale": "pt-BR", "application": "cv-match-backend"}
 
         if context:
             extra_data.update(context)

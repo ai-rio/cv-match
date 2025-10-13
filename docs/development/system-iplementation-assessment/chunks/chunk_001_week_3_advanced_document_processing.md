@@ -17,7 +17,6 @@ source: implementation-roadmap.md
 **Project Manager:** TBD
 **Technical Lead:** TBD
 
-
 <!-- Context: Implementation Roadmap > Executive Summary -->
 
 ## Executive Summary
@@ -27,12 +26,14 @@ This roadmap outlines a comprehensive 4-phase implementation plan for integratin
 **🚨 CRITICAL UPDATE:** The independent security verification revealed 8 critical security vulnerabilities that make the current system **ILLEGAL to deploy in Brazil** under LGPD regulations. These must be fixed first.
 
 **Key Milestones:**
+
 - **Phase 0 (Weeks 0-1):** Emergency Security Fixes - **MUST COMPLETE FIRST**
 - **Phase 1 (Weeks 2-7):** Core AI Foundation - Document processing and vector similarity
 - **Phase 2 (Weeks 8-11):** Enhanced Features - LLM integration and advanced scoring
 - **Phase 3 (Weeks 12-14):** UI/UX Integration - Complete user interface and testing
 
 **Success Metrics:**
+
 - Phase 0 security fixes completed and verified
 - On-time delivery of all subsequent phases
 - 90%+ test coverage achieved
@@ -41,49 +42,47 @@ This roadmap outlines a comprehensive 4-phase implementation plan for integratin
 
 ---
 
-
 <!-- Context: Implementation Roadmap > Phase 0: Emergency Security Fixes (Weeks 0-1) -->
 
 ## Phase 0: Emergency Security Fixes (Weeks 0-1)
 
-
 <!-- Context: Implementation Roadmap > Phase 0: Emergency Security Fixes (Weeks 0-1) > Objective -->
 
 ### Objective
-**CRITICAL:** Address all security vulnerabilities identified in the independent verification. This phase **BLOCKS ALL OTHER WORK** and must be completed before any additional features can be implemented.
 
+**CRITICAL:** Address all security vulnerabilities identified in the independent verification. This phase **BLOCKS ALL OTHER WORK** and must be completed before any additional features can be implemented.
 
 <!-- Context: Implementation Roadmap > Phase 0: Emergency Security Fixes (Weeks 0-1) > Duration: 1-2 weeks -->
 
 ### Duration: 1-2 weeks
+
 **Start Date:** Week 0 (IMMEDIATE)
 **End Date:** Week 1
 **Team Required:** 2 Backend Developers, 1 Security Engineer, 1 QA Engineer
 
-
 <!-- Context: Implementation Roadmap > Phase 0: Emergency Security Fixes (Weeks 0-1) > Critical Path Dependencies -->
 
 ### Critical Path Dependencies
+
 ```
 Security Fixes → All Other Work (BLOCKED until complete)
 ```
 
-
 <!-- Context: Implementation Roadmap > Phase 0: Emergency Security Fixes (Weeks 0-1) > Security Status: PRODUCTION ILLEGAL -->
 
 ### Security Status: PRODUCTION ILLEGAL
+
 **Current State:** Cannot legally deploy in Brazil due to LGPD violations
 **Risk Level:** 🔴 **CRITICAL** - Legal liability and data breach risk
-
 
 <!-- Context: Implementation Roadmap > Phase 0: Emergency Security Fixes (Weeks 0-1) > Week-by-Week Breakdown -->
 
 ### Week-by-Week Breakdown
 
-
 <!-- Context: Implementation Roadmap > Phase 0: Emergency Security Fixes (Weeks 0-1) > Week-by-Week Breakdown > Week 0: Critical Security Fixes (Days 1-3) -->
 
 #### Week 0: Critical Security Fixes (Days 1-3)
+
 **Duration:** 3 days
 **Priority:** 🔴 **URGENT** - Must complete before any other work
 **Focus:** Fix user authorization and data access controls
@@ -97,6 +96,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
    - Add authorization tests
 
    **Code Changes Required:**
+
    ```python
    # Fix in backend/app/api/endpoints/resumes.py
    @router.get("/{resume_id}", response_model=ResumeResponse)
@@ -123,6 +123,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
    - Database migration scripts
 
    **Database Migration:**
+
    ```sql
    -- Add user_id to resumes table
    ALTER TABLE public.resumes
@@ -148,6 +149,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
    - Update all mock data references
 
    **Code Changes:**
+
    ```python
    # Fix in backend/app/services/job_service.py
    async def _extract_structured_json(self, job_description_text: str):
@@ -166,7 +168,6 @@ Security Fixes → All Other Work (BLOCKED until complete)
        return result
    ```
 
-
 <!-- Context: Implementation Roadmap > Phase 0: Emergency Security Fixes (Weeks 0-1) > Week-by-Week Breakdown > Week 0: LGPD Compliance and Bias Detection (Days 4-5) -->
 
 #### Week 0: LGPD Compliance and Bias Detection (Days 4-5)
@@ -180,6 +181,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
    - Create bias monitoring system
 
    **Code Changes:**
+
    ```python
    # Fix in backend/app/services/score_improvement_service.py
    def _build_score_prompt(self, resume_text: str, job_description: str) -> str:
@@ -203,6 +205,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
    - PII logging prevention
 
    **Code Changes:**
+
    ```python
    # Add new service: backend/app/services/pii_detection.py
    import re
@@ -237,6 +240,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
    - CORS configuration fixes
 
    **Code Changes:**
+
    ```python
    # Add validation models
    from pydantic import BaseModel, Field, validator
@@ -266,7 +270,6 @@ Security Fixes → All Other Work (BLOCKED until complete)
        # Process upload...
    ```
 
-
 <!-- Context: Implementation Roadmap > Phase 0: Emergency Security Fixes (Weeks 0-1) > Week-by-Week Breakdown > Week 1: Security Verification and Documentation -->
 
 #### Week 1: Security Verification and Documentation
@@ -292,6 +295,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
    - Prepare security audit report
 
 **Deliverables:**
+
 - Complete security fixes implementation
 - Updated database schema with proper constraints
 - PII detection and masking system
@@ -301,6 +305,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
 - LGPD compliance documentation
 
 **Acceptance Criteria:**
+
 - ✅ All security vulnerabilities resolved
 - ✅ User authorization working correctly
 - ✅ Database schema properly constrained
@@ -311,6 +316,7 @@ Security Fixes → All Other Work (BLOCKED until complete)
 - ✅ LGPD compliance verified
 
 **Files to Create/Modify:**
+
 ```python
 backend/app/api/endpoints/resumes.py (fixed)
 backend/app/services/job_service.py (fixed)
@@ -322,10 +328,10 @@ docs/security/security-audit-report.md (new)
 docs/compliance/lgpd-compliance.md (new)
 ```
 
-
 <!-- Context: Implementation Roadmap > Phase 0: Emergency Security Fixes (Weeks 0-1) > Phase 0 Success Criteria -->
 
 ### Phase 0 Success Criteria
+
 - [ ] **CRITICAL**: User authorization implemented and tested
 - [ ] **CRITICAL**: Database schema fixed with foreign keys
 - [ ] **CRITICAL**: Mock data removed from production code
@@ -339,47 +345,46 @@ docs/compliance/lgpd-compliance.md (new)
 
 ---
 
-
 <!-- Context: Implementation Roadmap > Phase 1: Core AI Foundation (Weeks 2-7) -->
 
 ## Phase 1: Core AI Foundation (Weeks 2-7)
 
-
 <!-- Context: Implementation Roadmap > Phase 1: Core AI Foundation (Weeks 2-7) > Objective -->
 
 ### Objective
-Establish the fundamental infrastructure for document processing, vector embeddings, and basic similarity matching.
 
+Establish the fundamental infrastructure for document processing, vector embeddings, and basic similarity matching.
 
 <!-- Context: Implementation Roadmap > Phase 1: Core AI Foundation (Weeks 2-7) > Duration: 6 weeks -->
 
 ### Duration: 6 weeks
+
 **Start Date:** Week 2 (AFTER Phase 0 completion)
 **End Date:** Week 7
 **Team Required:** 2 Backend Developers, 1 Frontend Developer, 1 QA Engineer
 **Prerequisite:** Phase 0 Emergency Security Fixes **MUST** be completed first
 
-
 <!-- Context: Implementation Roadmap > Phase 1: Core AI Foundation (Weeks 2-7) > Critical Path Dependencies -->
 
 ### Critical Path Dependencies
+
 ```
 Phase 0 Complete → Document Processing → Vector Database → Basic Matching Algorithm
 ```
-
 
 <!-- Context: Implementation Roadmap > Phase 1: Core AI Foundation (Weeks 2-7) > Week-by-Week Breakdown -->
 
 ### Week-by-Week Breakdown
 
-
 <!-- Context: Implementation Roadmap > Phase 1: Core AI Foundation (Weeks 2-7) > Week-by-Week Breakdown > Week 2: Project Setup and Document Processing Foundation -->
 
 #### Week 2: Project Setup and Document Processing Foundation
+
 **Duration:** 5 days
 **Focus:** Infrastructure setup and basic document processing
 
 **Tasks:**
+
 1. **Project Infrastructure (2 days)**
    - Set up development environments
    - Configure Qdrant vector database
@@ -398,18 +403,21 @@ Phase 0 Complete → Document Processing → Vector Database → Basic Matching 
    - Add error handling for corrupted files
 
 **Deliverables:**
+
 - Enhanced document upload API endpoint
 - Basic PDF parsing service
 - Qdrant database configuration
 - Development environment setup guide
 
 **Acceptance Criteria:**
+
 - Users can upload PDF and DOCX files up to 10MB
 - PDF text extraction works with 95% accuracy
 - Qdrant database is accessible and configured
 - All new APIs have basic test coverage
 
 **Files to Create/Modify:**
+
 ```python
 backend/app/services/document_processing.py
 backend/app/api/endpoints/documents.py
@@ -417,14 +425,15 @@ backend/app/models/document.py
 frontend/app/components/DocumentUpload.tsx
 ```
 
-
 <!-- Context: Implementation Roadmap > Phase 1: Core AI Foundation (Weeks 2-7) > Week-by-Week Breakdown > Week 3: Advanced Document Processing -->
 
 #### Week 3: Advanced Document Processing
+
 **Duration:** 5 days
 **Focus:** Complete document parsing pipeline
 
 **Tasks:**
+
 1. **DOCX Parsing Implementation (2 days)**
    - Integrate python-docx library
    - Implement text and metadata extraction
@@ -441,18 +450,21 @@ frontend/app/components/DocumentUpload.tsx
    - Create document structure analysis
 
 **Deliverables:**
+
 - Complete document parsing service
 - Text cleaning and normalization pipeline
 - Document quality validation system
 - Comprehensive document processing tests
 
 **Acceptance Criteria:**
+
 - Both PDF and DOCX parsing with 90%+ accuracy
 - Text cleaning removes formatting artifacts
 - Quality validation rejects low-quality documents
 - Document processing completes in <5 seconds
 
 **Files to Create/Modify:**
+
 ```python
 backend/app/services/text_extraction.py
 backend/app/services/metadata_extraction.py

@@ -1,7 +1,7 @@
 # 🎯 Design System Implementation - Execution Guide
 
-**Purpose**: Visual step-by-step guide for implementing the complete design system  
-**Audience**: Engineering team, project managers, stakeholders  
+**Purpose**: Visual step-by-step guide for implementing the complete design system
+**Audience**: Engineering team, project managers, stakeholders
 **Time**: Read this (5 minutes) → Start implementation
 
 ---
@@ -67,6 +67,7 @@ bun run dev  # Should work without errors
 ### Step 2: Read Documentation (10 minutes)
 
 **REQUIRED READING** before starting:
+
 1. [Design System README](../../design-system/README.md) - 5 min
 2. [Component Inventory](../../design-system/components.md) - 3 min
 3. [Wireframes](../../design-system/wireframes.md) - 2 min
@@ -81,11 +82,12 @@ Follow the execution order below, using the specific prompts for each task.
 
 ### Phase 1: Foundation Setup ⚡ PARALLEL
 
-**Time**: 4h development → 2h wall time  
-**Agents**: 2 frontend specialists  
+**Time**: 4h development → 2h wall time
+**Agents**: 2 frontend specialists
 **Can Start**: Immediately
 
 #### Terminal 1: CSS Variables & Theme
+
 ```bash
 Agent: frontend-specialist
 Prompt: 01-css-theme-setup.md
@@ -98,6 +100,7 @@ Duration: 2h
 ```
 
 #### Terminal 2: Typography & Fonts
+
 ```bash
 Agent: frontend-specialist
 Prompt: 02-typography-fonts.md
@@ -109,7 +112,8 @@ Tasks:
 Duration: 2h
 ```
 
-**Checkpoint 1**: ✅ 
+**Checkpoint 1**: ✅
+
 - [ ] Theme toggle button works
 - [ ] Light/Dark themes switch correctly
 - [ ] All 3 fonts load properly
@@ -120,11 +124,12 @@ Duration: 2h
 
 ### Phase 2: Component Library 📦 SEQUENTIAL
 
-**Time**: 6h  
-**Agent**: 1 frontend specialist  
+**Time**: 6h
+**Agent**: 1 frontend specialist
 **Depends On**: Phase 1 complete
 
 #### Task 1: shadcn/ui Installation
+
 ```bash
 Agent: frontend-specialist
 Prompt: 03-shadcn-installation.md
@@ -138,6 +143,7 @@ Duration: 3h
 ```
 
 #### Task 2: Aceternity UI Installation
+
 ```bash
 Agent: frontend-specialist
 Prompt: 04-aceternity-installation.md
@@ -151,6 +157,7 @@ Duration: 3h
 ```
 
 **Checkpoint 2**: ✅
+
 - [ ] All shadcn components installed
 - [ ] All Aceternity components working
 - [ ] Component playground accessible
@@ -162,11 +169,12 @@ Duration: 3h
 
 ### Phase 3: Landing Page 🌟 PARALLEL
 
-**Time**: 6h development → 3h wall time  
-**Agents**: 2 frontend specialists  
+**Time**: 6h development → 3h wall time
+**Agents**: 2 frontend specialists
 **Depends On**: Phase 2 complete
 
 #### Terminal 1: Hero Section
+
 ```bash
 Agent: frontend-specialist
 Prompt: 05-landing-hero.md
@@ -180,6 +188,7 @@ Duration: 3h
 ```
 
 #### Terminal 2: Features Section
+
 ```bash
 Agent: frontend-specialist
 Prompt: 06-landing-features.md
@@ -193,6 +202,7 @@ Duration: 3h
 ```
 
 **Checkpoint 3**: ✅
+
 - [ ] Landing page hero stunning
 - [ ] Features section clear
 - [ ] All animations smooth
@@ -204,11 +214,12 @@ Duration: 3h
 
 ### Phase 4: Dashboard & App UI 🎨 SEQUENTIAL
 
-**Time**: 8h  
-**Agent**: 1 frontend specialist  
+**Time**: 8h
+**Agent**: 1 frontend specialist
 **Depends On**: Phase 3 complete
 
 #### Task 1: Dashboard Implementation
+
 ```bash
 Agent: frontend-specialist
 Prompt: 07-dashboard-implementation.md
@@ -222,6 +233,7 @@ Duration: 4h
 ```
 
 #### Task 2: Optimize Flow UI
+
 ```bash
 Agent: frontend-specialist
 Prompt: 08-optimize-flow-ui.md
@@ -235,6 +247,7 @@ Duration: 4h
 ```
 
 **Checkpoint 4**: ✅
+
 - [ ] Dashboard looks professional
 - [ ] Credit counter prominent
 - [ ] Stats cards informative
@@ -246,11 +259,12 @@ Duration: 4h
 
 ### Phase 5: Polish & Testing ✨ PARALLEL
 
-**Time**: 4h development → 2h wall time  
-**Agents**: 2 frontend specialists  
+**Time**: 4h development → 2h wall time
+**Agents**: 2 frontend specialists
 **Depends On**: Phase 4 complete
 
 #### Terminal 1: Theme Testing
+
 ```bash
 Agent: frontend-specialist
 Prompt: 09-theme-testing.md
@@ -264,6 +278,7 @@ Duration: 2h
 ```
 
 #### Terminal 2: Mobile & Accessibility
+
 ```bash
 Agent: frontend-specialist
 Prompt: 10-mobile-accessibility.md
@@ -277,6 +292,7 @@ Duration: 2h
 ```
 
 **Checkpoint 5**: ✅
+
 - [ ] Both themes perfect
 - [ ] Mobile fully responsive
 - [ ] Keyboard navigation works
@@ -292,6 +308,7 @@ Duration: 2h
 Before marking complete, verify:
 
 ### Visual Design
+
 - [ ] All pages match design system
 - [ ] Colors consistent (OKLCH)
 - [ ] Typography hierarchy clear
@@ -299,6 +316,7 @@ Before marking complete, verify:
 - [ ] Shadows appropriate
 
 ### Functionality
+
 - [ ] Theme toggle works everywhere
 - [ ] All components interactive
 - [ ] Animations smooth
@@ -306,6 +324,7 @@ Before marking complete, verify:
 - [ ] Forms validated
 
 ### Responsive Design
+
 - [ ] Mobile (320px - 767px) ✓
 - [ ] Tablet (768px - 1023px) ✓
 - [ ] Desktop (1024px+) ✓
@@ -313,6 +332,7 @@ Before marking complete, verify:
 - [ ] Text readable (16px min)
 
 ### Accessibility
+
 - [ ] WCAG 2.1 AA compliant
 - [ ] Keyboard navigation
 - [ ] Screen reader friendly
@@ -321,6 +341,7 @@ Before marking complete, verify:
 - [ ] ARIA labels where needed
 
 ### Performance
+
 - [ ] Lighthouse score 90+
 - [ ] Fonts load optimally
 - [ ] No layout shifts
@@ -328,6 +349,7 @@ Before marking complete, verify:
 - [ ] Bundle size reasonable
 
 ### Code Quality
+
 - [ ] Clean, commented code
 - [ ] Reusable components
 - [ ] Proper TypeScript types
@@ -339,6 +361,7 @@ Before marking complete, verify:
 ## 🚨 Common Issues & Solutions
 
 ### Issue 1: Fonts Not Loading
+
 ```bash
 # Solution: Check font imports in layout.tsx
 # Verify Google Fonts API key
@@ -346,6 +369,7 @@ Before marking complete, verify:
 ```
 
 ### Issue 2: Theme Flicker on Load
+
 ```bash
 # Solution: Add suppressHydrationWarning to <html>
 # Use next-themes properly
@@ -353,6 +377,7 @@ Before marking complete, verify:
 ```
 
 ### Issue 3: Aceternity Components Breaking
+
 ```bash
 # Solution: Check peer dependencies
 # Verify Tailwind config includes Aceternity paths
@@ -360,6 +385,7 @@ Before marking complete, verify:
 ```
 
 ### Issue 4: CSS Variables Not Applying
+
 ```bash
 # Solution: Check @theme inline directive in globals.css
 # Verify Tailwind v4 config
@@ -367,6 +393,7 @@ Before marking complete, verify:
 ```
 
 ### Issue 5: Mobile Layout Broken
+
 ```bash
 # Solution: Test on real devices, not just DevTools
 # Check container padding
@@ -379,18 +406,18 @@ Before marking complete, verify:
 
 Use this table to track completion:
 
-| Phase | Status | Start Time | End Time | Issues | Notes |
-|-------|--------|------------|----------|--------|-------|
-| 1.1 CSS & Theme | ⬜ | | | | |
-| 1.2 Typography | ⬜ | | | | |
-| 2.1 shadcn | ⬜ | | | | |
-| 2.2 Aceternity | ⬜ | | | | |
-| 3.1 Hero | ⬜ | | | | |
-| 3.2 Features | ⬜ | | | | |
-| 4.1 Dashboard | ⬜ | | | | |
-| 4.2 Optimize Flow | ⬜ | | | | |
-| 5.1 Theme Test | ⬜ | | | | |
-| 5.2 Mobile & A11y | ⬜ | | | | |
+| Phase             | Status | Start Time | End Time | Issues | Notes |
+| ----------------- | ------ | ---------- | -------- | ------ | ----- |
+| 1.1 CSS & Theme   | ⬜     |            |          |        |       |
+| 1.2 Typography    | ⬜     |            |          |        |       |
+| 2.1 shadcn        | ⬜     |            |          |        |       |
+| 2.2 Aceternity    | ⬜     |            |          |        |       |
+| 3.1 Hero          | ⬜     |            |          |        |       |
+| 3.2 Features      | ⬜     |            |          |        |       |
+| 4.1 Dashboard     | ⬜     |            |          |        |       |
+| 4.2 Optimize Flow | ⬜     |            |          |        |       |
+| 5.1 Theme Test    | ⬜     |            |          |        |       |
+| 5.2 Mobile & A11y | ⬜     |            |          |        |       |
 
 Legend: ⬜ Not Started | 🟡 In Progress | ✅ Complete | ❌ Blocked
 
@@ -414,18 +441,21 @@ When everything is complete:
 ## 📞 Need Help?
 
 **During Implementation:**
+
 - Check prompt troubleshooting sections
 - Review design system docs
 - Search component library docs
 - Ask in team chat
 
 **For Blockers:**
+
 - Tag tech lead
 - Create GitHub issue
 - Document the problem
 - Try workarounds in prompt
 
 **For Design Questions:**
+
 - Refer to design system docs
 - Check wireframes
 - Ask design lead
@@ -436,17 +466,20 @@ When everything is complete:
 ## 🔗 Quick Links
 
 ### Documentation
+
 - [Main README](README.md)
 - [Design System](../../design-system/README.md)
 - [Components](../../design-system/components.md)
 - [Wireframes](../../design-system/wireframes.md)
 
 ### Component Libraries
+
 - [shadcn/ui](https://ui.shadcn.com)
 - [Aceternity](https://ui.aceternity.com)
 - [Tailwind CSS](https://tailwindcss.com)
 
 ### Tools
+
 - [OKLCH Picker](https://oklch.com)
 - [Contrast Checker](https://webaim.org/resources/contrastchecker/)
 - [Google Fonts](https://fonts.google.com)

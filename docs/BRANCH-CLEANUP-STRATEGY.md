@@ -15,17 +15,20 @@ This document outlines the systematic approach for branch cleanup and maintenanc
 ## 📅 Cleanup Schedule
 
 ### Daily Cleanup
+
 - **Review merged PRs**: Check for branches ready for deletion
 - **Remove stale feature branches**: Delete branches inactive > 7 days
 - **Update protected branches**: Ensure main/develop are up to date
 
 ### Weekly Cleanup
+
 - **Comprehensive branch review**: Analyze all active branches
 - **Release branch maintenance**: Clean up completed releases
 - **Hotfix branch review**: Remove resolved hotfix branches
 - **Documentation update**: Update branch documentation
 
 ### Monthly Cleanup
+
 - **Deep repository analysis**: Review long-term branch patterns
 - **Archive strategy**: Move significant branches to archive if needed
 - **Workflow optimization**: Refine cleanup processes
@@ -34,18 +37,21 @@ This document outlines the systematic approach for branch cleanup and maintenanc
 ## 🔍 Branch Classification
 
 ### Active Branches
+
 - **Main branches**: `main`, `develop` (never delete)
 - **Current features**: Features under active development
 - **Recent releases**: Release branches in preparation
 - **Active hotfixes**: Emergency fixes in progress
 
 ### Stale Branches
+
 - **Merged features**: Features successfully merged (delete after 7 days)
 - **Abandoned features**: Features with no activity > 14 days
 - **Completed releases**: Released versions (delete after tag creation)
 - **Resolved hotfixes**: Hotfixes merged to main (delete after 7 days)
 
 ### Archive Candidates
+
 - **Historical features**: Significant features worth preserving
 - **Experimental branches**: Research/prototype work
 - **Major refactoring**: Large-scale changes with future reference value
@@ -53,6 +59,7 @@ This document outlines the systematic approach for branch cleanup and maintenanc
 ## 🛠 Cleanup Commands
 
 ### Identify Merged Branches
+
 ```bash
 # List merged branches (excluding main and develop)
 git branch --merged --no-contains main --no-contains develop
@@ -70,6 +77,7 @@ git branch --merged --no-contains main --no-contains develop --sort=-committerda
 ```
 
 ### Identify Stale Branches
+
 ```bash
 # List branches with no activity in last 14 days
 git for-each-ref --format='%(refname:short) %(committerdate)' refs/heads/ |
@@ -78,6 +86,7 @@ git for-each-ref --format='%(refname:short) %(committerdate)' refs/heads/ |
 ```
 
 ### Safe Branch Deletion
+
 ```bash
 # Delete merged local branch
 git branch -d branch-name
@@ -95,6 +104,7 @@ git branch --merged --no-contains main --no-contains develop |
 ```
 
 ### Cleanup Script
+
 ```bash
 #!/bin/bash
 # branch-cleanup.sh - Automated branch cleanup
@@ -171,6 +181,7 @@ echo "✅ Branch cleanup completed!"
 - [ ] **Documentation**: Update any related documentation
 
 ### Feature Branch Deletion
+
 - [ ] Merged to develop branch
 - [ ] No open PRs
 - [ ] Code reviewed and approved
@@ -179,6 +190,7 @@ echo "✅ Branch cleanup completed!"
 - [ ] Brazilian market considerations addressed
 
 ### Release Branch Deletion
+
 - [ ] Tag created for release version
 - [ ] Merged to main branch
 - [ ] Merged back to develop branch
@@ -187,6 +199,7 @@ echo "✅ Branch cleanup completed!"
 - [ ] Documentation updated
 
 ### Hotfix Branch Deletion
+
 - [ ] Merged to main branch
 - [ ] Tag created for hotfix version
 - [ ] Merged back to develop branch
@@ -197,44 +210,46 @@ echo "✅ Branch cleanup completed!"
 ## 🔄 Automated Cleanup Workflow
 
 ### GitHub Actions Integration
+
 ```yaml
 # .github/workflows/branch-cleanup.yml
 name: Branch Cleanup
 
 on:
   schedule:
-    - cron: '0 2 * * 1'  # Every Monday at 2 AM UTC
+    - cron: "0 2 * * 1" # Every Monday at 2 AM UTC
   workflow_dispatch:
 
 jobs:
   cleanup-branches:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Cleanup merged branches
-      run: |
-        # Add cleanup script here
-        ./scripts/branch-cleanup.sh
+      - name: Cleanup merged branches
+        run: |
+          # Add cleanup script here
+          ./scripts/branch-cleanup.sh
 
-    - name: Report cleanup results
-      uses: actions/github-script@v6
-      with:
-        script: |
-          // Create issue with cleanup report
-          github.rest.issues.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            title: 'Weekly Branch Cleanup Report',
-            body: 'Automated branch cleanup completed successfully.',
-            labels: ['maintenance', 'branch-cleanup']
-          })
+      - name: Report cleanup results
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // Create issue with cleanup report
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Weekly Branch Cleanup Report',
+              body: 'Automated branch cleanup completed successfully.',
+              labels: ['maintenance', 'branch-cleanup']
+            })
 ```
 
 ### Pre-commit Hook for Branch Name Validation
+
 ```bash
 # .husky/pre-commit
 #!/bin/sh
@@ -255,6 +270,7 @@ echo "✅ Branch name validation passed: $branch_name"
 ## 📊 Branch Analytics
 
 ### Monitoring Metrics
+
 ```bash
 # Branch activity report
 echo "📊 Branch Activity Report"
@@ -283,6 +299,7 @@ echo "Brazilian market branches: $br_branches"
 ```
 
 ### Health Score Calculation
+
 ```bash
 # Repository health score
 total_score=100
@@ -311,6 +328,7 @@ echo "🎯 Repository Health Score: $total_score/100"
 ## 🚨 Emergency Procedures
 
 ### Accidental Branch Deletion Recovery
+
 ```bash
 # Find deleted commit
 git reflog --no-merges | grep "branch-name"
@@ -320,6 +338,7 @@ git checkout -b recovered-branch <commit-hash>
 ```
 
 ### Mass Deletion Recovery
+
 ```bash
 # List all recently deleted branches
 git log --walk-reflogs --oneline | grep "branch:" | head -20
@@ -329,6 +348,7 @@ git branch branch-name <commit-hash>
 ```
 
 ### Backup Before Cleanup
+
 ```bash
 # Create backup of all branches
 git branch -a > backup-branches-$(date +%Y%m%d).txt
@@ -341,17 +361,20 @@ git push origin --tags
 ## 🇧🇷 Brazilian Market Considerations
 
 ### Special Branch Types
+
 - **Localization branches**: `feature/i18n-pt-br-updates`
 - **Payment branches**: `feature/brl-payment-integration`
 - **Compliance branches**: `feature/lgpd-compliance`
 - **Market branches**: `feature/brazilian-market-launch`
 
 ### Extended Retention
+
 - **Market launch branches**: Keep for 30 days post-launch
 - **Compliance branches**: Archive for legal reference
 - **Payment integration**: Extended retention for audit purposes
 
 ### Cleanup Exceptions
+
 ```bash
 # Never delete these Brazilian market branches
 protected_patterns=(
@@ -373,12 +396,14 @@ done
 ## 📚 Documentation Requirements
 
 ### Before Branch Deletion
+
 1. **Update Documentation**: Ensure all changes are documented
 2. **Wiki Updates**: Update project wiki pages
 3. **API Documentation**: Update API docs for backend changes
 4. **User Documentation**: Update user-facing docs
 
 ### After Branch Deletion
+
 1. **Cleanup References**: Remove branch references from docs
 2. **Update Roadmap**: Reflect completed features
 3. **Archive Notes**: Store important learnings
@@ -387,6 +412,7 @@ done
 ## 🎯 Best Practices
 
 ### DO ✅
+
 1. **Regular Cleanup**: Schedule consistent cleanup operations
 2. **Team Communication**: Notify before deletion
 3. **Backup Strategy**: Maintain backups of important work
@@ -399,6 +425,7 @@ done
 10. **Review Process**: Team review for important branches
 
 ### DON'T ❌
+
 1. **Force Delete**: Avoid force deletion without verification
 2. **Skip Communication**: Don't delete without team notice
 3. **Ignore Dependencies**: Check for dependent branches
@@ -413,6 +440,7 @@ done
 ## 🔧 Tools and Integration
 
 ### Git Aliases for Cleanup
+
 ```bash
 # Add to .gitconfig
 [alias]
@@ -422,6 +450,7 @@ done
 ```
 
 ### Integration with Project Management
+
 - **Jira Integration**: Link branches to tickets
 - **GitHub Projects**: Track branch lifecycle
 - **Slack Notifications**: Automated cleanup notifications
@@ -430,6 +459,7 @@ done
 ## 📞 Support and Escalation
 
 ### When to Seek Help
+
 1. **Uncertain Deletion**: Unsure about branch deletion
 2. **Dependencies Found**: Complex branch dependencies
 3. **Brazilian Market**: Market-specific branch concerns
@@ -437,6 +467,7 @@ done
 5. **Process Issues**: Cleanup workflow problems
 
 ### Escalation Path
+
 1. **Team Lead**: First point of contact
 2. **DevOps Engineer**: Technical assistance
 3. **Product Manager**: Feature branch decisions
@@ -446,6 +477,7 @@ done
 ## 📈 Continuous Improvement
 
 ### Metrics to Track
+
 - **Branch Lifecycle**: Average branch age
 - **Cleanup Efficiency**: Time from merge to deletion
 - **Repository Growth**: Branch count trends
@@ -453,6 +485,7 @@ done
 - **Brazilian Market**: Market-specific branch metrics
 
 ### Process Optimization
+
 1. **Regular Reviews**: Monthly process assessment
 2. **Tool Improvements**: Enhance automation tools
 3. **Team Feedback**: Collect and implement suggestions

@@ -401,9 +401,9 @@ if __name__ == "__main__":
 Create a test page `/home/carlos/projects/cv-match/frontend/app/test-resume/page.tsx`:
 
 ```tsx
-'use client';
+"use client";
 
-import FileUpload from '@/components/common/file-upload';
+import FileUpload from "@/components/common/file-upload";
 
 export default function TestResumePage() {
   return (

@@ -3,6 +3,7 @@
 This file provides quick reference guidance for Claude Code (claude.ai/code) when working with code in this repository.
 
 **📚 For detailed standards and patterns, see the [`.claude/` directory](.claude/GETTING_STARTED.md)** which contains:
+
 - Complete project overview and architecture
 - Business model and pricing strategy
 - Backend and frontend development standards
@@ -16,6 +17,7 @@ This file provides quick reference guidance for Claude Code (claude.ai/code) whe
 CV-Match is a full-stack SaaS application built on the Vinta Software template, featuring Next.js frontend with TypeScript, FastAPI backend with Python, and Supabase for database/authentication. The project targets the Brazilian market with Portuguese localization and BRL payment integration.
 
 **Key Architecture:**
+
 - **Frontend**: Next.js 15+ with App Router, TypeScript, Tailwind CSS, Bun package manager
 - **Backend**: FastAPI with async/await patterns, Pydantic models, service layer architecture
 - **Database**: Local Supabase PostgreSQL with Row Level Security (RLS)
@@ -25,6 +27,7 @@ CV-Match is a full-stack SaaS application built on the Vinta Software template, 
 ## Essential Commands
 
 ### Development Environment
+
 ```bash
 # Start full development environment (Docker)
 make dev
@@ -42,6 +45,7 @@ make build-frontend
 ```
 
 ### Database Operations
+
 ```bash
 # Create new migration
 make db-migration-new name=create_table_name
@@ -57,6 +61,7 @@ make db-list
 ```
 
 ### Production
+
 ```bash
 # Start production environment
 make prod
@@ -68,6 +73,7 @@ make clean
 ## Service Layer Architecture
 
 ### Backend Services Structure
+
 ```
 backend/app/services/
 ├── supabase/
@@ -82,12 +88,14 @@ backend/app/services/
 ```
 
 **Key Service Patterns:**
+
 - Use `SupabaseDatabaseService[T]` for generic CRUD operations with Pydantic models
 - Always implement async/await patterns in services
 - Service classes handle external API integrations (LLM, vector DB, storage)
 - Use dependency injection in FastAPI endpoints
 
 ### FastAPI Endpoint Pattern
+
 ```python
 @router.post("/items", response_model=ItemResponse)
 async def create_item(
@@ -105,6 +113,7 @@ async def create_item(
 ## Frontend Architecture
 
 ### Next.js App Router Structure
+
 ```
 frontend/app/
 ├── layout.tsx          # Root layout with providers
@@ -116,39 +125,38 @@ frontend/app/
 ```
 
 **Key Frontend Patterns:**
+
 - All components use `'use client'` directive when using hooks
 - TypeScript interfaces for all props
 - Tailwind CSS for styling with responsive design
 - Error handling with try/catch and loading states
 
 ### Component Pattern
+
 ```tsx
-'use client'
+"use client";
 export default function ComponentName({ title, onAction }: Props) {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const handleAction = async () => {
     try {
-      setLoading(true)
-      await onAction?.()
+      setLoading(true);
+      await onAction?.();
     } catch (error) {
-      console.error('Action failed:', error)
+      console.error("Action failed:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  return (
-    <div className="p-4 rounded-lg border">
-      {/* Component content */}
-    </div>
-  )
+  return <div className="p-4 rounded-lg border">{/* Component content */}</div>;
 }
 ```
 
 ## Database Schema Patterns
 
 ### Table Structure with RLS
+
 ```sql
 -- Standard table pattern with user association
 CREATE TABLE public.table_name (
@@ -170,6 +178,7 @@ CREATE POLICY "Users can manage own table_name"
 ## Environment Configuration
 
 ### Required Environment Variables
+
 ```bash
 # .env (backend)
 SUPABASE_URL=http://localhost:54321  # Local Supabase
@@ -184,6 +193,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
 ### Local Development Setup
+
 - Uses local Supabase instance (not remote)
 - Bun package manager for frontend dependencies
 - Docker Compose for service orchestration
@@ -194,13 +204,16 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 The project includes comprehensive Resume-Matcher integration documentation for Brazilian market entry:
 
 ### Key Features Available
+
 - **next-intl v4.3.6**: Brazilian Portuguese (pt-br) localization ready
 - **Stripe BRL Integration**: Complete payment infrastructure for Brazilian market
 - **Resume Matching**: Advanced cosine similarity algorithms with LLM improvement
 - **SaaS Infrastructure**: Credit-based usage tracking, subscription management
 
 ### Integration Documentation
+
 See `/docs/development/` for complete integration strategies:
+
 - `resume-matcher-integration.md` - 4-week launch strategy with 90% development time reduction
 - `implementation-guide.md` - Step-by-step integration instructions
 - `next-intl-integration.md` - Brazilian Portuguese localization setup
@@ -243,16 +256,19 @@ http://localhost:54323         # Supabase dashboard for local instance
 This file provides a quick reference. For comprehensive development standards and patterns:
 
 ### Core Documentation
+
 - **[.claude/GETTING_STARTED.md](.claude/GETTING_STARTED.md)** - Start here for using Claude Code effectively
 - **[.claude/project-overview.md](.claude/project-overview.md)** - Complete project context, tech stack, standards
 - **[.claude/business-context.md](.claude/business-context.md)** - Pricing model, market strategy, KPIs
 - **[.claude/development-workflow.md](.claude/development-workflow.md)** - Daily workflow, commands, debugging
 
 ### Development Standards
+
 - **[.claude/backend/fastapi-standards.md](.claude/backend/fastapi-standards.md)** - Backend API patterns
 - **[.claude/frontend/nextjs-standards.md](.claude/frontend/nextjs-standards.md)** - Frontend component patterns
 
 ### Business & Strategy
+
 - **[docs/development/business-model-analysis.md](docs/development/business-model-analysis.md)** - Full business model analysis
 - **[docs/development/stripe-integration-analysis.md](docs/development/stripe-integration-analysis.md)** - Brazilian payment strategy
 

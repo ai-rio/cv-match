@@ -26,6 +26,7 @@ from dataclasses import dataclass
 @dataclass
 class AgentDefinition:
     """Agent definition for Claude Agent SDK."""
+
     description: str
     prompt: str
     tools: list[str] | None = None
@@ -363,7 +364,7 @@ Read when relevant:
 ---
 
 **Remember**: Always use Repository Pattern. Always validate inputs. Always handle errors. Always ensure LGPD compliance.""",
-    model="sonnet"
+    model="sonnet",
 )
 
 

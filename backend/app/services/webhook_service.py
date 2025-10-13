@@ -11,8 +11,8 @@ from uuid import UUID
 from supabase import create_client
 
 from app.core.config import settings
-from app.services.usage_limit_service import UsageLimitService
 from app.core.database import SupabaseSession
+from app.services.usage_limit_service import UsageLimitService
 
 logger = logging.getLogger(__name__)
 
@@ -262,9 +262,11 @@ class WebhookService:
                         user_id=UUID(user_id),
                         amount=credits_added,
                         source="payment",
-                        description=f"Credits from {plan_type} plan purchase"
+                        description=f"Credits from {plan_type} plan purchase",
                     )
-                    logger.info(f"Added {credits_added} credits to user {user_id} for {plan_type} plan")
+                    logger.info(
+                        f"Added {credits_added} credits to user {user_id} for {plan_type} plan"
+                    )
                 except Exception as e:
                     logger.error(f"Failed to add credits to user {user_id}: {str(e)}")
                     return {"success": False, "error": f"Failed to add credits: {str(e)}"}
@@ -339,8 +341,8 @@ class WebhookService:
                 return {"success": False, "error": "User ID not found in subscription metadata"}
 
             # Use subscription service to create subscription record
-            from app.services.subscription_service import subscription_service
             from app.models.subscription import SubscriptionCreate
+            from app.services.subscription_service import subscription_service
 
             # Extract price ID from subscription items
             price_id = None
@@ -357,7 +359,9 @@ class WebhookService:
                 stripe_price_id=price_id,
             )
 
-            subscription_details = await subscription_service.create_subscription(subscription_create)
+            subscription_details = await subscription_service.create_subscription(
+                subscription_create
+            )
 
             logger.info(f"Created subscription {subscription_details.id} for user {user_id}")
 
@@ -391,8 +395,8 @@ class WebhookService:
                 return {"success": False, "error": "Subscription ID not found"}
 
             # Use subscription service to handle updates
-            from app.services.subscription_service import subscription_service
             from app.models.subscription import SubscriptionUpdate
+            from app.services.subscription_service import subscription_service
 
             # Find existing subscription to get local ID
             existing_sub = await self._get_by_field(
@@ -425,7 +429,9 @@ class WebhookService:
                 existing_sub["id"], update_data
             )
 
-            logger.info(f"Updated subscription {existing_sub['id']}: status={subscription_data.get('status')}")
+            logger.info(
+                f"Updated subscription {existing_sub['id']}: status={subscription_data.get('status')}"
+            )
 
             return {
                 "success": True,
@@ -526,7 +532,9 @@ class WebhookService:
 
                     try:
                         await subscription_service.process_period_renewal(local_subscription["id"])
-                        logger.info(f"Processed renewal for subscription {local_subscription['id']}")
+                        logger.info(
+                            f"Processed renewal for subscription {local_subscription['id']}"
+                        )
                     except Exception as e:
                         logger.error(f"Failed to process subscription renewal: {str(e)}")
 
@@ -539,7 +547,9 @@ class WebhookService:
                 "currency": invoice_data.get("currency", "brl"),
                 "status": "completed",
                 "payment_type": "subscription_payment" if subscription_id else "one_time",
-                "description": f"Pagamento da assinatura - {invoice_data.get('id')}" if subscription_id else f"Pagamento único - {invoice_data.get('id')}",
+                "description": f"Pagamento da assinatura - {invoice_data.get('id')}"
+                if subscription_id
+                else f"Pagamento único - {invoice_data.get('id')}",
                 "metadata": invoice_data.get("metadata", {}),
                 "created_at": datetime.now(UTC).isoformat(),
                 "updated_at": datetime.now(UTC).isoformat(),
@@ -580,16 +590,17 @@ class WebhookService:
             )
 
             if subscription:
-                from app.services.subscription_service import subscription_service
                 from app.models.subscription import SubscriptionUpdate
+                from app.services.subscription_service import subscription_service
 
                 # Update subscription status to past_due
                 await subscription_service.update_subscription(
-                    subscription["id"],
-                    SubscriptionUpdate(status="past_due")
+                    subscription["id"], SubscriptionUpdate(status="past_due")
                 )
 
-                logger.warning(f"Subscription {subscription['id']} marked as past_due due to payment failure")
+                logger.warning(
+                    f"Subscription {subscription['id']} marked as past_due due to payment failure"
+                )
 
                 return {
                     "success": True,
@@ -637,9 +648,11 @@ class WebhookService:
                         user_id=UUID(user_id),
                         amount=credits_to_add,
                         source="payment",
-                        description=f"Credits from one-time payment of R$ {amount/100:.2f}"
+                        description=f"Credits from one-time payment of R$ {amount / 100:.2f}",
                     )
-                    logger.info(f"Added {credits_to_add} credits to user {user_id} for one-time payment")
+                    logger.info(
+                        f"Added {credits_to_add} credits to user {user_id} for one-time payment"
+                    )
                 except Exception as e:
                     logger.error(f"Failed to add credits for one-time payment: {str(e)}")
 
@@ -772,9 +785,7 @@ class WebhookService:
                 update_data["error_message"] = error_message
 
             # Find and update the event
-            existing_event = await self._get_by_field(
-                "payment_events", "event_id", stripe_event_id
-            )
+            existing_event = await self._get_by_field("payment_events", "event_id", stripe_event_id)
 
             if existing_event:
                 await self._update("payment_events", existing_event["id"], update_data)

@@ -1,6 +1,6 @@
 # Type Checking Methodology - Bulk Fix Approach
 
-**Purpose**: Systematic approach for identifying and fixing type errors in bulk  
+**Purpose**: Systematic approach for identifying and fixing type errors in bulk
 **Focus**: High-impact fixes using error classification and prioritization
 
 ---
@@ -25,12 +25,12 @@ bun run build 2>&1 | grep "error TS" | wc -l  # Count TS errors
 
 ### Priority Levels
 
-| Priority | When to Fix | Impact | Examples |
-|----------|-------------|--------|----------|
-| 🔴 **Critical** | Immediately | Blocks builds | Module not found, syntax errors |
-| 🟡 **High** | Within 1 day | Affects multiple files | Type mismatches in shared code |
-| 🟢 **Medium** | Within 1 week | Local to file/component | Component prop types |
-| ⚪ **Low** | Anytime | Cosmetic | Unused variables |
+| Priority        | When to Fix   | Impact                  | Examples                        |
+| --------------- | ------------- | ----------------------- | ------------------------------- |
+| 🔴 **Critical** | Immediately   | Blocks builds           | Module not found, syntax errors |
+| 🟡 **High**     | Within 1 day  | Affects multiple files  | Type mismatches in shared code  |
+| 🟢 **Medium**   | Within 1 week | Local to file/component | Component prop types            |
+| ⚪ **Low**      | Anytime       | Cosmetic                | Unused variables                |
 
 ---
 
@@ -48,6 +48,7 @@ bun run build 2>&1 | grep -E "error TS[0-9]+" | \
 ```
 
 **Output example**:
+
 ```
 45 TS2339  # Property does not exist
 23 TS18047 # Possibly null/undefined
@@ -60,21 +61,25 @@ bun run build 2>&1 | grep -E "error TS[0-9]+" | \
 ### Step 2: Prioritize by Impact (2 min)
 
 **Critical** (Fix first):
+
 - TS2307 - Cannot find module
 - TS2304 - Cannot find name
 - Build-blocking errors
 
 **High Impact** (Fix second):
+
 - TS2339 - Property does not exist on type
 - TS2345 - Argument of type X not assignable to Y
 - Errors in shared utilities/components
 
 **Medium Impact** (Fix third):
+
 - TS18047 - Object is possibly null/undefined
 - TS2322 - Type X not assignable to type Y
 - Component-specific errors
 
 **Low Impact** (Fix last):
+
 - TS7006 - Implicit 'any' parameter
 - TS6133 - Declared but never used
 
@@ -83,18 +88,21 @@ bun run build 2>&1 | grep -E "error TS[0-9]+" | \
 ### Step 3: Fix in Batches (Bulk approach)
 
 #### Batch 1: Quick Wins (30 min)
+
 Target: Simple, high-frequency errors
 
 **Pattern: Null safety (TS18047)**
+
 ```typescript
 // Before: Object is possibly 'null'
 const email = user.email;
 
 // Fix: Add null check
-const email = user?.email ?? 'unknown';
+const email = user?.email ?? "unknown";
 ```
 
 **Pattern: Type assertions (TS2339)**
+
 ```typescript
 // Before: Property 'data' does not exist
 const items = response.data;
@@ -108,9 +116,11 @@ const items = (response as { data: Item[] }).data;
 ---
 
 #### Batch 2: Shared Code (1 hour)
+
 Target: Types affecting multiple files
 
 **Pattern: Interface updates**
+
 ```typescript
 // Update interface once
 interface ApiResponse<T> {
@@ -128,17 +138,23 @@ const result: ApiResponse<User[]> = await fetchUsers();
 ---
 
 #### Batch 3: Component Props (1 hour)
+
 Target: Component-specific errors
 
 **Pattern: Props interface**
+
 ```typescript
 interface ButtonProps {
-  variant?: 'primary' | 'secondary';
+  variant?: "primary" | "secondary";
   onClick?: () => void;
   children: React.ReactNode;
 }
 
-export function Button({ variant = 'primary', onClick, children }: ButtonProps) {
+export function Button({
+  variant = "primary",
+  onClick,
+  children,
+}: ButtonProps) {
   // Implementation
 }
 ```
@@ -166,6 +182,7 @@ echo "Progress: $((100 * Y / X))% remaining"
 ### 1. Use Global Find-Replace
 
 For repeated patterns:
+
 ```bash
 # Example: Add null checks to all `.email` accesses
 find frontend/app -name "*.tsx" -exec sed -i 's/user\.email/user?.email ?? ""/g' {} +
@@ -184,6 +201,7 @@ Focus on files with 5+ errors first.
 ### 3. Use TypeScript's `// @ts-expect-error`
 
 For errors you'll fix later:
+
 ```typescript
 // @ts-expect-error TODO: Fix type mismatch in next PR
 const data = complexFunction(param);
@@ -194,30 +212,34 @@ const data = complexFunction(param);
 ## 📝 Common Patterns & Quick Fixes
 
 ### Pattern 1: Possibly Null/Undefined
+
 ```typescript
 // Quick fix: Optional chaining + nullish coalescing
-data?.field ?? defaultValue
+data?.field ?? defaultValue;
 ```
 
 ### Pattern 2: Union Type Issues
+
 ```typescript
 // Quick fix: Type guard
-if ('property' in object) {
+if ("property" in object) {
   // TypeScript knows object has 'property' here
 }
 ```
 
 ### Pattern 3: Any Parameters
+
 ```typescript
 // Quick fix: Add basic type
-function handler(event: React.FormEvent) { }
+function handler(event: React.FormEvent) {}
 ```
 
 ### Pattern 4: Missing Properties
+
 ```typescript
 // Quick fix: Make property optional
 interface User {
-  email?: string;  // Add ? if property might not exist
+  email?: string; // Add ? if property might not exist
 }
 ```
 
@@ -227,12 +249,12 @@ interface User {
 
 Track your progress:
 
-| Metric | Target | How to Measure |
-|--------|--------|----------------|
-| Error count | < 50 | `grep "error TS" \| wc -l` |
-| Critical errors | 0 | Check build passes |
-| Files with errors | < 20% | Count files with errors |
-| Time per batch | < 1 hour | Track time spent |
+| Metric            | Target   | How to Measure             |
+| ----------------- | -------- | -------------------------- |
+| Error count       | < 50     | `grep "error TS" \| wc -l` |
+| Critical errors   | 0        | Check build passes         |
+| Files with errors | < 20%    | Count files with errors    |
+| Time per batch    | < 1 hour | Track time spent           |
 
 ---
 
@@ -264,6 +286,7 @@ Track your progress:
 ## 📋 Quick Reference
 
 ### Essential Commands
+
 ```bash
 # Check types
 cd frontend && bun run build
@@ -280,6 +303,7 @@ bun run build 2>&1 | grep "path/to/file.tsx"
 ```
 
 ### Priority Decision Tree
+
 ```
 Is build broken? → Fix immediately (Critical)
    ↓ No
@@ -295,12 +319,13 @@ Cosmetic/warnings? → Fix anytime (Low)
 ## 🎉 Expected Results
 
 After applying this methodology:
+
 - ✅ Build passes without type errors
 - ✅ 90% reduction in high-priority errors
 - ✅ Reusable patterns established
 - ✅ Team can maintain type safety
 
-**Time investment**: 3-4 hours for typical codebase  
+**Time investment**: 3-4 hours for typical codebase
 **Long-term benefit**: Catch bugs early, better IDE support
 
 ---

@@ -1,6 +1,6 @@
 # P0 → P1 Transition Quick Start Guide
 
-**Status**: After P0 (Frontend Migration) → Before P1 (Payment Integration)  
+**Status**: After P0 (Frontend Migration) → Before P1 (Payment Integration)
 **Last Updated**: 2025-10-09
 
 ---
@@ -24,6 +24,7 @@ chmod +x scripts/verify-p0.sh
 ```
 
 **What it checks**:
+
 - ✅ Docker services running
 - ✅ Database connectivity
 - ✅ Backend services operational
@@ -34,6 +35,7 @@ chmod +x scripts/verify-p0.sh
 - ✅ Performance benchmarks met
 
 **Expected output**:
+
 ```
 ✅ Passed:   25
 ❌ Failed:   0
@@ -81,6 +83,7 @@ For complete peace of mind before P1, follow the comprehensive checklist:
 **Location**: `docs/development/P0-VERIFICATION-CHECKLIST.md`
 
 This includes:
+
 - Infrastructure health checks
 - Backend services verification
 - Frontend functionality tests
@@ -117,6 +120,7 @@ This includes:
 
 **Symptoms**: pytest shows failing tests
 **Fix**:
+
 ```bash
 cd backend
 docker compose exec backend python -m pytest tests/unit/ -vv --tb=long
@@ -129,6 +133,7 @@ docker compose exec backend python -m pytest tests/unit/ -vv --tb=long
 
 **Symptoms**: TypeScript errors, missing dependencies
 **Fix**:
+
 ```bash
 cd frontend
 rm -rf .next node_modules
@@ -140,6 +145,7 @@ bun run build
 
 **Symptoms**: Can't connect to Supabase
 **Fix**:
+
 ```bash
 # Check environment variables
 cat backend/.env | grep SUPABASE
@@ -157,6 +163,7 @@ print('✅ Connected')
 
 **Symptoms**: `docker compose ps` shows no services
 **Fix**:
+
 ```bash
 # Start services
 docker compose up -d
@@ -224,17 +231,20 @@ Once P0 is verified, P1 (Payment Integration) will add:
 ## 🆘 Need Help?
 
 1. Check logs:
+
    ```bash
    docker compose logs backend --tail=100
    docker compose logs frontend --tail=100
    ```
 
 2. Review detailed checklist:
+
    ```bash
    cat docs/development/P0-VERIFICATION-CHECKLIST.md
    ```
 
 3. Check backend test output:
+
    ```bash
    cd backend
    docker compose exec backend python -m pytest tests/unit/ -vv
@@ -250,6 +260,7 @@ Once P0 is verified, P1 (Payment Integration) will add:
 ## ✨ Success Criteria
 
 **You're ready for P1 when**:
+
 - ✅ Automated verification passes (or only minor warnings)
 - ✅ You can successfully complete: Upload → Analyze → View Results
 - ✅ PT-BR interface works correctly
@@ -265,6 +276,6 @@ Once P0 is verified, P1 (Payment Integration) will add:
 
 ---
 
-**Last Updated**: 2025-10-09  
-**Phase**: P0 → P1 Transition  
+**Last Updated**: 2025-10-09
+**Phase**: P0 → P1 Transition
 **Next Milestone**: Payment Integration (Week 3)

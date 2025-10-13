@@ -1,9 +1,9 @@
 # Agent Prompt: Database Migrations
 
-**Agent**: database-architect  
-**Phase**: 2 - Database (After Phase 1 completes)  
-**Priority**: P0  
-**Estimated Time**: 2 hours  
+**Agent**: database-architect
+**Phase**: 2 - Database (After Phase 1 completes)
+**Priority**: P0
+**Estimated Time**: 2 hours
 **Dependencies**: Backend services must be copied first (to understand data models)
 
 ---
@@ -21,7 +21,9 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
 **Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/supabase/migrations/`
 
 **Actions**:
+
 1. List all migration files:
+
    ```bash
    ls -la /home/carlos/projects/Resume-Matcher/apps/backend/supabase/migrations/
    ```
@@ -41,12 +43,14 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
    - Triggers
 
 4. Create analysis document:
+
    ```markdown
    # File: backend/migration_analysis.md
-   
+
    ## Tables Required for P0
-   
+
    ### resumes
+
    - id: UUID PRIMARY KEY
    - user_id: UUID REFERENCES auth.users
    - filename: TEXT
@@ -54,16 +58,18 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
    - extracted_text: TEXT
    - created_at: TIMESTAMPTZ
    - deleted_at: TIMESTAMPTZ (LGPD soft delete)
-   
+
    ### job_descriptions
+
    - id: UUID PRIMARY KEY
    - user_id: UUID REFERENCES auth.users
    - title: TEXT
    - company: TEXT
    - description: TEXT
    - created_at: TIMESTAMPTZ
-   
+
    ### optimizations
+
    - id: UUID PRIMARY KEY
    - user_id: UUID REFERENCES auth.users
    - resume_id: UUID REFERENCES resumes
@@ -74,8 +80,9 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
    - status: TEXT (pending, processing, completed, failed)
    - created_at: TIMESTAMPTZ
    - completed_at: TIMESTAMPTZ
-   
+
    ### usage_tracking
+
    - id: UUID PRIMARY KEY
    - user_id: UUID REFERENCES auth.users
    - action: TEXT
@@ -85,6 +92,7 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
    ```
 
 **Success Criteria**:
+
 - [x] All relevant migrations identified
 - [x] Table schemas documented
 - [x] RLS policies documented
@@ -97,7 +105,9 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
 **Target**: `/home/carlos/projects/cv-match/supabase/migrations/`
 
 **Actions**:
+
 1. Create migration for resumes table:
+
    ```bash
    cd /home/carlos/projects/cv-match
    supabase migration new create_resumes_table
@@ -105,7 +115,7 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
 
    ```sql
    -- File: supabase/migrations/[timestamp]_create_resumes_table.sql
-   
+
    -- Create resumes table
    CREATE TABLE IF NOT EXISTS resumes (
        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -120,36 +130,36 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
        deleted_at TIMESTAMPTZ,
        CONSTRAINT resumes_filename_check CHECK (length(filename) > 0)
    );
-   
+
    -- Create index on user_id for fast lookups
    CREATE INDEX idx_resumes_user_id ON resumes(user_id) WHERE deleted_at IS NULL;
-   
+
    -- Create index on created_at for sorting
    CREATE INDEX idx_resumes_created_at ON resumes(created_at DESC);
-   
+
    -- Enable RLS
    ALTER TABLE resumes ENABLE ROW LEVEL SECURITY;
-   
+
    -- RLS Policy: Users can only see their own resumes
    CREATE POLICY "Users can view own resumes"
        ON resumes FOR SELECT
        USING (auth.uid() = user_id AND deleted_at IS NULL);
-   
+
    -- RLS Policy: Users can insert their own resumes
    CREATE POLICY "Users can insert own resumes"
        ON resumes FOR INSERT
        WITH CHECK (auth.uid() = user_id);
-   
+
    -- RLS Policy: Users can update their own resumes
    CREATE POLICY "Users can update own resumes"
        ON resumes FOR UPDATE
        USING (auth.uid() = user_id);
-   
+
    -- RLS Policy: Users can soft delete their own resumes
    CREATE POLICY "Users can delete own resumes"
        ON resumes FOR UPDATE
        USING (auth.uid() = user_id);
-   
+
    -- Trigger to update updated_at
    CREATE OR REPLACE FUNCTION update_updated_at()
    RETURNS TRIGGER AS $$
@@ -158,25 +168,26 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
        RETURN NEW;
    END;
    $$ LANGUAGE plpgsql;
-   
+
    CREATE TRIGGER resumes_updated_at
        BEFORE UPDATE ON resumes
        FOR EACH ROW
        EXECUTE FUNCTION update_updated_at();
-   
+
    -- Comments for documentation
    COMMENT ON TABLE resumes IS 'Stores uploaded resume files and extracted text';
    COMMENT ON COLUMN resumes.deleted_at IS 'LGPD compliance: soft delete timestamp';
    ```
 
 2. Create migration for job_descriptions table:
+
    ```bash
    supabase migration new create_job_descriptions_table
    ```
 
    ```sql
    -- File: supabase/migrations/[timestamp]_create_job_descriptions_table.sql
-   
+
    CREATE TABLE IF NOT EXISTS job_descriptions (
        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
        user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -191,44 +202,45 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
        CONSTRAINT job_company_check CHECK (length(company) > 0),
        CONSTRAINT job_description_check CHECK (length(description) > 0)
    );
-   
+
    CREATE INDEX idx_job_descriptions_user_id ON job_descriptions(user_id);
    CREATE INDEX idx_job_descriptions_created_at ON job_descriptions(created_at DESC);
-   
+
    ALTER TABLE job_descriptions ENABLE ROW LEVEL SECURITY;
-   
+
    CREATE POLICY "Users can view own job descriptions"
        ON job_descriptions FOR SELECT
        USING (auth.uid() = user_id);
-   
+
    CREATE POLICY "Users can insert own job descriptions"
        ON job_descriptions FOR INSERT
        WITH CHECK (auth.uid() = user_id);
-   
+
    CREATE POLICY "Users can update own job descriptions"
        ON job_descriptions FOR UPDATE
        USING (auth.uid() = user_id);
-   
+
    CREATE POLICY "Users can delete own job descriptions"
        ON job_descriptions FOR DELETE
        USING (auth.uid() = user_id);
-   
+
    CREATE TRIGGER job_descriptions_updated_at
        BEFORE UPDATE ON job_descriptions
        FOR EACH ROW
        EXECUTE FUNCTION update_updated_at();
-   
+
    COMMENT ON TABLE job_descriptions IS 'Stores job descriptions for resume optimization';
    ```
 
 3. Create migration for optimizations table:
+
    ```bash
    supabase migration new create_optimizations_table
    ```
 
    ```sql
    -- File: supabase/migrations/[timestamp]_create_optimizations_table.sql
-   
+
    -- Create ENUM for optimization status
    CREATE TYPE optimization_status AS ENUM (
        'pending_payment',
@@ -236,7 +248,7 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
        'completed',
        'failed'
    );
-   
+
    CREATE TABLE IF NOT EXISTS optimizations (
        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
        user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -253,52 +265,53 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
        updated_at TIMESTAMPTZ DEFAULT NOW(),
        started_at TIMESTAMPTZ,
        completed_at TIMESTAMPTZ,
-       CONSTRAINT optimizations_user_resume_check 
-           FOREIGN KEY (user_id, resume_id) 
+       CONSTRAINT optimizations_user_resume_check
+           FOREIGN KEY (user_id, resume_id)
            REFERENCES resumes(user_id, id)
    );
-   
+
    -- Indexes for common queries
    CREATE INDEX idx_optimizations_user_id ON optimizations(user_id);
    CREATE INDEX idx_optimizations_resume_id ON optimizations(resume_id);
    CREATE INDEX idx_optimizations_status ON optimizations(status);
    CREATE INDEX idx_optimizations_created_at ON optimizations(created_at DESC);
-   
+
    -- GIN index for JSONB improvements
    CREATE INDEX idx_optimizations_improvements ON optimizations USING GIN(improvements);
-   
+
    ALTER TABLE optimizations ENABLE ROW LEVEL SECURITY;
-   
+
    CREATE POLICY "Users can view own optimizations"
        ON optimizations FOR SELECT
        USING (auth.uid() = user_id);
-   
+
    CREATE POLICY "Users can insert own optimizations"
        ON optimizations FOR INSERT
        WITH CHECK (auth.uid() = user_id);
-   
+
    CREATE POLICY "Users can update own optimizations"
        ON optimizations FOR UPDATE
        USING (auth.uid() = user_id);
-   
+
    CREATE TRIGGER optimizations_updated_at
        BEFORE UPDATE ON optimizations
        FOR EACH ROW
        EXECUTE FUNCTION update_updated_at();
-   
+
    COMMENT ON TABLE optimizations IS 'Stores AI-powered resume optimization results';
    COMMENT ON COLUMN optimizations.match_score IS 'Compatibility score 0-100';
    COMMENT ON COLUMN optimizations.improvements IS 'JSON array of improvement suggestions';
    ```
 
 4. Create migration for usage_tracking table:
+
    ```bash
    supabase migration new create_usage_tracking_table
    ```
 
    ```sql
    -- File: supabase/migrations/[timestamp]_create_usage_tracking_table.sql
-   
+
    CREATE TABLE IF NOT EXISTS usage_tracking (
        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
        user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -309,28 +322,29 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
        created_at TIMESTAMPTZ DEFAULT NOW(),
        CONSTRAINT usage_tracking_action_check CHECK (length(action) > 0)
    );
-   
+
    CREATE INDEX idx_usage_tracking_user_id ON usage_tracking(user_id);
    CREATE INDEX idx_usage_tracking_created_at ON usage_tracking(created_at DESC);
    CREATE INDEX idx_usage_tracking_action ON usage_tracking(action);
-   
+
    ALTER TABLE usage_tracking ENABLE ROW LEVEL SECURITY;
-   
+
    -- Users can only view their own usage
    CREATE POLICY "Users can view own usage"
        ON usage_tracking FOR SELECT
        USING (auth.uid() = user_id);
-   
+
    -- Service role can insert usage records
    CREATE POLICY "Service can insert usage"
        ON usage_tracking FOR INSERT
        WITH CHECK (true);
-   
+
    COMMENT ON TABLE usage_tracking IS 'Tracks user actions for analytics and billing';
    COMMENT ON COLUMN usage_tracking.action IS 'Action performed (e.g., resume_upload, optimization_start)';
    ```
 
 **Success Criteria**:
+
 - [x] 4 migration files created
 - [x] All tables have RLS enabled
 - [x] Proper indexes created
@@ -343,24 +357,27 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
 ### Task 3: Apply and Verify Migrations (30 min)
 
 **Actions**:
+
 1. Apply all migrations:
+
    ```bash
    cd /home/carlos/projects/cv-match
-   
+
    # Apply migrations to local Supabase
    supabase db push
-   
+
    # Or if using remote Supabase
    supabase db push --db-url "$SUPABASE_DB_URL"
    ```
 
 2. Verify tables exist:
+
    ```bash
    docker compose exec backend python -c "
    from app.core.database import get_supabase_client
-   
+
    client = get_supabase_client()
-   
+
    tables = ['resumes', 'job_descriptions', 'optimizations', 'usage_tracking']
    for table in tables:
        try:
@@ -372,19 +389,20 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
    ```
 
 3. Test RLS policies:
+
    ```bash
    docker compose exec backend python -c "
    from app.core.database import get_supabase_client
-   
+
    client = get_supabase_client()
-   
+
    # Try to insert a test resume (should work with service role)
    result = client.table('resumes').insert({
        'user_id': 'test-user-id',
        'filename': 'test.pdf',
        'extracted_text': 'Test content'
    }).execute()
-   
+
    if result.data:
        print('✅ RLS policies working (service role can insert)')
        # Clean up
@@ -406,6 +424,7 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
    ```
 
 **Success Criteria**:
+
 - [x] All migrations applied successfully
 - [x] All 4 tables exist
 - [x] RLS policies active
@@ -420,6 +439,7 @@ Analyze Resume-Matcher database migrations, create equivalent migrations for cv-
 ### LGPD Compliance Requirements
 
 Every table with user data MUST have:
+
 1. **Soft Deletes**: `deleted_at TIMESTAMPTZ` column
 2. **Audit Trail**: `created_at`, `updated_at` columns
 3. **User Reference**: `user_id UUID REFERENCES auth.users`
@@ -428,6 +448,7 @@ Every table with user data MUST have:
 ### RLS Policy Patterns
 
 **Standard User Access**:
+
 ```sql
 -- Users can only see their own data
 CREATE POLICY "policy_name"
@@ -436,6 +457,7 @@ CREATE POLICY "policy_name"
 ```
 
 **Service Role Access**:
+
 ```sql
 -- Service role (backend) can do anything
 -- This is implicit when using service_role key
@@ -444,15 +466,18 @@ CREATE POLICY "policy_name"
 ### Index Strategy
 
 **B-tree indexes** for:
+
 - Foreign keys
 - Frequently filtered columns
 - Sorting columns (use DESC if sorting descending)
 
 **GIN indexes** for:
+
 - JSONB columns (improvements, metadata)
 - Array columns (keywords, strengths)
 
 **Partial indexes** for:
+
 - Soft deleted data: `WHERE deleted_at IS NULL`
 
 ---
@@ -460,28 +485,36 @@ CREATE POLICY "policy_name"
 ## 🚨 Common Issues & Solutions
 
 ### Issue 1: Migration Already Applied
-**Symptom**: `relation "resumes" already exists`  
+
+**Symptom**: `relation "resumes" already exists`
 **Solution**: Check if table exists first:
+
 ```sql
 CREATE TABLE IF NOT EXISTS resumes (...);
 ```
 
 ### Issue 2: RLS Policy Prevents Access
-**Symptom**: Query returns empty even though data exists  
-**Solution**: 
+
+**Symptom**: Query returns empty even though data exists
+**Solution**:
+
 - Use service_role key in backend
 - Verify JWT token in auth headers
 - Check policy logic with `EXPLAIN`
 
 ### Issue 3: Foreign Key Constraint Failed
-**Symptom**: `insert or update on table violates foreign key constraint`  
-**Solution**: 
+
+**Symptom**: `insert or update on table violates foreign key constraint`
+**Solution**:
+
 - Ensure referenced user exists in auth.users
 - Use CASCADE on delete for cleanup
 
 ### Issue 4: Index Creation Timeout
-**Symptom**: Migration hangs on large tables  
-**Solution**: 
+
+**Symptom**: Migration hangs on large tables
+**Solution**:
+
 ```sql
 -- Create index concurrently (doesn't lock table)
 CREATE INDEX CONCURRENTLY idx_name ON table(column);
@@ -547,16 +580,19 @@ print('✅ RLS enabled (using service role)')
 ## 📝 Deliverables
 
 ### Migration Files:
+
 1. `supabase/migrations/[timestamp]_create_resumes_table.sql`
 2. `supabase/migrations/[timestamp]_create_job_descriptions_table.sql`
 3. `supabase/migrations/[timestamp]_create_optimizations_table.sql`
 4. `supabase/migrations/[timestamp]_create_usage_tracking_table.sql`
 
 ### Documentation:
+
 - `backend/migration_analysis.md` - Analysis of Resume-Matcher migrations
 - Update schema documentation if exists
 
 ### Git Commit:
+
 ```bash
 git add supabase/migrations/
 git add backend/migration_analysis.md
@@ -590,6 +626,7 @@ Tested: All tables verified and accessible"
 ## 🎯 Success Definition
 
 Mission complete when:
+
 1. All 4 migration files created
 2. Migrations applied successfully
 3. All tables exist and accessible
@@ -604,6 +641,7 @@ Mission complete when:
 ## 🔄 Handoff to Backend Specialist
 
 After completion, notify backend-specialist:
+
 - ✅ All P0 tables created
 - ✅ RLS policies active
 - ✅ Indexes in place

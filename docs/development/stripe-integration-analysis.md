@@ -9,12 +9,14 @@ Resume-Matcher has a **comprehensive, production-ready Stripe integration** spec
 ### **✅ Production-Ready Stripe Infrastructure**
 
 #### **1. Core Stripe Services**
+
 - **StripeService**: Complete payment processing service
 - **PaymentVerificationService**: Advanced payment verification with AI trigger
 - **WebhookHandler**: Robust webhook processing with idempotency
 - **StripeClient**: Centralized Stripe client configuration
 
 #### **2. Brazilian Market Configuration**
+
 ```python
 # BRL Currency Configuration
 "currency": "brl",
@@ -26,6 +28,7 @@ Resume-Matcher has a **comprehensive, production-ready Stripe integration** spec
 ```
 
 #### **3. Payment Flow Architecture**
+
 ```mermaid
 sequenceDiagram
     participant U as User
@@ -54,6 +57,7 @@ sequenceDiagram
 ### **Backend Services Architecture**
 
 #### **1. StripeService (`stripe_service.py`)**
+
 ```python
 class StripeService:
     def __init__(self):
@@ -77,6 +81,7 @@ class StripeService:
 ```
 
 #### **2. PaymentVerificationService (`payment_verification.py`)**
+
 ```python
 class PaymentVerificationService:
     async def verify_and_process_payment(self, session_id, optimization_id, stripe_payment_id):
@@ -96,6 +101,7 @@ class PaymentVerificationService:
 ```
 
 #### **3. Webhook Processing (`webhooks.py`)**
+
 ```python
 @router.post("/webhooks/stripe")
 async def stripe_webhook(request: Request, stripe_signature: str):
@@ -111,12 +117,14 @@ async def stripe_webhook(request: Request, stripe_signature: str):
 ### **Frontend Components**
 
 #### **1. PaymentFlow Component (`payment-flow.tsx`)**
+
 - **Multi-tier support**: Free, Pro Lifetime, Pro Monthly
 - **BRL currency display**: Proper Brazilian formatting
 - **Security indicators**: SSL, money-back guarantee
 - **Error handling**: Comprehensive payment status management
 
 #### **2. Payment Integration (`lib/stripe.ts`)**
+
 ```typescript
 export const getStripe = (): Promise<Stripe | null> => {
   const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
@@ -127,6 +135,7 @@ export const getStripe = (): Promise<Stripe | null> => {
 ### **Database Schema**
 
 #### **1. Webhook Events Table**
+
 ```sql
 CREATE TABLE stripe_webhook_events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -140,6 +149,7 @@ CREATE TABLE stripe_webhook_events (
 ```
 
 #### **2. Payment History Table**
+
 ```sql
 CREATE TABLE payment_history (
     user_id UUID REFERENCES users(id),
@@ -158,11 +168,13 @@ CREATE TABLE payment_history (
 ### **✅ Already Implemented**
 
 #### **1. Currency Configuration**
+
 - **BRL Support**: Full Brazilian Real currency handling
 - **Decimal Formatting**: Proper comma decimal separator
 - **Price Display**: R$ XX,XX format throughout the application
 
 #### **2. Pricing Structure**
+
 ```python
 # Current pricing in Resume-Matcher
 FREE_PLAN = {
@@ -185,11 +197,13 @@ PRO_MONTHLY = {
 ```
 
 #### **3. Portuguese Localization**
+
 - **Product Names**: "Otimização de Currículo com IA"
 - **Descriptions**: Portuguese marketing copy
 - **Payment Buttons**: "Pagar Agora", "Comprar Plano"
 
 #### **4. Webhook Security**
+
 - **Signature Verification**: 300-second tolerance
 - **Idempotency**: Prevents duplicate processing
 - **Audit Trail**: Complete webhook event tracking
@@ -200,6 +214,7 @@ PRO_MONTHLY = {
 ### **Step 1: Copy Core Payment Services**
 
 #### **1.1 Backend Services Migration**
+
 ```bash
 # Copy payment services
 cp /home/carlos/projects/Resume-Matcher/apps/backend/app/services/stripe_service.py \
@@ -219,6 +234,7 @@ cp /home/carlos/projects/Resume-Matcher/apps/backend/app/api/router/v1/webhooks.
 ```
 
 #### **1.2 Frontend Components Migration**
+
 ```bash
 # Copy payment components
 cp -r /home/carlos/projects/Resume-Matcher/apps/frontend/components/payment/* \
@@ -234,6 +250,7 @@ cp /home/carlos/projects/Resume-Matcher/apps/frontend/lib/api/payments.ts \
 ### **Step 2: Database Schema Integration**
 
 #### **2.1 Add Payment Tables to Supabase**
+
 ```sql
 -- Add to your existing Supabase migrations
 CREATE TABLE payment_history (
@@ -285,6 +302,7 @@ CREATE TABLE stripe_webhook_events (
 ### **Step 3: Environment Configuration**
 
 #### **3.1 Backend Environment Variables**
+
 ```bash
 # Add to .env
 STRIPE_SECRET_KEY=sk_test_...  # Your Stripe secret key
@@ -297,6 +315,7 @@ DEFAULT_COUNTRY=BR
 ```
 
 #### **3.2 Frontend Environment Variables**
+
 ```bash
 # Add to frontend/.env.local
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
@@ -307,6 +326,7 @@ NEXT_PUBLIC_DEFAULT_COUNTRY=BR
 ### **Step 4: Enhanced Brazilian Market Features**
 
 #### **4.1 Brazilian Payment Methods Enhancement**
+
 ```python
 # Enhanced payment options for Brazil
 class BrazilianPaymentMethods:
@@ -329,6 +349,7 @@ class BrazilianPaymentMethods:
 ```
 
 #### **4.2 PIX Integration (Future Enhancement)**
+
 ```python
 # Future: Add PIX instant payment support
 class PIXPaymentService:
@@ -341,11 +362,13 @@ class PIXPaymentService:
 ## 💰 Pricing Strategy for Brazilian Market
 
 ### **Current Resume-Matcher Pricing**
+
 - **Free**: 5 resume analyses per month
 - **Pro Lifetime**: R$ 297.00 (one-time)
 - **Pro Monthly**: R$ 49.90/month
 
 ### **Recommended CV-Match Pricing**
+
 ```python
 # Enhanced pricing tiers for CV-Match
 PRICING_TIERS = {
@@ -393,6 +416,7 @@ PRICING_TIERS = {
 ## 🔧 Technical Implementation Details
 
 ### **1. Webhook Security**
+
 ```python
 # Robust webhook verification
 def verify_webhook_signature(self, payload: bytes, signature: str):
@@ -410,6 +434,7 @@ def verify_webhook_signature(self, payload: bytes, signature: str):
 ```
 
 ### **2. Idempotency Protection**
+
 ```python
 # Prevent duplicate processing
 async def check_idempotency(self, stripe_event_id: str):
@@ -424,6 +449,7 @@ async def check_idempotency(self, stripe_event_id: str):
 ```
 
 ### **3. Error Handling & Monitoring**
+
 ```python
 # Comprehensive error handling
 async def handle_payment_failure(self, optimization_id: str, error_message: str):
@@ -441,6 +467,7 @@ async def handle_payment_failure(self, optimization_id: str, error_message: str)
 ## 🧪 Testing Strategy
 
 ### **1. Payment Integration Tests**
+
 ```python
 # From Resume-Matcher: test_payment_integration.py
 @pytest.mark.asyncio
@@ -456,6 +483,7 @@ class TestPaymentIntegration:
 ```
 
 ### **2. Brazilian Market Tests**
+
 ```python
 # Add Brazilian-specific tests
 @pytest.mark.asyncio
@@ -473,12 +501,14 @@ class TestBrazilianPaymentFeatures:
 ## 📊 Success Metrics & Monitoring
 
 ### **Key Performance Indicators**
+
 - **Payment Success Rate**: > 95%
 - **Webhook Processing Time**: < 500ms
 - **Checkout Conversion Rate**: > 70%
 - **Brazilian Market Adoption**: > 15% of total users
 
 ### **Monitoring Dashboard**
+
 ```python
 # Payment metrics tracking
 class PaymentMetrics:
@@ -495,18 +525,21 @@ class PaymentMetrics:
 ## 🎯 Competitive Advantages
 
 ### **1. Production-Ready Infrastructure**
+
 - **Battle-tested**: Already processing real payments
 - **Secure**: Comprehensive security and fraud protection
 - **Scalable**: Handles high-volume transactions
 - **Compliant**: Brazilian market regulations
 
 ### **2. Brazilian Market Optimization**
+
 - **BRL Currency**: Full Brazilian Real support
 - **Local Pricing**: Market-appropriate pricing strategy
 - **Portuguese UI**: Complete localization
 - **Payment Methods**: Ready for PIX and boleto integration
 
 ### **3. Developer Experience**
+
 - **Type Safety**: Full TypeScript integration
 - **Error Handling**: Comprehensive error management
 - **Testing Suite**: Complete test coverage
@@ -515,18 +548,21 @@ class PaymentMetrics:
 ## 🚀 Next Steps for CV-Match
 
 ### **Immediate Actions (Week 1)**
+
 1. Copy all Stripe services and components
 2. Set up Supabase payment tables
 3. Configure environment variables
 4. Test basic payment flow
 
 ### **Enhanced Features (Week 2-3)**
+
 1. Implement CV-Match specific pricing tiers
 2. Add Brazilian payment method support (PIX)
 3. Enhanced dashboard for payment analytics
 4. Portuguese email templates
 
 ### **Advanced Features (Week 4+)**
+
 1. Subscription management with pro features
 2. Advanced payment analytics
 3. Automated tax handling for Brazil
@@ -535,11 +571,13 @@ class PaymentMetrics:
 ## 💰 Business Value
 
 ### **Time Savings**
+
 - **Payment Infrastructure**: 3-4 months → **1 day** (copy-paste)
 - **Brazilian Market Setup**: 2-3 months → **1 week** (already done)
 - **Security Implementation**: 1-2 months → **3 days** (battle-tested)
 
 ### **Revenue Acceleration**
+
 - **Ready for Brazilian Market**: Launch immediately
 - **Proven Pricing Strategy**: Market-tested pricing tiers
 - **Conversion Optimized**: High-converting payment flows

@@ -15,6 +15,7 @@ This document provides comprehensive guidelines for writing consistent, informat
 ## 📝 Conventional Commit Format
 
 ### Basic Structure
+
 ```
 <type>(<scope>): <description>
 
@@ -27,6 +28,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 ### Breaking Changes
+
 ```
 <type>(<scope>)!: <description>
 
@@ -40,59 +42,64 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## 🔤 Commit Types
 
-| Type | Purpose | Impact | Brazilian Context |
-|------|---------|--------|-------------------|
-| `feat` | New feature | Minor version bump | `feat(payment): add BRL support` |
-| `fix` | Bug fix | Patch version bump | `fix(currency): BRL conversion error` |
-| `docs` | Documentation | No version bump | `docs(pt-br): update Portuguese guide` |
-| `style` | Code formatting | No version bump | `style(frontend): format components` |
-| `refactor` | Code refactoring | No version bump | `refactor(api): optimize Brazilian queries` |
-| `perf` | Performance | Patch version bump | `perf(database): optimize for large datasets` |
-| `test` | Tests | No version bump | `test(auth): add Brazilian user tests` |
-| `chore` | Maintenance | No version bump | `chore(deps): update Brazilian packages` |
-| `build` | Build system | No version bump | `build(docker): add Brazilian locale` |
-| `ci` | CI/CD | No version bump | `ci(github): add Brazilian market checks` |
-| `revert` | Revert changes | Patch version bump | `revert: remove experimental BRL feature` |
+| Type       | Purpose          | Impact             | Brazilian Context                             |
+| ---------- | ---------------- | ------------------ | --------------------------------------------- |
+| `feat`     | New feature      | Minor version bump | `feat(payment): add BRL support`              |
+| `fix`      | Bug fix          | Patch version bump | `fix(currency): BRL conversion error`         |
+| `docs`     | Documentation    | No version bump    | `docs(pt-br): update Portuguese guide`        |
+| `style`    | Code formatting  | No version bump    | `style(frontend): format components`          |
+| `refactor` | Code refactoring | No version bump    | `refactor(api): optimize Brazilian queries`   |
+| `perf`     | Performance      | Patch version bump | `perf(database): optimize for large datasets` |
+| `test`     | Tests            | No version bump    | `test(auth): add Brazilian user tests`        |
+| `chore`    | Maintenance      | No version bump    | `chore(deps): update Brazilian packages`      |
+| `build`    | Build system     | No version bump    | `build(docker): add Brazilian locale`         |
+| `ci`       | CI/CD            | No version bump    | `ci(github): add Brazilian market checks`     |
+| `revert`   | Revert changes   | Patch version bump | `revert: remove experimental BRL feature`     |
 
 ## 🎯 Scope Definitions
 
 ### Frontend Scopes
-| Scope | Description | Brazilian Examples |
-|-------|-------------|-------------------|
-| `auth` | Authentication & authorization | `feat(auth): add Brazilian OAuth providers` |
-| `payment` | Payment processing | `feat(payment): integrate PIX for BRL` |
-| `ui` | User interface components | `fix(ui): Portuguese text overflow` |
-| `i18n` | Internationalization | `feat(i18n): add PT-BR translations` |
-| `dashboard` | User dashboard | `feat(dashboard): add BRL balance display` |
-| `onboarding` | User onboarding flow | `fix(onboarding): Brazilian CPF validation` |
+
+| Scope        | Description                    | Brazilian Examples                          |
+| ------------ | ------------------------------ | ------------------------------------------- |
+| `auth`       | Authentication & authorization | `feat(auth): add Brazilian OAuth providers` |
+| `payment`    | Payment processing             | `feat(payment): integrate PIX for BRL`      |
+| `ui`         | User interface components      | `fix(ui): Portuguese text overflow`         |
+| `i18n`       | Internationalization           | `feat(i18n): add PT-BR translations`        |
+| `dashboard`  | User dashboard                 | `feat(dashboard): add BRL balance display`  |
+| `onboarding` | User onboarding flow           | `fix(onboarding): Brazilian CPF validation` |
 
 ### Backend Scopes
-| Scope | Description | Brazilian Examples |
-|-------|-------------|-------------------|
-| `api` | API endpoints | `feat(api): add Brazilian document validation` |
+
+| Scope      | Description             | Brazilian Examples                                    |
+| ---------- | ----------------------- | ----------------------------------------------------- |
+| `api`      | API endpoints           | `feat(api): add Brazilian document validation`        |
 | `database` | Database schema/queries | `refactor(database): optimize Brazilian user queries` |
-| `llm` | LLM integrations | `feat(llm): add Portuguese resume analysis` |
-| `storage` | File storage | `fix(storage): handle Brazilian document formats` |
-| `auth` | Authentication service | `feat(auth): implement Brazilian ID verification` |
-| `payment` | Payment backend | `feat(payment): add BRL webhook handling` |
+| `llm`      | LLM integrations        | `feat(llm): add Portuguese resume analysis`           |
+| `storage`  | File storage            | `fix(storage): handle Brazilian document formats`     |
+| `auth`     | Authentication service  | `feat(auth): implement Brazilian ID verification`     |
+| `payment`  | Payment backend         | `feat(payment): add BRL webhook handling`             |
 
 ### Infrastructure Scopes
-| Scope | Description | Brazilian Examples |
-|-------|-------------|-------------------|
-| `deploy` | Deployment configuration | `fix(deploy): Brazilian region deployment` |
-| `security` | Security configurations | `feat(security): add LGPD compliance` |
-| `monitoring` | Monitoring & logging | `feat(monitoring): add Brazilian market metrics` |
-| `docker` | Docker configuration | `chore(docker): add Brazilian locale support` |
+
+| Scope        | Description              | Brazilian Examples                               |
+| ------------ | ------------------------ | ------------------------------------------------ |
+| `deploy`     | Deployment configuration | `fix(deploy): Brazilian region deployment`       |
+| `security`   | Security configurations  | `feat(security): add LGPD compliance`            |
+| `monitoring` | Monitoring & logging     | `feat(monitoring): add Brazilian market metrics` |
+| `docker`     | Docker configuration     | `chore(docker): add Brazilian locale support`    |
 
 ## 📋 Description Guidelines
 
 ### Good Descriptions
+
 - **Concise**: Use imperative mood ("add", "fix", "update")
 - **Clear**: Explain what and why, not how
 - **Specific**: Include relevant context
 - **Brazilian Context**: Mention market-specific aspects when relevant
 
 ### Examples
+
 ```bash
 # ✅ Good
 feat(payment): integrate Stripe for BRL transactions
@@ -108,6 +115,7 @@ refactor: made things faster
 ```
 
 ### Description Patterns
+
 ```bash
 # Feature additions
 feat(scope): add [feature] for [Brazilian market aspect]
@@ -129,6 +137,7 @@ perf(scope): improve [functionality] response time
 ## 📄 Body Section Guidelines
 
 ### When to Include a Body
+
 - **Complex changes**: Multiple files or components affected
 - **Breaking changes**: Detailed explanation required
 - **Brazilian market impact**: Specific market considerations
@@ -136,6 +145,7 @@ perf(scope): improve [functionality] response time
 - **Performance impact**: Benchmarks or improvements
 
 ### Body Format
+
 ```
 [type](scope): description
 
@@ -160,6 +170,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 ### Body Examples
+
 ```bash
 feat(payment): integrate PIX instant payment for Brazilian users
 
@@ -191,6 +202,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ## 🔗 Footer Section Guidelines
 
 ### Breaking Changes
+
 ```
 BREAKING CHANGE: [detailed description of breaking change]
 
@@ -205,6 +217,7 @@ Brazilian market impact:
 ```
 
 ### Issue References
+
 ```
 Closes: #123
 Fixes: #456
@@ -214,6 +227,7 @@ Brazilian market ticket: BRL-123
 ```
 
 ### Co-authored By
+
 ```
 Co-authored-by: Brazilian Team Member <email@example.com>
 ```
@@ -221,6 +235,7 @@ Co-authored-by: Brazilian Team Member <email@example.com>
 ## 🇧🇷 Brazilian Market Specific Guidelines
 
 ### Portuguese Terms
+
 ```bash
 # Use Portuguese terms when appropriate
 feat(i18n): add CPF/CNPJ validation for Brazilian users
@@ -230,6 +245,7 @@ fix(currency): handle Brazilian real (R$) formatting
 ```
 
 ### Compliance References
+
 ```bash
 feat(security): implement LGPD data consent for Brazilian users
 feat(privacy): add Brazilian data protection controls
@@ -237,6 +253,7 @@ fix(compliance): update privacy policy for Brazilian regulations
 ```
 
 ### Market Integration
+
 ```bash
 feat(integration): connect to Brazilian credit bureau API
 feat(localization): add Brazilian address validation
@@ -244,6 +261,7 @@ feat(market): implement Brazilian pricing tiers in BRL
 ```
 
 ### Cultural Considerations
+
 ```bash
 feat(ui): add Brazilian holiday calendar to scheduling
 fix(format): handle Brazilian date/time formats
@@ -253,6 +271,7 @@ feat(content): add Brazilian resume format templates
 ## 📏 Quality Checklist
 
 ### Before Committing
+
 - [ ] **Type is correct**: Uses appropriate conventional type
 - [ ] **Scope is specific**: Clearly indicates affected area
 - [ ] **Description is clear**: Imperative mood, concise
@@ -263,6 +282,7 @@ feat(content): add Brazilian resume format templates
 - [ ] **Co-author tag**: Added when using Claude Code
 
 ### Common Mistakes to Avoid
+
 ```bash
 # ❌ Common mistakes
 feat: added stuff
@@ -282,6 +302,7 @@ feat(i18n): add Portuguese translations
 ## 🔧 Git Hooks Integration
 
 ### Commit Message Validation
+
 ```bash
 # .husky/commit-msg
 #!/bin/sh
@@ -306,6 +327,7 @@ echo "✅ Commit message validation passed"
 ```
 
 ### Pre-commit Integration
+
 ```bash
 # .husky/pre-commit
 #!/bin/sh
@@ -329,6 +351,7 @@ fi
 ## 📊 Commit Message Templates
 
 ### Feature Template
+
 ```bash
 feat(<scope>): add <feature> for <Brazilian market aspect>
 
@@ -351,6 +374,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 ### Bug Fix Template
+
 ```bash
 fix(<scope>): resolve <issue> affecting <Brazilian users>
 
@@ -373,6 +397,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 ### Breaking Change Template
+
 ```bash
 <type>(<scope>)!: <breaking change description>
 
@@ -396,6 +421,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ## 📚 Examples by Category
 
 ### Authentication & Authorization
+
 ```bash
 feat(auth): add Brazilian OAuth providers (Google, LinkedIn)
 fix(auth): resolve CPF validation timeout for Brazilian users
@@ -404,6 +430,7 @@ docs(auth): update Brazilian user onboarding documentation
 ```
 
 ### Payment Integration
+
 ```bash
 feat(payment): integrate Stripe for BRL transactions
 fix(payment): handle BRL currency conversion edge cases
@@ -413,6 +440,7 @@ fix(payment): resolve Brazilian tax calculation errors
 ```
 
 ### Internationalization
+
 ```bash
 feat(i18n): add Portuguese (pt-br) language support
 fix(i18n): correct Portuguese translation for payment flow
@@ -421,6 +449,7 @@ docs(i18n): create Brazilian localization guide
 ```
 
 ### Database & Storage
+
 ```bash
 feat(database): add Brazilian user profile fields
 refactor(database): optimize queries for Brazilian datasets
@@ -429,6 +458,7 @@ fix(database): handle Brazilian address validation constraints
 ```
 
 ### API Development
+
 ```bash
 feat(api): add Brazilian document validation endpoint
 fix(api): resolve timeout for Brazilian credit bureau calls
@@ -437,6 +467,7 @@ docs(api): update Brazilian market API documentation
 ```
 
 ### Performance & Optimization
+
 ```bash
 perf(api): optimize Brazilian user data queries
 perf(frontend): improve load time for Brazilian users
@@ -445,6 +476,7 @@ refactor(storage): compress Brazilian document uploads
 ```
 
 ### Security & Compliance
+
 ```bash
 feat(security): implement LGPD data consent mechanisms
 feat(security): add Brazilian IP whitelisting
@@ -453,6 +485,7 @@ feat(security): implement Brazilian data encryption standards
 ```
 
 ### Testing & Quality
+
 ```bash
 test(auth): add Brazilian user authentication tests
 test(payment): create BRL transaction test suite
@@ -463,6 +496,7 @@ feat(testing): add Brazilian market test data fixtures
 ## 🛠 Tools and Integration
 
 ### VS Code Extension
+
 ```json
 // .vscode/settings.json
 {
@@ -484,6 +518,7 @@ feat(testing): add Brazilian market test data fixtures
 ```
 
 ### Git Aliases
+
 ```bash
 # Add to .gitconfig
 [alias]
@@ -495,6 +530,7 @@ feat(testing): add Brazilian market test data fixtures
 ```
 
 ### Commitizen Integration
+
 ```json
 // .commitlintrc.json
 {
@@ -527,6 +563,7 @@ feat(testing): add Brazilian market test data fixtures
 ## 📈 Continuous Improvement
 
 ### Metrics to Track
+
 - **Commit Quality**: Percentage following guidelines
 - **Brazilian Context**: Commits with market-specific info
 - **Breakage Rate**: Breaking changes frequency
@@ -534,6 +571,7 @@ feat(testing): add Brazilian market test data fixtures
 - **Scope Usage**: Percentage with proper scope
 
 ### Review Process
+
 1. **Automated Validation**: Git hooks check format
 2. **Peer Review**: Team reviews commit messages
 3. **Brazilian Review**: Market team validates context
@@ -541,6 +579,7 @@ feat(testing): add Brazilian market test data fixtures
 5. **Guideline Updates**: Refine based on feedback
 
 ### Training and Resources
+
 - **Onboarding**: Include commit guidelines in new hire training
 - **Documentation**: Keep this guide updated with examples
 - **Tools**: Provide IDE extensions and git aliases
@@ -550,6 +589,7 @@ feat(testing): add Brazilian market test data fixtures
 ## 🎯 Best Practices Summary
 
 ### DO ✅
+
 1. **Use conventional format**: `type(scope): description`
 2. **Be specific**: Include relevant context and scope
 3. **Think Brazilian**: Add market-specific information when relevant
@@ -562,6 +602,7 @@ feat(testing): add Brazilian market test data fixtures
 10. **Consider LGPD**: Include compliance information for data changes
 
 ### DON'T ❌
+
 1. **Skip the type**: Always include conventional type
 2. **Vague descriptions**: "fixed stuff", "added things"
 3. **Mix types**: `feat: fix bug` (should be `fix:`)

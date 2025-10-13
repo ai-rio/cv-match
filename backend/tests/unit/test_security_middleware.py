@@ -4,17 +4,18 @@ Unit tests for security middleware functionality.
 Tests cover middleware behavior, request validation, and security monitoring.
 """
 
-import pytest
 from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 from fastapi import HTTPException, Request, Response
 from fastapi.security import HTTPAuthorizationCredentials
 
 from app.services.security.middleware import (
     SecurityMiddleware,
-    validate_and_sanitize_request,
     create_security_error_response,
     log_security_validation_failure,
     log_security_validation_success,
+    validate_and_sanitize_request,
 )
 
 

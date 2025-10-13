@@ -1,4 +1,4 @@
-const nextJest = require('next/jest');
+import nextJest from 'next/jest.js';
 
 /** @type {import('jest').Config} */
 const createJestConfig = nextJest({
@@ -25,7 +25,7 @@ const config = {
     '!**/node_modules/**',
     '!**/.next/**',
     '!**/coverage/**',
-    '!**/jest.config.js',
+    '!**/jest.config.mjs',
   ],
   coverageThreshold: {
     global: {
@@ -40,4 +40,4 @@ const config = {
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
-module.exports = createJestConfig(config);
+export default createJestConfig(config);

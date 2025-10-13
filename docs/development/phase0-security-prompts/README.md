@@ -12,6 +12,7 @@
 **CRITICAL SECURITY VULNERABILITIES IDENTIFIED** - Independent verification confirms 8 critical security issues that make the current system **ILLEGAL to deploy in Brazil** under LGPD (Lei Geral de Proteção de Dados).
 
 ### Key Findings from Assessment Contrast Report:
+
 - **User Authorization Gap**: Any authenticated user can access ANY resume by ID
 - **Database Schema Issue**: Missing user_id foreign key on resumes table
 - **Mock Data in Production**: Core CV matching returns fake data
@@ -22,6 +23,7 @@
 - **Compliance Gaps**: No LGPD compliance implementation
 
 ### Business Impact:
+
 - **Legal Liability**: Fines up to 4% of global revenue under LGPD
 - **Data Breach Risk**: Any user can access any other user's data
 - **Reputational Damage**: Loss of user trust and market credibility
@@ -43,9 +45,11 @@
 ## 🎯 Deployment Order - SECURITY FIRST
 
 ### Phase 0.1-0.6: MASSIVE PARALLEL SECURITY FIXES (Day 1 - 6 hours)
+
 **Dependencies**: NONE - All can start immediately!
 
 **Read these chunks FIRST**:
+
 - [`chunk_003_1_security_vulnerability_exploitation.md`](../system-iplementation-assessment/chunks/chunk_003_1_security_vulnerability_exploitation.md) - Security vulnerability details
 - [`chunk_002_backendappservicessupabasedatabasepy_enhanced.md`](../system-iplementation-assessment/chunks-technical-guide/chunk_002_backendappservicessupabasedatabasepy_enhanced.md) - Database context
 - [`chunk_003_database_schema_changes.md`](../system-iplementation-assessment/chunks-technical-guide/chunk_003_database_schema_changes.md) - Schema requirements
@@ -89,6 +93,7 @@
    **Security Impact**: 🔴 CRITICAL - Prevents injection attacks
 
 ### Phase 0.7: SECURITY AUDIT VERIFICATION (Day 2-3 - 6 hours)
+
 **Dependencies**: ALL 6 security fixes must be complete and verified
 
 **Reference all chunks** for comprehensive verification
@@ -100,6 +105,7 @@
    **Security Impact**: 🔴 CRITICAL - Final verification
 
 ### Phase 0.8: FRONTEND DESIGN SYSTEM (Day 1.5-3 - 28 hours)
+
 **Dependencies**: Phases 0.1-0.3 must be 80% complete (parallel to audit)
 
 8. **Agent**: frontend-specialist
@@ -113,6 +119,7 @@
 ## 📝 Available Security Prompts
 
 ### ✅ MASSIVE PARALLEL - Day 1 (6 agents simultaneously)
+
 1. ✅ `01-user-authorization-fixes.md` - Backend Specialist (6h)
 2. ✅ `02-database-schema-security.md` - Database Architect (4h)
 3. ✅ `03-pii-lgpd-compliance.md` - Backend Specialist (6h)
@@ -121,9 +128,11 @@
 6. ✅ `06-input-validation-security.md` - Backend Specialist (4h)
 
 ### ✅ SEQUENTIAL AUDIT - Day 2-3
+
 7. ✅ `07-security-audit-verification.md` - Code Review Agent (6h)
 
 ### ✅ PARALLEL FRONTEND - Day 1.5-3
+
 8. ✅ `08-design-system-parallel.md` - Frontend Specialist (28h)
 
 ---
@@ -133,11 +142,13 @@
 ### Step 1: Security Context Setup
 
 1. Navigate to project root:
+
    ```bash
    cd /home/carlos/projects/cv-match
    ```
 
 2. **READ SECURITY ASSESSMENT FIRST**:
+
    ```bash
    # Read the critical security findings
    cat docs/development/system-iplementation-assessment/assessment-contrast-report.md
@@ -147,6 +158,7 @@
    ```
 
 3. Open Claude with specific security agent:
+
    ```bash
    # For Phase 0.1 - Critical Infrastructure Security
    claude --agent backend-security-specialist
@@ -157,6 +169,7 @@
 ### Step 2: Security Implementation Monitoring
 
 Each security agent will:
+
 - Fix specific security vulnerabilities
 - Create security test suites
 - Implement security monitoring
@@ -165,6 +178,7 @@ Each security agent will:
 ### Step 3: Security Verification
 
 After each security agent completes:
+
 - Run the security verification checklist from the prompt
 - Ensure all security criteria are met
 - Perform manual security testing
@@ -173,6 +187,7 @@ After each security agent completes:
 ### Step 4: Phase Security Gates
 
 **DO NOT PROCEED** until current phase passes ALL security gates:
+
 - ✅ Zero critical security vulnerabilities
 - ✅ All security tests passing
 - ✅ Manual security verification complete
@@ -255,6 +270,7 @@ Time: 28 hours
 ## ✅ Pre-Flight Checklist
 
 Before starting:
+
 - [ ] Feature branch created from main
 - [ ] Current system backed up
 - [ ] Development environment running
@@ -269,6 +285,7 @@ Before starting:
 **CRITICAL - Must achieve ALL:**
 
 ### Security Requirements ✅
+
 - [ ] Zero critical security vulnerabilities
 - [ ] User authorization working correctly (users can only access own data)
 - [ ] Database schema properly constrained with foreign keys
@@ -282,6 +299,7 @@ Before starting:
 - [ ] Rate limiting and DDoS protection active
 
 ### Compliance Requirements ✅
+
 - [ ] LGPD consent management implemented
 - [ ] Data retention policies enforced
 - [ ] Right to deletion implemented
@@ -290,6 +308,7 @@ Before starting:
 - [ ] Cookie consent implemented
 
 ### Technical Requirements ✅
+
 - [ ] All endpoints properly authenticated
 - [ ] RLS policies correctly implemented
 - [ ] Database migrations applied and tested
@@ -300,6 +319,7 @@ Before starting:
 - [ ] Logging without sensitive data
 
 ### Frontend Progress ✅
+
 - [ ] Design system foundation implemented
 - [ ] Security UI components ready
 - [ ] User feedback mechanisms in place
@@ -311,6 +331,7 @@ Before starting:
 ## 🚨 Risk Assessment & Mitigation
 
 ### Critical Risks
+
 1. **Data Breach During Implementation**
    - Mitigation: Work on development environment only
    - Backup strategy: Full database backup before changes
@@ -324,6 +345,7 @@ Before starting:
    - Legal review scheduled for Day 5
 
 ### Implementation Risks
+
 1. **Complex Database Migrations**
    - Mitigation: Test migrations on staging first
    - Step-by-step verification procedures
@@ -352,12 +374,14 @@ Before starting:
 ## 💰 Business Impact
 
 ### Current State:
+
 - **Revenue**: R$ 0 (cannot legally deploy)
 - **Legal Risk**: High fines for LGPD violations
 - **Market Access**: Blocked - cannot operate in Brazil
 - **Investment Risk**: High - security issues prevent funding
 
 ### After Phase 0:
+
 - **Revenue**: Ready for P1 deployment
 - **Legal Compliance**: LGPD compliant
 - **Market Access**: Ready for Brazilian launch
@@ -404,12 +428,14 @@ git checkout -b security/phase0-emergency-fixes
 ## 📊 Security Impact Assessment
 
 ### Current Risk Level: 🔴 CRITICAL
+
 - **Legal Exposure**: System violates LGPD - illegal to deploy in Brazil
 - **Data Breach Risk**: Any user can access any other user's data
 - **Reputational Risk**: Security vulnerabilities could destroy trust
 - **Financial Risk**: Potential fines, legal costs, customer loss
 
 ### Post-Phase 0 Target: 🟢 SECURE
+
 - **Legal Compliance**: Full LGPD compliance verified
 - **Data Protection**: 100% user data isolation
 - **Security Audit**: Zero critical vulnerabilities
@@ -420,6 +446,7 @@ git checkout -b security/phase0-emergency-fixes
 ## 🔄 Integration with Future Phases
 
 ### What Phase 0 Enables:
+
 - ✅ Legal operation in Brazil (LGPD compliance)
 - ✅ Secure foundation for all future development
 - ✅ User trust and data protection
@@ -427,6 +454,7 @@ git checkout -b security/phase0-emergency-fixes
 - ✅ Production deployment capability
 
 ### Impact on Timeline:
+
 - **Weeks 0-1**: Phase 0 security fixes (BLOCKS all other work)
 - **Week 1.5+**: Design system can start in parallel
 - **Week 2+**: Phase 1 (Core AI) can proceed on secure foundation
@@ -436,6 +464,7 @@ git checkout -b security/phase0-emergency-fixes
 ## 📝 Security Documentation Requirements
 
 Each security prompt includes:
+
 - ✅ Detailed vulnerability analysis
 - ✅ Step-by-step fix procedures
 - ✅ Security verification checklists
@@ -449,20 +478,25 @@ Each security prompt includes:
 ## 🚨 Important Security Notes
 
 ### This is NOT Optional
+
 Phase 0 security fixes are **MANDATORY** before any other work:
+
 - Legal requirement for Brazilian market operation
 - Ethical responsibility to protect user data
 - Technical foundation for secure development
 - Business necessity for investor confidence
 
 ### Security-First Development Culture
+
 After Phase 0 completion:
+
 - Security reviews for all new features
 - Regular security audits and penetration testing
 - Continuous LGPD compliance monitoring
 - Security training for all team members
 
 ### Production Deployment Requirements
+
 - Phase 0 must be 100% complete
 - Security audit must pass with zero critical findings
 - LGPD compliance must be verified
@@ -473,6 +507,7 @@ After Phase 0 completion:
 ## 🔗 Integration with Existing System
 
 ### What Gets Fixed 🔧
+
 - User authorization vulnerabilities
 - Database schema security issues
 - PII handling and LGPD compliance
@@ -481,6 +516,7 @@ After Phase 0 completion:
 - Security monitoring and logging
 
 ### What Gets Enhanced 📈
+
 - Authentication and authorization
 - Database security and constraints
 - Error handling and logging
@@ -488,6 +524,7 @@ After Phase 0 completion:
 - User privacy and consent management
 
 ### What Stays the Same ✅
+
 - Core business logic
 - Authentication providers
 - Payment infrastructure (once secure)
@@ -501,6 +538,7 @@ After Phase 0 completion:
 All prompts in: `/docs/development/phase0-security-prompts/`
 
 **Security Implementation Prompts:**
+
 1. ✅ `01-user-authorization-fixes.md`
 2. ✅ `02-database-schema-security.md`
 3. ✅ `03-pii-lgpd-compliance.md`
@@ -509,10 +547,10 @@ All prompts in: `/docs/development/phase0-security-prompts/`
 6. ✅ `06-input-validation-security.md`
 7. ✅ `07-security-audit-verification.md`
 
-**Parallel Frontend Work:**
-8. ✅ `08-design-system-parallel.md`
+**Parallel Frontend Work:** 8. ✅ `08-design-system-parallel.md`
 
 **Reference Documentation:**
+
 - ✅ `00-EXECUTION-GUIDE.md`
 - ✅ `00-AGENT-TOOLS-GUIDE.md`
 - ✅ `00-SECURITY-FIRST-MANDATE.md`
@@ -522,6 +560,7 @@ All prompts in: `/docs/development/phase0-security-prompts/`
 ## 🎊 Expected Outcome
 
 After completing Phase 0:
+
 - ✅ System is legally deployable in Brazil
 - ✅ LGPD compliance verified and documented
 - ✅ All critical security vulnerabilities resolved
@@ -538,6 +577,7 @@ After completing Phase 0:
 ## 🚨 Critical Implementation Notes
 
 ### Security First Approach
+
 1. **No Shortcuts**: Every security fix must be complete
 2. **No Temporary Solutions**: Production-ready implementation only
 3. **Comprehensive Testing**: Verify each fix thoroughly
@@ -545,6 +585,7 @@ After completing Phase 0:
 5. **Legal Review**: LGPD compliance must be verified
 
 ### Development Guidelines
+
 1. **Security-First Mindset**: Every decision considers security implications
 2. **Defensive Programming**: Assume all input is malicious
 3. **Principle of Least Privilege**: Minimum access required
@@ -552,6 +593,7 @@ After completing Phase 0:
 5. **Privacy by Design**: User privacy built into all features
 
 ### Testing Requirements
+
 1. **Security Testing**: Penetration testing, vulnerability scanning
 2. **Compliance Testing**: LGPD requirements verification
 3. **Functional Testing**: Ensure features still work
@@ -563,6 +605,7 @@ After completing Phase 0:
 ## 📞 Support & Troubleshooting
 
 Each prompt includes:
+
 - Detailed troubleshooting section
 - Verification checklist
 - Rollback procedures
@@ -570,6 +613,7 @@ Each prompt includes:
 - Security best practices
 
 If issues occur:
+
 1. Stop immediately and assess
 2. Check prompt troubleshooting section
 3. Verify previous phase completed successfully

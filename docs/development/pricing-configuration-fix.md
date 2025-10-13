@@ -7,13 +7,16 @@ The CV-Match application had significant pricing inconsistencies between fronten
 ### Original Issues
 
 **Frontend Display (pricing.json):**
+
 - Basic: R$19 (1900 cents)
 - Pro: R$79 (7900 cents)
 
 **Backend Processing (stripe_service.py):**
+
 - Both Basic and Pro tiers mapped to R$29.90 (2990 cents)
 
 **Backend Credits (payments.py):**
+
 - Basic: 10 credits → mapped to "pro" tier in Stripe (R$29.90)
 - Pro: 50 credits → mapped to "pro" tier in Stripe (R$29.90)
 
@@ -29,11 +32,11 @@ Created `/packages/shared-types/pricing-config.ts` and `/backend/app/config/pric
 export const BRAZILIAN_PRICING: PricingConfig = {
   tiers: {
     free: { price: 0, credits: 3 },
-    basic: { price: 2990, credits: 10 },      // R$ 29,90
-    pro: { price: 7900, credits: 50 },        // R$ 79,00
-    enterprise: { price: 9990, credits: 1000 } // R$ 99,90
-  }
-}
+    basic: { price: 2990, credits: 10 }, // R$ 29,90
+    pro: { price: 7900, credits: 50 }, // R$ 79,00
+    enterprise: { price: 9990, credits: 1000 }, // R$ 99,90
+  },
+};
 ```
 
 ### 2. Updated Frontend
@@ -51,6 +54,7 @@ export const BRAZILIAN_PRICING: PricingConfig = {
 ### 4. BRL Currency Formatting
 
 Implemented consistent BRL formatting:
+
 ```python
 def format_brl_price(price_in_cents: int) -> str:
     reais = price_in_cents / 100
@@ -59,16 +63,17 @@ def format_brl_price(price_in_cents: int) -> str:
 
 ## Final Pricing Structure
 
-| Tier | Credits | Price (BRL) | Price (cents) | Stripe Mapping |
-|------|---------|-------------|---------------|----------------|
-| Free | 3 | Gratuito | 0 | free |
-| Basic | 10 | R$ 29,90 | 2990 | basic |
-| Pro | 50 | R$ 79,00 | 7900 | pro |
-| Enterprise | 1000 | R$ 99,90 | 9990 | enterprise |
+| Tier       | Credits | Price (BRL) | Price (cents) | Stripe Mapping |
+| ---------- | ------- | ----------- | ------------- | -------------- |
+| Free       | 3       | Gratuito    | 0             | free           |
+| Basic      | 10      | R$ 29,90    | 2990          | basic          |
+| Pro        | 50      | R$ 79,00    | 7900          | pro            |
+| Enterprise | 1000    | R$ 99,90    | 9990          | enterprise     |
 
 ## Verification
 
 Run the consistency test:
+
 ```bash
 cd /home/carlos/projects/cv-match
 python3 test_pricing_consistency.py
@@ -77,12 +82,14 @@ python3 test_pricing_consistency.py
 ## Files Modified
 
 ### New Files
+
 - `/packages/shared-types/pricing-config.ts` - Centralized TypeScript config
 - `/packages/shared-types/package.json` - Package definition
 - `/backend/app/config/pricing.py` - Centralized Python config
 - `/test_pricing_consistency.py` - Verification script
 
 ### Updated Files
+
 - `/frontend/app/[locale]/pricing/page.tsx` - Use centralized config
 - `/frontend/locales/pt-br/pricing.json` - Updated pricing display
 - `/backend/app/api/endpoints/payments.py` - Use centralized config

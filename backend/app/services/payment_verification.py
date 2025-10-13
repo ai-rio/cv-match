@@ -6,13 +6,12 @@ Also handles subscription upgrades for Brazilian market.
 """
 
 import logging
-import os
 from datetime import UTC, datetime
 from typing import Any
 
+from app.models.payment import PaymentHistory, Subscription
 from app.services.stripe_service import stripe_service
 from app.services.supabase.database import SupabaseDatabaseService
-from app.models.payment import PaymentHistory, Subscription
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +51,9 @@ class PaymentVerificationService:
             # 1. Verify payment with Stripe
             session_result = await self.stripe_service.retrieve_checkout_session(session_id)
             if not session_result["success"]:
-                logger.error(f"Failed to retrieve session {session_id}: {session_result.get('error')}")
+                logger.error(
+                    f"Failed to retrieve session {session_id}: {session_result.get('error')}"
+                )
                 return {"success": False, "error": "Invalid session"}
 
             session = session_result["session"]
@@ -64,7 +65,7 @@ class PaymentVerificationService:
                 return {
                     "success": False,
                     "error": "Payment not completed",
-                    "status": session.payment_status
+                    "status": session.payment_status,
                 }
 
             # 2. Check if payment already processed (idempotency)
@@ -87,7 +88,9 @@ class PaymentVerificationService:
                 "amount": session.amount_total,
                 "currency": session.currency,
                 "status": "succeeded",
-                "payment_type": "subscription" if plan_type in ["pro", "enterprise"] else "one_time",
+                "payment_type": "subscription"
+                if plan_type in ["pro", "enterprise"]
+                else "one_time",
                 "description": f"CV-Match {plan_type.title()} Plan",
                 "metadata": {
                     "plan_type": plan_type,
@@ -169,11 +172,7 @@ class PaymentVerificationService:
             # Log payment intent success (main processing happens in checkout.completed)
             logger.info(f"Payment intent succeeded for user {user_id}: {payment_intent_id}")
 
-            return {
-                "success": True,
-                "user_id": user_id,
-                "payment_intent_id": payment_intent_id
-            }
+            return {"success": True, "user_id": user_id, "payment_intent_id": payment_intent_id}
 
         except Exception as e:
             logger.exception(f"Error handling payment intent succeeded: {str(e)}")
@@ -274,9 +273,7 @@ class PaymentVerificationService:
             Dict containing payment history
         """
         try:
-            payments = await self.payment_db.list(
-                filters={"user_id": user_id}, limit=limit
-            )
+            payments = await self.payment_db.list(filters={"user_id": user_id}, limit=limit)
 
             return {
                 "success": True,

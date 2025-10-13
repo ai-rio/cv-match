@@ -12,8 +12,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from app.agent.manager import AgentManager, EmbeddingManager
-from app.services.score_improvement_service import ScoreImprovementService
 from app.core.exceptions import ProviderError
+from app.services.score_improvement_service import ScoreImprovementService
 
 # Configure logging
 logging.basicConfig(

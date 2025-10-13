@@ -122,6 +122,7 @@ These tests verify the complete webhook processing flow, including:
 - Idempotency protection
 
 **Key test scenarios:**
+
 - Successful webhook processing for all event types
 - Brazilian market-specific webhook handling
 - Signature verification failures
@@ -215,9 +216,9 @@ name: Payment Webhook Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test-webhooks:
@@ -235,28 +236,28 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
 
-    - name: Install dependencies
-      run: |
-        cd backend
-        pip install -r requirements.txt
-        pip install -r requirements-test.txt
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install -r requirements-test.txt
 
-    - name: Run webhook tests
-      run: |
-        cd backend
-        pytest tests/ -m webhook --cov=app --cov-report=xml
+      - name: Run webhook tests
+        run: |
+          cd backend
+          pytest tests/ -m webhook --cov=app --cov-report=xml
 
-    - name: Upload coverage
-      uses: codecov/codecov-action@v3
-      with:
-        file: backend/coverage.xml
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: backend/coverage.xml
 ```
 
 ## Test Data Examples
@@ -303,7 +304,7 @@ jobs:
         "price": {
           "currency": "brl",
           "unit_amount": 2990,
-          "recurring": {"interval": "month"},
+          "recurring": { "interval": "month" },
           "nickname": "CV-Match Pro (BRL)"
         }
       }
@@ -343,6 +344,7 @@ Comprehensive error scenarios are tested:
 ### 1. Test Isolation
 
 Each test is isolated with proper setup/teardown:
+
 - Unique event IDs
 - Mocked database responses
 - Fresh fixtures for each test
@@ -350,6 +352,7 @@ Each test is isolated with proper setup/teardown:
 ### 2. Brazilian Market Focus
 
 Tests specifically validate:
+
 - BRL currency processing
 - Portuguese language support
 - Brazilian customer data handling
@@ -358,6 +361,7 @@ Tests specifically validate:
 ### 3. Security Validation
 
 Security features are thoroughly tested:
+
 - Signature verification with tolerance
 - Idempotency protection
 - Request validation
@@ -368,11 +372,13 @@ Security features are thoroughly tested:
 ### Common Issues
 
 1. **Import Errors**: Ensure all dependencies are installed
+
    ```bash
    pip install -r requirements-test.txt
    ```
 
 2. **Database Connection**: Check Supabase configuration
+
    ```bash
    # Verify test database is running
    supabase status

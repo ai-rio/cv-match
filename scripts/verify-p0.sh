@@ -109,7 +109,7 @@ success = True
 
 services = [
     'app.services.resume_service',
-    'app.services.job_service', 
+    'app.services.job_service',
     'app.services.score_improvement_service',
     'app.services.text_extraction',
     'app.agent.manager'

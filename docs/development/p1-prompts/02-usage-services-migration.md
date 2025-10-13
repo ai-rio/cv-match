@@ -1,9 +1,9 @@
 # Agent Prompt: Usage Services Migration
 
-**Agent**: backend-specialist  
-**Phase**: 1 - Usage Services (Parallel with payment services)  
-**Priority**: P0  
-**Estimated Time**: 2 hours  
+**Agent**: backend-specialist
+**Phase**: 1 - Usage Services (Parallel with payment services)
+**Priority**: P0
+**Estimated Time**: 2 hours
 **Dependencies**: None (runs parallel with payment services)
 
 ---
@@ -18,11 +18,13 @@ Copy and adapt usage tracking and limit services from Resume-Matcher to cv-match
 
 ### Task 1: Copy Usage Limit Service (1 hour)
 
-**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/usage_limit_service.py`  
+**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/usage_limit_service.py`
 **Target**: `/home/carlos/projects/cv-match/backend/app/services/usage_limit_service.py`
 
 **Actions**:
+
 1. Copy the file:
+
    ```bash
    cp /home/carlos/projects/Resume-Matcher/apps/backend/app/services/usage_limit_service.py \
       /home/carlos/projects/cv-match/backend/app/services/usage_limit_service.py
@@ -31,6 +33,7 @@ Copy and adapt usage tracking and limit services from Resume-Matcher to cv-match
 2. Update imports to match cv-match structure
 
 3. Configure credit tiers:
+
    ```python
    CREDIT_TIERS = {
        "free": 3,
@@ -49,6 +52,7 @@ Copy and adapt usage tracking and limit services from Resume-Matcher to cv-match
    ```
 
 **Success Criteria**:
+
 - [x] File copied and adapted
 - [x] Credit tiers configured
 - [x] Imports working
@@ -58,11 +62,13 @@ Copy and adapt usage tracking and limit services from Resume-Matcher to cv-match
 
 ### Task 2: Copy Usage Tracking Service (45 min)
 
-**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/usage_tracking_service.py`  
+**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/usage_tracking_service.py`
 **Target**: `/home/carlos/projects/cv-match/backend/app/services/usage_tracking_service.py`
 
 **Actions**:
+
 1. Copy the file:
+
    ```bash
    cp /home/carlos/projects/Resume-Matcher/apps/backend/app/services/usage_tracking_service.py \
       /home/carlos/projects/cv-match/backend/app/services/usage_tracking_service.py
@@ -83,6 +89,7 @@ Copy and adapt usage tracking and limit services from Resume-Matcher to cv-match
    ```
 
 **Success Criteria**:
+
 - [x] File copied
 - [x] Tracks all usage types
 - [x] Integrates with database
@@ -92,11 +99,13 @@ Copy and adapt usage tracking and limit services from Resume-Matcher to cv-match
 
 ### Task 3: Copy Paid Resume Improvement Service (15 min)
 
-**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/paid_resume_improvement_service.py`  
+**Source**: `/home/carlos/projects/Resume-Matcher/apps/backend/app/services/paid_resume_improvement_service.py`
 **Target**: `/home/carlos/projects/cv-match/backend/app/services/paid_resume_improvement_service.py`
 
 **Actions**:
+
 1. Copy the file:
+
    ```bash
    cp /home/carlos/projects/Resume-Matcher/apps/backend/app/services/paid_resume_improvement_service.py \
       /home/carlos/projects/cv-match/backend/app/services/paid_resume_improvement_service.py
@@ -116,6 +125,7 @@ Copy and adapt usage tracking and limit services from Resume-Matcher to cv-match
    ```
 
 **Success Criteria**:
+
 - [x] File copied
 - [x] Credit checking works
 - [x] Credit deduction atomic
@@ -131,7 +141,7 @@ Copy and adapt usage tracking and limit services from Resume-Matcher to cv-match
 class UsageLimitService:
     def __init__(self):
         self.db = get_supabase_client()
-    
+
     async def check_credits(self, user_id: str) -> int:
         """Get remaining credits for user"""
         result = self.db.table("user_credits")\
@@ -140,10 +150,10 @@ class UsageLimitService:
             .single()\
             .execute()
         return result.data["credits_remaining"] if result.data else 0
-    
+
     async def deduct_credits(
-        self, 
-        user_id: str, 
+        self,
+        user_id: str,
         amount: int,
         operation_id: str
     ) -> bool:
@@ -152,16 +162,16 @@ class UsageLimitService:
         current = await self.check_credits(user_id)
         if current < amount:
             return False
-        
+
         # Atomic update with check
         result = self.db.rpc("deduct_credits", {
             "p_user_id": user_id,
             "p_amount": amount,
             "p_operation_id": operation_id
         }).execute()
-        
+
         return result.data["success"]
-    
+
     async def add_credits(
         self,
         user_id: str,
@@ -234,11 +244,13 @@ print('✅ UsageLimitService instantiated')
 ## 📝 Deliverables
 
 ### Files to Create:
+
 1. `backend/app/services/usage_limit_service.py`
 2. `backend/app/services/usage_tracking_service.py`
 3. `backend/app/services/paid_resume_improvement_service.py`
 
 ### Git Commit:
+
 ```bash
 git add backend/app/services/usage_limit_service.py
 git add backend/app/services/usage_tracking_service.py
@@ -278,6 +290,7 @@ Tested: All imports verified"
 ## 🎯 Success Definition
 
 Mission complete when:
+
 1. All 3 services copied and working
 2. Credit tiers configured
 3. Atomic credit operations implemented
@@ -290,6 +303,7 @@ Mission complete when:
 ## 🔄 Handoff to Next Phase
 
 After completion, notify database-architect:
+
 - ✅ Usage services ready
 - ✅ Need tables: user_credits, credit_transactions, usage_tracking
 - ✅ Need RPC function for atomic credit deduction

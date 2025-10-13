@@ -22,11 +22,7 @@ class TestPaymentEndpoints:
 
     def setup_method(self):
         """Set up test method."""
-        self.test_user = {
-            "id": "user_1234567890",
-            "email": "test@example.com",
-            "name": "Test User"
-        }
+        self.test_user = {"id": "user_1234567890", "email": "test@example.com", "name": "Test User"}
 
     @pytest.mark.asyncio
     async def test_create_checkout_session_success(self, async_client: AsyncClient):
@@ -35,7 +31,7 @@ class TestPaymentEndpoints:
             "tier": "pro",
             "success_url": "https://example.com/success",
             "cancel_url": "https://example.com/cancel",
-            "metadata": {"custom_field": "custom_value"}
+            "metadata": {"custom_field": "custom_value"},
         }
 
         # Mock Stripe service response
@@ -45,12 +41,17 @@ class TestPaymentEndpoints:
             "checkout_url": "https://checkout.stripe.com/pay/cs_test_1234567890",
             "plan_type": "pro",
             "currency": "brl",
-            "amount": 2990
+            "amount": 2990,
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.create_checkout_session", return_value=mock_stripe_response):
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_checkout_session",
+            return_value=mock_stripe_response,
+        ):
             with patch("app.api.endpoints.payments.get_current_user", return_value=self.test_user):
-                response = await async_client.post("/api/payments/create-checkout", json=request_data)
+                response = await async_client.post(
+                    "/api/payments/create-checkout", json=request_data
+                )
 
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -73,12 +74,17 @@ class TestPaymentEndpoints:
             "checkout_url": "https://checkout.stripe.com/pay/cs_test_basic_123",
             "plan_type": "pro",  # Maps to pro in StripeService
             "currency": "brl",
-            "amount": 2990
+            "amount": 2990,
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.create_checkout_session", return_value=mock_stripe_response):
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_checkout_session",
+            return_value=mock_stripe_response,
+        ):
             with patch("app.api.endpoints.payments.get_current_user", return_value=self.test_user):
-                response = await async_client.post("/api/payments/create-checkout", json=request_data)
+                response = await async_client.post(
+                    "/api/payments/create-checkout", json=request_data
+                )
 
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -96,12 +102,17 @@ class TestPaymentEndpoints:
             "checkout_url": "https://checkout.stripe.com/pay/cs_test_enterprise_123",
             "plan_type": "enterprise",
             "currency": "brl",
-            "amount": 9990
+            "amount": 9990,
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.create_checkout_session", return_value=mock_stripe_response):
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_checkout_session",
+            return_value=mock_stripe_response,
+        ):
             with patch("app.api.endpoints.payments.get_current_user", return_value=self.test_user):
-                response = await async_client.post("/api/payments/create-checkout", json=request_data)
+                response = await async_client.post(
+                    "/api/payments/create-checkout", json=request_data
+                )
 
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -129,13 +140,14 @@ class TestPaymentEndpoints:
         """Test checkout session creation with Stripe error."""
         request_data = {"tier": "pro"}
 
-        with patch("app.api.endpoints.payments.stripe_service.create_checkout_session", return_value={
-            "success": False,
-            "error": "Card declined",
-            "error_type": "stripe_error"
-        }):
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_checkout_session",
+            return_value={"success": False, "error": "Card declined", "error_type": "stripe_error"},
+        ):
             with patch("app.api.endpoints.payments.get_current_user", return_value=self.test_user):
-                response = await async_client.post("/api/payments/create-checkout", json=request_data)
+                response = await async_client.post(
+                    "/api/payments/create-checkout", json=request_data
+                )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         response_data = response.json()
@@ -146,7 +158,10 @@ class TestPaymentEndpoints:
         """Test checkout session creation without authentication."""
         request_data = {"tier": "pro"}
 
-        with patch("app.api.endpoints.payments.get_current_user", side_effect=Exception("Not authenticated")):
+        with patch(
+            "app.api.endpoints.payments.get_current_user",
+            side_effect=Exception("Not authenticated"),
+        ):
             response = await async_client.post("/api/payments/create-checkout", json=request_data)
 
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -158,7 +173,7 @@ class TestPaymentEndpoints:
             "user_id": "user_123",
             "user_email": "test@example.com",
             "amount": 2990,  # R$ 29,90
-            "metadata": {"plan_type": "pro"}
+            "metadata": {"plan_type": "pro"},
         }
 
         mock_stripe_response = {
@@ -166,11 +181,16 @@ class TestPaymentEndpoints:
             "client_secret": "pi_test_1234567890_secret_test",
             "payment_intent_id": "pi_test_1234567890",
             "amount": 2990,
-            "currency": "brl"
+            "currency": "brl",
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.create_payment_intent", return_value=mock_stripe_response):
-            response = await async_client.post("/api/payments/create-payment-intent", json=request_data)
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_payment_intent",
+            return_value=mock_stripe_response,
+        ):
+            response = await async_client.post(
+                "/api/payments/create-payment-intent", json=request_data
+            )
 
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -183,18 +203,19 @@ class TestPaymentEndpoints:
     @pytest.mark.asyncio
     async def test_create_payment_intent_stripe_error(self, async_client: AsyncClient):
         """Test payment intent creation with Stripe error."""
-        request_data = {
-            "user_id": "user_123",
-            "user_email": "test@example.com",
-            "amount": 2990
-        }
+        request_data = {"user_id": "user_123", "user_email": "test@example.com", "amount": 2990}
 
-        with patch("app.api.endpoints.payments.stripe_service.create_payment_intent", return_value={
-            "success": False,
-            "error": "Insufficient funds",
-            "error_type": "stripe_error"
-        }):
-            response = await async_client.post("/api/payments/create-payment-intent", json=request_data)
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_payment_intent",
+            return_value={
+                "success": False,
+                "error": "Insufficient funds",
+                "error_type": "stripe_error",
+            },
+        ):
+            response = await async_client.post(
+                "/api/payments/create-payment-intent", json=request_data
+            )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         response_data = response.json()
@@ -212,17 +233,20 @@ class TestPaymentEndpoints:
                 "state": "SP",
                 "city": "São Paulo",
                 "line1": "Rua Teste, 123",
-                "postal_code": "01234-567"
-            }
+                "postal_code": "01234-567",
+            },
         }
 
         mock_stripe_response = {
             "success": True,
             "customer_id": "cus_test_1234567890",
-            "customer": {"id": "cus_test_1234567890", "email": "test@example.com"}
+            "customer": {"id": "cus_test_1234567890", "email": "test@example.com"},
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.create_customer", return_value=mock_stripe_response):
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_customer",
+            return_value=mock_stripe_response,
+        ):
             response = await async_client.post("/api/payments/create-customer", json=request_data)
 
         assert response.status_code == status.HTTP_200_OK
@@ -234,18 +258,18 @@ class TestPaymentEndpoints:
     @pytest.mark.asyncio
     async def test_create_customer_minimal_data(self, async_client: AsyncClient):
         """Test customer creation with minimal data."""
-        request_data = {
-            "user_id": "user_123",
-            "email": "test@example.com"
-        }
+        request_data = {"user_id": "user_123", "email": "test@example.com"}
 
         mock_stripe_response = {
             "success": True,
             "customer_id": "cus_test_minimal_123",
-            "customer": {"id": "cus_test_minimal_123", "email": "test@example.com"}
+            "customer": {"id": "cus_test_minimal_123", "email": "test@example.com"},
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.create_customer", return_value=mock_stripe_response):
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_customer",
+            return_value=mock_stripe_response,
+        ):
             response = await async_client.post("/api/payments/create-customer", json=request_data)
 
         assert response.status_code == status.HTTP_200_OK
@@ -256,16 +280,12 @@ class TestPaymentEndpoints:
     @pytest.mark.asyncio
     async def test_create_customer_stripe_error(self, async_client: AsyncClient):
         """Test customer creation with Stripe error."""
-        request_data = {
-            "user_id": "user_123",
-            "email": "invalid-email"
-        }
+        request_data = {"user_id": "user_123", "email": "invalid-email"}
 
-        with patch("app.api.endpoints.payments.stripe_service.create_customer", return_value={
-            "success": False,
-            "error": "Invalid email",
-            "error_type": "stripe_error"
-        }):
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_customer",
+            return_value={"success": False, "error": "Invalid email", "error_type": "stripe_error"},
+        ):
             response = await async_client.post("/api/payments/create-customer", json=request_data)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -283,11 +303,14 @@ class TestPaymentEndpoints:
                 "id": session_id,
                 "payment_status": "paid",
                 "amount_total": 2990,
-                "currency": "brl"
-            }
+                "currency": "brl",
+            },
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.retrieve_checkout_session", return_value=mock_stripe_response):
+        with patch(
+            "app.api.endpoints.payments.stripe_service.retrieve_checkout_session",
+            return_value=mock_stripe_response,
+        ):
             response = await async_client.get(f"/api/payments/retrieve-session/{session_id}")
 
         assert response.status_code == status.HTTP_200_OK
@@ -301,11 +324,14 @@ class TestPaymentEndpoints:
         """Test checkout session retrieval with non-existent session."""
         session_id = "cs_nonexistent"
 
-        with patch("app.api.endpoints.payments.stripe_service.retrieve_checkout_session", return_value={
-            "success": False,
-            "error": "Session not found",
-            "error_type": "stripe_error"
-        }):
+        with patch(
+            "app.api.endpoints.payments.stripe_service.retrieve_checkout_session",
+            return_value={
+                "success": False,
+                "error": "Session not found",
+                "error_type": "stripe_error",
+            },
+        ):
             response = await async_client.get(f"/api/payments/retrieve-session/{session_id}")
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -316,33 +342,26 @@ class TestPaymentEndpoints:
     async def test_get_brazilian_pricing_success(self, async_client: AsyncClient):
         """Test getting Brazilian pricing configuration."""
         mock_pricing = {
-            "free": {
-                "name": "Plano Grátis",
-                "price": 0,
-                "currency": "brl",
-                "credits": 5
-            },
-            "pro": {
-                "name": "Plano Profissional",
-                "price": 2990,
-                "currency": "brl",
-                "credits": 50
-            },
+            "free": {"name": "Plano Grátis", "price": 0, "currency": "brl", "credits": 5},
+            "pro": {"name": "Plano Profissional", "price": 2990, "currency": "brl", "credits": 50},
             "enterprise": {
                 "name": "Plano Empresarial",
                 "price": 9990,
                 "currency": "brl",
-                "credits": 200
+                "credits": 200,
             },
             "lifetime": {
                 "name": "Acesso Vitalício",
                 "price": 29700,
                 "currency": "brl",
-                "credits": 1000
-            }
+                "credits": 1000,
+            },
         }
 
-        with patch("app.api.endpoints.payments.stripe_service._get_brazilian_pricing", return_value=mock_pricing):
+        with patch(
+            "app.api.endpoints.payments.stripe_service._get_brazilian_pricing",
+            return_value=mock_pricing,
+        ):
             response = await async_client.get("/api/payments/pricing")
 
         assert response.status_code == status.HTTP_200_OK
@@ -391,7 +410,9 @@ class TestPaymentEndpoints:
     @pytest.mark.asyncio
     async def test_payments_health_check_system_error(self, async_client: AsyncClient):
         """Test payments health check with system error."""
-        with patch("app.api.endpoints.payments.stripe_service", side_effect=Exception("System error")):
+        with patch(
+            "app.api.endpoints.payments.stripe_service", side_effect=Exception("System error")
+        ):
             response = await async_client.get("/api/payments/health")
 
         assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
@@ -445,11 +466,7 @@ class TestPaymentEndpoints:
         """Test checkout session creation with custom metadata."""
         request_data = {
             "tier": "pro",
-            "metadata": {
-                "campaign": "summer_sale",
-                "referrer": "user_456",
-                "utm_source": "google"
-            }
+            "metadata": {"campaign": "summer_sale", "referrer": "user_456", "utm_source": "google"},
         }
 
         mock_stripe_response = {
@@ -458,12 +475,17 @@ class TestPaymentEndpoints:
             "checkout_url": "https://checkout.stripe.com/pay/cs_test_metadata_123",
             "plan_type": "pro",
             "currency": "brl",
-            "amount": 2990
+            "amount": 2990,
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.create_checkout_session", return_value=mock_stripe_response) as mock_create:
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_checkout_session",
+            return_value=mock_stripe_response,
+        ) as mock_create:
             with patch("app.api.endpoints.payments.get_current_user", return_value=self.test_user):
-                response = await async_client.post("/api/payments/create-checkout", json=request_data)
+                response = await async_client.post(
+                    "/api/payments/create-checkout", json=request_data
+                )
 
         assert response.status_code == status.HTTP_200_OK
 
@@ -488,19 +510,24 @@ class TestPaymentEndpoints:
             "checkout_url": "https://checkout.stripe.com/pay/cs_test_minimal_123",
             "plan_type": "pro",
             "currency": "brl",
-            "amount": 2990
+            "amount": 2990,
         }
 
-        with patch("app.api.endpoints.payments.stripe_service.create_checkout_session", return_value=mock_stripe_response) as mock_create:
+        with patch(
+            "app.api.endpoints.payments.stripe_service.create_checkout_session",
+            return_value=mock_stripe_response,
+        ) as mock_create:
             with patch("app.api.endpoints.payments.get_current_user", return_value=self.test_user):
-                response = await async_client.post("/api/payments/create-checkout", json=request_data)
+                response = await async_client.post(
+                    "/api/payments/create-checkout", json=request_data
+                )
 
         assert response.status_code == status.HTTP_200_OK
 
         # Verify default values were used
         call_args = mock_create.call_args[1]
         assert call_args["success_url"] is not None  # Default URL
-        assert call_args["cancel_url"] is not None   # Default URL
+        assert call_args["cancel_url"] is not None  # Default URL
 
     @pytest.mark.asyncio
     async def test_create_payment_intent_validation_error(self, async_client: AsyncClient):
@@ -519,10 +546,7 @@ class TestPaymentEndpoints:
     async def test_create_customer_validation_error(self, async_client: AsyncClient):
         """Test customer creation with validation error."""
         # Invalid email format
-        request_data = {
-            "user_id": "user_123",
-            "user_email": "invalid-email-format"
-        }
+        request_data = {"user_id": "user_123", "user_email": "invalid-email-format"}
 
         response = await async_client.post("/api/payments/create-customer", json=request_data)
 
@@ -537,18 +561,21 @@ class TestPaymentEndpoints:
                 "description": "Análise básica de currículo",
                 "price": 0,
                 "currency": "brl",
-                "features": ["5 análises por mês", "Matching básico"]
+                "features": ["5 análises por mês", "Matching básico"],
             },
             "pro": {
                 "name": "Plano Profissional",
                 "description": "Análise avançada com IA",
                 "price": 2990,
                 "currency": "brl",
-                "features": ["Análises ilimitadas", "Suporte prioritário"]
-            }
+                "features": ["Análises ilimitadas", "Suporte prioritário"],
+            },
         }
 
-        with patch("app.api.endpoints.payments.stripe_service._get_brazilian_pricing", return_value=mock_pricing):
+        with patch(
+            "app.api.endpoints.payments.stripe_service._get_brazilian_pricing",
+            return_value=mock_pricing,
+        ):
             response = await async_client.get("/api/payments/pricing")
 
         assert response.status_code == status.HTTP_200_OK
@@ -572,8 +599,13 @@ class TestPaymentEndpoints:
         request_data = {"tier": "pro"}
 
         with patch("app.api.endpoints.payments.get_current_user", return_value=self.test_user):
-            with patch("app.api.endpoints.payments.stripe_service.create_checkout_session", side_effect=Exception("Unexpected error")):
-                response = await async_client.post("/api/payments/create-checkout", json=request_data)
+            with patch(
+                "app.api.endpoints.payments.stripe_service.create_checkout_session",
+                side_effect=Exception("Unexpected error"),
+            ):
+                response = await async_client.post(
+                    "/api/payments/create-checkout", json=request_data
+                )
 
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
         response_data = response.json()

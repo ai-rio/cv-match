@@ -13,6 +13,7 @@ This is a modern full-stack application template with Next.js frontend and Pytho
 ## Development Standards
 
 ### Code Style
+
 - Use TypeScript for all frontend files
 - Use Python type hints for all backend functions
 - Follow async/await patterns consistently
@@ -20,6 +21,7 @@ This is a modern full-stack application template with Next.js frontend and Pytho
 - Include proper error handling in all functions
 
 ### Architecture Patterns
+
 - Follow the service layer pattern for external integrations
 - Use Pydantic models for API request/response validation
 - Implement proper authentication on all protected endpoints
@@ -27,6 +29,7 @@ This is a modern full-stack application template with Next.js frontend and Pytho
 - Abstract LLM providers through service classes
 
 ### File Organization
+
 - Backend: `backend/app/` with api/, models/, services/ subdirectories
 - Frontend: `frontend/` with app/, components/, services/ subdirectories
 - Database: `supabase/migrations/` for all schema changes
@@ -35,6 +38,7 @@ This is a modern full-stack application template with Next.js frontend and Pytho
 ## Common Patterns
 
 ### FastAPI Endpoints
+
 ```python
 @router.post("/items", response_model=ItemResponse)
 async def create_item(
@@ -51,31 +55,29 @@ async def create_item(
 ```
 
 ### React Components
+
 ```tsx
-'use client'
+"use client";
 export default function ComponentName({ title, onAction }: Props) {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const handleAction = async () => {
     try {
-      setLoading(true)
-      await onAction?.()
+      setLoading(true);
+      await onAction?.();
     } catch (error) {
-      console.error('Action failed:', error)
+      console.error("Action failed:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  return (
-    <div className="p-4 rounded-lg border">
-      {/* Component content */}
-    </div>
-  )
+  return <div className="p-4 rounded-lg border">{/* Component content */}</div>;
 }
 ```
 
 ### Database Migrations
+
 ```sql
 -- Create table with RLS
 CREATE TABLE public.items (
@@ -112,6 +114,7 @@ CREATE POLICY "Users can manage own items"
 ## Environment Configuration
 
 Required environment variables:
+
 - `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` (required)
 - `OPENAI_API_KEY` and/or `ANTHROPIC_API_KEY` (for LLM features)
 - `QDRANT_URL` and `QDRANT_API_KEY` (for vector database)

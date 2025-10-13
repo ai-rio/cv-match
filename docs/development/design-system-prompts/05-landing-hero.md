@@ -1,8 +1,8 @@
 # 05 - Landing Hero Implementation
 
-**Agent**: `frontend-specialist`  
-**Phase**: 3  
-**Duration**: 3h  
+**Agent**: `frontend-specialist`
+**Phase**: 3
+**Duration**: 3h
 **Dependencies**: Previous phase complete
 
 ---

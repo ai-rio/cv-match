@@ -67,9 +67,7 @@ class PaidResumeImprovementService:
 
             # Step 1: Check and deduct credits
             limit_check = await self.usage_limit_service.check_and_track_usage(
-                user_id=user_id,
-                optimization_type="paid",
-                cost_credits=cost_credits
+                user_id=user_id, optimization_type="paid", cost_credits=cost_credits
             )
 
             if not limit_check.can_optimize:
@@ -124,7 +122,9 @@ class PaidResumeImprovementService:
         """
         try:
             # Get resume data
-            resume_result = self.db.client.table("resumes").select("*").eq("id", str(resume_id)).execute()
+            resume_result = (
+                self.db.client.table("resumes").select("*").eq("id", str(resume_id)).execute()
+            )
             if not resume_result.data:
                 raise ValueError(f"Resume not found: {resume_id}")
 
@@ -175,9 +175,9 @@ class PaidResumeImprovementService:
             "suggestions": [
                 "Add quantifiable achievements",
                 "Include relevant keywords",
-                "Improve formatting"
+                "Improve formatting",
             ],
-            "keywords": ["python", "fastapi", "postgresql", "docker"]
+            "keywords": ["python", "fastapi", "postgresql", "docker"],
         }
 
     async def _prepare_response(

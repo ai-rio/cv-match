@@ -7,6 +7,7 @@ This document provides an overview of the backend API architecture, services, an
 The backend is built using FastAPI, a modern, high-performance web framework for building APIs with Python. It integrates with Supabase for authentication, database, and storage services, provides an abstraction layer for LLM services (OpenAI and Anthropic), and includes vector database functionality with Qdrant.
 
 ### Tech Stack
+
 - **FastAPI**: Fast API development with automatic OpenAPI documentation
 - **Supabase**: For authentication, database, and storage
 - **LLM Integration**: OpenAI and Anthropic API integrations
@@ -87,18 +88,24 @@ backend/
 ### Supabase Services
 
 #### Authentication Service
+
 The SupabaseAuthService handles user authentication using Supabase Auth. It supports:
+
 - Google and LinkedIn OAuth authentication
 - JWT token validation and exchange
 
 #### Database Service
+
 The SupabaseDatabaseService provides generic CRUD operations with type safety:
+
 - List records with filtering
 - Get a single record by ID
 - Create, update, and delete records
 
 #### Storage Service
+
 The SupabaseStorageService provides a high-level interface to Supabase Storage:
+
 - Upload files
 - Get public URLs for files
 - Delete files
@@ -107,13 +114,17 @@ The SupabaseStorageService provides a high-level interface to Supabase Storage:
 ### LLM Services
 
 #### LLM Service
+
 Abstraction layer for text generation with multiple providers:
+
 - OpenAI GPT models
 - Anthropic Claude models
 - Factory pattern for provider selection
 
 #### Embedding Service
+
 Abstraction layer for creating vector embeddings:
+
 - OpenAI embeddings
 - Placeholder for Anthropic embeddings (when available)
 - Factory pattern for provider selection
@@ -121,7 +132,9 @@ Abstraction layer for creating vector embeddings:
 ### Vector Database Service
 
 #### Qdrant Service
+
 Vector database service for semantic search:
+
 - Document storage with metadata
 - Semantic search based on vector embeddings
 - Filtering capabilities for metadata
@@ -132,6 +145,7 @@ Vector database service for semantic search:
 Environment variables are managed through the `app.core.config` module using Pydantic settings.
 
 Required environment variables:
+
 - `SUPABASE_URL`: URL of your Supabase project
 - `SUPABASE_SERVICE_KEY`: Service key for Supabase project
 - `OPENAI_API_KEY`: OpenAI API key (optional if not using OpenAI)

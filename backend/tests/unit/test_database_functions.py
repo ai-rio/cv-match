@@ -30,47 +30,38 @@ class TestDatabaseFunctions:
         """Test successful atomic credit deduction via RPC function."""
         # Mock successful RPC call
         mock_result = MagicMock()
-        mock_result.data = [{
-            "success": True,
-            "new_balance": 45,
-            "previous_balance": 50
-        }]
+        mock_result.data = [{"success": True, "new_balance": 45, "previous_balance": 50}]
 
         self.db.client.rpc.return_value.execute.return_value = mock_result
 
         # Call the RPC function
-        result = self.db.client.rpc("deduct_credits_atomically", {
-            "p_user_id": str(self.test_user_id),
-            "p_amount": 5
-        }).execute()
+        result = self.db.client.rpc(
+            "deduct_credits_atomically", {"p_user_id": str(self.test_user_id), "p_amount": 5}
+        ).execute()
 
         assert result.data[0]["success"] is True
         assert result.data[0]["new_balance"] == 45
         assert result.data[0]["previous_balance"] == 50
 
         # Verify RPC was called with correct parameters
-        self.db.client.rpc.assert_called_once_with("deduct_credits_atomically", {
-            "p_user_id": str(self.test_user_id),
-            "p_amount": 5
-        })
+        self.db.client.rpc.assert_called_once_with(
+            "deduct_credits_atomically", {"p_user_id": str(self.test_user_id), "p_amount": 5}
+        )
 
     @pytest.mark.asyncio
     async def test_deduct_credits_atomically_insufficient_credits(self):
         """Test atomic credit deduction with insufficient credits."""
         # Mock insufficient credits response
         mock_result = MagicMock()
-        mock_result.data = [{
-            "success": False,
-            "reason": "insufficient_credits",
-            "current_balance": 3
-        }]
+        mock_result.data = [
+            {"success": False, "reason": "insufficient_credits", "current_balance": 3}
+        ]
 
         self.db.client.rpc.return_value.execute.return_value = mock_result
 
-        result = self.db.client.rpc("deduct_credits_atomically", {
-            "p_user_id": str(self.test_user_id),
-            "p_amount": 5
-        }).execute()
+        result = self.db.client.rpc(
+            "deduct_credits_atomically", {"p_user_id": str(self.test_user_id), "p_amount": 5}
+        ).execute()
 
         assert result.data[0]["success"] is False
         assert result.data[0]["reason"] == "insufficient_credits"
@@ -81,17 +72,13 @@ class TestDatabaseFunctions:
         """Test atomic credit deduction when user not found."""
         # Mock user not found response
         mock_result = MagicMock()
-        mock_result.data = [{
-            "success": False,
-            "reason": "user_not_found"
-        }]
+        mock_result.data = [{"success": False, "reason": "user_not_found"}]
 
         self.db.client.rpc.return_value.execute.return_value = mock_result
 
-        result = self.db.client.rpc("deduct_credits_atomically", {
-            "p_user_id": str(self.test_user_id),
-            "p_amount": 5
-        }).execute()
+        result = self.db.client.rpc(
+            "deduct_credits_atomically", {"p_user_id": str(self.test_user_id), "p_amount": 5}
+        ).execute()
 
         assert result.data[0]["success"] is False
         assert result.data[0]["reason"] == "user_not_found"
@@ -104,10 +91,9 @@ class TestDatabaseFunctions:
 
         # This should be handled by the service layer fallback
         with pytest.raises(Exception, match="RPC function not found"):
-            self.db.client.rpc("deduct_credits_atomically", {
-                "p_user_id": str(self.test_user_id),
-                "p_amount": 5
-            }).execute()
+            self.db.client.rpc(
+                "deduct_credits_atomically", {"p_user_id": str(self.test_user_id), "p_amount": 5}
+            ).execute()
 
     @pytest.mark.asyncio
     async def test_record_credit_transaction_success(self):
@@ -119,16 +105,18 @@ class TestDatabaseFunctions:
             "source": "optimization",
             "description": f"Credit deduction for operation {self.test_operation_id}",
             "operation_id": self.test_operation_id,
-            "balance_after": 45
+            "balance_after": 45,
         }
 
         # Mock successful transaction creation
         mock_result = MagicMock()
-        mock_result.data = [{
-            "id": "transaction_123",
-            "created_at": datetime.now(UTC).isoformat(),
-            **transaction_data
-        }]
+        mock_result.data = [
+            {
+                "id": "transaction_123",
+                "created_at": datetime.now(UTC).isoformat(),
+                **transaction_data,
+            }
+        ]
 
         self.db.client.table.return_value.insert.return_value.execute.return_value = mock_result
 
@@ -151,7 +139,7 @@ class TestDatabaseFunctions:
             "user_id": str(self.test_user_id),
             "amount": -5,
             "type": "debit",
-            "source": "optimization"
+            "source": "optimization",
         }
 
         # Mock failed transaction creation
@@ -170,34 +158,45 @@ class TestDatabaseFunctions:
 
         # Mock current user credits
         mock_current = MagicMock()
-        mock_current.data = [{
-            "id": "credit_123",
-            "user_id": str(self.test_user_id),
-            "credits_remaining": current_credits,
-            "total_credits": current_credits
-        }]
+        mock_current.data = [
+            {
+                "id": "credit_123",
+                "user_id": str(self.test_user_id),
+                "credits_remaining": current_credits,
+                "total_credits": current_credits,
+            }
+        ]
 
         # Mock successful update
         mock_updated = MagicMock()
-        mock_updated.data = [{
-            "id": "credit_123",
-            "user_id": str(self.test_user_id),
-            "credits_remaining": new_credits,
-            "total_credits": new_credits
-        }]
+        mock_updated.data = [
+            {
+                "id": "credit_123",
+                "user_id": str(self.test_user_id),
+                "credits_remaining": new_credits,
+                "total_credits": new_credits,
+            }
+        ]
 
         self.db.client.table.return_value.select.return_value.eq.return_value.execute.return_value = mock_current
         self.db.client.table.return_value.update.return_value.eq.return_value.execute.return_value = mock_updated
 
         # Get current credits
-        current = self.db.client.table("user_credits").select("*").eq("user_id", str(self.test_user_id)).execute()
+        current = (
+            self.db.client.table("user_credits")
+            .select("*")
+            .eq("user_id", str(self.test_user_id))
+            .execute()
+        )
         assert current.data[0]["credits_remaining"] == current_credits
 
         # Update credits
-        updated = self.db.client.table("user_credits").update({
-            "credits_remaining": new_credits,
-            "total_credits": new_credits
-        }).eq("user_id", str(self.test_user_id)).execute()
+        updated = (
+            self.db.client.table("user_credits")
+            .update({"credits_remaining": new_credits, "total_credits": new_credits})
+            .eq("user_id", str(self.test_user_id))
+            .execute()
+        )
 
         assert updated.data[0]["credits_remaining"] == new_credits
         assert updated.data[0]["total_credits"] == new_credits
@@ -213,7 +212,7 @@ class TestDatabaseFunctions:
                 "amount": -5,
                 "type": "debit",
                 "source": "optimization",
-                "created_at": datetime.now(UTC).isoformat()
+                "created_at": datetime.now(UTC).isoformat(),
             },
             {
                 "id": "transaction_2",
@@ -221,14 +220,21 @@ class TestDatabaseFunctions:
                 "amount": 50,
                 "type": "credit",
                 "source": "payment",
-                "created_at": datetime.now(UTC).isoformat()
-            }
+                "created_at": datetime.now(UTC).isoformat(),
+            },
         ]
 
         self.db.client.table.return_value.select.return_value.eq.return_value.order.return_value.limit.return_value.execute.return_value.data = mock_transactions
 
         # Get transaction history
-        result = self.db.client.table("credit_transactions").select("*").eq("user_id", str(self.test_user_id)).order("created_at", desc=True).limit(10).execute()
+        result = (
+            self.db.client.table("credit_transactions")
+            .select("*")
+            .eq("user_id", str(self.test_user_id))
+            .order("created_at", desc=True)
+            .limit(10)
+            .execute()
+        )
 
         assert len(result.data) == 2
         assert result.data[0]["id"] == "transaction_1"
@@ -244,12 +250,19 @@ class TestDatabaseFunctions:
             "credits_remaining": 25,
             "total_credits": 100,
             "subscription_tier": "pro",
-            "is_pro": True
+            "is_pro": True,
         }
 
-        self.db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [mock_credits]
+        self.db.client.table.return_value.select.return_value.eq.return_value.execute.return_value.data = [
+            mock_credits
+        ]
 
-        result = self.db.client.table("user_credits").select("*").eq("user_id", str(self.test_user_id)).execute()
+        result = (
+            self.db.client.table("user_credits")
+            .select("*")
+            .eq("user_id", str(self.test_user_id))
+            .execute()
+        )
 
         assert result.data[0]["credits_remaining"] == 25
         assert result.data[0]["total_credits"] == 100
@@ -258,22 +271,24 @@ class TestDatabaseFunctions:
     @pytest.mark.asyncio
     async def test_credit_operations_transaction_isolation(self):
         """Test that credit operations are properly isolated."""
+
         # Test concurrent credit deduction attempts
         async def deduct_credits_concurrently():
             # Each attempt tries to deduct 5 credits from a balance of 10
             mock_result = MagicMock()
-            mock_result.data = [{
-                "success": True,
-                "new_balance": 5,  # After first deduction
-                "previous_balance": 10
-            }]
+            mock_result.data = [
+                {
+                    "success": True,
+                    "new_balance": 5,  # After first deduction
+                    "previous_balance": 10,
+                }
+            ]
 
             self.db.client.rpc.return_value.execute.return_value = mock_result
 
-            return self.db.client.rpc("deduct_credits_atomically", {
-                "p_user_id": str(self.test_user_id),
-                "p_amount": 5
-            }).execute()
+            return self.db.client.rpc(
+                "deduct_credits_atomically", {"p_user_id": str(self.test_user_id), "p_amount": 5}
+            ).execute()
 
         # Run multiple concurrent deductions
         tasks = [deduct_credits_concurrently() for _ in range(3)]
@@ -292,11 +307,7 @@ class TestDatabaseFunctions:
 
         # Mock successful credit deduction
         mock_deduct_result = MagicMock()
-        mock_deduct_result.data = [{
-            "success": True,
-            "new_balance": 45,
-            "previous_balance": 50
-        }]
+        mock_deduct_result.data = [{"success": True, "new_balance": 45, "previous_balance": 50}]
 
         # Mock failed operation (simulate business logic failure)
         def simulate_operation_failure():
@@ -304,19 +315,14 @@ class TestDatabaseFunctions:
 
         # Mock credit addition (rollback)
         mock_add_result = MagicMock()
-        mock_add_result.data = [{
-            "id": "credit_123",
-            "credits_remaining": 50,
-            "total_credits": 100
-        }]
+        mock_add_result.data = [{"id": "credit_123", "credits_remaining": 50, "total_credits": 100}]
 
         # Execute the scenario
         try:
             # Deduct credits
-            deduct_result = self.db.client.rpc("deduct_credits_atomically", {
-                "p_user_id": str(self.test_user_id),
-                "p_amount": 5
-            }).execute()
+            deduct_result = self.db.client.rpc(
+                "deduct_credits_atomically", {"p_user_id": str(self.test_user_id), "p_amount": 5}
+            ).execute()
             assert deduct_result.data[0]["success"] is True
 
             # Simulate operation failure
@@ -326,10 +332,12 @@ class TestDatabaseFunctions:
             # Rollback: add credits back
             self.db.client.table.return_value.update.return_value.eq.return_value.execute.return_value = mock_add_result
 
-            rollback_result = self.db.client.table("user_credits").update({
-                "credits_remaining": 50,
-                "total_credits": 100
-            }).eq("user_id", str(self.test_user_id)).execute()
+            rollback_result = (
+                self.db.client.table("user_credits")
+                .update({"credits_remaining": 50, "total_credits": 100})
+                .eq("user_id", str(self.test_user_id))
+                .execute()
+            )
 
             assert rollback_result.data[0]["credits_remaining"] == 50
             assert str(e) == "Business logic failed"
@@ -346,19 +354,14 @@ class TestDatabaseFunctions:
             "status": "succeeded",
             "payment_type": "subscription",
             "description": "CV-Match Pro Plan",
-            "metadata": {
-                "plan_type": "pro",
-                "market": "brazil"
-            }
+            "metadata": {"plan_type": "pro", "market": "brazil"},
         }
 
         # Mock successful payment recording
         mock_result = MagicMock()
-        mock_result.data = [{
-            "id": "payment_123",
-            "created_at": datetime.now(UTC).isoformat(),
-            **payment_data
-        }]
+        mock_result.data = [
+            {"id": "payment_123", "created_at": datetime.now(UTC).isoformat(), **payment_data}
+        ]
 
         self.db.client.table.return_value.insert.return_value.execute.return_value = mock_result
 
@@ -382,19 +385,18 @@ class TestDatabaseFunctions:
             "current_period_start": datetime.now(UTC).isoformat(),
             "current_period_end": datetime.now(UTC).isoformat(),
             "cancel_at_period_end": False,
-            "metadata": {
-                "plan_type": "pro",
-                "market": "brazil"
-            }
+            "metadata": {"plan_type": "pro", "market": "brazil"},
         }
 
         # Mock successful subscription recording
         mock_result = MagicMock()
-        mock_result.data = [{
-            "id": "subscription_123",
-            "created_at": datetime.now(UTC).isoformat(),
-            **subscription_data
-        }]
+        mock_result.data = [
+            {
+                "id": "subscription_123",
+                "created_at": datetime.now(UTC).isoformat(),
+                **subscription_data,
+            }
+        ]
 
         self.db.client.table.return_value.insert.return_value.execute.return_value = mock_result
 
@@ -419,15 +421,12 @@ class TestDatabaseFunctions:
             "status": "completed",
             "payload": {"test": "data"},
             "processed": False,
-            "created_at": datetime.now(UTC).isoformat()
+            "created_at": datetime.now(UTC).isoformat(),
         }
 
         # Mock successful webhook recording
         mock_result = MagicMock()
-        mock_result.data = [{
-            "id": "webhook_123",
-            **webhook_data
-        }]
+        mock_result.data = [{"id": "webhook_123", **webhook_data}]
 
         self.db.client.table.return_value.insert.return_value.execute.return_value = mock_result
 
@@ -445,21 +444,28 @@ class TestDatabaseFunctions:
         update_data = {
             "processed": True,
             "processed_at": datetime.now(UTC).isoformat(),
-            "processing_time_ms": 150.5
+            "processing_time_ms": 150.5,
         }
 
         # Mock successful update
         mock_result = MagicMock()
-        mock_result.data = [{
-            "id": webhook_id,
-            "processed": True,
-            "processed_at": update_data["processed_at"],
-            "processing_time_ms": 150.5
-        }]
+        mock_result.data = [
+            {
+                "id": webhook_id,
+                "processed": True,
+                "processed_at": update_data["processed_at"],
+                "processing_time_ms": 150.5,
+            }
+        ]
 
         self.db.client.table.return_value.update.return_value.eq.return_value.execute.return_value = mock_result
 
-        result = self.db.client.table("payment_events").update(update_data).eq("id", webhook_id).execute()
+        result = (
+            self.db.client.table("payment_events")
+            .update(update_data)
+            .eq("id", webhook_id)
+            .execute()
+        )
 
         assert result.data[0]["processed"] is True
         assert result.data[0]["processing_time_ms"] == 150.5
@@ -475,19 +481,21 @@ class TestDatabaseFunctions:
 
         # Mock the constraint violation
         mock_result = MagicMock()
-        mock_result.data = [{
-            "success": False,
-            "reason": "insufficient_credits",
-            "current_balance": current_balance,
-            "requested_amount": deduction_amount
-        }]
+        mock_result.data = [
+            {
+                "success": False,
+                "reason": "insufficient_credits",
+                "current_balance": current_balance,
+                "requested_amount": deduction_amount,
+            }
+        ]
 
         self.db.client.rpc.return_value.execute.return_value = mock_result
 
-        result = self.db.client.rpc("deduct_credits_atomically", {
-            "p_user_id": str(self.test_user_id),
-            "p_amount": deduction_amount
-        }).execute()
+        result = self.db.client.rpc(
+            "deduct_credits_atomically",
+            {"p_user_id": str(self.test_user_id), "p_amount": deduction_amount},
+        ).execute()
 
         assert result.data[0]["success"] is False
         assert result.data[0]["reason"] == "insufficient_credits"
@@ -504,15 +512,13 @@ class TestDatabaseFunctions:
             "credits_remaining": 3,  # Free tier
             "total_credits": 3,
             "subscription_tier": "free",
-            "is_pro": False
+            "is_pro": False,
         }
 
         mock_result = MagicMock()
-        mock_result.data = [{
-            "id": "credit_new_123",
-            "created_at": datetime.now(UTC).isoformat(),
-            **initial_credits
-        }]
+        mock_result.data = [
+            {"id": "credit_new_123", "created_at": datetime.now(UTC).isoformat(), **initial_credits}
+        ]
 
         self.db.client.table.return_value.insert.return_value.execute.return_value = mock_result
 
@@ -531,16 +537,20 @@ class TestDatabaseFunctions:
 
         # Mock existing event
         mock_existing = MagicMock()
-        mock_existing.data = [{
-            "id": "webhook_123",
-            "event_id": event_id,
-            "processed": True,
-            "processed_at": datetime.now(UTC).isoformat()
-        }]
+        mock_existing.data = [
+            {
+                "id": "webhook_123",
+                "event_id": event_id,
+                "processed": True,
+                "processed_at": datetime.now(UTC).isoformat(),
+            }
+        ]
 
         self.db.client.table.return_value.select.return_value.eq.return_value.execute.return_value = mock_existing
 
-        result = self.db.client.table("payment_events").select("*").eq("event_id", event_id).execute()
+        result = (
+            self.db.client.table("payment_events").select("*").eq("event_id", event_id).execute()
+        )
 
         assert len(result.data) == 1
         assert result.data[0]["event_id"] == event_id
@@ -550,33 +560,39 @@ class TestDatabaseFunctions:
     async def test_subscription_update_handling(self):
         """Test subscription status updates."""
         subscription_id = "sub_test_123"
-        update_data = {
-            "status": "past_due",
-            "updated_at": datetime.now(UTC).isoformat()
-        }
+        update_data = {"status": "past_due", "updated_at": datetime.now(UTC).isoformat()}
 
         # Mock existing subscription
         mock_existing = MagicMock()
-        mock_existing.data = [{
-            "id": "subscription_123",
-            "stripe_subscription_id": subscription_id,
-            "status": "active"
-        }]
+        mock_existing.data = [
+            {
+                "id": "subscription_123",
+                "stripe_subscription_id": subscription_id,
+                "status": "active",
+            }
+        ]
 
         # Mock successful update
         mock_updated = MagicMock()
-        mock_updated.data = [{
-            "id": "subscription_123",
-            "stripe_subscription_id": subscription_id,
-            "status": "past_due",
-            "updated_at": update_data["updated_at"]
-        }]
+        mock_updated.data = [
+            {
+                "id": "subscription_123",
+                "stripe_subscription_id": subscription_id,
+                "status": "past_due",
+                "updated_at": update_data["updated_at"],
+            }
+        ]
 
         self.db.client.table.return_value.select.return_value.eq.return_value.execute.return_value = mock_existing
         self.db.client.table.return_value.update.return_value.eq.return_value.execute.return_value = mock_updated
 
         # Update subscription
-        result = self.db.client.table("subscriptions").update(update_data).eq("stripe_subscription_id", subscription_id).execute()
+        result = (
+            self.db.client.table("subscriptions")
+            .update(update_data)
+            .eq("stripe_subscription_id", subscription_id)
+            .execute()
+        )
 
         assert result.data[0]["status"] == "past_due"
         assert result.data[0]["updated_at"] == update_data["updated_at"]

@@ -6,7 +6,7 @@ from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, Field
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class BaseAPIResponse(BaseModel, Generic[T]):

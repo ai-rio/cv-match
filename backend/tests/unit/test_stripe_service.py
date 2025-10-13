@@ -44,7 +44,9 @@ class TestStripeService:
     async def test_stripe_service_missing_api_key(self):
         """Test Stripe service initialization with missing API key."""
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(ValueError, match="STRIPE_SECRET_KEY environment variable is required"):
+            with pytest.raises(
+                ValueError, match="STRIPE_SECRET_KEY environment variable is required"
+            ):
                 StripeService()
 
     @pytest.mark.asyncio
@@ -67,14 +69,14 @@ class TestStripeService:
 
             with patch("stripe.checkout.Session.create", return_value=mock_session):
                 result = await service.create_checkout_session(
-                    user_id="user_123",
-                    user_email="test@example.com",
-                    plan_type="pro"
+                    user_id="user_123", user_email="test@example.com", plan_type="pro"
                 )
 
                 assert result["success"] is True
                 assert result["session_id"] == "cs_test_1234567890"
-                assert result["checkout_url"] == "https://checkout.stripe.com/pay/cs_test_1234567890"
+                assert (
+                    result["checkout_url"] == "https://checkout.stripe.com/pay/cs_test_1234567890"
+                )
                 assert result["plan_type"] == "pro"
                 assert result["currency"] == "brl"
                 assert result["amount"] == 2990  # R$ 29,90
@@ -91,9 +93,7 @@ class TestStripeService:
 
             with patch("stripe.checkout.Session.create", return_value=mock_session):
                 result = await service.create_checkout_session(
-                    user_id="user_456",
-                    user_email="enterprise@example.com",
-                    plan_type="enterprise"
+                    user_id="user_456", user_email="enterprise@example.com", plan_type="enterprise"
                 )
 
                 assert result["success"] is True
@@ -107,9 +107,7 @@ class TestStripeService:
             service = StripeService()
 
             result = await service.create_checkout_session(
-                user_id="user_789",
-                user_email="free@example.com",
-                plan_type="free"
+                user_id="user_789", user_email="free@example.com", plan_type="free"
             )
 
             assert result["success"] is True
@@ -125,9 +123,7 @@ class TestStripeService:
             service = StripeService()
 
             result = await service.create_checkout_session(
-                user_id="user_123",
-                user_email="test@example.com",
-                plan_type="invalid_plan"
+                user_id="user_123", user_email="test@example.com", plan_type="invalid_plan"
             )
 
             assert result["success"] is False
@@ -140,11 +136,11 @@ class TestStripeService:
         with patch.dict(os.environ, self.test_env):
             service = StripeService()
 
-            with patch("stripe.checkout.Session.create", side_effect=stripe.StripeError("Card declined")):
+            with patch(
+                "stripe.checkout.Session.create", side_effect=stripe.StripeError("Card declined")
+            ):
                 result = await service.create_checkout_session(
-                    user_id="user_123",
-                    user_email="test@example.com",
-                    plan_type="pro"
+                    user_id="user_123", user_email="test@example.com", plan_type="pro"
                 )
 
                 assert result["success"] is False
@@ -159,9 +155,7 @@ class TestStripeService:
 
             with patch("stripe.checkout.Session.create", side_effect=Exception("System error")):
                 result = await service.create_checkout_session(
-                    user_id="user_123",
-                    user_email="test@example.com",
-                    plan_type="pro"
+                    user_id="user_123", user_email="test@example.com", plan_type="pro"
                 )
 
                 assert result["success"] is False
@@ -184,7 +178,7 @@ class TestStripeService:
                     user_email="test@example.com",
                     plan_type="pro",
                     success_url="https://myapp.com/success",
-                    cancel_url="https://myapp.com/cancel"
+                    cancel_url="https://myapp.com/cancel",
                 )
 
                 assert result["success"] is True
@@ -209,7 +203,7 @@ class TestStripeService:
                     user_id="user_brazil_123",
                     user_email="usuario@exemplo.com.br",
                     plan_type="pro",
-                    metadata={"custom_field": "custom_value"}
+                    metadata={"custom_field": "custom_value"},
                 )
 
                 assert result["success"] is True
@@ -236,9 +230,7 @@ class TestStripeService:
 
             with patch("stripe.Customer.create", return_value=mock_customer):
                 result = await service.create_customer(
-                    user_id="user_123",
-                    email="test@example.com",
-                    name="Test User"
+                    user_id="user_123", email="test@example.com", name="Test User"
                 )
 
                 assert result["success"] is True
@@ -267,7 +259,7 @@ class TestStripeService:
                     user_id="user_brazil_123",
                     email="usuario@exemplo.com.br",
                     name="João Silva",
-                    address=brazilian_address
+                    address=brazilian_address,
                 )
 
                 assert result["success"] is True
@@ -291,7 +283,7 @@ class TestStripeService:
                 result = await service.create_customer(
                     user_id="user_default_123",
                     email="test@example.com",
-                    name="Test User"
+                    name="Test User",
                     # No address provided
                 )
 
@@ -314,9 +306,7 @@ class TestStripeService:
 
             with patch("stripe.Customer.create", side_effect=stripe.StripeError("Invalid email")):
                 result = await service.create_customer(
-                    user_id="user_123",
-                    email="invalid-email",
-                    name="Test User"
+                    user_id="user_123", email="invalid-email", name="Test User"
                 )
 
                 assert result["success"] is False
@@ -346,7 +336,9 @@ class TestStripeService:
         with patch.dict(os.environ, self.test_env):
             service = StripeService()
 
-            with patch("stripe.checkout.Session.retrieve", side_effect=stripe.StripeError("Not found")):
+            with patch(
+                "stripe.checkout.Session.retrieve", side_effect=stripe.StripeError("Not found")
+            ):
                 result = await service.retrieve_checkout_session("cs_nonexistent")
 
                 assert result["success"] is False
@@ -367,7 +359,7 @@ class TestStripeService:
                 result = await service.create_payment_intent(
                     amount=2990,  # R$ 29,90
                     user_id="user_123",
-                    user_email="test@example.com"
+                    user_email="test@example.com",
                 )
 
                 assert result["success"] is True
@@ -391,7 +383,7 @@ class TestStripeService:
                     amount=9990,  # R$ 99,90
                     user_id="user_brazil_123",
                     user_email="usuario@exemplo.com.br",
-                    metadata={"plan_type": "enterprise"}
+                    metadata={"plan_type": "enterprise"},
                 )
 
                 assert result["success"] is True
@@ -417,11 +409,11 @@ class TestStripeService:
         with patch.dict(os.environ, self.test_env):
             service = StripeService()
 
-            with patch("stripe.PaymentIntent.create", side_effect=stripe.StripeError("Insufficient funds")):
+            with patch(
+                "stripe.PaymentIntent.create", side_effect=stripe.StripeError("Insufficient funds")
+            ):
                 result = await service.create_payment_intent(
-                    amount=9990,
-                    user_id="user_123",
-                    user_email="test@example.com"
+                    amount=9990, user_id="user_123", user_email="test@example.com"
                 )
 
                 assert result["success"] is False
@@ -443,8 +435,7 @@ class TestStripeService:
 
             with patch("stripe.Webhook.construct_event", return_value=mock_event):
                 result = await service.verify_webhook_signature(
-                    payload=payload,
-                    signature=signature
+                    payload=payload, signature=signature
                 )
 
                 assert result["success"] is True
@@ -461,10 +452,11 @@ class TestStripeService:
             payload = b'{"test": "data"}'
             signature = "invalid_signature"
 
-            with patch("stripe.Webhook.construct_event", side_effect=stripe.SignatureVerificationError):
+            with patch(
+                "stripe.Webhook.construct_event", side_effect=stripe.SignatureVerificationError
+            ):
                 result = await service.verify_webhook_signature(
-                    payload=payload,
-                    signature=signature
+                    payload=payload, signature=signature
                 )
 
                 assert result["success"] is False
@@ -474,16 +466,15 @@ class TestStripeService:
     @pytest.mark.asyncio
     async def test_verify_webhook_signature_no_secret(self):
         """Test webhook signature verification with no webhook secret configured."""
-        with patch.dict(os.environ, {"STRIPE_SECRET_KEY": "sk_test_1234567890"}):  # No webhook secret
+        with patch.dict(
+            os.environ, {"STRIPE_SECRET_KEY": "sk_test_1234567890"}
+        ):  # No webhook secret
             service = StripeService()
 
             payload = b'{"test": "data"}'
             signature = "t=1234567890,v1=signature123"
 
-            result = await service.verify_webhook_signature(
-                payload=payload,
-                signature=signature
-            )
+            result = await service.verify_webhook_signature(payload=payload, signature=signature)
 
             assert result["success"] is False
             assert "Webhook secret not configured" in result["error"]
@@ -500,8 +491,7 @@ class TestStripeService:
 
             with patch("stripe.Webhook.construct_event", side_effect=Exception("System error")):
                 result = await service.verify_webhook_signature(
-                    payload=payload,
-                    signature=signature
+                    payload=payload, signature=signature
                 )
 
                 assert result["success"] is False

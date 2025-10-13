@@ -6,7 +6,6 @@ import logging
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer
 
 from app.core.auth import get_current_user
 from app.core.database import SupabaseSession
@@ -14,14 +13,15 @@ from app.services.usage_limit_service import UsageLimitService
 
 logger = logging.getLogger(__name__)
 
+
 # Database dependency
 async def get_db() -> SupabaseSession:
     """Get database session."""
     return SupabaseSession()
 
+
 async def check_credits(
-    current_user: dict = Depends(get_current_user),
-    db: SupabaseSession = Depends(get_db)
+    current_user: dict = Depends(get_current_user), db: SupabaseSession = Depends(get_db)
 ) -> dict:
     """
     Check if user has sufficient credits for optimization operations.
@@ -51,36 +51,35 @@ async def check_credits(
 
         # Pro users have unlimited access, check credits for others
         if not is_pro and credits_remaining <= 0:
-            logger.warning(f"User {current_user['id']} has insufficient credits: {credits_remaining}")
+            logger.warning(
+                f"User {current_user['id']} has insufficient credits: {credits_remaining}"
+            )
             raise HTTPException(
                 status_code=status.HTTP_402_PAYMENT_REQUIRED,
                 detail={
                     "error": "Insufficient credits",
                     "message": f"You have {credits_remaining} credits remaining. Purchase more credits to continue.",
                     "credits_remaining": credits_remaining,
-                    "upgrade_prompt": "Purchase more credits to continue optimizing your resume."
-                }
+                    "upgrade_prompt": "Purchase more credits to continue optimizing your resume.",
+                },
             )
 
-        logger.info(f"Credit check passed for user {current_user['id']}: {credits_remaining} credits remaining")
-        return {
-            **current_user,
-            "credits_remaining": credits_remaining,
-            "is_pro": is_pro
-        }
+        logger.info(
+            f"Credit check passed for user {current_user['id']}: {credits_remaining} credits remaining"
+        )
+        return {**current_user, "credits_remaining": credits_remaining, "is_pro": is_pro}
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error checking credits for user {current_user['id']}: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to verify credits"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to verify credits"
         )
 
+
 async def require_pro_or_credits(
-    current_user: dict = Depends(get_current_user),
-    db: SupabaseSession = Depends(get_db)
+    current_user: dict = Depends(get_current_user), db: SupabaseSession = Depends(get_db)
 ) -> dict:
     """
     Check if user has Pro status or sufficient credits.
@@ -109,7 +108,9 @@ async def require_pro_or_credits(
 
         # Allow access if Pro user OR has credits
         if not is_pro and credits_remaining <= 0:
-            logger.warning(f"User {current_user['id']} lacks Pro status and has insufficient credits: {credits_remaining}")
+            logger.warning(
+                f"User {current_user['id']} lacks Pro status and has insufficient credits: {credits_remaining}"
+            )
             raise HTTPException(
                 status_code=status.HTTP_402_PAYMENT_REQUIRED,
                 detail={
@@ -117,21 +118,16 @@ async def require_pro_or_credits(
                     "message": "Upgrade to Pro for unlimited access or purchase credits to continue.",
                     "credits_remaining": credits_remaining,
                     "is_pro": is_pro,
-                    "upgrade_prompt": "Upgrade to Pro for unlimited optimizations or purchase credit packs."
-                }
+                    "upgrade_prompt": "Upgrade to Pro for unlimited optimizations or purchase credit packs.",
+                },
             )
 
-        return {
-            **current_user,
-            "credits_remaining": credits_remaining,
-            "is_pro": is_pro
-        }
+        return {**current_user, "credits_remaining": credits_remaining, "is_pro": is_pro}
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error checking Pro/credits for user {current_user['id']}: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to verify access"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to verify access"
         )
