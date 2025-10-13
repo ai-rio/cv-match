@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from functools import lru_cache
 
@@ -7,6 +8,8 @@ from pydantic import BaseModel
 
 from app.core.config import settings
 from app.models.llm import LLMUsage
+
+logger = logging.getLogger(__name__)
 
 
 class EmbeddingResponse(BaseModel):
@@ -56,27 +59,32 @@ class AnthropicEmbeddingService(EmbeddingService):
     def __init__(self, api_key: str):
         """Initialize the Anthropic client."""
         # Note: Anthropic doesn't currently have a dedicated embeddings API,
-        # so this is a placeholder for future implementation
+        # so this implementation falls back to OpenAI for embeddings
+        if not settings.OPENAI_API_KEY:
+            raise ValueError("OpenAI API key required for embeddings when using Anthropic as primary provider")
+        self.openai_client = openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         self.api_key = api_key
 
     async def create_embedding(
-        self, text: str, model: str = "claude-embedding"
+        self, text: str, model: str = "text-embedding-3-small"
     ) -> EmbeddingResponse:
-        """Create an embedding using Anthropic."""
-        # This is a placeholder implementation
-        # In a real implementation, you'd call the Anthropic embedding API when available
+        """Create an embedding using OpenAI (fallback for Anthropic)."""
+        try:
+            response = await self.openai_client.embeddings.create(model=model, input=text)
 
-        # For now, return a random embedding as a placeholder
-        # In production, you would replace this with the actual API call
-        random_embedding = list(np.random.normal(0, 1, 1536))
+            embedding = response.data[0].embedding
 
-        usage = LLMUsage(
-            prompt_tokens=len(text.split()), completion_tokens=0, total_tokens=len(text.split())
-        )
+            usage = LLMUsage(
+                prompt_tokens=response.usage.prompt_tokens,
+                completion_tokens=0,
+                total_tokens=response.usage.total_tokens,
+            )
 
-        return EmbeddingResponse(
-            embedding=[float(x) for x in random_embedding], model=model, usage=usage
-        )
+            return EmbeddingResponse(embedding=embedding, model=model, usage=usage)
+
+        except Exception as e:
+            logger.error(f"Failed to create embedding with OpenAI fallback: {e}")
+            raise ValueError(f"Failed to create embedding: {str(e)}") from e
 
 
 class EmbeddingServiceFactory:

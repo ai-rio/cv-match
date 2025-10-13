@@ -12,7 +12,9 @@ from pydantic import BaseModel, EmailStr
 from app.config.pricing import pricing_config
 from app.core.auth import get_current_user
 from app.core.database import SupabaseSession
+from app.models.secure import SecurePaymentRequest, SecureMetadataRequest, SecureUUIDRequest
 from app.services.stripe_service import stripe_service
+from app.utils.validation import validate_string, validate_dict, validate_uuid
 
 
 # Database dependency
@@ -83,10 +85,16 @@ async def create_checkout_session(
     db: SupabaseSession = Depends(get_db),
 ) -> JSONResponse:
     """
-    Create a Stripe checkout session for Brazilian market.
+    Create a Stripe checkout session with security validation.
 
     This endpoint creates a checkout session with Brazilian Real (BRL) currency
     and appropriate pricing tiers for the Brazilian market.
+
+    Security features:
+    - Input validation and sanitization
+    - Payment amount verification
+    - Metadata injection prevention
+    - Rate limiting applied
 
     Credit Tiers available:
     - basic: 10 credits (R$ 29,90)
@@ -109,6 +117,40 @@ async def create_checkout_session(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid tier. Must be one of: {list(pricing_config.tiers.keys())}",
             )
+
+        # Additional security validation
+        tier_validation = validate_string(request.tier, input_type="general", max_length=20)
+        if not tier_validation.is_valid:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid tier format"
+            )
+
+        # Validate URLs if provided
+        if request.success_url:
+            url_validation = validate_string(request.success_url, input_type="general", max_length=500)
+            if not url_validation.is_valid:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid success URL format"
+                )
+
+        if request.cancel_url:
+            url_validation = validate_string(request.cancel_url, input_type="general", max_length=500)
+            if not url_validation.is_valid:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid cancel URL format"
+                )
+
+        # Validate metadata if provided
+        if request.metadata:
+            metadata_validation = validate_dict(request.metadata, max_items=20, max_value_length=200)
+            if not metadata_validation.is_valid:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid metadata: {'; '.join(metadata_validation.errors)}"
+                )
 
         # Get credits and plan type from pricing config
         credits = tier.credits

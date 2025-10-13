@@ -8,6 +8,7 @@ from app.api.router import api_router
 from app.core.config import settings
 from app.core.sentry import get_sentry_config, init_sentry
 from app.services.security import SecurityMiddleware
+from app.middleware.security import create_security_middleware
 
 # Initialize Sentry first (before other imports)
 init_sentry()
@@ -42,13 +43,24 @@ class OptionsMiddleware(BaseHTTPMiddleware):
 # Add OPTIONS middleware first
 app.add_middleware(OptionsMiddleware)
 
-# Add security middleware for LLM endpoints
-if settings.ENABLE_RATE_LIMITING:
-    logger.info("Security middleware enabled with rate limiting")
-    app.add_middleware(SecurityMiddleware, enable_rate_limiting=settings.ENABLE_RATE_LIMITING)
-else:
-    logger.info("Security middleware enabled without rate limiting")
-    app.add_middleware(SecurityMiddleware, enable_rate_limiting=False)
+# Add comprehensive security middleware
+logger.info("Configuring comprehensive security middleware")
+app = create_security_middleware(
+    app,
+    enable_rate_limiting=settings.ENABLE_RATE_LIMITING,
+    enable_input_validation=True,  # Always enable input validation
+    enable_security_headers=True,  # Always enable security headers
+    enable_request_logging=settings.ENABLE_SECURITY_LOGGING,
+    max_request_size=10 * 1024 * 1024,  # 10MB
+)
+
+logger.info(
+    f"Security middleware configured: "
+    f"rate_limiting={settings.ENABLE_RATE_LIMITING}, "
+    f"input_validation=True, "
+    f"security_headers=True, "
+    f"request_logging={settings.ENABLE_SECURITY_LOGGING}"
+)
 
 # Set up CORS - Expanded configuration
 app.add_middleware(

@@ -2,16 +2,9 @@ import logging
 import uuid
 from typing import Any
 
+from app.agent.manager import AgentManager
 from app.services.supabase.database import SupabaseDatabaseService
-
-# TODO: These will need to be created in a later phase
-# from app.agent import AgentManager
-# from app.prompt import prompt_factory
-# from app.schemas.json import json_schema_factory
-# from app.schemas.pydantic import StructuredJobModel
-
-# TODO: Create JobNotFoundError when exceptions module is ready
-# from .exceptions import JobNotFoundError
+from app.core.exceptions import ProviderError
 
 logger = logging.getLogger(__name__)
 
@@ -19,10 +12,12 @@ logger = logging.getLogger(__name__)
 class JobService:
     def __init__(self):
         # Use cv-match's Supabase pattern
-        pass
-
-        # TODO: Initialize these when AI Integration is complete
-        # self.json_agent_manager = AgentManager()
+        try:
+            self.agent_manager = AgentManager()
+            logger.info("JobService initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize JobService: {e}")
+            raise
 
     async def create_and_store_job(self, job_data: dict) -> list[str]:
         """
@@ -115,21 +110,70 @@ class JobService:
         Uses the AgentManager+JSONWrapper to ask the LLM to
         return the data in exact JSON schema we need.
         """
-        # TODO: Implement when AI Integration is complete
-        logger.info("Structured JSON extraction not yet implemented")
-        return {
-            "job_title": "Sample Job",
-            "company_profile": "Sample Company",
-            "location": "Remote",
-            "date_posted": "2024-01-01",
-            "employment_type": "Full-time",
-            "job_summary": job_description_text[:200] + "...",
-            "key_responsibilities": ["Responsibility 1", "Responsibility 2"],
-            "qualifications": ["Qualification 1", "Qualification 2"],
-            "compensation_and_benfits": ["Competitive salary", "Benefits"],
-            "application_info": ["Apply via email"],
-            "extracted_keywords": ["keyword1", "keyword2"],
-        }
+        try:
+            # Build structured extraction prompt for Brazilian market
+            prompt = f"""
+            Você é um especialista em análise de vagas de emprego para o mercado brasileiro.
+
+            Analise esta descrição de vaga e extraia as informações estruturadas em formato JSON válido:
+
+            DESCRIÇÃO DA VAGA:
+            {job_description_text}
+
+            Retorne um JSON com as seguintes chaves:
+            - job_title: Título da vaga (string)
+            - company_profile: Perfil da empresa (string, opcional)
+            - location: Localização (string, opcional)
+            - date_posted: Data da publicação (string, opcional, formato YYYY-MM-DD)
+            - employment_type: Tipo de emprego (string, opcional - ex: "Full-time", "Part-time", "Contract", "Remote")
+            - job_summary: Resumo da vaga (string)
+            - key_responsibilities: Lista de responsabilidades principais (array de strings)
+            - qualifications: Lista de qualificações exigidas (array de strings)
+            - compensation_and_benefits: Lista de informações sobre salário e benefícios (array de strings)
+            - application_info: Lista de informações sobre como se candidatar (array de strings)
+            - extracted_keywords: Lista de palavras-chave importantes para ATS (array de strings)
+
+            IMPORTANTE: Retorne apenas o JSON válido, sem texto adicional.
+            """
+
+            # Get AI response
+            response = await self.agent_manager.generate(
+                prompt,
+                max_tokens=2000,
+                temperature=0.3,  # Lower for consistent extraction
+            )
+
+            # Parse the response
+            import json
+
+            # Try to parse as JSON directly
+            try:
+                return json.loads(response)
+            except json.JSONDecodeError:
+                # Try to extract JSON from markdown code blocks
+                if "```json" in response:
+                    json_start = response.find("```json") + 7
+                    json_end = response.find("```", json_start)
+                    if json_end != -1:
+                        json_str = response[json_start:json_end].strip()
+                        return json.loads(json_str)
+                elif "```" in response:
+                    json_start = response.find("```") + 3
+                    json_end = response.find("```", json_start)
+                    if json_end != -1:
+                        json_str = response[json_start:json_end].strip()
+                        # Remove 'json' if present at start
+                        if json_str.startswith('json'):
+                            json_str = json_str[4:].strip()
+                        return json.loads(json_str)
+
+            logger.warning(f"Could not parse AI response as JSON: {response[:200]}...")
+            return None
+
+        except Exception as e:
+            logger.error(f"Error in structured job extraction: {e}")
+            # Don't return mock data on error - let the caller handle the failure
+            raise ProviderError(f"Failed to extract structured job data: {str(e)}") from e
 
     async def get_job_with_processed_data(self, job_id: str) -> dict | None:
         """

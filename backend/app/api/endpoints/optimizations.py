@@ -469,9 +469,21 @@ async def process_optimization(
         raw_resume = resume_data.get("raw_resume", {})
         resume_text = raw_resume.get("content", "")
 
-        # Get job description (simplified for now)
-        job_description = "Sample job description"
-        # TODO: Implement proper job description retrieval
+        # Get job description from database
+        job_service = ExtendedJobService()
+        job_data = await job_service.get_job_with_processed_data(optimization["job_description_id"])
+
+        if not job_data:
+            raise HTTPException(status_code=404, detail="Job description not found")
+
+        # Extract job description text
+        processed_job = job_data.get("processed_job", {})
+        if processed_job and processed_job.get("job_summary"):
+            job_description = processed_job["job_summary"]
+        else:
+            # Fallback to raw job content
+            raw_job = job_data.get("raw_job", {})
+            job_description = raw_job.get("content", "Job description not available")
 
         # Perform analysis using ScoreImprovementService
         analysis_result = await optimization_service.analyze_and_improve(

@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.api import pricing, subscriptions
-from app.api.endpoints import auth, llm, optimizations, payments, resumes, users, vectordb, webhooks
+from app.api.endpoints import auth, llm, optimizations, payments, resumes, users, vectordb, webhooks, transparency
 
 api_router = APIRouter()
 
@@ -16,3 +16,4 @@ api_router.include_router(payments.router, prefix="/payments", tags=["Payments"]
 api_router.include_router(webhooks.router, tags=["Webhooks"])
 api_router.include_router(pricing.router, prefix="/pricing", tags=["Pricing"])
 api_router.include_router(subscriptions.router, tags=["Subscriptions"])
+api_router.include_router(transparency.router, tags=["Transparency"])

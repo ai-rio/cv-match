@@ -3,6 +3,7 @@ Pydantic models for resume upload and management.
 """
 
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -19,8 +20,9 @@ class ResumeUploadResponse(BaseModel):
 
     id: str = Field(..., description="Resume ID")
     filename: str = Field(..., description="Original filename")
-    extracted_text: str | None = Field(None, description="Extracted text content from resume")
+    extracted_text: Optional[str] = Field(None, description="Extracted text content from resume")
     content_type: str = Field(..., description="Content type of the extracted text")
+    user_id: str = Field(..., description="User ID who owns this resume")
     created_at: datetime = Field(..., description="Upload timestamp")
 
 
@@ -29,10 +31,11 @@ class ResumeResponse(BaseModel):
 
     id: str = Field(..., description="Resume ID")
     filename: str = Field(..., description="Original filename")
-    extracted_text: str | None = Field(None, description="Extracted text content from resume")
+    extracted_text: Optional[str] = Field(None, description="Extracted text content from resume")
     content_type: str = Field(..., description="Content type of the extracted text")
+    user_id: str = Field(..., description="User ID who owns this resume")
     created_at: datetime = Field(..., description="Creation timestamp")
-    updated_at: datetime | None = Field(None, description="Last update timestamp")
+    updated_at: Optional[datetime] = Field(None, description="Last update timestamp")
 
 
 class ResumeListResponse(BaseModel):
@@ -42,3 +45,12 @@ class ResumeListResponse(BaseModel):
     total: int = Field(..., description="Total number of resumes")
     limit: int = Field(..., description="Number of resumes returned")
     offset: int = Field(..., description="Number of resumes skipped")
+
+
+class ResumeCreateRequest(BaseModel):
+    """Request model for creating a resume with user association."""
+
+    resume_id: str = Field(..., description="Unique resume ID")
+    content: str = Field(..., description="Resume content")
+    content_type: str = Field(..., description="Content type of the resume")
+    user_id: str = Field(..., description="User ID who owns this resume")
