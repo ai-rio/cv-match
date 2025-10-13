@@ -42,8 +42,8 @@ which make  # Build automation
 # Install security testing tools
 pip install bandit  # Python security linter
 pip install safety  # Dependency vulnerability scanner
-npm install -g audit-ci  # Node.js security auditor
-npm install -g retire  # Dependency scanner
+bun install -g audit-ci  # Node.js security auditor
+bun install -g retire  # Dependency scanner
 ```
 
 ### CV-Match Project Tools
@@ -79,14 +79,14 @@ bandit -r backend/app/ --severity-level high
 #### Frontend Security Scanner
 ```bash
 # Node.js security scanning
-npm install -g audit-ci
+bun install -g audit-ci
 
 # Usage:
 cd frontend
 audit-ci --moderate
 
 # Dependency vulnerability scan
-npm audit --audit-level high
+bun audit --audit-level high
 ```
 
 ### 2. Dynamic Application Security Testing (DAST)
@@ -264,7 +264,7 @@ grep -r -i "password\|secret\|key\|token" backend/app/ \
 #### Frontend Code Analysis
 ```bash
 # JavaScript/TypeScript security analysis
-npm install -g eslint-plugin-security
+bun install -g eslint-plugin-security
 
 # Create .eslintrc.js for security rules
 cat > .eslintrc.js << 'EOF'
@@ -315,14 +315,14 @@ pip-review --local --interactive
 ```bash
 # Audit Node.js dependencies
 cd frontend
-npm audit --json --audit-level high > npm-audit-report.json
+bun audit --json --audit-level high > npm-audit-report.json
 
 # Check for outdated packages
-npm outdated --json > npm-outdated-report.json
+bun outdated --json > npm-outdated-report.json
 
 # Update dependencies securely
-npm update
-npm audit fix
+bun update
+bun audit fix
 ```
 
 ### 3. Code Quality Analysis
@@ -905,14 +905,14 @@ cd ..
 # Setup Node.js environment
 echo "📦 Setting up Node.js environment..."
 cd frontend
-npm install
-npm install --save-dev eslint eslint-plugin-security audit-ci
+bun install
+bun install --save-dev eslint eslint-plugin-security audit-ci
 cd ..
 
 # Setup security scanning tools
 echo "🔍 Installing security tools..."
 pip install safety
-npm install -g audit-ci retire
+bun install -g audit-ci retire
 
 # Setup pre-commit hooks
 echo "🔗 Setting up pre-commit hooks..."
@@ -981,7 +981,7 @@ echo "🗄️ Setting up secure database..."
 # Check Supabase CLI
 if ! command -v supabase &> /dev/null; then
     echo "❌ Supabase CLI is required"
-    echo "Install with: npm install -g supabase"
+    echo "Install with: bun install -g supabase"
     exit 1
 fi
 
@@ -1147,7 +1147,7 @@ jobs:
     - name: Install Node.js dependencies
       run: |
         cd frontend
-        npm ci
+        bun ci
 
     - name: Run Bandit security scan
       run: |
@@ -1160,10 +1160,10 @@ jobs:
         cd backend
         safety check --json --output safety-report.json
 
-    - name: Run npm audit
+    - name: Run bun audit
       run: |
         cd frontend
-        npm audit --audit-level high
+        bun audit --audit-level high
 
     - name: Run ESLint security check
       run: |
@@ -1301,12 +1301,12 @@ cd ..
 cd frontend
 echo "📦 Frontend security analysis..."
 
-echo "  - Running npm audit..."
-npm audit --audit-level high --json > ../security-reports/npm-audit-report.json
+echo "  - Running bun audit..."
+bun audit --audit-level high --json > ../security-reports/npm-audit-report.json
 if [ $? -eq 0 ]; then
-    echo "  ✅ npm audit passed"
+    echo "  ✅ bun audit passed"
 else
-    echo "  ❌ npm audit found vulnerabilities"
+    echo "  ❌ bun audit found vulnerabilities"
 fi
 
 echo "  - Running ESLint security check..."
@@ -1359,7 +1359,7 @@ bandit -r backend/app/ --skip B101,B601
 # Problem: Security plugin not found
 # Solution: Install plugin locally
 cd frontend
-npm install eslint-plugin-security --save-dev
+bun install eslint-plugin-security --save-dev
 
 # Problem: TypeScript errors
 # Solution: Update parser configuration

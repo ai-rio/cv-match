@@ -63,17 +63,25 @@ package.json         # Global scripts and dependencies
 
 1. **⚛️ Frontend Tests**
    - Jest test suite with coverage
-   - TypeScript type checking
+   - TypeScript type checking with error classification
    - Production build validation
+   - Type safety score calculation
 
 2. **🐍 Backend Tests**
    - pytest with coverage reporting
-   - Python type checking
+   - Python type checking with error classification
    - API endpoint validation
+   - Type safety metrics tracking
 
 3. **🔐 Security Audit**
    - Frontend dependency vulnerability scanning
    - Warns about security issues
+
+4. **🔍 Type Quality Gates**
+   - Critical error validation (blocks push)
+   - High priority error thresholds
+   - Type safety score requirements
+   - Brazilian market type validation
 
 ## 📝 Commit Message Standards
 
@@ -130,28 +138,36 @@ fix(currency): handle BRL decimal formatting correctly
 docs(BRL-123): update Brazilian payment methods documentation
 ```
 
-## 🛠 Available NPM Scripts
+## 🛠 Available bun Scripts
 
 ### Setup Commands:
 ```bash
-npm run dev:setup          # Install all dependencies
-npm run install:frontend   # Install frontend deps with bun
-npm run install:backend    # Install backend deps with uv
-npm run hooks:install      # Install Git hooks
+bun run dev:setup          # Install all dependencies
+bun run install:frontend   # Install frontend deps with bun
+bun run install:backend    # Install backend deps with uv
+bun run hooks:install      # Install Git hooks
 ```
 
 ### Quality Assurance:
 ```bash
-npm run lint:all          # Lint frontend and backend
-npm run format:all        # Format all code
-npm run test:all          # Run all test suites
-npm run type-check:all    # Type check frontend and backend
-npm run quality:check     # Run complete quality check
+bun run lint:all          # Lint frontend and backend
+bun run format:all        # Format all code
+bun run test:all          # Run all test suites
+bun run type-check:all    # Type check frontend and backend
+bun run type-analysis     # Analyze type errors without fixing
+bun run type-fix:all      # Apply automated type fixes (all priorities)
+bun run type-fix:critical # Fix critical type errors manually
+bun run type-fix:high     # Apply high priority automated fixes
+bun run type-fix:medium   # Apply medium priority automated fixes
+bun run type-fix:low      # Apply low priority automated fixes
+bun run type-fix:dry-run  # Preview fixes without applying
+bun run type-safety:report# Generate comprehensive type safety report
+bun run quality:check     # Run complete quality check
 ```
 
 ### Build Commands:
 ```bash
-npm run build:frontend    # Build frontend for production
+bun run build:frontend    # Build frontend for production
 ```
 
 ## 🔄 Daily Workflow
@@ -161,8 +177,8 @@ npm run build:frontend    # Build frontend for production
 # Clone and setup
 git clone <repository-url>
 cd cv-match
-npm run dev:setup
-npm run hooks:install
+bun run dev:setup
+bun run hooks:install
 ```
 
 ### 2. Feature Development:
@@ -184,7 +200,7 @@ git commit -m "feat(payment): implement Brazilian PIX payment method"
 ### 3. Quality Assurance:
 ```bash
 # Run comprehensive checks before pushing
-npm run quality:check
+bun run quality:check
 
 # Push to remote (pre-push hooks will run full test suite)
 git push origin feat/brazilian-payment-flow
@@ -195,8 +211,8 @@ git push origin feat/brazilian-payment-flow
 ### Hook Execution Issues:
 ```bash
 # Reinstall hooks if they're not working
-npm run hooks:uninstall
-npm run hooks:install
+bun run hooks:uninstall
+bun run hooks:install
 
 # Check hook permissions
 ls -la .husky/
@@ -228,13 +244,65 @@ The workflow automatically tracks:
 - Security scan results
 - Build success rates
 
+## 🔍 Automated Type Checking System
+
+Our comprehensive type checking system is integrated throughout the CI/CD pipeline:
+
+### Type Error Classification
+- **🔴 Critical**: Build-blocking errors (TS2307, TS2304, undefined names)
+- **🟡 High**: Affects multiple files (TS2339, TS2345, type incompatibilities)
+- **🟢 Medium**: Local to component/function (TS18047, TS2322)
+- **⚪ Low**: Cosmetic/warnings (TS7006, TS6133, unused variables)
+
+### Quality Gates
+- Critical errors: 0 allowed (blocks merge)
+- High priority: Maximum 10 allowed
+- Medium priority: Maximum 25 allowed
+- Low priority: Maximum 50 allowed
+- Type safety score: Minimum 80% for production
+
+### Automated Workflows
+1. **Type Error Analysis**: Runs on every PR and push
+2. **Progressive Fixing**: Automated fixes for non-critical errors
+3. **Brazilian Market Validation**: PT-BR and BRL type checking
+4. **PR Metrics**: Type safety scores in PR descriptions
+
+### Manual Bulk Fixes
+```bash
+# Analyze current state
+bun run type-analysis
+
+# Apply automated fixes by priority
+bun run type-fix:critical  # Manual intervention required
+bun run type-fix:high      # Automated fixes applied
+bun run type-fix:medium    # Automated fixes applied
+bun run type-fix:low       # Automated fixes applied
+
+# Preview changes before applying
+bun run type-fix:dry-run
+
+# Generate comprehensive report
+bun run type-safety:report
+```
+
+### Integration with Git Flow
+- **Feature branches**: Type checking runs on every push
+- **Release branches**: Strict type gates (90%+ safety score required)
+- **Hotfix branches**: Critical errors only (rapid fixes prioritized)
+- **Main branch**: Full type validation with automated fixes
+
+---
+
 ## 🎯 Best Practices
 
 1. **Write Descriptive Commits**: Use conventional commit format with clear scope
-2. **Test Before Pushing**: Always run `npm run quality:check` locally
-3. **Small Focused Commits**: Keep commits atomic and related
-4. **Branch Naming**: Use `feat/`, `fix/`, `docs/` prefixes
-5. **Brazilian Context**: Include BRL/PT-BR context when relevant
+2. **Test Before Pushing**: Always run `bun run quality:check` locally
+3. **Monitor Type Safety**: Keep type safety score above 80%
+4. **Fix Progressively**: Address critical errors first, then automate remaining fixes
+5. **Small Focused Commits**: Keep commits atomic and related
+6. **Branch Naming**: Use `feat/`, `fix/`, `docs/` prefixes
+7. **Brazilian Context**: Include BRL/PT-BR context when relevant
+8. **Type Safety First**: Run `bun run type-analysis` before major changes
 
 ## 🔐 Security Considerations
 

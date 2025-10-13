@@ -225,7 +225,7 @@ body {
 ### Step 2: Install next-themes (10 min)
 
 ```bash
-npm install next-themes
+bun install next-themes
 ```
 
 ### Step 3: Update Root Layout (20 min)

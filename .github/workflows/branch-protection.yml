@@ -2,15 +2,15 @@ name: Branch Protection and CI/CD
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   release:
-    types: [ published ]
+    types: [published]
 
 env:
-  NODE_VERSION: '18'
-  PYTHON_VERSION: '3.11'
+  NODE_VERSION: "18"
+  PYTHON_VERSION: "3.11"
 
 jobs:
   # Branch Protection Checks
@@ -20,53 +20,53 @@ jobs:
     if: github.event_name == 'pull_request'
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Check branch name compliance
-      run: |
-        BRANCH_NAME="${{ github.head_ref }}"
-        echo "Checking branch: $BRANCH_NAME"
+      - name: Check branch name compliance
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          echo "Checking branch: $BRANCH_NAME"
 
-        # Check Git Flow naming conventions
-        if [[ "$BRANCH_NAME" =~ ^(feature|release|hotfix)/.+$ ]]; then
-          echo "✅ Branch name follows Git Flow conventions"
-        elif [[ "$BRANCH_NAME" == "main" || "$BRANCH_NAME" == "develop" ]]; then
-          echo "✅ Protected branch"
-        else
-          echo "❌ Invalid branch name. Use Git Flow naming: feature/, release/, hotfix/"
-          exit 1
-        fi
+          # Check Git Flow naming conventions
+          if [[ "$BRANCH_NAME" =~ ^(feature|release|hotfix)/.+$ ]]; then
+            echo "✅ Branch name follows Git Flow conventions"
+          elif [[ "$BRANCH_NAME" == "main" || "$BRANCH_NAME" == "develop" ]]; then
+            echo "✅ Protected branch"
+          else
+            echo "❌ Invalid branch name. Use Git Flow naming: feature/, release/, hotfix/"
+            exit 1
+          fi
 
-    - name: Validate base branch
-      run: |
-        BASE_BRANCH="${{ github.base_ref }}"
-        HEAD_BRANCH="${{ github.head_ref }}"
+      - name: Validate base branch
+        run: |
+          BASE_BRANCH="${{ github.base_ref }}"
+          HEAD_BRANCH="${{ github.head_ref }}"
 
-        # Validate Git Flow branch hierarchy
-        case "$HEAD_BRANCH" in
-          feature/*)
-            if [[ "$BASE_BRANCH" != "develop" ]]; then
-              echo "❌ Feature branches must target 'develop' branch"
-              exit 1
-            fi
-            ;;
-          release/*)
-            if [[ "$BASE_BRANCH" != "main" ]]; then
-              echo "❌ Release branches must target 'main' branch"
-              exit 1
-            fi
-            ;;
-          hotfix/*)
-            if [[ "$BASE_BRANCH" != "main" ]]; then
-              echo "❌ Hotfix branches must target 'main' branch"
-              exit 1
-            fi
-            ;;
-        esac
-        echo "✅ Base branch validation passed"
+          # Validate Git Flow branch hierarchy
+          case "$HEAD_BRANCH" in
+            feature/*)
+              if [[ "$BASE_BRANCH" != "develop" ]]; then
+                echo "❌ Feature branches must target 'develop' branch"
+                exit 1
+              fi
+              ;;
+            release/*)
+              if [[ "$BASE_BRANCH" != "main" ]]; then
+                echo "❌ Release branches must target 'main' branch"
+                exit 1
+              fi
+              ;;
+            hotfix/*)
+              if [[ "$BASE_BRANCH" != "main" ]]; then
+                echo "❌ Hotfix branches must target 'main' branch"
+                exit 1
+              fi
+              ;;
+          esac
+          echo "✅ Base branch validation passed"
 
   # Frontend Quality Checks
   frontend-quality:
@@ -74,33 +74,118 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Bun
-      uses: oven-sh/setup-bun@v1
-      with:
-        bun-version: latest
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
 
-    - name: Install dependencies
-      working-directory: ./frontend
-      run: bun install --frozen-lockfile
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: bun install --frozen-lockfile
 
-    - name: Type check
-      working-directory: ./frontend
-      run: bun run type-check
+      - name: Type Error Analysis
+        id: type-analysis
+        working-directory: ./frontend
+        run: |
+          echo "Running comprehensive type error analysis..."
 
-    - name: Lint
-      working-directory: ./frontend
-      run: bun run lint
+          # Run TypeScript build and capture errors
+          BUILD_OUTPUT=$(bun run build 2>&1)
+          ERROR_COUNT=$(echo "$BUILD_OUTPUT" | grep -c "error TS" || echo "0")
 
-    - name: Build
-      working-directory: ./frontend
-      run: bun run build
-      env:
-        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-        NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          echo "total-errors=$ERROR_COUNT" >> $GITHUB_OUTPUT
+
+          # Classify errors by priority
+          CRITICAL_COUNT=$(echo "$BUILD_OUTPUT" | grep -c "error TS2307\|error TS2304" || echo "0")
+          HIGH_COUNT=$(echo "$BUILD_OUTPUT" | grep -c "error TS2339\|error TS2345" || echo "0")
+          MEDIUM_COUNT=$(echo "$BUILD_OUTPUT" | grep -c "error TS18047\|error TS2322" || echo "0")
+          LOW_COUNT=$(echo "$BUILD_OUTPUT" | grep -c "error TS7006\|error TS6133" || echo "0")
+
+          echo "critical-errors=$CRITICAL_COUNT" >> $GITHUB_OUTPUT
+          echo "high-errors=$HIGH_COUNT" >> $GITHUB_OUTPUT
+          echo "medium-errors=$MEDIUM_COUNT" >> $GITHUB_OUTPUT
+          echo "low-errors=$LOW_COUNT" >> $GITHUB_OUTPUT
+
+          # Generate type safety report
+          TYPE_SAFETY_SCORE=$(echo "100 - ($ERROR_COUNT * 2)" | bc -l | cut -d. -f1)
+          if [ "$TYPE_SAFETY_SCORE" -lt 0 ]; then
+            TYPE_SAFETY_SCORE=0
+          fi
+          echo "type-safety-score=$TYPE_SAFETY_SCORE" >> $GITHUB_OUTPUT
+
+          # Create detailed error report
+          cat > type-report.md << EOF
+          ## Frontend Type Safety Report
+
+          ### Error Summary
+          - 🔴 Critical: $CRITICAL_COUNT (Build-blocking)
+          - 🟡 High: $HIGH_COUNT (Affects multiple files)
+          - 🟢 Medium: $MEDIUM_COUNT (Local to component)
+          - ⚪ Low: $LOW_COUNT (Cosmetic/warnings)
+          - **Total:** $ERROR_COUNT
+
+          ### Type Safety Score: $TYPE_SAFETY_SCORE%
+
+          ### Quality Gates
+          - Critical Errors: $([ "$CRITICAL_COUNT" -eq 0 ] && echo "✅ PASS" || echo "❌ FAIL")
+          - High Priority: $([ "$HIGH_COUNT" -le 5 ] && echo "✅ PASS" || echo "⚠️ WARNING")
+          - Medium Priority: $([ "$MEDIUM_COUNT" -le 15 ] && echo "✅ PASS" || echo "⚠️ WARNING")
+          - Low Priority: $([ "$LOW_COUNT" -le 25 ] && echo "✅ PASS" || echo "⚠️ WARNING")
+
+          EOF
+
+          echo "## Frontend Type Analysis Results" >> $GITHUB_STEP_SUMMARY
+          echo "- **Critical Errors:** $CRITICAL_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **High Priority:** $HIGH_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Medium Priority:** $MEDIUM_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Low Priority:** $LOW_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Errors:** $ERROR_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Type Safety Score:** $TYPE_SAFETY_SCORE%" >> $GITHUB_STEP_SUMMARY
+
+          # Check if build should fail
+          if [ "$CRITICAL_COUNT" -gt 0 ] || [ "$ERROR_COUNT" -gt 50 ]; then
+            echo "should-fail=true" >> $GITHUB_OUTPUT
+            echo "❌ Type quality gates failed - build will be blocked"
+          else
+            echo "should-fail=false" >> $GITHUB_OUTPUT
+            echo "✅ Type quality gates passed"
+          fi
+
+      - name: Type check with enhanced reporting
+        working-directory: ./frontend
+        run: bun run type-check
+
+      - name: Lint
+        working-directory: ./frontend
+        run: bun run lint
+
+      - name: Build
+        working-directory: ./frontend
+        run: bun run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+
+      - name: Upload type analysis report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: frontend-type-report
+          path: frontend/type-report.md
+          retention-days: 30
+
+      - name: Fail on type quality gate violations
+        if: steps.type-analysis.outputs.should-fail == 'true'
+        run: |
+          echo "❌ Frontend type quality gates failed"
+          echo "Critical errors: ${{ steps.type-analysis.outputs.critical-errors }}"
+          echo "Total errors: ${{ steps.type-analysis.outputs.total-errors }}"
+          echo "Type safety score: ${{ steps.type-analysis.outputs.type-safety-score }}%"
+          exit 1
 
   # Backend Quality Checks
   backend-quality:
@@ -108,43 +193,140 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Setup UV
-      uses: astral-sh/setup-uv@v2
-      with:
-        version: "latest"
+      - name: Setup UV
+        uses: astral-sh/setup-uv@v2
+        with:
+          version: "latest"
 
-    - name: Install dependencies
-      working-directory: ./backend
-      run: uv sync --frozen
+      - name: Install dependencies
+        working-directory: ./backend
+        run: uv sync --frozen
 
-    - name: Type check
-      working-directory: ./backend
-      run: uv run mypy .
+      - name: Python Type Error Analysis
+        id: backend-type-analysis
+        working-directory: ./backend
+        run: |
+          echo "Running comprehensive Python type error analysis..."
 
-    - name: Lint
-      working-directory: ./backend
-      run: uv run ruff check .
+          # Run mypy and capture errors
+          MYPY_OUTPUT=$(uv run mypy app/ 2>&1)
+          ERROR_COUNT=$(echo "$MYPY_OUTPUT" | grep -c "error:" || echo "0")
 
-    - name: Format check
-      working-directory: ./backend
-      run: uv run ruff format --check .
+          echo "total-errors=$ERROR_COUNT" >> $GITHUB_OUTPUT
 
-    - name: Run tests
-      working-directory: ./backend
-      run: uv run pytest
-      env:
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Classify Python errors by priority
+          CRITICAL_COUNT=$(echo "$MYPY_OUTPUT" | grep -c "error: Name.*not defined\|error: Module.*has no attribute" || echo "0")
+          HIGH_COUNT=$(echo "$MYPY_OUTPUT" | grep -c "error: Incompatible types\|error: Argument.*has incompatible type" || echo "0")
+          MEDIUM_COUNT=$(echo "$MYPY_OUTPUT" | grep -c "error: Item.*of.*has no attribute\|error: Returning Any" || echo "0")
+          LOW_COUNT=$(echo "$MYPY_OUTPUT" | grep -c "error: unused.*type: ignore\|warning:" || echo "0")
+
+          echo "critical-errors=$CRITICAL_COUNT" >> $GITHUB_OUTPUT
+          echo "high-errors=$HIGH_COUNT" >> $GITHUB_OUTPUT
+          echo "medium-errors=$MEDIUM_COUNT" >> $GITHUB_OUTPUT
+          echo "low-errors=$LOW_COUNT" >> $GITHUB_OUTPUT
+
+          # Generate type safety report
+          TYPE_SAFETY_SCORE=$(echo "100 - ($ERROR_COUNT * 2)" | bc -l | cut -d. -f1)
+          if [ "$TYPE_SAFETY_SCORE" -lt 0 ]; then
+            TYPE_SAFETY_SCORE=0
+          fi
+          echo "type-safety-score=$TYPE_SAFETY_SCORE" >> $GITHUB_OUTPUT
+
+          # Create detailed error report
+          cat > backend-type-report.md << EOF
+          ## Backend Type Safety Report
+
+          ### Error Summary
+          - 🔴 Critical: $CRITICAL_COUNT (Build-blocking)
+          - 🟡 High: $HIGH_COUNT (Affects multiple modules)
+          - 🟢 Medium: $MEDIUM_COUNT (Local to function/class)
+          - ⚪ Low: $LOW_COUNT (Warnings/cosmetic)
+          - **Total:** $ERROR_COUNT
+
+          ### Type Safety Score: $TYPE_SAFETY_SCORE%
+
+          ### Quality Gates
+          - Critical Errors: $([ "$CRITICAL_COUNT" -eq 0 ] && echo "✅ PASS" || echo "❌ FAIL")
+          - High Priority: $([ "$HIGH_COUNT" -le 5 ] && echo "✅ PASS" || echo "⚠️ WARNING")
+          - Medium Priority: $([ "$MEDIUM_COUNT" -le 15 ] && echo "✅ PASS" || echo "⚠️ WARNING")
+          - Low Priority: $([ "$LOW_COUNT" -le 25 ] && echo "✅ PASS" || echo "⚠️ WARNING")
+
+          ### Common Python Type Issues Found
+          EOF
+
+          # Add common issues found
+          if echo "$MYPY_OUTPUT" | grep -q "error: Name.*not defined"; then
+            echo "- Undefined names found" >> backend-type-report.md
+          fi
+          if echo "$MYPY_OUTPUT" | grep -q "error: Incompatible types"; then
+            echo "- Type incompatibilities found" >> backend-type-report.md
+          fi
+          if echo "$MYPY_OUTPUT" | grep -q "error: Returning Any"; then
+            echo "- Functions returning Any type" >> backend-type-report.md
+          fi
+
+          echo "## Backend Type Analysis Results" >> $GITHUB_STEP_SUMMARY
+          echo "- **Critical Errors:** $CRITICAL_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **High Priority:** $HIGH_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Medium Priority:** $MEDIUM_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Low Priority:** $LOW_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Total Errors:** $ERROR_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Type Safety Score:** $TYPE_SAFETY_SCORE%" >> $GITHUB_STEP_SUMMARY
+
+          # Check if build should fail
+          if [ "$CRITICAL_COUNT" -gt 0 ] || [ "$ERROR_COUNT" -gt 50 ]; then
+            echo "should-fail=true" >> $GITHUB_OUTPUT
+            echo "❌ Backend type quality gates failed - build will be blocked"
+          else
+            echo "should-fail=false" >> $GITHUB_OUTPUT
+            echo "✅ Backend type quality gates passed"
+          fi
+
+      - name: Type check with enhanced reporting
+        working-directory: ./backend
+        run: uv run mypy .
+
+      - name: Lint
+        working-directory: ./backend
+        run: uv run ruff check .
+
+      - name: Format check
+        working-directory: ./backend
+        run: uv run ruff format --check .
+
+      - name: Run tests
+        working-directory: ./backend
+        run: uv run pytest
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Upload backend type analysis report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: backend-type-report
+          path: backend/backend-type-report.md
+          retention-days: 30
+
+      - name: Fail on backend type quality gate violations
+        if: steps.backend-type-analysis.outputs.should-fail == 'true'
+        run: |
+          echo "❌ Backend type quality gates failed"
+          echo "Critical errors: ${{ steps.backend-type-analysis.outputs.critical-errors }}"
+          echo "Total errors: ${{ steps.backend-type-analysis.outputs.total-errors }}"
+          echo "Type safety score: ${{ steps.backend-type-analysis.outputs.type-safety-score }}%"
+          exit 1
 
   # Security Scans
   security-scan:
@@ -152,34 +334,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
 
-    - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v2
-      if: always()
-      with:
-        sarif_file: 'trivy-results.sarif'
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: "trivy-results.sarif"
 
-    - name: Frontend dependency audit
-      working-directory: ./frontend
-      run: |
-        bun install
-        bun audit
+      - name: Frontend dependency audit
+        working-directory: ./frontend
+        run: |
+          bun install
+          bun audit
 
-    - name: Backend dependency audit
-      working-directory: ./backend
-      run: |
-        uv sync
-        uv pip list | uv pip-audit
+      - name: Backend dependency audit
+        working-directory: ./backend
+        run: |
+          uv sync
+          uv pip list | uv pip-audit
 
   # Database Migration Check
   database-migration:
@@ -187,68 +369,69 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Supabase CLI
-      uses: supabase/setup-cli@v1
-      with:
-        version: latest
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
-    - name: Check migration files
-      run: |
-        if [ -d "supabase/migrations" ]; then
-          echo "✅ Migration directory found"
-          ls -la supabase/migrations/
-        else
-          echo "❌ No migration directory found"
-          exit 1
-        fi
-
-    - name: Validate migration syntax
-      run: |
-        for file in supabase/migrations/*.sql; do
-          if [ -f "$file" ]; then
-            echo "Validating $file..."
-            # Basic SQL syntax validation
-            if ! psql --help > /dev/null 2>&1; then
-              echo "Installing PostgreSQL client..."
-              sudo apt-get update && sudo apt-get install -y postgresql-client
-            fi
-            # Basic validation - check for common SQL patterns
-            if grep -q "DROP TABLE\|DELETE FROM\|TRUNCATE" "$file"; then
-              echo "⚠️ Warning: Potentially destructive operations found in $file"
-            fi
+      - name: Check migration files
+        run: |
+          if [ -d "supabase/migrations" ]; then
+            echo "✅ Migration directory found"
+            ls -la supabase/migrations/
+          else
+            echo "❌ No migration directory found"
+            exit 1
           fi
-        done
+
+      - name: Validate migration syntax
+        run: |
+          for file in supabase/migrations/*.sql; do
+            if [ -f "$file" ]; then
+              echo "Validating $file..."
+              # Basic SQL syntax validation
+              if ! psql --help > /dev/null 2>&1; then
+                echo "Installing PostgreSQL client..."
+                sudo apt-get update && sudo apt-get install -y postgresql-client
+              fi
+              # Basic validation - check for common SQL patterns
+              if grep -q "DROP TABLE\|DELETE FROM\|TRUNCATE" "$file"; then
+                echo "⚠️ Warning: Potentially destructive operations found in $file"
+              fi
+            fi
+          done
 
   # Semantic Release
   semantic-release:
     name: Semantic Release
     runs-on: ubuntu-latest
-    needs: [frontend-quality, backend-quality, security-scan, database-migration]
+    needs:
+      [frontend-quality, backend-quality, security-scan, database-migration]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
 
-    - name: Install semantic-release
-      run: npm install -g semantic-release @semantic-release/git @semantic-release/changelog @semantic-release/github
+      - name: Install semantic-release
+        run: bun install -g semantic-release @semantic-release/git @semantic-release/changelog @semantic-release/github
 
-    - name: Run semantic-release
-      run: semantic-release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run semantic-release
+        run: semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Brazilian Market Specific Checks
   brazilian-market-compliance:
@@ -256,51 +439,51 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Check Brazilian Portuguese localization
-      run: |
-        echo "Checking Brazilian Portuguese (pt-br) localization..."
+      - name: Check Brazilian Portuguese localization
+        run: |
+          echo "Checking Brazilian Portuguese (pt-br) localization..."
 
-        # Check for next-intl configuration
-        if [ -f "frontend/next.config.js" ]; then
-          if grep -q "pt-br" frontend/next.config.js; then
-            echo "✅ Brazilian Portuguese configuration found"
-          else
-            echo "⚠️ Brazilian Portuguese configuration not found in next.config.js"
+          # Check for next-intl configuration
+          if [ -f "frontend/next.config.js" ]; then
+            if grep -q "pt-br" frontend/next.config.js; then
+              echo "✅ Brazilian Portuguese configuration found"
+            else
+              echo "⚠️ Brazilian Portuguese configuration not found in next.config.js"
+            fi
           fi
-        fi
 
-        # Check for locale files
-        if [ -d "frontend/messages" ]; then
-          if [ -f "frontend/messages/pt-br.json" ]; then
-            echo "✅ Brazilian Portuguese translation file found"
-          else
-            echo "⚠️ Brazilian Portuguese translation file not found"
+          # Check for locale files
+          if [ -d "frontend/messages" ]; then
+            if [ -f "frontend/messages/pt-br.json" ]; then
+              echo "✅ Brazilian Portuguese translation file found"
+            else
+              echo "⚠️ Brazilian Portuguese translation file not found"
+            fi
           fi
-        fi
 
-    - name: Check BRL payment configuration
-      run: |
-        echo "Checking BRL payment integration..."
+      - name: Check BRL payment configuration
+        run: |
+          echo "Checking BRL payment integration..."
 
-        # Check for Stripe configuration
-        if grep -r "BRL\|brazilian\|real" frontend/ backend/ --include="*.ts" --include="*.js" --include="*.py"; then
-          echo "✅ BRL payment references found"
-        else
-          echo "⚠️ Limited BRL payment configuration found"
-        fi
+          # Check for Stripe configuration
+          if grep -r "BRL\|brazilian\|real" frontend/ backend/ --include="*.ts" --include="*.js" --include="*.py"; then
+            echo "✅ BRL payment references found"
+          else
+            echo "⚠️ Limited BRL payment configuration found"
+          fi
 
-    - name: Check LGPD compliance references
-      run: |
-        echo "Checking LGPD (Brazilian GDPR) compliance..."
+      - name: Check LGPD compliance references
+        run: |
+          echo "Checking LGPD (Brazilian GDPR) compliance..."
 
-        if grep -r "LGPD\|privacy\|brazilian.*law" docs/ --include="*.md"; then
-          echo "✅ LGPD compliance documentation found"
-        else
-          echo "⚠️ Consider adding LGPD compliance documentation"
-        fi
+          if grep -r "LGPD\|privacy\|brazilian.*law" docs/ --include="*.md"; then
+            echo "✅ LGPD compliance documentation found"
+          else
+            echo "⚠️ Consider adding LGPD compliance documentation"
+          fi
 
   # Deployment Notification
   deployment-notification:
@@ -310,8 +493,8 @@ jobs:
     if: success()
 
     steps:
-    - name: Notify deployment success
-      run: |
-        echo "🚀 CV-Match deployment completed successfully!"
-        echo "📍 Brazilian SaaS platform is ready for production"
-        echo "📊 Semantic release version created"
+      - name: Notify deployment success
+        run: |
+          echo "🚀 CV-Match deployment completed successfully!"
+          echo "📍 Brazilian SaaS platform is ready for production"
+          echo "📊 Semantic release version created"

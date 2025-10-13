@@ -60,8 +60,8 @@ git checkout main && git pull
 git checkout -b feature/design-system-implementation
 
 # Verify dependencies
-npm install
-npm run dev  # Should work without errors
+bun install
+bun run dev  # Should work without errors
 ```
 
 ### Step 2: Read Documentation (10 minutes)

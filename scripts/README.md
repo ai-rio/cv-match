@@ -111,7 +111,7 @@ bun run build
 
 Common issues:
 - Missing dependencies: Run `bun install`
-- TypeScript errors: Check `npm run type-check`
+- TypeScript errors: Check `bun run type-check`
 - Missing environment variables: Check `.env.local`
 
 ---

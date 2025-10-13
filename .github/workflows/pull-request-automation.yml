@@ -90,6 +90,108 @@ jobs:
 
         echo "pr_type=$PR_TYPE" >> $GITHUB_OUTPUT
 
+    - name: Run Type Error Analysis for PR
+      id: pr-type-analysis
+      run: |
+        echo "Running type error analysis for PR..."
+
+        # Setup Bun and Python
+        curl -fsSL https://bun.sh/install | bash
+        export BUN_INSTALL="$HOME/.bun"
+        export PATH="$BUN_INSTALL/bin:$PATH"
+
+        # Install dependencies
+        cd frontend && bun install --frozen-lockfile
+        cd ../backend && pip install mypy
+
+        # Analyze frontend TypeScript errors
+        cd frontend
+        FRONTEND_BUILD_OUTPUT=$(bun run build 2>&1)
+        FRONTEND_ERROR_COUNT=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS" || echo "0")
+
+        FRONTEND_CRITICAL=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS2307\|error TS2304" || echo "0")
+        FRONTEND_HIGH=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS2339\|error TS2345" || echo "0")
+        FRONTEND_MEDIUM=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS18047\|error TS2322" || echo "0")
+        FRONTEND_LOW=$(echo "$FRONTEND_BUILD_OUTPUT" | grep -c "error TS7006\|error TS6133" || echo "0")
+
+        FRONTEND_TYPE_SCORE=$(echo "100 - ($FRONTEND_ERROR_COUNT * 2)" | bc -l | cut -d. -f1)
+        if [ "$FRONTEND_TYPE_SCORE" -lt 0 ]; then
+          FRONTEND_TYPE_SCORE=0
+        fi
+
+        # Analyze backend Python type errors
+        cd ../backend
+        BACKEND_MYPY_OUTPUT=$(python -m mypy app/ 2>&1)
+        BACKEND_ERROR_COUNT=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "error:" || echo "0")
+
+        BACKEND_CRITICAL=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "error: Name.*not defined\|error: Module.*has no attribute" || echo "0")
+        BACKEND_HIGH=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "error: Incompatible types\|error: Argument.*has incompatible type" || echo "0")
+        BACKEND_MEDIUM=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "error: Item.*of.*has no attribute\|error: Returning Any" || echo "0")
+        BACKEND_LOW=$(echo "$BACKEND_MYPY_OUTPUT" | grep -c "warning:" || echo "0")
+
+        BACKEND_TYPE_SCORE=$(echo "100 - ($BACKEND_ERROR_COUNT * 2)" | bc -l | cut -d. -f1)
+        if [ "$BACKEND_TYPE_SCORE" -lt 0 ]; then
+          BACKEND_TYPE_SCORE=0
+        fi
+
+        # Calculate totals
+        TOTAL_CRITICAL=$((FRONTEND_CRITICAL + BACKEND_CRITICAL))
+        TOTAL_HIGH=$((FRONTEND_HIGH + BACKEND_HIGH))
+        TOTAL_MEDIUM=$((FRONTEND_MEDIUM + BACKEND_MEDIUM))
+        TOTAL_LOW=$((FRONTEND_LOW + BACKEND_LOW))
+        TOTAL_ERRORS=$((FRONTEND_ERROR_COUNT + BACKEND_ERROR_COUNT))
+
+        # Calculate overall type safety score
+        OVERALL_TYPE_SCORE=$(( (FRONTEND_TYPE_SCORE + BACKEND_TYPE_SCORE) / 2 ))
+
+        # Determine status
+        TYPE_CRITICAL_STATUS="✅ PASS"
+        TYPE_HIGH_STATUS="✅ PASS"
+        TYPE_MEDIUM_STATUS="✅ PASS"
+        TYPE_LOW_STATUS="✅ PASS"
+        TYPE_OVERALL_STATUS="✅ PASS"
+
+        if [ "$TOTAL_CRITICAL" -gt 0 ]; then
+          TYPE_CRITICAL_STATUS="❌ FAIL"
+          TYPE_OVERALL_STATUS="❌ BLOCKED"
+        elif [ "$TOTAL_HIGH" -gt 10 ]; then
+          TYPE_HIGH_STATUS="⚠️ WARNING"
+          TYPE_OVERALL_STATUS="⚠️ WARNING"
+        elif [ "$TOTAL_MEDIUM" -gt 25 ]; then
+          TYPE_MEDIUM_STATUS="⚠️ WARNING"
+        elif [ "$TOTAL_LOW" -gt 50 ]; then
+          TYPE_LOW_STATUS="⚠️ WARNING"
+        fi
+
+        # Set outputs for PR template
+        echo "TYPE_CRITICAL_ERRORS=$TOTAL_CRITICAL" >> $GITHUB_ENV
+        echo "TYPE_HIGH_ERRORS=$TOTAL_HIGH" >> $GITHUB_ENV
+        echo "TYPE_MEDIUM_ERRORS=$TOTAL_MEDIUM" >> $GITHUB_ENV
+        echo "TYPE_LOW_ERRORS=$TOTAL_LOW" >> $GITHUB_ENV
+        echo "TYPE_TOTAL_ERRORS=$TOTAL_ERRORS" >> $GITHUB_ENV
+        echo "TYPE_CRITICAL_STATUS=$TYPE_CRITICAL_STATUS" >> $GITHUB_ENV
+        echo "TYPE_HIGH_STATUS=$TYPE_HIGH_STATUS" >> $GITHUB_ENV
+        echo "TYPE_MEDIUM_STATUS=$TYPE_MEDIUM_STATUS" >> $GITHUB_ENV
+        echo "TYPE_LOW_STATUS=$TYPE_LOW_STATUS" >> $GITHUB_ENV
+        echo "TYPE_OVERALL_STATUS=$TYPE_OVERALL_STATUS" >> $GITHUB_ENV
+        echo "TYPE_SAFETY_SCORE=$OVERALL_TYPE_SCORE" >> $GITHUB_ENV
+
+        # Set step outputs
+        echo "critical-errors=$TOTAL_CRITICAL" >> $GITHUB_OUTPUT
+        echo "high-errors=$TOTAL_HIGH" >> $GITHUB_OUTPUT
+        echo "medium-errors=$TOTAL_MEDIUM" >> $GITHUB_OUTPUT
+        echo "low-errors=$TOTAL_LOW" >> $GITHUB_OUTPUT
+        echo "total-errors=$TOTAL_ERRORS" >> $GITHUB_OUTPUT
+        echo "type-safety-score=$OVERALL_TYPE_SCORE" >> $GITHUB_OUTPUT
+
+        echo "Type analysis completed:"
+        echo "- Critical: $TOTAL_CRITICAL"
+        echo "- High: $TOTAL_HIGH"
+        echo "- Medium: $TOTAL_MEDIUM"
+        echo "- Low: $TOTAL_LOW"
+        echo "- Total: $TOTAL_ERRORS"
+        echo "- Type Safety Score: $OVERALL_TYPE_SCORE%"
+
     - name: Generate PR description
       id: pr-description
       run: |
@@ -116,7 +218,17 @@ jobs:
           DESCRIPTION+="- 🗄️ Database schema changes\n"
         fi
 
-        DESCRIPTION+="\n## Type of Change\n\n"
+        DESCRIPTION+="\n## 📋 Type Safety Metrics\n\n"
+        DESCRIPTION+="| Priority | Errors | Status |\n"
+        DESCRIPTION+="|----------|--------|--------|\n"
+        DESCRIPTION+="| 🔴 Critical | ${{ env.TYPE_CRITICAL_ERRORS }} | ${{ env.TYPE_CRITICAL_STATUS }} |\n"
+        DESCRIPTION+="| 🟡 High | ${{ env.TYPE_HIGH_ERRORS }} | ${{ env.TYPE_HIGH_STATUS }} |\n"
+        DESCRIPTION+="| 🟢 Medium | ${{ env.TYPE_MEDIUM_ERRORS }} | ${{ env.TYPE_MEDIUM_STATUS }} |\n"
+        DESCRIPTION+="| ⚪ Low | ${{ env.TYPE_LOW_ERRORS }} | ${{ env.TYPE_LOW_STATUS }} |\n"
+        DESCRIPTION+="| **Total** | **${{ env.TYPE_TOTAL_ERRORS }}** | **${{ env.TYPE_OVERALL_STATUS }}** |\n\n"
+        DESCRIPTION+="*Type Safety Score: ${{ env.TYPE_SAFETY_SCORE }}%*\n\n"
+
+        DESCRIPTION+="## Type of Change\n\n"
         case "$PR_TYPE" in
           feature)
             DESCRIPTION+="- [x] Feature\n"
@@ -137,13 +249,31 @@ jobs:
         DESCRIPTION+="- [ ] Automated tests passing\n"
         if [[ "$FRONTEND" == "true" ]]; then
           DESCRIPTION+="- [ ] Frontend components tested\n"
+          DESCRIPTION+="- [ ] Frontend type errors resolved\n"
         fi
         if [[ "$BACKEND" == "true" ]]; then
           DESCRIPTION+="- [ ] API endpoints tested\n"
+          DESCRIPTION+="- [ ] Backend type errors resolved\n"
         fi
         if [[ "$DB" == "true" ]]; then
           DESCRIPTION+="- [ ] Database migrations tested\n"
         fi
+
+        DESCRIPTION+="\n## 📝 Type Safety Checklist\n\n"
+        DESCRIPTION+="### Frontend (TypeScript)\n"
+        DESCRIPTION+="- [ ] No critical type errors (TS2307, TS2304)\n"
+        DESCRIPTION+="- [ ] High priority errors under threshold (TS2339, TS2345)\n"
+        DESCRIPTION+="- [ ] Component props properly typed\n"
+        DESCRIPTION+="- [ ] API response types defined\n"
+        DESCRIPTION+="\n### Backend (Python)\n"
+        DESCRIPTION+="- [ ] No critical type errors\n"
+        DESCRIPTION+="- [ ] Function signatures typed\n"
+        DESCRIPTION+="- [ ] Return types specified\n"
+        DESCRIPTION+="- [ ] Database models typed\n"
+        DESCRIPTION+="\n### Brazilian Market Types\n"
+        DESCRIPTION+="- [ ] BRL currency types defined\n"
+        DESCRIPTION+="- [ ] PT-BR translation types\n"
+        DESCRIPTION+="- [ ] Brazilian payment method types\n\n"
 
         DESCRIPTION+="\n## Brazilian Market Considerations\n\n"
         DESCRIPTION+="- [ ] Portuguese (pt-br) localization verified\n"
@@ -151,7 +281,8 @@ jobs:
         DESCRIPTION+="- [ ] LGPD compliance checked\n"
 
         DESCRIPTION+="\n---\n\n"
-        DESCRIPTION+="🤖 Generated with Claude Code for CV-Match Brazilian SaaS"
+        DESCRIPTION+="🤖 Generated with Claude Code for CV-Match Brazilian SaaS\n"
+        DESCRIPTION+="*Type safety metrics automatically calculated and validated*"
 
         # Save description to file
         echo "$DESCRIPTION" > pr-description.md

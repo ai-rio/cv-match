@@ -131,7 +131,7 @@ export const config = {
 
 **Test it:**
 1. Save the file
-2. Restart your dev server: `npm run dev`
+2. Restart your dev server: `bun run dev`
 3. Try to access `http://localhost:3000/pt-br/optimize` while logged out
 4. You should be redirected to signup ✅
 

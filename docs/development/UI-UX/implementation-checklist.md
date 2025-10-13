@@ -679,7 +679,7 @@ Use a library like **react-joyride** or **driver.js** for product tours.
 **Example:**
 
 ```bash
-npm install react-joyride
+bun install react-joyride
 ```
 
 ```typescript
@@ -850,7 +850,7 @@ class EmailService:
 **Recommended:** PostHog (open-source, self-hostable)
 
 ```bash
-npm install posthog-js
+bun install posthog-js
 ```
 
 ```typescript

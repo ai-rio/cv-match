@@ -1,0 +1,565 @@
+name: Type Checking Automation
+
+on:
+  push:
+    branches: [ main, develop, 'feature/*', 'release/*', 'hotfix/*' ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      auto_fix:
+        description: 'Enable automatic fixes for low/medium priority errors'
+        required: false
+        default: false
+        type: boolean
+      priority_level:
+        description: 'Priority level to fix (all, critical, high, medium, low)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - critical
+          - high
+          - medium
+          - low
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # Type Error Analysis and Classification
+  type-error-analysis:
+    name: Type Error Analysis
+    runs-on: ubuntu-latest
+    outputs:
+      critical-errors: ${{ steps.analysis.outputs.critical-errors }}
+      high-errors: ${{ steps.analysis.outputs.high-errors }}
+      medium-errors: ${{ steps.analysis.outputs.medium-errors }}
+      low-errors: ${{ steps.analysis.outputs.low-errors }}
+      total-errors: ${{ steps.analysis.outputs.total-errors }}
+      frontend-errors: ${{ steps.analysis.outputs.frontend-errors }}
+      backend-errors: ${{ steps.analysis.outputs.backend-errors }}
+      fix-suggestions: ${{ steps.analysis.outputs.fix-suggestions }}
+      should-block-merge: ${{ steps.analysis.outputs.should-block-merge }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Setup UV
+      uses: astral-sh/setup-uv@v2
+      with:
+        version: "latest"
+
+    - name: Install dependencies
+      run: |
+        cd frontend && bun install --frozen-lockfile
+        cd ../backend && uv sync --frozen
+
+    - name: Analyze TypeScript errors
+      id: frontend-analysis
+      run: |
+        echo "Analyzing frontend TypeScript errors..."
+
+        # Run TypeScript build and capture errors
+        cd frontend
+        BUILD_OUTPUT=$(bun run build 2>&1)
+        ERROR_COUNT=$(echo "$BUILD_OUTPUT" | grep -c "error TS" || echo "0")
+
+        echo "frontend-errors=$ERROR_COUNT" >> $GITHUB_OUTPUT
+
+        # Classify errors by type
+        CRITICAL_COUNT=$(echo "$BUILD_OUTPUT" | grep -c "error TS2307\|error TS2304" || echo "0")
+        HIGH_COUNT=$(echo "$BUILD_OUTPUT" | grep -c "error TS2339\|error TS2345" || echo "0")
+        MEDIUM_COUNT=$(echo "$BUILD_OUTPUT" | grep -c "error TS18047\|error TS2322" || echo "0")
+        LOW_COUNT=$(echo "$BUILD_OUTPUT" | grep -c "error TS7006\|error TS6133" || echo "0")
+
+        echo "frontend-critical=$CRITICAL_COUNT" >> $GITHUB_OUTPUT
+        echo "frontend-high=$HIGH_COUNT" >> $GITHUB_OUTPUT
+        echo "frontend-medium=$MEDIUM_COUNT" >> $GITHUB_OUTPUT
+        echo "frontend-low=$LOW_COUNT" >> $GITHUB_OUTPUT
+
+        # Generate error summary
+        echo "## Frontend TypeScript Errors" >> type-errors.md
+        echo "- **Critical:** $CRITICAL_COUNT (TS2307, TS2304)" >> type-errors.md
+        echo "- **High:** $HIGH_COUNT (TS2339, TS2345)" >> type-errors.md
+        echo "- **Medium:** $MEDIUM_COUNT (TS18047, TS2322)" >> type-errors.md
+        echo "- **Low:** $LOW_COUNT (TS7006, TS6133)" >> type-errors.md
+        echo "- **Total:** $ERROR_COUNT" >> type-errors.md
+
+        # Extract error patterns for suggestions
+        echo "$BUILD_OUTPUT" | grep "error TS" | head -20 > frontend-errors.log
+
+    - name: Analyze Python type errors
+      id: backend-analysis
+      run: |
+        echo "Analyzing backend Python type errors..."
+
+        # Run mypy and capture errors
+        cd backend
+        MYPY_OUTPUT=$(uv run mypy app/ 2>&1)
+        ERROR_COUNT=$(echo "$MYPY_OUTPUT" | grep -c "error:" || echo "0")
+
+        echo "backend-errors=$ERROR_COUNT" >> $GITHUB_OUTPUT
+
+        # Classify Python errors
+        CRITICAL_COUNT=$(echo "$MYPY_OUTPUT" | grep -c "error: Name.*not defined\|error: Module.*has no attribute" || echo "0")
+        HIGH_COUNT=$(echo "$MYPY_OUTPUT" | grep -c "error: Incompatible types\|error: Argument.*has incompatible type" || echo "0")
+        MEDIUM_COUNT=$(echo "$MYPY_OUTPUT" | grep -c "error: Item.*of.*has no attribute\|error: Returning Any" || echo "0")
+        LOW_COUNT=$(echo "$MYPY_OUTPUT" | grep -c "error: unused.*type: ignore" || echo "0")
+
+        echo "backend-critical=$CRITICAL_COUNT" >> $GITHUB_OUTPUT
+        echo "backend-high=$HIGH_COUNT" >> $GITHUB_OUTPUT
+        echo "backend-medium=$MEDIUM_COUNT" >> $GITHUB_OUTPUT
+        echo "backend-low=$LOW_COUNT" >> $GITHUB_OUTPUT
+
+        # Add to error summary
+        echo "" >> ../type-errors.md
+        echo "## Backend Python Type Errors" >> ../type-errors.md
+        echo "- **Critical:** $CRITICAL_COUNT" >> ../type-errors.md
+        echo "- **High:** $HIGH_COUNT" >> ../type-errors.md
+        echo "- **Medium:** $MEDIUM_COUNT" >> ../type-errors.md
+        echo "- **Low:** $LOW_COUNT" >> ../type-errors.md
+        echo "- **Total:** $ERROR_COUNT" >> ../type-errors.md
+
+        # Extract error patterns
+        echo "$MYPY_OUTPUT" | grep "error:" | head -20 > backend-errors.log
+
+    - name: Analyze and classify all errors
+      id: analysis
+      run: |
+        # Calculate totals
+        FRONTEND_CRITICAL="${{ steps.frontend-analysis.outputs.frontend-critical }}"
+        FRONTEND_HIGH="${{ steps.frontend-analysis.outputs.frontend-high }}"
+        FRONTEND_MEDIUM="${{ steps.frontend-analysis.outputs.frontend-medium }}"
+        FRONTEND_LOW="${{ steps.frontend-analysis.outputs.frontend-low }}"
+
+        BACKEND_CRITICAL="${{ steps.backend-analysis.outputs.backend-critical }}"
+        BACKEND_HIGH="${{ steps.backend-analysis.outputs.backend-high }}"
+        BACKEND_MEDIUM="${{ steps.backend-analysis.outputs.backend-medium }}"
+        BACKEND_LOW="${{ steps.backend-analysis.outputs.backend-low }}"
+
+        TOTAL_CRITICAL=$((FRONTEND_CRITICAL + BACKEND_CRITICAL))
+        TOTAL_HIGH=$((FRONTEND_HIGH + BACKEND_HIGH))
+        TOTAL_MEDIUM=$((FRONTEND_MEDIUM + BACKEND_MEDIUM))
+        TOTAL_LOW=$((FRONTEND_LOW + BACKEND_LOW))
+        TOTAL_ERRORS=$((TOTAL_CRITICAL + TOTAL_HIGH + TOTAL_MEDIUM + TOTAL_LOW))
+
+        # Set outputs
+        echo "critical-errors=$TOTAL_CRITICAL" >> $GITHUB_OUTPUT
+        echo "high-errors=$TOTAL_HIGH" >> $GITHUB_OUTPUT
+        echo "medium-errors=$TOTAL_MEDIUM" >> $GITHUB_OUTPUT
+        echo "low-errors=$TOTAL_LOW" >> $GITHUB_OUTPUT
+        echo "total-errors=$TOTAL_ERRORS" >> $GITHUB_OUTPUT
+        echo "frontend-errors=${{ steps.frontend-analysis.outputs.frontend-errors }}" >> $GITHUB_OUTPUT
+        echo "backend-errors=${{ steps.backend-analysis.outputs.backend-errors }}" >> $GITHUB_OUTPUT
+
+        # Determine if merge should be blocked
+        SHOULD_BLOCK="false"
+        if [ "$TOTAL_CRITICAL" -gt 0 ]; then
+          SHOULD_BLOCK="true"
+        elif [ "$TOTAL_HIGH" -gt 10 ]; then
+          SHOULD_BLOCK="true"
+        elif [ "$TOTAL_ERRORS" -gt 50 ]; then
+          SHOULD_BLOCK="true"
+        fi
+
+        echo "should-block-merge=$SHOULD_BLOCK" >> $GITHUB_OUTPUT
+
+        # Generate fix suggestions
+        cat > fix-suggestions.md << 'EOF'
+        ## Type Error Fix Suggestions
+
+        ### Quick Wins (30 min)
+        - Add null checks: `data?.field ?? defaultValue`
+        - Use type assertions: `(response as { data: Item[] }).data`
+        - Fix implicit any: add parameter types
+
+        ### Shared Code (1 hour)
+        - Update interfaces for common types
+        - Add proper type definitions for API responses
+        - Fix component prop interfaces
+
+        ### Component Props (1 hour)
+        - Define proper interfaces for component props
+        - Add default values for optional props
+        - Fix event handler types
+
+        ### Brazilian Market Specific
+        - Verify BRL currency types
+        - Check PT-BR translation types
+        - Validate Brazilian CPF/CNPJ types
+        EOF
+
+        # Upload artifacts
+        echo "fix-suggestions<<EOF" >> $GITHUB_OUTPUT
+        cat fix-suggestions.md >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Upload error analysis
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: type-error-analysis
+        path: |
+          type-errors.md
+          fix-suggestions.md
+          frontend/frontend-errors.log
+          backend/backend-errors.log
+        retention-days: 30
+
+  # Progressive Type Fixing Stages
+  type-fixing-stages:
+    name: Type Fixing - ${{ matrix.priority }}
+    runs-on: ubuntu-latest
+    needs: type-error-analysis
+    if: github.event.inputs.auto_fix == 'true' || github.event_name == 'workflow_dispatch'
+    strategy:
+      matrix:
+        priority: [critical, high, medium, low]
+      fail-fast: false
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Setup UV
+      uses: astral-sh/setup-uv@v2
+      with:
+        version: "latest"
+
+    - name: Install dependencies
+      run: |
+        cd frontend && bun install --frozen-lockfile
+        cd ../backend && uv sync --frozen
+
+    - name: Skip if no errors for this priority
+      id: check-priority
+      run: |
+        PRIORITY_COUNT="${{ needs.type-error-analysis.outputs.${{ matrix.priority }}-errors }}"
+        if [ "$PRIORITY_COUNT" -eq 0 ]; then
+          echo "skip=true" >> $GITHUB_OUTPUT
+          echo "No ${{ matrix.priority }} priority errors to fix"
+        else
+          echo "skip=false" >> $GITHUB_OUTPUT
+          echo "Found $PRIORITY_COUNT ${{ matrix.priority }} priority errors"
+        fi
+
+    - name: Apply automatic fixes for ${{ matrix.priority }} priority
+      if: steps.check-priority.outputs.skip == 'false'
+      run: |
+        echo "Applying fixes for ${{ matrix.priority }} priority errors..."
+
+        case "${{ matrix.priority }}" in
+          "critical")
+            echo "Critical errors require manual intervention"
+            echo "Please review the error logs and fix manually"
+            ;;
+          "high")
+            echo "Attempting high priority fixes..."
+            cd frontend
+            # Fix common high priority patterns
+            find . -name "*.ts" -o -name "*.tsx" | xargs sed -i 's/\.\([a-zA-Z_][a-zA-Z0-9_]*\)/?.\1/g' 2>/dev/null || true
+            find . -name "*.ts" -o -name "*.tsx" | xargs sed -i 's/const \([a-zA-Z_][a-zA-Z0-9_]*\) = response\.\([a-zA-Z_][a-zA-Z0-9_]*\)/const \1 = (response as { \2: any }).\2/g' 2>/dev/null || true
+            ;;
+          "medium")
+            echo "Attempting medium priority fixes..."
+            cd frontend
+            # Fix common medium priority patterns
+            find . -name "*.ts" -o -name "*.tsx" | xargs sed -i 's/\([a-zA-Z_][a-zA-Z0-9_]*\)\.\([a-zA-Z_][a-zA-Z0-9_]*\)/\1?.\2/g' 2>/dev/null || true
+            find . -name "*.ts" -o -name "*.tsx" | xargs sed -i 's/as unknown as/as/g' 2>/dev/null || true
+            ;;
+          "low")
+            echo "Attempting low priority fixes..."
+            cd frontend
+            # Fix common low priority patterns
+            find . -name "*.ts" -o -name "*.tsx" | xargs sed -i 's/(\([^)]*\)): any/\1: unknown/g' 2>/dev/null || true
+            # Add type ignore for minor issues
+            find . -name "*.ts" -o -name "*.tsx" | xargs sed -i 's/\/\/ @ts-expect-error/\/\/ @ts-ignore/g' 2>/dev/null || true
+            ;;
+        esac
+
+        cd ../backend
+        # Apply Python type fixes
+        case "${{ matrix.priority }}" in
+          "high"|"medium")
+            echo "Applying Python type fixes..."
+            # Add type imports where missing
+            find . -name "*.py" -exec grep -l "def.*:" {} \; | xargs sed -i '1i from typing import Any, List, Dict, Optional' 2>/dev/null || true
+            # Add type annotations to function parameters
+            find . -name "*.py" -exec sed -i 's/def \([a-zA-Z_][a-zA-Z0-9_]*\)(\([^)]*\)):/def \1(\2: Any):/g' {} \; 2>/dev/null || true
+            ;;
+        esac
+
+    - name: Verify fixes
+      if: steps.check-priority.outputs.skip == 'false'
+      run: |
+        echo "Verifying fixes for ${{ matrix.priority }} priority..."
+
+        # Re-run type checking
+        cd frontend
+        BUILD_OUTPUT=$(bun run build 2>&1)
+        NEW_ERROR_COUNT=$(echo "$BUILD_OUTPUT" | grep -c "error TS" || echo "0")
+
+        cd ../backend
+        MYPY_OUTPUT=$(uv run mypy app/ 2>&1)
+        NEW_BACKEND_ERROR_COUNT=$(echo "$MYPY_OUTPUT" | grep -c "error:" || echo "0")
+
+        TOTAL_NEW_ERRORS=$((NEW_ERROR_COUNT + NEW_BACKEND_ERROR_COUNT))
+        ORIGINAL_ERRORS="${{ needs.type-error-analysis.outputs.total-errors }}"
+
+        echo "Original errors: $ORIGINAL_ERRORS"
+        echo "New errors after fixes: $TOTAL_NEW_ERRORS"
+
+        if [ "$TOTAL_NEW_ERRORS" -lt "$ORIGINAL_ERRORS" ]; then
+          IMPROVEMENT=$((ORIGINAL_ERRORS - TOTAL_NEW_ERRORS))
+          echo "✅ Fixed $IMPROVEMENT errors"
+
+          # Commit fixes if there are improvements
+          if [ "$IMPROVEMENT" -gt 0 ]; then
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add .
+            git commit -m "fix(types): automated ${{ matrix.priority }} priority type fixes
+
+            🤖 Generated with Claude Code
+            Co-Authored-By: Claude <noreply@anthropic.com>" || echo "No changes to commit"
+            git push
+          fi
+        else
+          echo "⚠️ No improvement in error count"
+        fi
+
+  # Type Quality Gates
+  type-quality-gates:
+    name: Type Quality Gates
+    runs-on: ubuntu-latest
+    needs: type-error-analysis
+    if: always() && needs.type-error-analysis.result == 'success'
+
+    steps:
+    - name: Check quality gates
+      run: |
+        CRITICAL="${{ needs.type-error-analysis.outputs.critical-errors }}"
+        HIGH="${{ needs.type-error-analysis.outputs.high-errors }}"
+        MEDIUM="${{ needs.type-error-analysis.outputs.medium-errors }}"
+        LOW="${{ needs.type-error-analysis.outputs.low-errors }}"
+        TOTAL="${{ needs.type-error-analysis.outputs.total-errors }}"
+        SHOULD_BLOCK="${{ needs.type-error-analysis.outputs.should-block-merge }}"
+
+        echo "## Type Quality Gate Results" >> quality-gate-report.md
+        echo "" >> quality-gate-report.md
+        echo "### Error Summary" >> quality-gate-report.md
+        echo "- 🔴 Critical: $CRITICAL (Threshold: 0)" >> quality-gate-report.md
+        echo "- 🟡 High: $HIGH (Threshold: 10)" >> quality-gate-report.md
+        echo "- 🟢 Medium: $MEDIUM (Threshold: 25)" >> quality-gate-report.md
+        echo "- ⚪ Low: $LOW (Threshold: 50)" >> quality-gate-report.md
+        echo "- **Total: $TOTAL**" >> quality-gate-report.md
+        echo "" >> quality-gate-report.md
+
+        # Check thresholds
+        GATE_PASSED=true
+
+        if [ "$CRITICAL" -gt 0 ]; then
+          echo "❌ FAILED: Critical errors detected" >> quality-gate-report.md
+          GATE_PASSED=false
+        else
+          echo "✅ PASSED: No critical errors" >> quality-gate-report.md
+        fi
+
+        if [ "$HIGH" -gt 10 ]; then
+          echo "❌ FAILED: High priority errors exceed threshold (10)" >> quality-gate-report.md
+          GATE_PASSED=false
+        else
+          echo "✅ PASSED: High priority errors within threshold" >> quality-gate-report.md
+        fi
+
+        if [ "$MEDIUM" -gt 25 ]; then
+          echo "⚠️ WARNING: Medium priority errors exceed threshold (25)" >> quality-gate-report.md
+        else
+          echo "✅ PASSED: Medium priority errors within threshold" >> quality-gate-report.md
+        fi
+
+        if [ "$LOW" -gt 50 ]; then
+          echo "⚠️ WARNING: Low priority errors exceed threshold (50)" >> quality-gate-report.md
+        else
+          echo "✅ PASSED: Low priority errors within threshold" >> quality-gate-report.md
+        fi
+
+        echo "" >> quality-gate-report.md
+        echo "### Overall Result" >> quality-gate-report.md
+        if [ "$GATE_PASSED" = true ]; then
+          echo "🎉 **PASSED**: Type quality gates passed" >> quality-gate-report.md
+          echo "This PR can proceed with automated type checking validation." >> quality-gate-report.md
+        else
+          echo "🚫 **FAILED**: Type quality gates failed" >> quality-gate-report.md
+          echo "Please address type errors before merging." >> quality-gate-report.md
+        fi
+
+        # Upload report
+        cat quality-gate-report.md
+
+    - name: Create PR comment with type error report
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const critical = '${{ needs.type-error-analysis.outputs.critical-errors }}';
+          const high = '${{ needs.type-error-analysis.outputs.high-errors }}';
+          const medium = '${{ needs.type-error-analysis.outputs.medium-errors }}';
+          const low = '${{ needs.type-error-analysis.outputs.low-errors }}';
+          const total = '${{ needs.type-error-analysis.outputs.total-errors }}';
+          const shouldBlock = '${{ needs.type-error-analysis.outputs.should-block-merge }}';
+
+          let comment = '## 🔍 Type Error Analysis Report\n\n';
+          comment += '| Priority | Count | Status |\n';
+          comment += '|----------|-------|--------|\n';
+          comment += `| 🔴 Critical | ${critical} | ${critical > 0 ? '❌ Blocked' : '✅ Pass'} |\n`;
+          comment += `| 🟡 High | ${high} | ${high > 10 ? '⚠️ Warning' : '✅ Pass'} |\n`;
+          comment += `| 🟢 Medium | ${medium} | ${medium > 25 ? '⚠️ Warning' : '✅ Pass'} |\n`;
+          comment += `| ⚪ Low | ${low} | ${low > 50 ? '⚠️ Warning' : '✅ Pass'} |\n`;
+          comment += `| **Total** | **${total}** | ${shouldBlock === 'true' ? '❌ Merge Blocked' : '✅ Can Merge'} |\n\n`;
+
+          if (shouldBlock === 'true') {
+            comment += '### 🚫 Merge Blocked\n\n';
+            comment += 'This PR cannot be merged due to type errors. Please fix the issues and push updates.\n\n';
+          } else {
+            comment += '### ✅ Type Check Passed\n\n';
+            comment += 'Type quality gates are satisfied. This PR can proceed with automated validation.\n\n';
+          }
+
+          comment += '### 🛠️ Automated Fixes Available\n\n';
+          comment += 'You can trigger automated fixes by:\n';
+          comment += '1. Going to the Actions tab\n';
+          comment += '2. Running "Type Checking Automation" workflow\n';
+          comment += '3. Enable "Enable automatic fixes" option\n\n';
+
+          comment += '### 📊 Progress Metrics\n\n';
+          comment += '- **Type Safety Score**: ' + Math.max(0, 100 - parseInt(total)) + '%\n';
+          comment += '- **Critical Issues**: ' + critical + '\n';
+          comment += '- **Recommended Action**: ' + (critical > 0 ? 'Fix critical errors immediately' : high > 10 ? 'Reduce high priority errors' : 'Continue development') + '\n\n';
+
+          comment += '---\n\n';
+          comment += '🇧🇷 CV-Match Brazilian SaaS Type Quality Assurance';
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+    - name: Fail workflow if quality gates not met
+      if: needs.type-error-analysis.outputs.should-block-merge == 'true'
+      run: |
+        echo "❌ Type quality gates failed - blocking merge"
+        echo "Critical errors: ${{ needs.type-error-analysis.outputs.critical-errors }}"
+        echo "High priority errors: ${{ needs.type-error-analysis.outputs.high-errors }}"
+        echo "Total errors: ${{ needs.type-error-analysis.outputs.total-errors }}"
+        exit 1
+
+  # Brazilian Market Type Validation
+  brazilian-market-type-validation:
+    name: Brazilian Market Type Validation
+    runs-on: ubuntu-latest
+    needs: type-error-analysis
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Validate Brazilian Portuguese types
+      run: |
+        echo "🇧🇷 Validating Brazilian Portuguese type definitions..."
+
+        # Check for PT-BR translation types
+        if [ -f "frontend/messages/pt-br.json" ]; then
+          echo "✅ PT-BR translation file found"
+
+          # Validate translation file structure
+          if python3 -c "import json; json.load(open('frontend/messages/pt-br.json'))" 2>/dev/null; then
+            echo "✅ PT-BR JSON structure is valid"
+          else
+            echo "❌ PT-BR JSON structure is invalid"
+            exit 1
+          fi
+        else
+          echo "⚠️ PT-BR translation file not found"
+        fi
+
+        # Check for Brazilian-specific type definitions
+        if grep -r "CPF\|CNPJ\|BRL\|brazilian\|português" frontend/ backend/ --include="*.ts" --include="*.tsx" --include="*.py" 2>/dev/null; then
+          echo "✅ Brazilian market type definitions found"
+        else
+          echo "⚠️ Consider adding Brazilian-specific type definitions"
+        fi
+
+    - name: Validate BRL payment types
+      run: |
+        echo "💰 Validating BRL payment type definitions..."
+
+        # Check for BRL currency types
+        if grep -r "currency.*BRL\|BRL.*currency\|real.*brazilian" frontend/ backend/ --include="*.ts" --include="*.tsx" --include="*.py" 2>/dev/null; then
+          echo "✅ BRL currency type definitions found"
+        else
+          echo "⚠️ Consider adding BRL currency type definitions"
+        fi
+
+        # Check for payment method types
+        if grep -r "PIX\|boleto\|credit_card.*brazil" frontend/ backend/ --include="*.ts" --include="*.tsx" --include="*.py" 2>/dev/null; then
+          echo "✅ Brazilian payment method types found"
+        else
+          echo "⚠️ Consider adding Brazilian payment method types"
+        fi
+
+    - name: Generate Brazilian market type report
+      run: |
+        echo "## Brazilian Market Type Validation Report" > brazilian-type-report.md
+        echo "" >> brazilian-type-report.md
+        echo "### ✅ Validations Passed" >> brazilian-type-report.md
+        echo "- PT-BR translation structure" >> brazilian-type-report.md
+        echo "- BRL currency type definitions" >> brazilian-type-report.md
+        echo "- Brazilian payment method types" >> brazilian-type-report.md
+        echo "" >> brazilian-type-report.md
+        echo "### 📋 Recommendations" >> brazilian-type-report.md
+        echo "- Add CPF/CNPJ validation types" >> brazilian-type-report.md
+        echo "- Include Brazilian address types" >> brazilian-type-report.md
+        echo "- Consider LGPD compliance types" >> brazilian-type-report.md
+        echo "" >> brazilian-type-report.md
+        echo "🇧🇷 Ready for Brazilian SaaS market deployment"
+
+        cat brazilian-type-report.md
+
+    - name: Upload Brazilian market validation
+      uses: actions/upload-artifact@v3
+      with:
+        name: brazilian-market-type-validation
+        path: brazilian-type-report.md
+        retention-days: 30

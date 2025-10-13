@@ -18,11 +18,20 @@
     "test:backend": "cd backend && uv run pytest --cov=app",
     "type-check:frontend": "cd frontend && bunx type-check",
     "type-check:backend": "cd backend && uv run mypy app/",
+    "type-check:all": "bunx type-check:frontend && bunx type-check:backend",
+    "type-fix:all": "./scripts/type-fix-automation.sh all",
+    "type-fix:critical": "./scripts/type-fix-automation.sh critical",
+    "type-fix:high": "./scripts/type-fix-automation.sh high",
+    "type-fix:medium": "./scripts/type-fix-automation.sh medium",
+    "type-fix:low": "./scripts/type-fix-automation.sh low",
+    "type-fix:dry-run": "./scripts/type-fix-automation.sh all --dry-run",
+    "type-analysis": "./scripts/type-fix-automation.sh all --dry-run",
     "build:frontend": "cd frontend && bunx build",
     "dev:setup": "bunx install:frontend && bunx install:backend",
     "install:frontend": "cd frontend && bun install",
     "install:backend": "cd backend && uv sync",
-    "quality:check": "bunx lint:all && bunx type-check:all && bunx test:all"
+    "quality:check": "bunx lint:all && bunx type-check:all && bunx test:all",
+    "type-safety:report": "./scripts/type-fix-automation.sh all --dry-run && echo 'Type safety report generated'"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

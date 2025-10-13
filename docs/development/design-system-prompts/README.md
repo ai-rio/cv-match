@@ -154,7 +154,7 @@ Agent: frontend-specialist
 
 Before starting:
 - [ ] Node.js 18+ installed
-- [ ] All dependencies up to date (`npm install`)
+- [ ] All dependencies up to date (`bun install`)
 - [ ] Design system docs reviewed
 - [ ] Figma access (if applicable)
 - [ ] Current styling backed up
