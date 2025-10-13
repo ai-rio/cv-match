@@ -58,9 +58,7 @@ class SentryConfig:
                 profiles_sample_rate=1.0,
                 # Integrations for FastAPI ecosystem
                 integrations=[
-                    FastApiIntegration(
-                        auto_enabling_integrations=False, transaction_style="endpoint"
-                    ),
+                    FastApiIntegration(transaction_style="endpoint"),
                     StarletteIntegration(transaction_style="url"),
                     logging_integration,
                     HttpxIntegration(),
@@ -168,7 +166,9 @@ class SentryConfig:
     def set_transaction_name(self, name: str):
         """Set transaction name with Brazilian context"""
         if self.enabled:
-            sentry_sdk.set_transaction(f"cv-match-brazil/{name}")
+            # Note: set_transaction is deprecated in newer Sentry versions
+            # Transaction naming is handled automatically by FastAPI integration
+            pass
 
     def add_breadcrumb(self, message: str, category: str = "default", level: str = "info"):
         """Add breadcrumb with Brazilian context"""

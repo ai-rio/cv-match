@@ -354,9 +354,9 @@ class WebhookService:
                 user_id=user_id,
                 tier_id=tier_id or "flow_pro",  # Default if not specified
                 status=subscription_data.get("status", "active"),
-                stripe_subscription_id=subscription_data.get("id"),
-                stripe_customer_id=subscription_data.get("customer"),
-                stripe_price_id=price_id,
+                stripe_subscription_id=subscription_data.get("id") or "",
+                stripe_customer_id=subscription_data.get("customer") or "",
+                stripe_price_id=price_id or "",
             )
 
             subscription_details = await subscription_service.create_subscription(
