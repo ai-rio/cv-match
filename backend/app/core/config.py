@@ -68,6 +68,15 @@ class Settings(BaseSettings):
     LOG_SECURITY_EVENTS: bool = True
     SECURITY_LOG_LEVEL: str = "INFO"
 
+    # Sentry Configuration
+    SENTRY_DSN: str = ""
+    SENTRY_ENVIRONMENT: str = "development"
+    SENTRY_TRACES_SAMPLE_RATE: float = 1.0
+    SENTRY_PROFILES_SAMPLE_RATE: float = 1.0
+
+    # Application Version
+    APP_VERSION: str = "cv-match@1.0.0"
+
     class Config:
         env_file = ".env"
         case_sensitive = True

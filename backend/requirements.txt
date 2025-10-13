@@ -12,3 +12,4 @@ qdrant-client==1.5.4
 httpx==0.26.0
 stripe==7.15.0
 markitdown[all]==0.1.2
+sentry-sdk[fastapi]==1.40.6

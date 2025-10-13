@@ -1,0 +1,212 @@
+# Ruff configuration optimized for CV-Match Brazilian SaaS project
+# Enhanced for Brazilian market compliance and Portuguese support
+
+[tool.ruff]
+# General configuration
+line-length = 100
+target-version = "py312"
+show-fixes = true
+show-source = true
+
+# Include all Python files
+include = ["*.py", "*.pyi"]
+
+# Exclude common patterns
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+[tool.ruff.format]
+# Formatting settings optimized for Brazilian development teams
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint]
+# Select rules for comprehensive code quality
+select = [
+    # pycodestyle
+    "E",
+    "W",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-comprehensions
+    "C4",
+    # flake8-simplify
+    "SIM",
+    # flake8-import-conventions
+    "ICN",
+    # flake8-datetimez
+    "DTZ",
+    # flake8-unused-arguments
+    "ARG",
+    # flake8-no-pep420
+    "INP",
+    # flake8-todos
+    "TD",
+    # flake8-return
+    "RET",
+    # flake8-raise
+    "RSE",
+    # isort
+    "I",
+    # numpy-specific rules
+    "NPY",
+    # pandas-vet
+    "PD",
+    # flake8-quotes
+    "Q",
+    # flake8-annotations
+    "ANN",
+    # flake8-bandit
+    "S",
+    # flake8-django
+    "DJ",
+    # flake8-fastapi
+    "FAST",
+    # flake8-pytest-style
+    "PT",
+    # flake8-type-checking
+    "TCH",
+    # flake8-copyright
+    "CPY",
+]
+
+ignore = [
+    "E501",  # line too long, handled by formatter
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+    "ANN101",  # missing-type-self
+    "ANN102",  # missing-type-cls
+    "ANN401",  # any-type
+    "S104",  # hardcoded-bind-all-interfaces
+    "S311",  # suspicious-non-cryptographic-random-usage
+    "DTZ005",  # call-datetime-now-without-tzinfo
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/**/*.py" = ["B", "F401", "F811", "S101", "S105", "S106"]
+"migrations/**/*.py" = ["ALL"]
+"conftest.py" = ["F401", "F811"]
+"test_*.py" = ["B", "F401", "F811", "S101", "S105", "S106"]
+
+[tool.ruff.lint.isort]
+# Import organization settings
+known-first-party = ["app"]
+known-third-party = ["fastapi", "pydantic", "supabase", "httpx", "stripe", "anthropic", "openai"]
+required-imports = ["from __future__ import annotations"]
+split-on-trailing-comma = false
+force-single-line = false
+
+[tool.ruff.lint.flake8-annotations]
+# Type annotation settings for better type safety
+allow-star-arg-any = true
+ignore-fully-untyped = false
+mypy-init-return = true
+suppress-dummy-args = false
+suppress-none-returning = true
+
+[tool.ruff.lint.flake8-tidy-imports]
+# Import organization for clean dependency management
+ban-relative-imports = "all"
+disallow-any-import = ["os", "sys"]
+
+[tool.ruff.lint.flake8-type-checking]
+# Runtime type checking optimization
+exempt-modules = ["typing", "typing_extensions"]
+strict = true
+
+[tool.ruff.lint.flake8-copyright]
+# Copyright header compliance
+author = "CV-Match"
+notice-rgx = "Copyright \\(c\\) \\d{4} CV-Match"
+
+[tool.ruff.lint.flake8-datetimez]
+# Datetime handling for Brazilian timezone
+allow-fast-naive-false = true
+allow-no-tzinfo = false
+aware-now-with-utc = false
+require-tzinfo = true
+
+[tool.ruff.lint.flake8-bandit]
+# Security settings for financial applications
+check-typed-exception = true
+hardcoded-password-regex = "passw|word|pwd|secret|token"
+hardcoded-temporary-files = true
+hardcoded-hash-functions = true
+
+# Brazilian market specific configurations
+[tool.ruff.lint.flake8-bugbear]
+# Bug prevention for financial applications
+extend-immutable-calls = ["fastapi.Depends", "pydantic.Field"]
+
+[tool.ruff.lint.flake8-comprehensions]
+# Comprehension quality
+allow-dict-calls-with-keyword-arguments = true
+
+[tool.ruff.lint.flake8-simplify]
+# Code simplification rules
+collection-utils-extend-type-safe = true
+
+# Portuguese language support in comments and docstrings
+[tool.ruff.lint.flake8-quotes]
+# Quote consistency for Portuguese text
+inline-quotes = "double"
+multiline-quotes = "double"
+docstring-quotes = "double"
+avoid-escape = false
+
+[tool.ruff.lint.flake8-unused-arguments]
+# Function argument optimization
+ignore-variadic-names = false
+ignore-method-names = ["__init__", "__post_init__"]
+
+# Performance optimization rules
+[tool.ruff.lint.flake8-simplify]
+# Simplification rules for better performance
+atomicity-allowed-regex = "^test_"
+extend-simplify-operators = true
+
+# Financial application specific rules
+[tool.ruff.lint.flake8-bandit]
+# Security rules for financial data
+check-executability-of-shell-commands = true
+check-typed-exception = true
+hardcoded-tmp-directory-locations = ["/tmp", "/var/tmp", "/dev/shm"]
+
+# Logging configuration for Brazilian market compliance
+[tool.ruff.lint.flake8-logging]
+# Logging best practices
+allow-wrapped-variables = true
+log-fmt-strings = true
+logging-modules = ["logging", "logging.config"]
+
+# Async/await optimization for FastAPI
+[tool.ruff.lint.flake8-async]
+# Async function optimization
+async-iterator = true
+trio-asyncio = true

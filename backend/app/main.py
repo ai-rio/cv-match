@@ -6,7 +6,11 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api.router import api_router
 from app.core.config import settings
+from app.core.sentry import init_sentry, get_sentry_config
 from app.services.security import SecurityMiddleware
+
+# Initialize Sentry first (before other imports)
+init_sentry()
 
 # Configure logging
 logging.basicConfig(
@@ -15,10 +19,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Get Sentry configuration for app title
+sentry_config = get_sentry_config()
+
 app = FastAPI(
-    title="Full Stack App Backend",
-    description="API for the Full Stack Application",
-    version="0.1.0",
+    title="CV-Match Backend - Brazilian SaaS",
+    description="API para plataforma de matching de currículos para o mercado brasileiro",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 
@@ -66,12 +75,64 @@ app.include_router(api_router, prefix="/api")
 @app.get("/")
 async def root():
     """Health check endpoint."""
+    sentry_config = get_sentry_config()
     return {
         "status": "online",
         "environment": settings.ENVIRONMENT,
-        "version": "0.1.0",
+        "version": settings.APP_VERSION,
         "security_enabled": settings.ENABLE_RATE_LIMITING,
+        "sentry_enabled": sentry_config.enabled,
+        "market": "brazil",
+        "locale": "pt-BR"
     }
+
+
+@app.get("/health/sentry")
+async def sentry_health():
+    """Sentry health check endpoint."""
+    sentry_config = get_sentry_config()
+
+    # Test Sentry by capturing a test message in development
+    if settings.ENVIRONMENT == "development" and sentry_config.enabled:
+        sentry_config.add_breadcrumb(
+            message="Sentry health check accessed",
+            category="health",
+            level="info"
+        )
+
+    return {
+        "sentry_status": "enabled" if sentry_config.enabled else "disabled",
+        "environment": sentry_config.environment,
+        "dsn_configured": bool(sentry_config.dsn),
+        "market": "brazil",
+        "traces_sample_rate": settings.SENTRY_TRACES_SAMPLE_RATE,
+        "profiles_sample_rate": settings.SENTRY_PROFILES_SAMPLE_RATE,
+    }
+
+
+@app.get("/test/sentry-error")
+async def test_sentry_error():
+    """Test endpoint to trigger a Sentry error for testing (development only)."""
+    if settings.ENVIRONMENT != "development":
+        return {"error": "This endpoint is only available in development mode"}
+
+    sentry_config = get_sentry_config()
+
+    try:
+        # Test exception handling
+        raise ValueError("Este é um erro de teste para o Sentry - CV-Match Backend")
+    except Exception as e:
+        sentry_config.capture_exception(e, {
+            "test_endpoint": True,
+            "market": "brazil",
+            "application": "cv-match-backend"
+        })
+        return {
+            "test_error_triggered": True,
+            "error_message": str(e),
+            "sentry_enabled": sentry_config.enabled,
+            "message": "Erro de teste capturado pelo Sentry"
+        }
 
 
 @app.get("/health/security")
