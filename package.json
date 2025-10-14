@@ -31,7 +31,8 @@
     "install:frontend": "cd frontend && bun install",
     "install:backend": "cd backend && uv sync",
     "quality:check": "bunx lint:all && bunx type-check:all && bunx test:all",
-    "type-safety:report": "./scripts/type-fix-automation.sh all --dry-run && echo 'Type safety report generated'"
+    "type-safety:report": "./scripts/type-fix-automation.sh all --dry-run && echo 'Type safety report generated'",
+    "tsc": "tsc"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

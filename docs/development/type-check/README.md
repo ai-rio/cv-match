@@ -10,13 +10,13 @@
 ```bash
 # Check types
 cd /home/carlos/projects/cv-match/frontend
-bun run build  # TypeScript check via Next.js
+bun tsc --noEmit  # TypeScript check via Next.js
 
 cd /home/carlos/projects/cv-match/backend
 docker compose exec backend python -m pytest  # Python type hints checked via tests
 
 # Analyze errors
-bun run build 2>&1 | grep "error TS" | wc -l  # Count TS errors
+bun tsc --noEmit 2>&1 | grep "error TS" | wc -l  # Count TS errors
 ```
 
 ---
@@ -40,10 +40,10 @@ bun run build 2>&1 | grep "error TS" | wc -l  # Count TS errors
 
 ```bash
 # Get error count
-bun run build 2>&1 | grep -E "error TS[0-9]+" | wc -l
+bun tsc --noEmit 2>&1 | grep -E "error TS[0-9]+" | wc -l
 
 # Group by error type
-bun run build 2>&1 | grep -E "error TS[0-9]+" | \
+bun tsc --noEmit 2>&1 | grep -E "error TS[0-9]+" | \
   sed 's/.*error \(TS[0-9]*\).*/\1/' | sort | uniq -c | sort -nr
 ```
 
@@ -168,7 +168,7 @@ export function Button({
 echo "Before: X errors"
 
 # After each batch
-bun run build 2>&1 | grep "error TS" | wc -l
+bun tsc --noEmit 2>&1 | grep "error TS" | wc -l
 echo "After Batch 1: Y errors (X-Y fixed)"
 
 # Track progress
@@ -192,7 +192,7 @@ find frontend/app -name "*.tsx" -exec sed -i 's/user\.email/user?.email ?? ""/g'
 
 ```bash
 # Find files with most errors
-bun run build 2>&1 | grep "error TS" | \
+bun tsc --noEmit 2>&1 | grep "error TS" | \
   cut -d'(' -f1 | sort | uniq -c | sort -nr | head -10
 ```
 
@@ -289,17 +289,17 @@ Track your progress:
 
 ```bash
 # Check types
-cd frontend && bun run build
+bun tsc --noEmit
 
 # Count errors
-bun run build 2>&1 | grep "error TS" | wc -l
+bun tsc --noEmit 2>&1 | grep "error TS" | wc -l
 
 # Group errors
-bun run build 2>&1 | grep "error TS" | \
+bun tsc --noEmit 2>&1 | grep "error TS" | \
   sed 's/.*\(TS[0-9]*\).*/\1/' | sort | uniq -c | sort -nr
 
 # Find error in specific file
-bun run build 2>&1 | grep "path/to/file.tsx"
+bun tsc --noEmit 2>&1 | grep "path/to/file.tsx"
 ```
 
 ### Priority Decision Tree
