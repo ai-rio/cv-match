@@ -11,7 +11,7 @@
     "lint:fix": "eslint --fix .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "type-check": "tsc --noEmit",
+    "type-check": "bun node_modules/typescript/bin/tsc --noEmit",
     "test": "NODE_OPTIONS=--experimental-vm-modules bunx  jest",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules bunx  jest --watch",
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules bunx  jest --coverage",
