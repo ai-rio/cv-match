@@ -16,12 +16,13 @@
 
 'use client';
 
-import React, { forwardRef, ButtonHTMLAttributes } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/lib/utils';
-import { useTheme } from '@/contexts/theme-context';
 import { Loader2 } from 'lucide-react';
+import React, { ButtonHTMLAttributes, forwardRef } from 'react';
+
+import { useTheme } from '@/contexts/theme-context';
+import { cn } from '@/lib/utils';
 
 /**
  * Button variants using class-variance-authority

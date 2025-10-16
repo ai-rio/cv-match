@@ -647,8 +647,9 @@ function ResumeUploadComponent({
         xhr.setRequestHeader('Authorization', `Bearer ${session.access_token}`);
         xhr.send(formData);
       });
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao enviar arquivo';
+      setError(errorMessage);
       setUploadProgress(0);
     }
   };
@@ -937,9 +938,9 @@ function PaymentFlow({
 
       // Redirect to Stripe Checkout
       window.location.href = data.checkout_url;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Payment error will be handled by the parent component
-      console.error('Payment failed:', error);
+      // TODO: Add proper error logging service
       throw error;
     } finally {
       setIsProcessing(false);

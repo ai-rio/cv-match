@@ -16,10 +16,11 @@
 
 'use client';
 
-import React, { forwardRef, useState, useEffect, HTMLAttributes } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { AlertCircle, AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
+import React, { forwardRef, HTMLAttributes, useEffect, useState } from 'react';
+
 import { cn } from '@/lib/utils';
-import { X, AlertCircle, CheckCircle, AlertTriangle, Info } from 'lucide-react';
 
 /**
  * Alert variants using class-variance-authority
@@ -399,6 +400,6 @@ export function AlertList({ alerts, onDismiss, className }: AlertListProps) {
   );
 }
 
-export { Alert, AlertDescription, AlertTitle, AlertAction, alertVariants };
+export { Alert, AlertAction, AlertDescription, AlertTitle, alertVariants };
 
 export default Alert;

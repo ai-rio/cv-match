@@ -102,9 +102,7 @@ function DashboardContent() {
           total_applications: 5,
         });
       } catch (error) {
-        // TODO: Implement proper error logging
-        // eslint-disable-next-line no-console
-        console.error('Error loading dashboard data:', error);
+        // TODO: Implement proper error logging service
 
         // Fallback to mock data
         setOptimizations([

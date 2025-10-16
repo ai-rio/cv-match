@@ -15,10 +15,11 @@
 
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { colors, ColorName, ColorShade } from '@/lib/design-system/colors';
-import { typography, TypographyKey } from '@/lib/design-system/typography';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+
+import { ColorName, colors, ColorShade } from '@/lib/design-system/colors';
 import { designTokens } from '@/lib/design-system/tokens';
+import { typography, TypographyKey } from '@/lib/design-system/typography';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -238,7 +239,7 @@ export function ThemeProvider({
    */
   const updateColorPreference = (colorName: ColorName, shade: ColorShade) => {
     // This could be extended to allow custom color preferences
-    console.log(`Updating ${colorName} to shade ${shade}`);
+    // TODO: Add proper logging service for theme updates
   };
 
   /**

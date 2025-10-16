@@ -16,10 +16,11 @@
 
 'use client';
 
-import React, { forwardRef, HTMLAttributes } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/lib/utils';
+import React, { forwardRef, HTMLAttributes } from 'react';
+
 import { useTheme } from '@/contexts/theme-context';
+import { cn } from '@/lib/utils';
 
 /**
  * Card variants using class-variance-authority
@@ -383,8 +384,8 @@ export {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
   CardMedia,
+  CardTitle,
   cardVariants,
 };
 

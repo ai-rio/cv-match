@@ -48,7 +48,7 @@ export default function CreditBalance() {
         setCreditData(response);
         setError(null);
       } catch (err) {
-        console.error('Error fetching credit balance:', err);
+        // TODO: Add proper error logging service
         setError('Não foi possível carregar seus créditos. Tente novamente mais tarde.');
         setCreditData(null);
       } finally {

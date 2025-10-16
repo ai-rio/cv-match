@@ -509,13 +509,13 @@ export const getColor = (colorPath: string, theme: 'light' | 'dark' = 'light'): 
   const colorScale = colors[colorName as keyof SemanticColors];
 
   if (!colorScale) {
-    console.warn(`Color "${colorName}" not found in color system`);
+    // TODO: Add proper error logging service
     return '#000000';
   }
 
   const colorToken = colorScale[shade as unknown as keyof ColorScale];
   if (!colorToken) {
-    console.warn(`Shade "${shade}" not found for color "${colorName}"`);
+    // TODO: Add proper error logging service
     return '#000000';
   }
 

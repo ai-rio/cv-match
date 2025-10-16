@@ -36,7 +36,8 @@ export default function PaymentSuccess() {
           setCredits(data.credits || 0);
         }
       } catch (error) {
-        console.error('Error fetching credits:', error);
+        // Log error silently in production
+        // TODO: Add proper error logging service
       } finally {
         setLoading(false);
       }

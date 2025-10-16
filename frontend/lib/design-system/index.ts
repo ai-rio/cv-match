@@ -19,15 +19,15 @@ export * from './tokens';
 
 // Theme context and provider
 export {
+  type Theme,
+  type ThemeColors,
+  type ThemeMode,
   ThemeProvider,
+  themeUtils,
+  useIsDarkTheme,
+  useResolvedTheme,
   useTheme,
   useThemeColors,
-  useResolvedTheme,
-  useIsDarkTheme,
-  themeUtils,
-  type ThemeMode,
-  type ThemeColors,
-  type Theme,
 } from '../../contexts/theme-context';
 
 // Accessibility utilities
@@ -35,10 +35,10 @@ export * from '../accessibility/wcag-utils';
 
 // Re-export commonly used combinations are already included above
 export {
-  WCAG_STANDARDS,
   calculateContrastRatio,
   checkContrastCompliance,
   runAccessibilityAudit,
+  WCAG_STANDARDS,
 } from '../accessibility/wcag-utils';
 
 // Utility functions for design system usage
@@ -57,7 +57,7 @@ export const designSystemUtils = {
   applyColorVariables: (container?: HTMLElement) => {
     const target = container || document.documentElement;
     // This would be implemented with actual color tokens
-    console.log('Applying design system color variables');
+    // TODO: Implement proper color variable application
   },
 
   /**

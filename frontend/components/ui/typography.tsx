@@ -17,10 +17,11 @@
 
 'use client';
 
-import React, { forwardRef, HTMLAttributes } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/lib/utils';
+import React, { forwardRef, HTMLAttributes } from 'react';
+
 import { getTypographyStyles } from '@/lib/design-system/typography';
+import { cn } from '@/lib/utils';
 
 /**
  * Typography variants using class-variance-authority
@@ -276,8 +277,8 @@ const Typography = forwardRef<HTMLElement, TypographyProps>(
     const Component = as || getDefaultElement();
 
     // Use proper typing to avoid SVG/HTML incompatibility
-    const componentProps: Record<string, any> = { ...props };
-    delete componentProps.color;
+    const componentProps: Record<string, unknown> = { ...props };
+    delete (componentProps as Record<string, unknown>).color;
 
     return React.createElement(
       Component as keyof React.JSX.IntrinsicElements,
@@ -500,7 +501,12 @@ export interface TruncatedTextProps extends TypographyProps {
 
 export const TruncatedText = forwardRef<HTMLSpanElement, TruncatedTextProps>(
   ({ maxLines = 1, className, children, ...props }, ref) => (
-    <Typography ref={ref} lineClamp={maxLines as any} className={className} {...props}>
+    <Typography
+      ref={ref}
+      lineClamp={maxLines as 1 | 2 | 3 | 4 | 5 | 6 | 'none'}
+      className={className}
+      {...props}
+    >
       {children}
     </Typography>
   )

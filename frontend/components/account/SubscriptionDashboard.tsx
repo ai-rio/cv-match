@@ -67,7 +67,7 @@ export function SubscriptionDashboard() {
       setSubscription(data);
       setError(null);
     } catch (error) {
-      console.error('Failed to fetch subscription:', error);
+      // TODO: Add proper error logging service
       setError(error instanceof Error ? error.message : 'Erro ao carregar assinatura');
       setSubscription(null);
     } finally {

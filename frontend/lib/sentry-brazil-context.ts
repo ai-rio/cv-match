@@ -94,7 +94,7 @@ export class SentryBrazilianContext {
     message: string,
     category: string = 'brazil-context',
     level: Sentry.SeverityLevel = 'info',
-    data?: Record<string, any>
+    data?: Record<string, unknown>
   ): void {
     Sentry.addBreadcrumb({
       message,
@@ -166,7 +166,7 @@ export class SentryBrazilianContext {
   captureMessage(
     message: string,
     level: Sentry.SeverityLevel = 'info',
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): void {
     const localizedMessage = this.localizeMessage(message);
 
@@ -245,7 +245,19 @@ export class SentryBrazilianContext {
   /**
    * Localize error messages for Brazilian market
    */
-  private localizeErrorMessage(message: string, context: any): string {
+  private localizeErrorMessage(
+    message: string,
+    context: {
+      operation?: string;
+      feature?: string;
+      userAction?: string;
+      paymentContext?: {
+        method?: string;
+        amount?: number;
+        currency?: string;
+      };
+    }
+  ): string {
     const lowerMessage = message.toLowerCase();
 
     // Payment-related errors
@@ -331,20 +343,37 @@ export const setBrazilianUserContext = (user: BrazilianUserContext) =>
 export const setBrazilianTransactionContext = (transaction: BrazilianTransactionContext) =>
   sentryBrazil.setTransactionContext(transaction);
 
-export const captureBrazilianException = (error: Error, context?: any) =>
-  sentryBrazil.captureException(error, context);
+export const captureBrazilianException = (
+  error: Error,
+  context?: {
+    operation?: string;
+    feature?: string;
+    userAction?: string;
+    paymentContext?: {
+      method?: string;
+      amount?: number;
+      currency?: string;
+    };
+  }
+) => sentryBrazil.captureException(error, context);
 
 export const captureBrazilianMessage = (
   message: string,
   level?: Sentry.SeverityLevel,
-  context?: any
+  context?: Record<string, unknown>
 ) => sentryBrazil.captureMessage(message, level, context);
 
 export const addBrazilianBreadcrumb = (
   message: string,
   category?: string,
   level?: Sentry.SeverityLevel,
-  data?: any
+  data?: Record<string, unknown>
 ) => sentryBrazil.addBreadcrumb(message, category, level, data);
 
-export const setBrazilianTags = (tags: any) => sentryBrazil.setBrazilianTags(tags);
+export const setBrazilianTags = (tags: {
+  feature?: string;
+  operation?: string;
+  paymentFlow?: string;
+  userPlan?: string;
+  subscriptionStatus?: string;
+}) => sentryBrazil.setBrazilianTags(tags);

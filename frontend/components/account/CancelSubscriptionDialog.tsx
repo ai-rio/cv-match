@@ -15,10 +15,16 @@ import {
 } from '@/components/ui/alert-dialog';
 import { createClient } from '@/lib/supabase/client';
 
+interface SubscriptionData {
+  id: string;
+  current_period_end: string;
+  status: string;
+}
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  subscription: any;
+  subscription: SubscriptionData;
   onCancel: () => void;
 }
 
@@ -56,7 +62,7 @@ export function CancelSubscriptionDialog({ open, onOpenChange, subscription, onC
       onCancel();
       onOpenChange(false);
     } catch (error) {
-      console.error('Cancel failed:', error);
+      // TODO: Add proper error logging service
       // TODO: Replace with proper toast notification when available
       // alert(error instanceof Error ? error.message : 'Erro ao cancelar assinatura');
     } finally {

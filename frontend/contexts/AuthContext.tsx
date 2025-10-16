@@ -51,9 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = await apiService.getCurrentUser(authToken);
       setUser(userData);
     } catch (error) {
-      // TODO: Implement proper error logging
-      // eslint-disable-next-line no-console
-      console.error('Error validating token:', error);
+      // TODO: Implement proper error logging service
       localStorage.removeItem('auth_token');
       setToken(null);
     } finally {

@@ -17,10 +17,11 @@
 
 'use client';
 
-import React, { forwardRef, useState, InputHTMLAttributes } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/lib/utils';
 import { Eye, EyeOff, Loader2, Search } from 'lucide-react';
+import React, { forwardRef, InputHTMLAttributes, useState } from 'react';
+
+import { cn } from '@/lib/utils';
 
 /**
  * Input variants using class-variance-authority
@@ -421,18 +422,21 @@ export function FormField({
 
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
-          return React.cloneElement(child as React.ReactElement<any>, {
-            id: name,
-            'aria-describedby': [
-              description && `${name}-description`,
-              error && `${name}-error`,
-              success && `${name}-success`,
-              warning && `${name}-warning`,
-            ]
-              .filter(Boolean)
-              .join(' '),
-            'aria-invalid': error ? 'true' : undefined,
-          });
+          return React.cloneElement(
+            child as React.ReactElement<React.InputHTMLAttributes<HTMLInputElement>>,
+            {
+              id: name,
+              'aria-describedby': [
+                description && `${name}-description`,
+                error && `${name}-error`,
+                success && `${name}-success`,
+                warning && `${name}-warning`,
+              ]
+                .filter(Boolean)
+                .join(' '),
+              'aria-invalid': error ? 'true' : undefined,
+            }
+          );
         }
         return child;
       })}
