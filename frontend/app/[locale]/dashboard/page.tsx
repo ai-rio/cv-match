@@ -32,7 +32,7 @@ interface UserStats {
 }
 
 function DashboardContent() {
-  const { user, logout, token } = useAuth();
+  const { user, logout } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [optimizations, setOptimizations] = useState<Optimization[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
@@ -42,16 +42,14 @@ function DashboardContent() {
 
   useEffect(() => {
     async function loadDashboardData() {
-      if (!user || !token) return;
+      if (!user) return;
 
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
         // Load user's credits from API
         const creditsResponse = await fetch(`${API_URL}/api/optimizations/credits/check`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: 'include',
         });
 
         let creditsData = {
@@ -133,7 +131,7 @@ function DashboardContent() {
     }
 
     loadDashboardData();
-  }, [user, token]);
+  }, [user]);
 
   const handleSignOut = () => {
     logout();
