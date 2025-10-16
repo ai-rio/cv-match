@@ -4,9 +4,8 @@ Database session and operations for cv-match backend.
 
 from typing import Any
 
-from supabase import Client, create_client
-
 from app.core.config import settings
+from supabase import Client, create_client
 
 
 class SupabaseSession:

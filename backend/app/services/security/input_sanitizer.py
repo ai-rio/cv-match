@@ -196,15 +196,16 @@ class InputSanitizer:
         Returns:
             SanitizationResult with sanitized text and metadata
         """
-        return self.sanitize_input(text, input_type, user_id, ip_address)
+        return self._sanitize_text_impl(text, input_type, user_id, ip_address)
 
-    def sanitize_input(
+    def _sanitize_text_impl(
         self,
         text: str,
         input_type: str = "prompt",
         user_id: str | None = None,
         ip_address: str | None = None,
     ) -> SanitizationResult:
+        """Implementation of text sanitization."""
         if not isinstance(text, str):
             return SanitizationResult(
                 is_safe=False,
@@ -307,6 +308,16 @@ class InputSanitizer:
             blocked_patterns=blocked_patterns,
             metadata=metadata,
         )
+
+    def sanitize_input(
+        self,
+        text: str,
+        input_type: str = "prompt",
+        user_id: str | None = None,
+        ip_address: str | None = None,
+    ) -> SanitizationResult:
+        """Alias for sanitize_text method."""
+        return self.sanitize_text(text, input_type, user_id, ip_address)
 
     def _get_max_length(self, input_type: str) -> int:
         """Get maximum allowed length for input type."""

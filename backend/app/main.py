@@ -33,7 +33,7 @@ app = FastAPI(
 
 # Custom middleware to handle OPTIONS requests properly
 class OptionsMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next: callable) -> Response:
         if request.method == "OPTIONS":
             return Response(status_code=200)
         return await call_next(request)
@@ -84,7 +84,7 @@ app.include_router(api_router, prefix="/api")
 
 
 @app.get("/")
-async def root():
+async def root() -> dict[str, str | bool]:
     """Health check endpoint."""
     sentry_config = get_sentry_config()
     return {
@@ -99,7 +99,7 @@ async def root():
 
 
 @app.get("/health/sentry")
-async def sentry_health():
+async def sentry_health() -> dict[str, str | bool | float]:
     """Sentry health check endpoint."""
     sentry_config = get_sentry_config()
 
@@ -112,7 +112,7 @@ async def sentry_health():
     return {
         "sentry_status": "enabled" if sentry_config.enabled else "disabled",
         "environment": sentry_config.environment,
-        "dsn_configured": bool(sentry_config.dsn),
+        "dsn_configured": bool(sentry_config.dsn) if sentry_config.dsn else False,
         "market": "brazil",
         "traces_sample_rate": settings.SENTRY_TRACES_SAMPLE_RATE,
         "profiles_sample_rate": settings.SENTRY_PROFILES_SAMPLE_RATE,
@@ -120,7 +120,7 @@ async def sentry_health():
 
 
 @app.get("/test/sentry-error")
-async def test_sentry_error():
+async def test_sentry_error() -> dict[str, str | bool]:
     """Test endpoint to trigger a Sentry error for testing (development only)."""
     if settings.ENVIRONMENT != "development":
         return {"error": "This endpoint is only available in development mode"}
@@ -143,7 +143,7 @@ async def test_sentry_error():
 
 
 @app.get("/health/security")
-async def security_health():
+async def security_health() -> dict[str, str | bool | dict[str, int | bool | str]]:
     """Security health check endpoint."""
     return {
         "security_status": "enabled",

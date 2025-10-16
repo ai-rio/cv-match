@@ -100,7 +100,7 @@ class FairnessMonitoringService:
     - Compliance monitoring for Brazilian law
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize fairness monitoring service."""
         self.pending_reviews: dict[str, HumanReviewRequest] = {}
         self.completed_reviews: list[HumanReviewRequest] = []
@@ -520,7 +520,7 @@ class FairnessMonitoringService:
                 fairness_violations = 0
 
             # Incident analysis
-            incidents_by_severity = {}
+            incidents_by_severity: dict[str, int] = {}
             for incident in relevant_incidents:
                 severity = incident.severity.value
                 incidents_by_severity[severity] = incidents_by_severity.get(severity, 0) + 1
@@ -535,7 +535,7 @@ class FairnessMonitoringService:
             )
 
             # Pending reviews by priority
-            pending_by_priority = {}
+            pending_by_priority: dict[str, int] = {}
             for review in self.pending_reviews.values():
                 priority = review.priority.value
                 pending_by_priority[priority] = pending_by_priority.get(priority, 0) + 1
@@ -602,17 +602,16 @@ class FairnessMonitoringService:
 
     def _calculate_average_review_time(self) -> float:
         """Calculate average time for human reviews."""
-        completed_with_times = [
-            r for r in self.completed_reviews if r.resolution_timestamp and r.timestamp
-        ]
+        review_times = []
 
-        if not completed_with_times:
+        for r in self.completed_reviews:
+            if r.resolution_timestamp is not None:
+                # Both timestamps are not None, safe to subtract
+                time_diff = r.resolution_timestamp - r.timestamp
+                review_times.append(time_diff.total_seconds() / 3600)  # Hours
+
+        if not review_times:
             return 0.0
-
-        review_times = [
-            (r.resolution_timestamp - r.timestamp).total_seconds() / 3600  # Hours
-            for r in completed_with_times
-        ]
 
         return statistics.mean(review_times)
 

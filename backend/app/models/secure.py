@@ -35,7 +35,7 @@ class SecureLoginRequest(SecureBaseModel):
 
     @field_validator("email")
     @classmethod
-    def validate_email(cls, v):
+    def validate_email(cls, v: str) -> str:
         """Validate email against injection patterns."""
         # Check for suspicious email patterns
         dangerous_patterns = [
@@ -56,7 +56,7 @@ class SecureLoginRequest(SecureBaseModel):
 
     @field_validator("password")
     @classmethod
-    def validate_password(cls, v):
+    def validate_password(cls, v: str) -> str:
         """Validate password against injection patterns."""
         # Check for SQL injection patterns
         sql_injection_patterns = [
@@ -86,7 +86,7 @@ class SecureUserRegistrationRequest(SecureBaseModel):
 
     @field_validator("full_name")
     @classmethod
-    def validate_full_name(cls, v):
+    def validate_full_name(cls, v: str) -> str:
         """Validate full name against injection patterns."""
         # Remove excessive whitespace
         v = " ".join(v.split())
@@ -121,7 +121,7 @@ class SecureFileUploadRequest(SecureBaseModel):
 
     @field_validator("filename")
     @classmethod
-    def validate_filename(cls, v):
+    def validate_filename(cls, v: str) -> str:
         """Validate filename against path traversal and injection attacks."""
         # Check for path traversal attempts
         if ".." in v or "/" in v or "\\" in v:
@@ -184,7 +184,7 @@ class SecurePaymentRequest(SecureBaseModel):
 
     @field_validator("amount")
     @classmethod
-    def validate_amount(cls, v):
+    def validate_amount(cls, v: int) -> int:
         """Validate payment amount to prevent injection and fraud."""
         # Check for reasonable limits for Brazilian market
         if v < 50:  # R$ 0,50 minimum
@@ -195,7 +195,7 @@ class SecurePaymentRequest(SecureBaseModel):
         return v
 
     @model_validator(mode="after")
-    def validate_payment_consistency(self):
+    def validate_payment_consistency(self) -> "SecurePaymentRequest":
         """Validate payment consistency for tier pricing."""
         tier_prices = {
             "basic": 2990,  # R$ 29,90
@@ -220,7 +220,7 @@ class SecureWebhookRequest(SecureBaseModel):
 
     @field_validator("event_type")
     @classmethod
-    def validate_event_type(cls, v):
+    def validate_event_type(cls, v: str) -> str:
         """Validate webhook event type against allowed types."""
         allowed_event_types = [
             "checkout.session.completed",
@@ -242,7 +242,7 @@ class SecureWebhookRequest(SecureBaseModel):
 
     @field_validator("signature")
     @classmethod
-    def validate_signature(cls, v):
+    def validate_signature(cls, v: str) -> str:
         """Validate webhook signature format."""
         # Basic signature format validation (Stripe signatures)
         if not re.match(r"^whsec_[a-zA-Z0-9]{24,}$", v):
@@ -258,7 +258,7 @@ class SecureUUIDRequest(SecureBaseModel):
 
     @field_validator("resource_id")
     @classmethod
-    def validate_uuid(cls, v):
+    def validate_uuid(cls, v: str) -> str:
         """Validate UUID format to prevent injection."""
         try:
             # Try to parse as UUID
@@ -277,7 +277,7 @@ class SecurePaginationRequest(SecureBaseModel):
 
     @field_validator("limit")
     @classmethod
-    def validate_limit(cls, v):
+    def validate_limit(cls, v: int) -> int:
         """Validate pagination limit to prevent resource exhaustion."""
         if v > 100:
             raise ValueError("Limit too large")
@@ -285,7 +285,7 @@ class SecurePaginationRequest(SecureBaseModel):
 
     @field_validator("offset")
     @classmethod
-    def validate_offset(cls, v):
+    def validate_offset(cls, v: int) -> int:
         """Validate pagination offset."""
         if v > 1000:
             raise ValueError("Offset too large")
@@ -300,7 +300,7 @@ class SecureSearchRequest(SecureBaseModel):
 
     @field_validator("query")
     @classmethod
-    def validate_search_query(cls, v):
+    def validate_search_query(cls, v: str) -> str:
         """Validate search query against injection attacks."""
         # Check for SQL injection patterns
         sql_patterns = [
@@ -333,7 +333,7 @@ class SecureTextContentRequest(SecureBaseModel):
 
     @field_validator("content")
     @classmethod
-    def validate_content(cls, v):
+    def validate_content(cls, v: str) -> str:
         """Validate content against injection attacks."""
         # Check for script injection
         script_patterns = [
@@ -360,10 +360,10 @@ class SecureTextContentRequest(SecureBaseModel):
 class SecureMetadataRequest(SecureBaseModel):
     """Secure metadata request with validation."""
 
-    metadata: dict[str, str] = Field(default_factory=dict, max_items=50)
+    metadata: dict[str, str] = Field(default_factory=lambda: dict[str, str], max_items=50)
 
     @model_validator(mode="after")
-    def validate_metadata(self):
+    def validate_metadata(self) -> "SecureMetadataRequest":
         """Validate metadata fields against injection."""
         if not self.metadata:
             return self

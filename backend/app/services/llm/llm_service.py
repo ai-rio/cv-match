@@ -12,51 +12,48 @@ from app.models.llm_models import LLMUsage
 
 class ProviderError(Exception):
     """Exception raised when LLM provider encounters an error."""
+
     pass
 
 
 class AgentManager:
     """Manager for LLM agents with multiple provider support."""
-    
+
     def __init__(self, provider: str = "openai"):
         """Initialize agent manager with specified provider."""
         self.provider = provider
         self.service = get_llm_service(provider)
-    
+
     async def generate(
         self,
         prompt: str,
         max_tokens: int = 1000,
         temperature: float = 0.7,
         model: str | None = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> str:
         """
         Generate text using the configured LLM provider.
-        
+
         Args:
             prompt: The prompt to send to the LLM
             max_tokens: Maximum tokens to generate
             temperature: Sampling temperature
             model: Model name (uses provider default if None)
             **kwargs: Additional parameters
-            
+
         Returns:
             Generated text as string
-            
+
         Raises:
             ProviderError: If LLM generation fails
         """
         try:
             if model is None:
                 model = "gpt-3.5-turbo" if self.provider == "openai" else "claude-3-sonnet-20240229"
-            
+
             response = await self.service.generate_text(
-                prompt=prompt,
-                model=model,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                **kwargs
+                prompt=prompt, model=model, max_tokens=max_tokens, temperature=temperature, **kwargs
             )
             return response.text
         except Exception as e:
@@ -76,7 +73,12 @@ class LLMService(ABC):
 
     @abstractmethod
     async def generate_text(
-        self, prompt: str, model: str, max_tokens: int = 500, temperature: float = 0.7, **kwargs: dict[str, Any]
+        self,
+        prompt: str,
+        model: str,
+        max_tokens: int = 500,
+        temperature: float = 0.7,
+        **kwargs: dict[str, Any],
     ) -> LLMResponse:
         """Generate text using the LLM."""
         pass
@@ -107,7 +109,7 @@ class OpenAIService(LLMService):
 
         if not response.usage:
             raise ValueError("OpenAI API returned no usage information")
-        
+
         if not response.choices or not response.choices[0].message.content:
             raise ValueError("OpenAI API returned no content")
 
@@ -145,7 +147,7 @@ class AnthropicService(LLMService):
 
         if not response.usage:
             raise ValueError("Anthropic API returned no usage information")
-        
+
         if not response.content or not response.content[0].text:
             raise ValueError("Anthropic API returned no content")
 

@@ -64,6 +64,50 @@ Build `/components-test` page showing all components.
 
 ---
 
+## 🔍 Type Checking Integration
+
+### Post-Implementation Type Check Instructions
+
+After completing the shadcn/ui component installation, perform comprehensive type checking to ensure type safety across the newly installed components.
+
+### Phase-Specific Type Validation Commands
+
+Execute the following commands in sequence to validate types:
+
+```bash
+# Run the project's type check script
+bun run type-check
+
+# Check all shadcn/ui components for type errors
+npx tsc --noEmit --skipLibCheck src/components/ui/*.tsx
+
+# Strict type checking for app routes
+npx tsc --noEmit src/app/**/*.{ts,tsx} --strict
+
+# Lint for unused variables in UI components
+npx eslint src/components/ui --ext .ts,.tsx --no-eslintrc --config '{ "rules": { "@typescript-eslint/no-unused-vars": "error" } }'
+```
+
+### Type Validation Checklist
+
+- [ ] All shadcn/ui components compile without type errors
+- [ ] App routes can properly import and use UI components
+- [ ] No unused variables in component files
+- [ ] Component props accept correct types
+- [ ] CSS variables are properly typed
+- [ ] Theme customization maintains type safety
+
+### Type Error Resolution Guidance
+
+If encountering type errors:
+
+1. **Component Import Errors**: Verify component exports in `src/components/ui/index.ts`
+2. **Missing Type Definitions**: Check if `@types/react` and `@types/react-dom` are up to date
+3. **CSS Variable Types**: Ensure theme variables are properly defined in CSS type declarations
+4. **Prop Type Mismatches**: Review component props against shadcn/ui documentation
+
+---
+
 ## ✅ Verification
 
 - [ ] All 15 components installed
@@ -71,6 +115,7 @@ Build `/components-test` page showing all components.
 - [ ] Playground page works
 - [ ] Theme applies to all components
 - [ ] No console errors
+- [ ] All type checks pass
 
 ---
 

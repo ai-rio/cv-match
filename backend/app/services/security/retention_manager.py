@@ -64,7 +64,7 @@ class RetentionPolicy(BaseModel):
     exceptions: list[str] = Field(default_factory=list)
 
     @validator("retention_days")
-    def validate_retention_days(cls, v, values):
+    def validate_retention_days(cls, v: int, values: dict[str, Any]) -> int:
         if v <= 0:
             raise ValueError("Retention days must be positive")
         return v
@@ -81,9 +81,9 @@ class RetentionTask:
     status: str = "pending"  # "pending", "running", "completed", "failed"
     records_processed: int = 0
     records_deleted: int = 0
-    errors: list[str] = None
+    errors: list[str] | None = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.errors is None:
             self.errors = []
 
@@ -105,7 +105,7 @@ class RetentionCleanupResult(BaseModel):
 class RetentionManager:
     """Service for managing data retention policies and cleanup."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize retention manager."""
         self.policies_db = SupabaseDatabaseService("retention_policies", dict)
         self.tasks_db = SupabaseDatabaseService("retention_tasks", dict)
@@ -211,7 +211,7 @@ class RetentionManager:
             policy_data["created_at"] = datetime.now(UTC).isoformat()
 
             result = await self.policies_db.create(policy_data)
-            policy_id = result["id"]
+            policy_id = str(result["id"])
 
             logger.info(f"Retention policy created: {policy_id} for {policy.data_category.value}")
             return policy_id
@@ -286,7 +286,7 @@ class RetentionManager:
             }
 
             result = await self.tasks_db.create(task_data)
-            task_id = result["id"]
+            task_id = str(result["id"])
 
             logger.info(f"Retention cleanup scheduled: {task_id} for {data_category.value}")
             return task_id
@@ -608,9 +608,10 @@ class RetentionManager:
         """
         try:
             policies = await self.get_retention_policies()
+            policies_by_category: dict[str, list[dict[str, Any]]] = {}
             status = {
                 "total_policies": len(policies),
-                "policies_by_category": {},
+                "policies_by_category": policies_by_category,
                 "recent_cleanup_results": [],
                 "scheduled_tasks": [],
                 "compliance_status": "compliant",
@@ -619,10 +620,10 @@ class RetentionManager:
             # Get policy breakdown
             for policy in policies:
                 category = policy.data_category.value
-                if category not in status["policies_by_category"]:
-                    status["policies_by_category"][category] = []
+                if category not in policies_by_category:
+                    policies_by_category[category] = []
 
-                status["policies_by_category"][category].append(
+                policies_by_category[category].append(
                     {
                         "retention_period": policy.retention_period.value,
                         "retention_days": policy.retention_days,
@@ -633,18 +634,14 @@ class RetentionManager:
 
             # Get recent cleanup results
             try:
-                recent_results = await self.results_db.list(
-                    filters={}, order_by="created_at", limit=10
-                )
+                recent_results = await self.results_db.list(filters={}, limit=10)
                 status["recent_cleanup_results"] = recent_results
             except Exception:
                 status["recent_cleanup_results"] = []
 
             # Get scheduled tasks
             try:
-                scheduled_tasks = await self.tasks_db.list(
-                    filters={"status": "pending"}, order_by="scheduled_date"
-                )
+                scheduled_tasks = await self.tasks_db.list(filters={"status": "pending"})
                 status["scheduled_tasks"] = scheduled_tasks
             except Exception:
                 status["scheduled_tasks"] = []

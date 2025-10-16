@@ -63,7 +63,7 @@ class ConsentRequest(BaseModel):
     user_agent: str | None = None
 
     @validator("legal_basis")
-    def validate_legal_basis(cls, v):
+    def validate_legal_basis(cls, v: str) -> str:
         valid_bases = [
             "consent",
             "contract",
@@ -118,7 +118,7 @@ class ConsentAuditEvent:
 class ConsentManager:
     """Service for managing user consents under LGPD."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize consent manager."""
         self.consent_types_db = SupabaseDatabaseService("consent_types", ConsentType)
         self.user_consents_db = SupabaseDatabaseService("user_consents", UserConsent)
@@ -133,7 +133,12 @@ class ConsentManager:
         """
         try:
             result = await self.consent_types_db.list(filters={"is_active": True})
-            return [ConsentType(**item) for item in result]
+            return [
+                ConsentType(**asdict(item))
+                if isinstance(item, ConsentType)
+                else ConsentType(**item)
+                for item in result
+            ]
         except Exception as e:
             logger.error(f"Failed to get consent types: {e}")
             raise
@@ -166,9 +171,7 @@ class ConsentManager:
 
             # Check if this is a required consent and user is revoking it
             if consent_type.is_required and not consent_request.granted:
-                raise ValueError(
-                    f"Cannot revoke required consent '{consent_type.consent_type_name}'"
-                )
+                raise ValueError(f"Cannot revoke required consent '{consent_type.name}'")
 
             # Revoke any existing consent first
             await self._revoke_existing_consent(user_id, consent_type.id)
@@ -191,7 +194,9 @@ class ConsentManager:
 
                 # Create consent record
                 result = await self.user_consents_db.create(consent_data)
-                consent_record = UserConsent(**result)
+                consent_record = UserConsent(
+                    **asdict(result) if isinstance(result, UserConsent) else result
+                )
 
                 # Log audit event
                 await self._log_consent_event(
@@ -222,10 +227,11 @@ class ConsentManager:
             )
 
             for consent in existing_consents:
-                if consent.get("revoked_at") is None:
+                consent_dict = asdict(consent) if isinstance(consent, UserConsent) else consent
+                if consent_dict.get("revoked_at") is None:
                     # Revoke the consent
                     await self.user_consents_db.update(
-                        consent["id"], {"revoked_at": datetime.now(UTC).isoformat()}
+                        consent_dict["id"], {"revoked_at": datetime.now(UTC).isoformat()}
                     )
 
                     # Log audit event
@@ -246,7 +252,9 @@ class ConsentManager:
         """Get consent type name by ID."""
         try:
             consent_type = await self.consent_types_db.get(consent_type_id)
-            return consent_type.get("name", "unknown")
+            if isinstance(consent_type, ConsentType):
+                return consent_type.name
+            return consent_type.get("name", "unknown") if consent_type else "unknown"
         except Exception:
             return "unknown"
 
@@ -281,8 +289,9 @@ class ConsentManager:
 
             active_consent = None
             for consent in user_consents:
-                if consent.get("revoked_at") is None:
-                    active_consent = consent
+                consent_dict = asdict(consent) if isinstance(consent, UserConsent) else consent
+                if consent_dict.get("revoked_at") is None:
+                    active_consent = consent_dict
                     break
 
             has_consent = active_consent is not None
@@ -327,10 +336,11 @@ class ConsentManager:
             consent_lookup = {}
 
             for consent in user_consents:
-                consent_name = await self._get_consent_type_name(consent["consent_type_id"])
-                consent_lookup[consent_name] = consent
+                consent_dict = asdict(consent) if isinstance(consent, UserConsent) else consent
+                consent_name = await self._get_consent_type_name(consent_dict["consent_type_id"])
+                consent_lookup[consent_name] = consent_dict
 
-                if consent.get("revoked_at") is None and consent["granted"]:
+                if consent_dict.get("revoked_at") is None and consent_dict["granted"]:
                     granted_consents.append(consent_name)
                 else:
                     revoked_consents.append(consent_name)
@@ -390,14 +400,15 @@ class ConsentManager:
             )
 
             for consent in user_consents:
-                if consent.get("revoked_at") is None:
+                consent_dict = asdict(consent) if isinstance(consent, UserConsent) else consent
+                if consent_dict.get("revoked_at") is None:
                     await self.user_consents_db.update(
-                        consent["id"], {"revoked_at": datetime.now(UTC).isoformat()}
+                        consent_dict["id"], {"revoked_at": datetime.now(UTC).isoformat()}
                     )
 
                     # Log audit event
                     consent_type_name = await self._get_consent_type_name(
-                        consent["consent_type_id"]
+                        consent_dict["consent_type_id"]
                     )
                     await self._log_consent_event(
                         user_id=user_id,

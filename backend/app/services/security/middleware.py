@@ -7,9 +7,9 @@ input sanitization and security monitoring to LLM API calls.
 
 import logging
 import time
-from typing import Any
+from typing import Any, Awaitable, Callable
 
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
@@ -22,13 +22,15 @@ logger = logging.getLogger(__name__)
 class SecurityMiddleware(BaseHTTPMiddleware):
     """Middleware to apply security measures to LLM endpoints."""
 
-    def __init__(self, app, enable_rate_limiting: bool = True):
+    def __init__(self, app: Any, enable_rate_limiting: bool = True) -> None:
         """Initialize security middleware."""
         super().__init__(app)
         self.enable_rate_limiting = enable_rate_limiting
         self.request_times: dict[str, list[float]] = {}  # Simple in-memory tracking
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         """Process request through security middleware."""
         start_time = time.time()
 

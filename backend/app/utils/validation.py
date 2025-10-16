@@ -95,12 +95,12 @@ class InjectionPatterns:
 class InputValidator:
     """Comprehensive input validator."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the input validator."""
         self.injection_patterns = InjectionPatterns()
         self._compile_patterns()
 
-    def _compile_patterns(self):
+    def _compile_patterns(self) -> None:
         """Compile regex patterns for better performance."""
         self.compiled_patterns = {}
 
@@ -182,9 +182,9 @@ class InputValidator:
 
         return result
 
-    def _check_injection_patterns(self, input_str: str, result: ValidationResult):
+    def _check_injection_patterns(self, input_str: str, result: ValidationResult) -> None:
         """Check for injection patterns in input."""
-        input_str.lower()
+        input_str = input_str.lower()
 
         for category, patterns in self.compiled_patterns.items():
             category_matched = False
@@ -258,7 +258,7 @@ class InputValidator:
 
         return text.strip()
 
-    def _validate_by_type(self, input_str: str, input_type: str, result: ValidationResult):
+    def _validate_by_type(self, input_str: str, input_type: str, result: ValidationResult) -> None:
         """Validate input based on specific type."""
         if input_type == "email":
             if not self._validate_email_format(input_str):

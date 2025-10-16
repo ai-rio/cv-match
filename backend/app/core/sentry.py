@@ -181,7 +181,9 @@ class SentryConfig:
                 data={"market": "brazil", "locale": "pt-BR"},
             )
 
-    def capture_exception(self, exception: Exception, context: dict[str, Any] | None = None) -> None:
+    def capture_exception(
+        self, exception: Exception, context: dict[str, Any] | None = None
+    ) -> None:
         """Capture exception with Brazilian context"""
         if not self.enabled:
             return
@@ -193,7 +195,12 @@ class SentryConfig:
 
         sentry_sdk.capture_exception(exception, extra=extra_data)
 
-    def capture_message(self, message: str, level: Literal["fatal", "critical", "error", "warning", "info", "debug"] = "info", context: dict[str, Any] | None = None) -> None:
+    def capture_message(
+        self,
+        message: str,
+        level: Literal["fatal", "critical", "error", "warning", "info", "debug"] = "info",
+        context: dict[str, Any] | None = None,
+    ) -> None:
         """Capture message with Brazilian context"""
         if not self.enabled:
             return

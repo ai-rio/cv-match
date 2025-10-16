@@ -326,6 +326,7 @@ class P0Verifier:
             import fastapi  # noqa: F401
             import httpx  # noqa: F401
             import pydantic  # noqa: F401
+
             import supabase  # noqa: F401
 
             self.log_verification(

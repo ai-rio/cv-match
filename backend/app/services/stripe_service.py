@@ -18,7 +18,7 @@ load_dotenv()
 class StripeService:
     """Service for Stripe payment operations with Brazilian market support."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize Stripe service with test mode configuration."""
         self.api_key = os.getenv("STRIPE_SECRET_KEY")
         if not self.api_key:
@@ -91,7 +91,7 @@ class StripeService:
 
         try:
             # Create checkout session with Brazilian configuration
-            session_params = {
+            session_params: dict[str, Any] = {
                 "payment_method_types": ["card"],  # Start with cards, add PIX later
                 "mode": "payment",  # One-time payment for credit packages
                 "currency": self.default_currency,
@@ -116,30 +116,26 @@ class StripeService:
                 }
             else:
                 # Create one-time payment for credit packages
-                session_params.update(
+                session_params["line_items"] = [
                     {
-                        "line_items": [  # type: ignore
-                            {
-                                "price_data": {
-                                    "currency": self.default_currency,
-                                    "unit_amount": pricing_tier.price,
-                                    "product_data": {
-                                        "name": pricing_tier.name,
-                                        "description": pricing_tier.description,
-                                        "images": [],
-                                        "metadata": {
-                                            "market": "brazil",
-                                            "language": "pt-br",
-                                            "credits": str(pricing_tier.credits),
-                                            "plan": plan_type,
-                                        },
-                                    },
+                        "price_data": {
+                            "currency": self.default_currency,
+                            "unit_amount": pricing_tier.price,
+                            "product_data": {
+                                "name": pricing_tier.name,
+                                "description": pricing_tier.description,
+                                "images": [],
+                                "metadata": {
+                                    "market": "brazil",
+                                    "language": "pt-br",
+                                    "credits": str(pricing_tier.credits),
+                                    "plan": plan_type,
                                 },
-                                "quantity": 1,
-                            }
-                        ]
+                            },
+                        },
+                        "quantity": 1,
                     }
-                )
+                ]
 
             # Create the checkout session
             session = stripe.checkout.Session.create(session_params)  # type: ignore
