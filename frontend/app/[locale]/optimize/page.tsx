@@ -938,10 +938,6 @@ function PaymentFlow({
 
       // Redirect to Stripe Checkout
       window.location.href = data.checkout_url;
-    } catch (error: unknown) {
-      // Payment error will be handled by the parent component
-      // TODO: Add proper error logging service
-      throw error;
     } finally {
       setIsProcessing(false);
     }

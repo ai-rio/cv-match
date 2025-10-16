@@ -250,9 +250,7 @@ AlertTitle.displayName = 'AlertTitle';
 /**
  * Alert Description Component
  */
-export interface AlertDescriptionProps extends HTMLAttributes<HTMLDivElement> {}
-
-const AlertDescription = forwardRef<HTMLDivElement, AlertDescriptionProps>(
+const AlertDescription = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
