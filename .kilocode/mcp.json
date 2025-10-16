@@ -45,6 +45,21 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "alwaysAllow": [
+        "sequentialthinking"
+      ]
+    },
+    "shadcn": {
+      "command": "bunx",
+      "args": [
+        "shadcn@latest",
+        "mcp"
+      ],
+      "alwaysAllow": [
+        "search_items_in_registries",
+        "view_items_in_registries",
+        "get_project_registries"
       ]
     }
   }
