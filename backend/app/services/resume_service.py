@@ -48,7 +48,7 @@ class ResumeService:
     def _validate_docx_dependencies(self) -> None:
         """Validate that DOCX processing dependencies are available."""
         try:
-            import markitdown.converters.docx  # Check if DOCX support is available
+            import markitdown.converters.docx  # type: ignore  # Check if DOCX support is available
         except ImportError:
             logger.warning(
                 "markitdown is missing DOCX support. Install with: pip install 'markitdown[docx]'"

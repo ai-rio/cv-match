@@ -12,14 +12,14 @@ from app.core.config import settings
 class SupabaseSession:
     """Supabase session wrapper for database operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.client: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_KEY)
 
 
 class DatabaseOperations:
     """Generic database operations for Supabase."""
 
-    def __init__(self, db: SupabaseSession):
+    def __init__(self, db: SupabaseSession) -> None:
         self.db = db
 
     async def select_by_id(
