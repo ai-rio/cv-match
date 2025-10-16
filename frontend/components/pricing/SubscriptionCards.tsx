@@ -64,7 +64,7 @@ export function SubscriptionCards() {
         window.location.href = data.checkout_url;
       }
     } catch (error: unknown) {
-      console.error('Checkout failed:', error);
+      // TODO: Add proper error logging service
       // TODO: Replace with proper toast notification when available
       // const errorMessage = error instanceof Error ? error.message : 'Erro ao processar pagamento. Tente novamente.';
       // alert(errorMessage);

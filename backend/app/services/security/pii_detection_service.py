@@ -119,7 +119,7 @@ class PIIMaskingStrategy:
 class PIIDetectionService:
     """Service for detecting and masking PII in text data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize PII detection service with Brazilian patterns."""
         self._init_brazilian_patterns()
         self._init_standard_patterns()

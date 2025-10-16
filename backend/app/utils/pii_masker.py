@@ -40,7 +40,7 @@ class MaskingRule:
 class PIIMasker:
     """Advanced PII masking utility with multiple strategies."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize PII masker with comprehensive rules."""
         self._init_brazilian_rules()
         self._init_standard_rules()
@@ -213,7 +213,7 @@ class PIIMasker:
             return rule.mask_char * len(value)
 
         # Extract non-digit characters for format preservation
-        [c for c in value if not c.isdigit()]
+        non_digits = [c for c in value if not c.isdigit()]
         digits = [c for c in value if c.isdigit()]
 
         if len(digits) <= rule.show_first + rule.show_last:
@@ -267,9 +267,9 @@ class PIIMasker:
             Dictionary with masked values
         """
         if not isinstance(data, dict):
-            return data
+            return {"error": "Input must be a dictionary"}
 
-        masked_data = {}
+        masked_data: dict[str, Any] = {}
 
         for key, value in data.items():
             if isinstance(value, str):
@@ -278,18 +278,19 @@ class PIIMasker:
                 if any(sensitive_key in key.lower() for sensitive_key in sensitive_keys):
                     masked_data[key] = self.mask_text(value, masking_level)
                 else:
-                    masked_data[key] = self.mask_text(value, masking_level)
+                    masked_data[key] = value  # Don't mask non-sensitive strings by default
             elif isinstance(value, dict):
                 masked_data[key] = self.mask_dict(value, masking_level)
             elif isinstance(value, list):
-                masked_data[key] = [
-                    self.mask_dict(item, masking_level)
-                    if isinstance(item, dict)
-                    else self.mask_text(item, masking_level)
-                    if isinstance(item, str)
-                    else item
-                    for item in value
-                ]
+                masked_list: list[Any] = []
+                for item in value:
+                    if isinstance(item, dict):
+                        masked_list.append(self.mask_dict(item, masking_level))
+                    elif isinstance(item, str):
+                        masked_list.append(self.mask_text(item, masking_level))
+                    else:
+                        masked_list.append(item)
+                masked_data[key] = masked_list
             else:
                 masked_data[key] = value
 
@@ -361,7 +362,11 @@ class PIIMasker:
         all_rules.update(self.standard_rules)
         all_rules.update(self.financial_rules)
 
-        validation_results = {"is_masked": False, "remaining_pii": [], "masking_quality": "poor"}
+        validation_results: dict[str, Any] = {
+            "is_masked": False,
+            "remaining_pii": [],
+            "masking_quality": "poor",
+        }
 
         for rule_name, rule in all_rules.items():
             original_matches = re.findall(rule.pattern, original, re.IGNORECASE | re.MULTILINE)

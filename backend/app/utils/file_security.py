@@ -377,11 +377,13 @@ class FileSecurityValidator:
     def _scan_for_scripts(self, file_content: bytes, result: FileSecurityResult) -> None:
         """Scan for embedded scripts."""
         # Check for script patterns
-        for pattern_name, patterns in self.malware_patterns["script_patterns"].items():
-            for pattern in patterns:
-                if re.search(pattern, file_content, re.IGNORECASE | re.DOTALL):
-                    result.warnings.append(f"Script pattern detected: {pattern_name}")
-                    result.blocked_patterns.append(f"script_{pattern_name}")
+        for pattern in self.malware_patterns["script_patterns"]:
+            if re.search(pattern, file_content, re.IGNORECASE | re.DOTALL):
+                pattern_name = pattern.decode("utf-8", errors="ignore")[
+                    :20
+                ]  # Truncate for readability
+                result.warnings.append(f"Script pattern detected: {pattern_name}")
+                result.blocked_patterns.append("script_pattern")
 
         # Additional checks for Office documents
         if file_content.startswith(b"PK\x03\x04"):  # DOCX
@@ -417,7 +419,7 @@ class FileSecurityValidator:
 
     def _extract_metadata(self, file_content: bytes, result: FileSecurityResult) -> None:
         """Extract safe metadata from file."""
-        metadata = {}
+        metadata: dict[str, Any] = {}
 
         # File info
         metadata["file_size"] = len(file_content)
@@ -439,7 +441,7 @@ class FileSecurityValidator:
 
     def _extract_pdf_metadata(self, content: bytes) -> dict[str, Any]:
         """Extract safe metadata from PDF file."""
-        metadata = {"file_type": "PDF"}
+        metadata: dict[str, Any] = {"file_type": "PDF"}
 
         try:
             # Extract PDF version
@@ -450,7 +452,7 @@ class FileSecurityValidator:
 
             # Count pages (basic estimation)
             page_count = content_str.count("/Type /Page")
-            metadata["estimated_pages"] = page_count
+            metadata["estimated_pages"] = str(page_count)
 
         except Exception as e:
             logger.warning(f"Failed to extract PDF metadata: {str(e)}")

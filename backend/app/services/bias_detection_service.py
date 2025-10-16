@@ -72,7 +72,7 @@ class BiasDetectionService:
     - Employment gaps (intervalos de emprego)
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize bias detection with Brazilian context."""
         self.protected_characteristics = self._initialize_protected_characteristics()
         self.pii_patterns = self._initialize_pii_patterns()

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import lru_cache
+from typing import Any
 
 import anthropic
 import openai
@@ -7,6 +8,56 @@ from pydantic import BaseModel
 
 from app.core.config import settings
 from app.models.llm_models import LLMUsage
+
+
+class ProviderError(Exception):
+    """Exception raised when LLM provider encounters an error."""
+
+    pass
+
+
+class AgentManager:
+    """Manager for LLM agents with multiple provider support."""
+
+    def __init__(self, provider: str = "openai"):
+        """Initialize agent manager with specified provider."""
+        self.provider = provider
+        self.service = get_llm_service(provider)
+
+    async def generate(
+        self,
+        prompt: str,
+        max_tokens: int = 1000,
+        temperature: float = 0.7,
+        model: str | None = None,
+        **kwargs: Any,
+    ) -> str:
+        """
+        Generate text using the configured LLM provider.
+
+        Args:
+            prompt: The prompt to send to the LLM
+            max_tokens: Maximum tokens to generate
+            temperature: Sampling temperature
+            model: Model name (uses provider default if None)
+            **kwargs: Additional parameters
+
+        Returns:
+            Generated text as string
+
+        Raises:
+            ProviderError: If LLM generation fails
+        """
+        try:
+            if model is None:
+                model = "gpt-3.5-turbo" if self.provider == "openai" else "claude-3-sonnet-20240229"
+
+            response = await self.service.generate_text(
+                prompt=prompt, model=model, max_tokens=max_tokens, temperature=temperature, **kwargs
+            )
+            return response.text
+        except Exception as e:
+            raise ProviderError(f"LLM generation failed: {str(e)}") from e
 
 
 class LLMResponse(BaseModel):
@@ -22,7 +73,12 @@ class LLMService(ABC):
 
     @abstractmethod
     async def generate_text(
-        self, prompt: str, model: str, max_tokens: int = 500, temperature: float = 0.7, **kwargs
+        self,
+        prompt: str,
+        model: str,
+        max_tokens: int = 500,
+        temperature: float = 0.7,
+        **kwargs: dict[str, Any],
     ) -> LLMResponse:
         """Generate text using the LLM."""
         pass
@@ -41,7 +97,7 @@ class OpenAIService(LLMService):
         model: str = "gpt-3.5-turbo",
         max_tokens: int = 500,
         temperature: float = 0.7,
-        **kwargs,
+        **kwargs: dict[str, Any],
     ) -> LLMResponse:
         """Generate text using OpenAI."""
         response = await self.client.chat.completions.create(
@@ -49,8 +105,13 @@ class OpenAIService(LLMService):
             messages=[{"role": "user", "content": prompt}],
             max_tokens=max_tokens,
             temperature=temperature,
-            **kwargs,
         )
+
+        if not response.usage:
+            raise ValueError("OpenAI API returned no usage information")
+
+        if not response.choices or not response.choices[0].message.content:
+            raise ValueError("OpenAI API returned no content")
 
         usage = LLMUsage(
             prompt_tokens=response.usage.prompt_tokens,
@@ -74,7 +135,7 @@ class AnthropicService(LLMService):
         model: str = "claude-3-sonnet-20240229",
         max_tokens: int = 500,
         temperature: float = 0.7,
-        **kwargs,
+        **kwargs: dict[str, Any],
     ) -> LLMResponse:
         """Generate text using Anthropic Claude."""
         response = await self.client.messages.create(
@@ -82,8 +143,13 @@ class AnthropicService(LLMService):
             max_tokens=max_tokens,
             temperature=temperature,
             messages=[{"role": "user", "content": prompt}],
-            **kwargs,
         )
+
+        if not response.usage:
+            raise ValueError("Anthropic API returned no usage information")
+
+        if not response.content or not response.content[0].text:
+            raise ValueError("Anthropic API returned no content")
 
         usage = LLMUsage(
             prompt_tokens=response.usage.input_tokens,

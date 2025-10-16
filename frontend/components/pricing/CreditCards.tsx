@@ -77,7 +77,7 @@ export function CreditCards() {
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Erro ao processar pagamento. Tente novamente.';
-      console.error('Payment failed:', error);
+      // TODO: Add proper error logging service
       setError(errorMessage);
     } finally {
       setProcessingTier(null);

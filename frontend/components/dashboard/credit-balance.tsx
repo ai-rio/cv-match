@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService } from '@/lib/api';
 
 interface CreditBalance {
   credits_remaining: number;
@@ -18,17 +17,8 @@ interface CreditBalance {
   upgrade_prompt?: string;
 }
 
-interface CreditBalanceResponse {
-  credits_remaining: number;
-  total_credits: number;
-  tier: string;
-  is_pro: boolean;
-  can_optimize: boolean;
-  upgrade_prompt?: string;
-}
-
 export default function CreditBalance() {
-  const { token, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [creditData, setCreditData] = useState<CreditBalance | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,18 +27,27 @@ export default function CreditBalance() {
 
   useEffect(() => {
     const fetchCreditBalance = async () => {
-      if (!isAuthenticated || !token) {
+      if (!isAuthenticated) {
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
-        const response = await apiService.get<CreditBalanceResponse>('/api/users/credits', token);
-        setCreditData(response);
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const response = await fetch(`${API_URL}/api/users/credits`, {
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch credits');
+        }
+
+        const data = await response.json();
+        setCreditData(data);
         setError(null);
-      } catch (err) {
-        console.error('Error fetching credit balance:', err);
+      } catch {
+        // TODO: Add proper error logging service
         setError('Não foi possível carregar seus créditos. Tente novamente mais tarde.');
         setCreditData(null);
       } finally {
@@ -57,7 +56,7 @@ export default function CreditBalance() {
     };
 
     fetchCreditBalance();
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated]);
 
   if (!isAuthenticated) {
     return (

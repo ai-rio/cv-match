@@ -4,6 +4,7 @@ Configures error tracking and performance monitoring for FastAPI application
 """
 
 import logging
+from typing import Any, Literal
 
 import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
@@ -19,12 +20,12 @@ logger = logging.getLogger(__name__)
 class SentryConfig:
     """Sentry configuration management for CV-Match backend"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.dsn: str | None = None
         self.environment: str | None = None
         self.enabled: bool = False
 
-    def load_config(self):
+    def load_config(self) -> None:
         """Load Sentry configuration from environment"""
         self.dsn = settings.SENTRY_DSN
         self.environment = settings.ENVIRONMENT
@@ -35,7 +36,7 @@ class SentryConfig:
         else:
             logger.info("Sentry disabled - no DSN configured")
 
-    def init_sentry(self):
+    def init_sentry(self) -> None:
         """Initialize Sentry SDK with Brazilian market context"""
         if not self.enabled:
             logger.info("Skipping Sentry initialization - disabled")
@@ -83,7 +84,7 @@ class SentryConfig:
         except Exception as e:
             logger.error(f"Failed to initialize Sentry: {e}")
 
-    def _add_brazilian_context(self, event, hint):
+    def _add_brazilian_context(self, event: Any, hint: Any) -> Any:
         """Add Brazilian market context to Sentry events"""
         if event is None:
             return event
@@ -130,7 +131,7 @@ class SentryConfig:
 
         return event
 
-    def _add_brazilian_breadcrumb_context(self, breadcrumb, hint):
+    def _add_brazilian_breadcrumb_context(self, breadcrumb: Any, hint: Any) -> Any:
         """Add Brazilian context to breadcrumbs"""
         if breadcrumb is None:
             return breadcrumb
@@ -146,7 +147,7 @@ class SentryConfig:
 
         return os.getenv("APP_VERSION", "cv-match@1.0.0")
 
-    def set_user_context(self, user_id: str, email: str = None, **kwargs):
+    def set_user_context(self, user_id: str, email: str | None = None, **kwargs: Any) -> None:
         """Set user context for Brazilian users"""
         if not self.enabled:
             return
@@ -163,14 +164,14 @@ class SentryConfig:
 
         sentry_sdk.set_user(user_data)
 
-    def set_transaction_name(self, name: str):
+    def set_transaction_name(self, name: str) -> None:
         """Set transaction name with Brazilian context"""
         if self.enabled:
             # Note: set_transaction is deprecated in newer Sentry versions
             # Transaction naming is handled automatically by FastAPI integration
             pass
 
-    def add_breadcrumb(self, message: str, category: str = "default", level: str = "info"):
+    def add_breadcrumb(self, message: str, category: str = "default", level: str = "info") -> None:
         """Add breadcrumb with Brazilian context"""
         if self.enabled:
             sentry_sdk.add_breadcrumb(
@@ -180,7 +181,9 @@ class SentryConfig:
                 data={"market": "brazil", "locale": "pt-BR"},
             )
 
-    def capture_exception(self, exception: Exception, context: dict = None):
+    def capture_exception(
+        self, exception: Exception, context: dict[str, Any] | None = None
+    ) -> None:
         """Capture exception with Brazilian context"""
         if not self.enabled:
             return
@@ -192,7 +195,12 @@ class SentryConfig:
 
         sentry_sdk.capture_exception(exception, extra=extra_data)
 
-    def capture_message(self, message: str, level: str = "info", context: dict = None):
+    def capture_message(
+        self,
+        message: str,
+        level: Literal["fatal", "critical", "error", "warning", "info", "debug"] = "info",
+        context: dict[str, Any] | None = None,
+    ) -> None:
         """Capture message with Brazilian context"""
         if not self.enabled:
             return
@@ -209,7 +217,7 @@ class SentryConfig:
 sentry_config = SentryConfig()
 
 
-def init_sentry():
+def init_sentry() -> None:
     """Initialize Sentry for the FastAPI application"""
     sentry_config.load_config()
     sentry_config.init_sentry()

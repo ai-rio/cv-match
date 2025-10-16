@@ -8,9 +8,7 @@ export async function GET(): Promise<NextResponse<HealthCheckResponse | BaseAPIR
     // This is a Server Component, so we're making this request from the container
     const apiUrl = 'http://backend:8000';
 
-    // TODO: Implement proper logging
-    // eslint-disable-next-line no-console
-    console.log(`Checking backend health at: ${apiUrl}`);
+    // TODO: Implement proper logging service
 
     // Attempt to connect to the backend
     const response = await fetch(`${apiUrl}/`, {
@@ -42,9 +40,7 @@ export async function GET(): Promise<NextResponse<HealthCheckResponse | BaseAPIR
       timestamp: new Date().toISOString(),
     } as HealthCheckResponse);
   } catch (error) {
-    // TODO: Implement proper error logging
-    // eslint-disable-next-line no-console
-    console.error('Health check error:', error);
+    // TODO: Implement proper error logging service
     return NextResponse.json(
       {
         status: 'error',

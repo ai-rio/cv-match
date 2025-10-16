@@ -24,7 +24,7 @@ class PricingTier:
     features: list[str] | None = None
     popular: bool = False
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.features is None:
             self.features = []
 
@@ -32,7 +32,7 @@ class PricingTier:
 class BrazilianPricingConfig:
     """Brazilian market pricing configuration."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.currency = "brl"
         self.country = "BR"
         self.locale = "pt-BR"

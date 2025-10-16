@@ -125,7 +125,7 @@ class DataSubjectRightsResponse(BaseModel):
 class DataSubjectRightsManager:
     """Service for managing LGPD data subject rights."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize data subject rights manager."""
         self.requests_db = SupabaseDatabaseService("data_subject_requests", dict)
         self.profiles_db = SupabaseDatabaseService("profiles", dict)
@@ -156,7 +156,7 @@ class DataSubjectRightsManager:
             }
 
             result = await self.requests_db.create(request_data)
-            request_id = result["id"]
+            request_id = str(result["id"])
 
             logger.info(f"Data access request created: {request_id} for user {request.user_id}")
             return request_id
@@ -252,7 +252,7 @@ class DataSubjectRightsManager:
             }
 
             result = await self.requests_db.create(request_data)
-            request_id = result["id"]
+            request_id = str(result["id"])
 
             logger.info(f"Data correction request created: {request_id} for user {request.user_id}")
             return request_id
@@ -351,7 +351,7 @@ class DataSubjectRightsManager:
             }
 
             result = await self.requests_db.create(request_data)
-            request_id = result["id"]
+            request_id = str(result["id"])
 
             logger.info(f"Data deletion request created: {request_id} for user {request.user_id}")
             return request_id
@@ -448,7 +448,7 @@ class DataSubjectRightsManager:
             }
 
             result = await self.requests_db.create(request_data)
-            request_id = result["id"]
+            request_id = str(result["id"])
 
             logger.info(
                 f"Data portability request created: {request_id} for user {request.user_id}"
@@ -526,7 +526,7 @@ class DataSubjectRightsManager:
     async def _collect_user_data(self, user_id: str) -> dict[str, Any]:
         """Collect all user data for access requests."""
         try:
-            user_data = {
+            user_data: dict[str, Any] = {
                 "user_id": user_id,
                 "export_date": datetime.now(UTC).isoformat(),
                 "data_categories": {},
@@ -616,7 +616,7 @@ class DataSubjectRightsManager:
             specific_data_types = deletion_request.get("specific_data_types", [])
             retain_legal_required = deletion_request.get("retain_legal_required", True)
 
-            deletion_results = {"deleted_data": {}, "retained_data": {}}
+            deletion_results: dict[str, dict[str, str]] = {"deleted_data": {}, "retained_data": {}}
 
             if deletion_scope == "all":
                 # Full data deletion (right to be forgotten)
@@ -635,24 +635,34 @@ class DataSubjectRightsManager:
                 # Delete specific data types
                 for data_type in specific_data_types:
                     if data_type == "optimizations":
-                        await self.optimizations_db.update_many(
-                            filters={"user_id": user_id},
-                            data={"deleted_at": datetime.now(UTC).isoformat()},
+                        # Update each optimization individually since update_many doesn't exist
+                        optimizations = await self.optimizations_db.list(
+                            filters={"user_id": user_id}
                         )
+                        for opt in optimizations:
+                            await self.optimizations_db.update(
+                                opt["id"], {"deleted_at": datetime.now(UTC).isoformat()}
+                            )
                         deletion_results["deleted_data"][data_type] = (
                             "Optimization records soft deleted"
                         )
                     elif data_type == "resumes":
-                        await self.resumes_db.update_many(
-                            filters={"user_id": user_id},
-                            data={"deleted_at": datetime.now(UTC).isoformat()},
-                        )
+                        # Update each resume individually since update_many doesn't exist
+                        resumes = await self.resumes_db.list(filters={"user_id": user_id})
+                        for resume in resumes:
+                            await self.resumes_db.update(
+                                resume["id"], {"deleted_at": datetime.now(UTC).isoformat()}
+                            )
                         deletion_results["deleted_data"][data_type] = "Resume records soft deleted"
                     elif data_type == "job_descriptions":
-                        await self.job_descriptions_db.update_many(
-                            filters={"user_id": user_id},
-                            data={"deleted_at": datetime.now(UTC).isoformat()},
+                        # Update each job description individually since update_many doesn't exist
+                        job_descs = await self.job_descriptions_db.list(
+                            filters={"user_id": user_id}
                         )
+                        for jd in job_descs:
+                            await self.job_descriptions_db.update(
+                                jd["id"], {"deleted_at": datetime.now(UTC).isoformat()}
+                            )
                         deletion_results["deleted_data"][data_type] = (
                             "Job description records soft deleted"
                         )
@@ -710,10 +720,16 @@ class DataSubjectRightsManager:
         """Permanent deletion of all user data."""
         try:
             # Delete from all tables
-            await self.usage_tracking_db.delete_many(filters={"user_id": user_id})
-            await self.job_descriptions_db.delete_many(filters={"user_id": user_id})
-            await self.resumes_db.delete_many(filters={"user_id": user_id})
-            await self.optimizations_db.delete_many(filters={"user_id": user_id})
+            # Delete each record individually since delete_many doesn't exist
+            for db in [
+                self.usage_tracking_db,
+                self.job_descriptions_db,
+                self.resumes_db,
+                self.optimizations_db,
+            ]:
+                records = await db.list(filters={"user_id": user_id})
+                for record in records:
+                    await db.delete(record["id"])
             await self.profiles_db.delete(user_id)
 
             logger.info(f"Permanent deletion completed for user {user_id}")
@@ -728,18 +744,16 @@ class DataSubjectRightsManager:
             # Soft delete all user data
             timestamp = datetime.now(UTC).isoformat()
 
-            await self.usage_tracking_db.update_many(
-                filters={"user_id": user_id}, data={"deleted_at": timestamp}
-            )
-            await self.job_descriptions_db.update_many(
-                filters={"user_id": user_id}, data={"deleted_at": timestamp}
-            )
-            await self.resumes_db.update_many(
-                filters={"user_id": user_id}, data={"deleted_at": timestamp}
-            )
-            await self.optimizations_db.update_many(
-                filters={"user_id": user_id}, data={"deleted_at": timestamp}
-            )
+            # Update each record individually since update_many doesn't exist
+            for db in [
+                self.usage_tracking_db,
+                self.job_descriptions_db,
+                self.resumes_db,
+                self.optimizations_db,
+            ]:
+                records = await db.list(filters={"user_id": user_id})
+                for record in records:
+                    await db.update(record["id"], {"deleted_at": timestamp})
             await self.profiles_db.update(user_id, {"deleted_at": timestamp})
 
             logger.info(f"Soft deletion completed for user {user_id}")
@@ -765,7 +779,7 @@ class DataSubjectRightsManager:
 data_subject_rights_manager = DataSubjectRightsManager()
 
 
-async def create_data_access_request(user_id: str, justification: str = None) -> str:
+async def create_data_access_request(user_id: str, justification: str | None = None) -> str:
     """
     Convenience function to create data access request.
 

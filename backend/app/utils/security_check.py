@@ -19,13 +19,15 @@ logger = logging.getLogger(__name__)
 class SecurityCheckResult:
     """Result of security configuration check."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.passed = 0
         self.failed = 0
         self.warnings = 0
         self.results: list[dict[str, Any]] = []
 
-    def add_result(self, name: str, status: str, message: str, details: dict[str, Any] = None):
+    def add_result(
+        self, name: str, status: str, message: str, details: dict[str, Any] | None = None
+    ) -> None:
         """Add a security check result."""
         self.results.append(
             {
@@ -57,7 +59,7 @@ class SecurityCheckResult:
 class SecurityChecker:
     """Security configuration checker."""
 
-    def __init__(self, app: FastAPI):
+    def __init__(self, app: FastAPI) -> None:
         """Initialize security checker."""
         self.app = app
         self.result = SecurityCheckResult()
@@ -93,7 +95,7 @@ class SecurityChecker:
         logger.info(f"Security checks completed: {self.result.get_summary()}")
         return self.result
 
-    def _check_input_validation(self):
+    def _check_input_validation(self) -> None:
         """Check input validation configuration."""
         # Check if input sanitizer is configured
         try:
@@ -129,7 +131,7 @@ class SecurityChecker:
                 "Secure Pydantic Models", "FAIL", f"Secure Pydantic models not available: {str(e)}"
             )
 
-    def _check_rate_limiting(self):
+    def _check_rate_limiting(self) -> None:
         """Check rate limiting configuration."""
         if settings.ENABLE_RATE_LIMITING:
             self.result.add_result(
@@ -144,7 +146,7 @@ class SecurityChecker:
         else:
             self.result.add_result("Rate Limiting", "WARN", "Rate limiting is disabled")
 
-    def _check_security_headers(self):
+    def _check_security_headers(self) -> None:
         """Check security headers configuration."""
 
         # Check if middleware is configured to add security headers
@@ -170,7 +172,7 @@ class SecurityChecker:
                 f"Error checking security middleware: {str(e)}",
             )
 
-    def _check_file_upload_security(self):
+    def _check_file_upload_security(self) -> None:
         """Check file upload security configuration."""
         try:
             from app.utils.file_security import FileSecurityConfig, default_validator
@@ -201,12 +203,12 @@ class SecurityChecker:
                 "File Upload Security", "FAIL", f"File security configuration error: {str(e)}"
             )
 
-    def _check_cors_configuration(self):
+    def _check_cors_configuration(self) -> None:
         """Check CORS configuration."""
         try:
             # Check CORS middleware configuration
             cors_configured = False
-            allowed_origins = []
+            allowed_origins: list[str] = []
 
             for middleware in self.app.user_middleware:
                 if "CORSMiddleware" in str(middleware.cls):
@@ -214,7 +216,9 @@ class SecurityChecker:
                     # Try to extract CORS configuration
                     if hasattr(middleware, "kwargs"):
                         options = middleware.kwargs
-                        allowed_origins = options.get("allow_origins", [])
+                        origins = options.get("allow_origins", [])
+                        if isinstance(origins, list):
+                            allowed_origins = origins
                     break
 
             if cors_configured:
@@ -231,7 +235,7 @@ class SecurityChecker:
                 "CORS Configuration", "FAIL", f"Error checking CORS configuration: {str(e)}"
             )
 
-    def _check_logging_configuration(self):
+    def _check_logging_configuration(self) -> None:
         """Check logging configuration."""
         if settings.ENABLE_SECURITY_LOGGING:
             self.result.add_result(
@@ -243,7 +247,7 @@ class SecurityChecker:
         else:
             self.result.add_result("Security Logging", "WARN", "Security logging is disabled")
 
-    def _check_environment_variables(self):
+    def _check_environment_variables(self) -> None:
         """Check security-related environment variables."""
         security_env_vars = {
             "ENABLE_RATE_LIMITING": settings.ENABLE_RATE_LIMITING,
@@ -270,7 +274,7 @@ class SecurityChecker:
             {**security_env_vars, **sensitive_config},
         )
 
-    def _check_middleware_configuration(self):
+    def _check_middleware_configuration(self) -> None:
         """Check overall middleware configuration."""
         middleware_count = len(self.app.user_middleware)
         middleware_types = []
@@ -308,7 +312,7 @@ def run_security_checks(app: FastAPI) -> dict[str, Any]:
     result = checker.run_all_checks()
 
     return {
-        "timestamp": logger.info("Security checks completed"),
+        "timestamp": logger.info("Security checks completed"),  # type: ignore
         "summary": result.get_summary(),
         "detailed_results": result.results,
         "recommendations": _generate_recommendations(result),
@@ -367,7 +371,7 @@ def _generate_recommendations(result: SecurityCheckResult) -> list[str]:
     return recommendations
 
 
-def print_security_report(check_results: dict[str, Any]):
+def print_security_report(check_results: dict[str, Any]) -> None:
     """Print a formatted security report."""
     print("\n" + "=" * 60)
     print("CV-MATCH SECURITY CONFIGURATION REPORT")

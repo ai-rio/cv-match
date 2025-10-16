@@ -26,7 +26,7 @@ class JSONWrapper(Strategy):
 
         # 1) Try direct parse first
         try:
-            return json.loads(response)
+            return json.loads(response)  # type: ignore[no-any-return]
         except json.JSONDecodeError:
             pass
 
@@ -35,7 +35,7 @@ class JSONWrapper(Strategy):
         for fence_match in FENCE_PATTERN.finditer(response):
             fenced = fence_match.group(1).strip()
             try:
-                return json.loads(fenced)
+                return json.loads(fenced)  # type: ignore[no-any-return]
             except json.JSONDecodeError:
                 continue
 
@@ -48,11 +48,11 @@ class JSONWrapper(Strategy):
 
         for _, candidate in candidates:
             try:
-                return json.loads(candidate)
+                return json.loads(candidate)  # type: ignore[no-any-return]
             except json.JSONDecodeError:
                 candidate2 = candidate.replace("```", "").strip()
                 try:
-                    return json.loads(candidate2)
+                    return json.loads(candidate2)  # type: ignore[no-any-return]
                 except json.JSONDecodeError:
                     continue
 

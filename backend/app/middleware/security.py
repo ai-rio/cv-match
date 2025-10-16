@@ -34,12 +34,12 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
     def __init__(
         self,
-        app,
+        app: Any,
         enable_rate_limiting: bool = True,
         enable_input_validation: bool = True,
         enable_security_headers: bool = True,
         max_request_size: int = 10 * 1024 * 1024,  # 10MB
-    ):
+    ) -> None:
         """Initialize security middleware."""
         super().__init__(app)
         self.enable_rate_limiting = enable_rate_limiting
@@ -85,7 +85,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             r"powershell",  # Command injection
         ]
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next: Any) -> Response:
         """Process request through security middleware."""
         start_time = time.time()
         client_ip = self._get_client_ip(request)
@@ -342,12 +342,12 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
     to prevent injection attacks and ensure input security.
     """
 
-    def __init__(self, app, enable_validation: bool = True):
+    def __init__(self, app: Any, enable_validation: bool = True) -> None:
         """Initialize input validation middleware."""
         super().__init__(app)
         self.enable_validation = enable_validation
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next: Any) -> Response:
         """Process request through input validation."""
         if not self.enable_validation:
             return await call_next(request)
@@ -441,13 +441,13 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
     debugging purposes.
     """
 
-    def __init__(self, app, log_body: bool = False, max_body_size: int = 1024):
+    def __init__(self, app: Any, log_body: bool = False, max_body_size: int = 1024) -> None:
         """Initialize request logging middleware."""
         super().__init__(app)
         self.log_body = log_body
         self.max_body_size = max_body_size
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next: Any) -> Response:
         """Process request with logging."""
         start_time = time.time()
 
@@ -547,13 +547,13 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
 # Factory function for creating security middleware
 def create_security_middleware(
-    app,
+    app: Any,
     enable_rate_limiting: bool = True,
     enable_input_validation: bool = True,
     enable_security_headers: bool = True,
     enable_request_logging: bool = True,
     max_request_size: int = 10 * 1024 * 1024,
-):
+) -> Any:
     """
     Create and configure security middleware stack.
 

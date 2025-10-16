@@ -36,7 +36,8 @@ export default function PaymentSuccess() {
           setCredits(data.credits || 0);
         }
       } catch (error) {
-        console.error('Error fetching credits:', error);
+        // Log error silently in production
+        // TODO: Add proper error logging service
       } finally {
         setLoading(false);
       }
@@ -74,12 +75,14 @@ export default function PaymentSuccess() {
             ) : null}
 
             <div className="space-y-3">
-              <Button className="w-full" asChild>
-                <Link href="/dashboard">Ir para Dashboard</Link>
-              </Button>
-              <Button variant="outline" className="w-full" asChild>
-                <Link href="/optimize">Otimizar Currículo</Link>
-              </Button>
+              <Link href="/dashboard" className="block">
+                <Button className="w-full">Ir para Dashboard</Button>
+              </Link>
+              <Link href="/optimize" className="block">
+                <Button variant="outline" className="w-full">
+                  Otimizar Currículo
+                </Button>
+              </Link>
             </div>
 
             <div className="text-xs text-gray-500 space-y-1">

@@ -23,7 +23,7 @@ class TextExtractionError(Exception):
 class TextExtractionService:
     """Service for extracting text from resume files."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize text extraction service."""
         self.supported_formats = [".pdf", ".docx"]
 

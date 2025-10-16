@@ -91,3 +91,5 @@ supabase/.temp
 .claude/
 .env.sentry-build-plugin
 .claude/settings.local.json
+docs/mocks/
+.gitignore

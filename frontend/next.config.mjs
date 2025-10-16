@@ -6,8 +6,8 @@ const withNextIntl = createNextIntlPlugin('./i18n.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    // Temporarily ignore ESLint errors during build for P0 verification
-    ignoreDuringBuilds: true,
+    // Only ignore ESLint errors in development, not in production
+    ignoreDuringBuilds: process.env.NODE_ENV === 'development',
   },
   async rewrites() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';

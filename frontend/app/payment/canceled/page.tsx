@@ -33,12 +33,14 @@ export default function PaymentCanceled() {
             </div>
 
             <div className="space-y-3">
-              <Button className="w-full" asChild>
-                <Link href="/pricing">Ver Planos</Link>
-              </Button>
-              <Button variant="outline" className="w-full" asChild>
-                <Link href="/dashboard">Voltar ao Dashboard</Link>
-              </Button>
+              <Link href="/pricing" className="block">
+                <Button className="w-full">Ver Planos</Button>
+              </Link>
+              <Link href="/dashboard" className="block">
+                <Button variant="outline" className="w-full">
+                  Voltar ao Dashboard
+                </Button>
+              </Link>
             </div>
 
             <div className="text-xs text-gray-500 space-y-1">

@@ -24,7 +24,7 @@ fi
 # Check for staged Python files and run linting and type checking
 if git diff --cached --name-only | grep -q "\.py$"; then
     echo "🐍 Running Python linting and formatting..."
-    cd backend && . .venv-fixed/bin/activate
+    cd backend
 
     echo "  📝 Running ruff linting..."
     ruff check . --fix --select=E,W,F,I --ignore=E501,F401,E722,F841,F821 || {

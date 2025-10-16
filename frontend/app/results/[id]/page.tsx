@@ -147,8 +147,10 @@ export default function ResultsPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao baixar arquivo. Por favor, tente novamente.');
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erro ao baixar arquivo. Por favor, tente novamente.';
+      setError(errorMessage);
     } finally {
       setDownloading(false);
     }

@@ -143,9 +143,9 @@ jobs:
         run: |
           echo "Analyzing frontend TypeScript errors..."
 
-          # Run TypeScript build and capture errors
+          # Run TypeScript type check and capture errors
           cd frontend
-          BUILD_OUTPUT=$(bun run build 2>&1)
+          BUILD_OUTPUT=$(bun run type-check 2>&1)
           ERROR_COUNT=$(echo "$BUILD_OUTPUT" | grep -c "error TS" || echo "0")
 
           echo "frontend-errors=$ERROR_COUNT" >> $GITHUB_OUTPUT
@@ -481,7 +481,7 @@ jobs:
 
           # Re-run type checking
           cd frontend
-          BUILD_OUTPUT=$(bun run build 2>&1)
+          BUILD_OUTPUT=$(bun run type-check 2>&1)
           NEW_ERROR_COUNT=$(echo "$BUILD_OUTPUT" | grep -c "error TS" || echo "0")
 
           cd ../backend
