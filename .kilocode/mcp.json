@@ -1,23 +1,14 @@
 {
   "mcpServers": {
-    "serena": {
-      "command": "uvx",
+    "context7": {
+      "type": "streamable-http",
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "sequentialthinking": {
+      "command": "npx",
       "args": [
-        "--from",
-        "git+https://github.com/oraios/serena",
-        "serena",
-        "start-mcp-server",
-        "--context",
-        "ide-assistant"
-      ],
-      "alwaysAllow": [
-        "list_dir",
-        "get_symbols_overview",
-        "find_symbol",
-        "read_memory",
-        "search_for_pattern",
-        "find_referencing_symbols",
-        "activate_project"
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
       ]
     },
     "brave-search": {
@@ -27,39 +18,38 @@
         "@modelcontextprotocol/server-brave-search"
       ],
       "env": {
-        "BRAVE_API_KEY": "BSAnvp-gWxQKFORwwgR_9MSr0VG3odR"
+        "BRAVE_API_KEY": "ctx7sk-f64eb40b-2d19-4b35-88c6-378b06364062"
       }
     },
-    "context7": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp"
-      ],
-      "env": {
-        "DEFAULT_MINIMUM_TOKENS": ""
-      }
-    },
-    "sequentialthinking": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ],
-      "alwaysAllow": [
-        "sequentialthinking"
-      ]
-    },
-    "shadcn": {
+    "chrome-devtools": {
       "command": "bunx",
       "args": [
-        "shadcn@latest",
-        "mcp"
+        "-y",
+        "chrome-devtools-mcp@latest"
       ],
       "alwaysAllow": [
-        "search_items_in_registries",
-        "view_items_in_registries",
-        "get_project_registries"
+        "new_page",
+        "list_pages"
+      ]
+    },
+    "tailwindcss-server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "tailwindcss-mcp-server"
+      ],
+      "alwaysAllow": [
+        "get_tailwind_config_guide",
+        "search_tailwind_docs",
+        "get_tailwind_utilities"
+      ]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/carlos/projects"
       ]
     }
   }
