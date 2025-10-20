@@ -89,7 +89,8 @@
       "Bash(node:*)",
       "Bash(git rm:*)",
       "Bash(mv:*)",
-      "mcp__chrome-devtools__new_page"
+      "mcp__chrome-devtools__new_page",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": [],
