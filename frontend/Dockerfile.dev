@@ -2,8 +2,9 @@ FROM oven/bun:1-alpine
 
 WORKDIR /app
 
-# Copy package.json and bun.lock if exists
-COPY package.json bun.lock* ./
+# Copy package.json, bun.lock if exists, and packages directory
+COPY frontend/package.json frontend/bun.lock* ./
+COPY packages ./packages
 
 # Install dependencies
 RUN bun install
