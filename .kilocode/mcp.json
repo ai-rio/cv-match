@@ -1,57 +1,54 @@
 {
   "mcpServers": {
+    "shadcn": {
+      "command": "bunx",
+      "args": [
+        "shadcn@latest",
+        "mcp"
+      ],
+      "alwaysAllow": [
+        "get_project_registries",
+        "list_items_in_registries",
+        "view_items_in_registries",
+        "search_items_in_registries",
+        "get_item_examples_from_registries",
+        "get_add_command_for_items"
+      ]
+    },
     "context7": {
-      "type": "streamable-http",
-      "url": "https://mcp.context7.com/mcp",
-      "alwaysAllow": []
+      "command": "bunx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "env": {
+        "DEFAULT_MINIMUM_TOKENS": ""
+      }
+    },
+    "filesystem": {
+      "command": "bunx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/carlos/projects"
+      ]
     },
     "sequentialthinking": {
-      "command": "npx",
+      "command": "bunx",
       "args": [
         "-y",
         "@modelcontextprotocol/server-sequential-thinking"
       ]
     },
     "brave-search": {
-      "command": "npx",
+      "command": "bunx",
       "args": [
         "-y",
         "@modelcontextprotocol/server-brave-search"
       ],
       "env": {
-        "BRAVE_API_KEY": "ctx7sk-f64eb40b-2d19-4b35-88c6-378b06364062"
+        "BRAVE_API_KEY": "BSAnvp-gWxQKFORwwgR_9MSr0VG3odR"
       }
-    },
-    "chrome-devtools": {
-      "command": "bunx",
-      "args": [
-        "-y",
-        "chrome-devtools-mcp@latest"
-      ],
-      "alwaysAllow": [
-        "new_page",
-        "list_pages"
-      ]
-    },
-    "tailwindcss-server": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "tailwindcss-mcp-server"
-      ],
-      "alwaysAllow": [
-        "get_tailwind_config_guide",
-        "search_tailwind_docs",
-        "get_tailwind_utilities"
-      ]
-    },
-    "filesystem": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/home/carlos/projects"
-      ]
     },
     "fetch": {
       "command": "bunx",
@@ -61,6 +58,26 @@
       "env": {
         "DEFAULT_LIMIT": "50000"
       }
-    }
+    },
+    "puppeteer": {
+      "command": "bunx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ]
+    },
+    "serena": {
+  "command": "uvx",
+  "args": [
+    "--from",
+    "git+https://github.com/oraios/serena",
+    "serena",
+    "start-mcp-server",
+    "--context",
+    "ide-assistant",
+    "--project",
+    "/home/carlos/projects"
+  ]
+   }
   }
 }
