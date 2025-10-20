@@ -1,9 +1,14 @@
 FROM oven/bun:1-alpine
 
+# Install curl for health checks and create non-root user
+RUN apk add --no-cache curl && \
+    addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
 WORKDIR /app
 
 # Copy package.json, bun.lock if exists, and packages directory
-COPY frontend/package.json frontend/bun.lock* ./
+COPY package.json bun.lock* ./
 COPY packages ./packages
 
 # Install dependencies
@@ -14,6 +19,11 @@ RUN test -d node_modules/next-intl || (echo "next-intl not found" && exit 1)
 
 # Copy the rest of the application code
 # Note: In dev mode, we'll mount the source code as a volume
+
+# Change ownership of the app directory to the nextjs user
+RUN chown -R nextjs:nodejs /app
+
+USER nextjs
 
 EXPOSE 3000
 

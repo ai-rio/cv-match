@@ -2,7 +2,8 @@
   "mcpServers": {
     "context7": {
       "type": "streamable-http",
-      "url": "https://mcp.context7.com/mcp"
+      "url": "https://mcp.context7.com/mcp",
+      "alwaysAllow": []
     },
     "sequentialthinking": {
       "command": "npx",
@@ -51,6 +52,15 @@
         "@modelcontextprotocol/server-filesystem",
         "/home/carlos/projects"
       ]
+    },
+    "fetch": {
+      "command": "bunx",
+      "args": [
+        "mcp-fetch-server"
+      ],
+      "env": {
+        "DEFAULT_LIMIT": "50000"
+      }
     }
   }
 }
