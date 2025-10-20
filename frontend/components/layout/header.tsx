@@ -28,7 +28,7 @@ export function Header({ className }: HeaderProps) {
     if (href === '/') {
       return pathname === '/';
     }
-    return pathname.startsWith(href);
+    return pathname?.startsWith(href) || false;
   };
 
   return (

@@ -138,7 +138,7 @@ type WorkflowStep = 'upload' | 'job-details' | 'payment' | 'processing' | 'resul
 function OptimizePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const resumeId = searchParams.get('resume_id');
+  const resumeId = searchParams?.get('resume_id');
 
   const [currentStep, setCurrentStep] = useState<WorkflowStep>(resumeId ? 'job-details' : 'upload');
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);

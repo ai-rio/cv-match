@@ -26,7 +26,7 @@ export default function LanguageSwitcherButton({
   const handleLanguageChange = (newLocale: string) => {
     startTransition(() => {
       // Remove the current locale from pathname and add the new one
-      const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
+      const newPathname = pathname?.replace(`/${locale}`, `/${newLocale}`) || `/${newLocale}`;
       router.push(newPathname);
     });
   };

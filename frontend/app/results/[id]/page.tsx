@@ -46,7 +46,7 @@ interface ResumeImprovementStatus {
 export default function ResultsPage() {
   const params = useParams();
   const router = useRouter();
-  const improvementId = params.id as string;
+  const improvementId = params?.id as string;
 
   const [status, setStatus] = useState<ResumeImprovementStatus | null>(null);
   const [loading, setLoading] = useState(true);

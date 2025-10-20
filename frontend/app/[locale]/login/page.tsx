@@ -11,7 +11,7 @@ export default function Login() {
   const t = useTranslations('common');
   const router = useRouter();
   const params = useParams();
-  const locale = params.locale as string;
+  const locale = (params?.locale as string) || 'en';
   const { login, isAuthenticated, loading: authLoading } = useAuth();
 
   const [email, setEmail] = useState('');

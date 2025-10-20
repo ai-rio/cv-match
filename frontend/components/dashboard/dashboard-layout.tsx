@@ -53,7 +53,7 @@ export function DashboardLayout({ children, className }: DashboardLayoutProps) {
     if (href === '/dashboard') {
       return pathname === '/dashboard';
     }
-    return pathname.startsWith(href);
+    return pathname?.startsWith(href) || false;
   };
 
   return (

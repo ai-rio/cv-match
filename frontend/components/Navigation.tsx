@@ -11,7 +11,7 @@ export default function Navigation() {
   const pathname = usePathname();
 
   const isActive = (path: string) => {
-    return pathname === path || pathname.startsWith(path + '/');
+    return pathname === path || pathname?.startsWith(path + '/') || false;
   };
 
   const navLinks = [

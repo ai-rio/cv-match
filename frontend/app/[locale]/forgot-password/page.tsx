@@ -8,7 +8,7 @@ import { supabase } from '@/services/supabase';
 
 export default function ForgotPassword() {
   const params = useParams();
-  const locale = params.locale as string;
+  const locale = (params?.locale as string) || 'en';
 
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
