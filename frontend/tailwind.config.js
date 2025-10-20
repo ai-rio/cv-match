@@ -88,6 +88,7 @@ module.exports = {
       // Typography system optimized for Brazilian Portuguese
       fontFamily: {
         sans: [
+          'var(--font-inter)',
           'Inter var',
           'Inter',
           '-apple-system',
@@ -116,6 +117,7 @@ module.exports = {
           'monospace',
         ],
         display: [
+          'var(--font-inter)',
           'Inter Display',
           'Inter var',
           'Inter',

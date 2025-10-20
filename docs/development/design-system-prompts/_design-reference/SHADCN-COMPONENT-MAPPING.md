@@ -1,7 +1,7 @@
 # 🎨 Shadcn Registry Component Mapping for CV-Match Design System
 
-**Version:** 2.0
-**Last Updated:** October 16, 2025
+**Version:** 2.1
+**Last Updated:** October 20, 2025
 **Purpose:** Map shadcn + 3 registry components to wireframes with conflict prevention
 
 ---
@@ -26,7 +26,7 @@
 | Registry | Purpose | Target Pages | Component Types |
 |----------|---------|--------------|-----------------|
 | **@shadcn** | Base UI foundation | All pages | Forms, buttons, cards, navigation |
-| **@aceternity-ui** | Premium animations | Public pages only | Hero sections, feature grids, interactive elements |
+| **@kokonutui** | Premium animations | Public pages only | Hero sections, feature grids, interactive elements |
 | **@kibo-ui** | Dashboard & analytics | Protected pages only | Charts, data tables, metrics |
 | **@ai-sdk** | AI-powered interactions | AI features only | File upload, processing, smart forms |
 
@@ -62,19 +62,19 @@
 
 ### Landing Page Components
 
-| Wireframe Section | @shadcn Component | @aceternity-ui Component | Usage Notes |
+| Wireframe Section | @shadcn Component | @kokonutui Component | Usage Notes |
 |-------------------|------------------|-------------------------|-------------|
 | Navigation Header | navigation-menu | - | Base navigation |
-| Hero Section | button | Hero-Parallax | Premium hero animation |
+| Hero Section | button | shape-hero | Premium hero animation |
 | Social Proof | card + badge | - | Stats display |
-| Features Grid | card | Bento Grid | 3D animated grid |
+| Features Grid | card | bento-grid | 3D animated grid |
 | How It Works | card + progress | - | Step indicators |
 | CTA Section | button | - | Emphasis CTA |
 | Footer | - | - | Simple layout |
 
 ### Pricing Page Components
 
-| Wireframe Section | @shadcn Component | @aceternity-ui Component | Usage Notes |
+| Wireframe Section | @shadcn Component | @kokonutui Component | Usage Notes |
 |-------------------|------------------|-------------------------|-------------|
 | Navigation Header | navigation-menu | - | Reusable component |
 | Pricing Tabs | tabs | - | Credits vs Subscriptions |
@@ -84,9 +84,9 @@
 
 ### Results Page Components
 
-| Wireframe Section | @shadcn Component | @aceternity-ui Component | Usage Notes |
+| Wireframe Section | @shadcn Component | @kokonutui Component | Usage Notes |
 |-------------------|------------------|-------------------------|-------------|
-| Match Score | progress + card | Text-Reveal | Animated score display |
+| Match Score | progress + card | shimmer-text, dynamic-text, type-writer | Animated score display |
 | Improvements | card + badge | - | 3-column grid |
 | Download Actions | button | - | Multiple CTAs |
 | Next Steps | button | - | Navigation |
@@ -101,7 +101,7 @@
 | Wireframe Section | @shadcn Component | @kibo-ui Component | @ai-sdk Component | Usage Notes |
 |-------------------|------------------|-------------------|------------------|-------------|
 | Navigation Header | navigation-menu | - | - | User menu |
-| Quick Actions | card + button | - | 3D-Card-Hover | Interactive actions |
+| Quick Actions | card + button | - | card-flip | Interactive actions |
 | Statistics Cards | card + progress | Analytics-Card | - | 2x2 grid |
 | Credits Display | card + progress | Metric-Display | - | Prominent section |
 | Recent Table | table + badge | DataTable | - | Status indicators |
@@ -118,9 +118,9 @@
 
 ### Upgrade Modal
 
-| Wireframe Section | @shadcn Component | @aceternity-ui Component | Usage Notes |
+| Wireframe Section | @shadcn Component | @kokonutui Component | Usage Notes |
 |-------------------|------------------|-------------------------|-------------|
-| Modal Container | dialog | Moving Border | Overlay backdrop |
+| Modal Container | dialog | gradient-button & particle-button | Overlay backdrop |
 | Pricing Options | card + button | - | 3-column comparison |
 | Testimonial | card | - | Social proof |
 | CTAs | button | - | Primary/secondary |
@@ -166,16 +166,20 @@ bunx shadcn@latest add @shadcn/menubar
 bunx shadcn@latest add @shadcn/collapsible
 ```
 
-### Phase 2: @aceternity-ui Components (Public Pages Only)
+### Phase 2: @kokonutui Components (Public Pages Only)
 
 ```bash
 # Hero and landing page components
-bunx shadcn@latest add @aceternity-ui/hero-parallax
-bunx shadcn@latest add @aceternity-ui/bento-grid
-bunx shadcn@latest add @aceternity-ui/3d-card-hover
-bunx shadcn@latest add @aceternity-ui/moving-border
-bunx shadcn@latest add @aceternity-ui/text-reveal
-bunx shadcn@latest add @aceternity-ui/sparkles
+bunx shadcn@latest add @kokonutui/shape-hero
+bunx shadcn@latest add @kokonutui/bento-grid
+bunx shadcn@latest add @kokonutui/card-flip
+bunx shadcn@latest add @kokonutui/gradient-button
+bunx shadcn@latest add @kokonutui/particle-button
+bunx shadcn@latest add @kokonutui/shimmer-text
+bunx shadcn@latest add @kokonutui/dynamic-text
+bunx shadcn@latest add @kokonutui/type-writer
+bunx shadcn@latest add @kokonutui/attract-button
+bunx shadcn@latest add @kokonutui/beams-background
 ```
 
 ### Phase 3: @kibo-ui Components (Dashboard Only)
@@ -231,16 +235,20 @@ bunx shadcn@latest add @ai-sdk/result-display
 
 ## 🔍 Registry-Specific Component Selection
 
-### @aceternity-ui Registry Components (Public Pages Only)
+### @kokonutui Registry Components (Public Pages Only)
 
 | Component | Use Case | Page Location | Conflict Prevention |
 |-----------|----------|---------------|---------------------|
-| Hero-Parallax | Hero section animation | Landing page | Public pages only |
-| Bento-Grid | Feature grid with 3D effects | Landing page | Public pages only |
-| 3D-Card-Hover | Interactive card effects | Landing page | Public pages only |
-| Moving-Border | Animated borders | Upgrade modal | Public pages only |
-| Text-Reveal | Animated text appearance | Results page | Public pages only |
-| Sparkles | Success animations | Results page | Public pages only |
+| shape-hero | Hero section animation | Landing page | Public pages only |
+| bento-grid | Feature grid with 3D effects | Landing page | Public pages only |
+| card-flip | Interactive card effects | Landing page | Public pages only |
+| gradient-button | Animated gradient borders | Upgrade modal | Public pages only |
+| particle-button | Interactive particle effects | Upgrade modal | Public pages only |
+| shimmer-text | Animated text appearance | Results page | Public pages only |
+| dynamic-text | Dynamic text animations | Results page | Public pages only |
+| type-writer | Typewriter text effect | Results page | Public pages only |
+| attract-button | Magnetic button effect | Landing page | Public pages only |
+| beams-background | Animated background beams | Landing page | Public pages only |
 
 ### @kibo-ui Registry Components (Dashboard Only)
 
@@ -266,7 +274,7 @@ bunx shadcn@latest add @ai-sdk/result-display
 
 ```bash
 # Configure multiple registries
-bunx shadcn@latest config set registries.aceternity-ui https://ui.aceternity.com
+bunx shadcn@latest config set registries.kokonutui https://ui.kokonutui.com
 bunx shadcn@latest config set registries.kibo-ui https://ui.kibo-ui.com
 bunx shadcn@latest config set registries.ai-sdk https://ui.ai-sdk.dev
 
@@ -280,7 +288,7 @@ bunx shadcn@latest registry list
 
 ### Public Pages Pattern:
 
-1. **Hero Sections**: Use Aceternity components for visual impact
+1. **Hero Sections**: Use Kokonut UI components for visual impact
 2. **Feature Cards**: Shadcn card + badge combinations
 3. **CTAs**: Shadcn button with proper sizing
 4. **Forms**: shadcn form components with validation
@@ -290,7 +298,7 @@ bunx shadcn@latest registry list
 
 1. **Layout**: shadcn sidebar + navigation
 2. **Data Display**: kibo-ui charts + shadcn tables
-3. **Interactions**: ai-sdk.dev 3D effects + animations
+3. **Interactions**: kokonutui 3D effects + animations
 4. **Forms**: shadcn form + react-hook-form + zod validation
 5. **Feedback**: shadcn toast + sonner for notifications
 
@@ -353,10 +361,10 @@ bunx shadcn@latest registry list
 4. **Custom components** - match score gauge, credit counter
 
 ### Phase 3 Priority (Landing Page):
-1. **Hero section** with Aceternity parallax
-2. **Feature grid** with card animations
+1. **Hero section** with Kokonut UI shape-hero
+2. **Feature grid** with bento-grid animations
 3. **Pricing section** with tabs and cards
-4. **CTA sections** with proper hierarchy
+4. **CTA sections** with gradient-button and particle-button
 
 ### Phase 4 Priority (Dashboard):
 1. **Layout and navigation**
@@ -369,14 +377,19 @@ bunx shadcn@latest registry list
 ## 📝 Next Steps
 
 1. **Install missing shadcn components** (Phase 2)
-2. **Add additional registries** (ai-sdk.dev, kibo-ui)
+2. **Add additional registries** (@kokonutui, @kibo-ui, @ai-sdk)
 3. **Create custom components** (match gauge, credit counter)
 4. **Implement component variations** (sizing, states)
 5. **Test responsive behavior** across all breakpoints
 6. **Validate accessibility** (WCAG 2.1 AA)
+7. **Review migration guide** for detailed Kokonut UI implementation
+
+## 📚 Additional Documentation
+
+- [Kokonut UI Migration Guide](./KOKONUT-UI-MIGRATION-GUIDE.md) - Detailed migration instructions from Aceternity UI to Kokonut UI
 
 ---
 
-**Last Updated:** October 16, 2025
+**Last Updated:** October 20, 2025
 **Maintained by:** CV-Match Design System Team
-**Status:** Ready for Implementation
+**Status:** Updated for Kokonut UI Migration

@@ -19,7 +19,7 @@ PHASE 1: Foundation (4h wall time - PARALLEL)
   ↓
 PHASE 2: Component Library (6h - SEQUENTIAL)
   ├─→ shadcn/ui Installation (3h)
-  └─→ Aceternity UI Installation (3h)
+  └─→ Kokonut UI Installation (3h)
   ↓
   ✓ Checkpoint: Component playground works
   ↓
@@ -71,6 +71,7 @@ bun run dev  # Should work without errors
 1. [Design System README](../../design-system/README.md) - 5 min
 2. [Component Inventory](../../design-system/components.md) - 3 min
 3. [Wireframes](../../design-system/wireframes.md) - 2 min
+4. [Anti-Hallucination Protocol](ANTI-HALLUCINATION-PROTOCOL.md) - 5 min ⚠️ CRITICAL
 
 ### Step 3: Execute Phases (21h wall time)
 
@@ -142,14 +143,15 @@ Tasks:
 Duration: 3h
 ```
 
-#### Task 2: Aceternity UI Installation
+#### Task 2: Kokonut UI Installation
 
 ```bash
 Agent: frontend-specialist
-Prompt: 04-aceternity-installation.md
+Prompt: 04-kokonut-installation.md
 Tasks:
-  ✓ Install Aceternity dependencies
-  ✓ Add animated components (8 components)
+  ⚠️ VERIFY REGISTRY FIRST (see ANTI-HALLUCINATION-PROTOCOL.md)
+  ✓ Install Kokonut UI dependencies
+  ✓ Add animated components (10 components)
   ✓ Configure animations
   ✓ Test performance
   ✓ Add to component playground
@@ -159,7 +161,7 @@ Duration: 3h
 **Checkpoint 2**: ✅
 
 - [ ] All shadcn components installed
-- [ ] All Aceternity components working
+- [ ] All Kokonut UI components working (or custom fallbacks)
 - [ ] Component playground accessible
 - [ ] Animations smooth (60fps)
 - [ ] Theme works with all components
@@ -179,7 +181,7 @@ Duration: 3h
 Agent: frontend-specialist
 Prompt: 05-landing-hero.md
 Tasks:
-  ✓ Implement hero with Aceternity parallax
+  ✓ Implement hero with Kokonut UI shape-hero
   ✓ Add spotlight effect
   ✓ Create CTAs with design system
   ✓ Add trust indicators
@@ -193,7 +195,7 @@ Duration: 3h
 Agent: frontend-specialist
 Prompt: 06-landing-features.md
 Tasks:
-  ✓ Implement bento grid features
+  ✓ Implement bento grid features with Kokonut UI
   ✓ Add hover effects
   ✓ Create "How it Works" section
   ✓ Add social proof
@@ -224,8 +226,8 @@ Duration: 3h
 Agent: frontend-specialist
 Prompt: 07-dashboard-implementation.md
 Tasks:
-  ✓ Create stats cards with 3D effect
-  ✓ Build credit counter widget
+  ✓ Create stats cards with Kokonut UI card-flip
+  ✓ Build credit counter widget with animated text
   ✓ Implement quick actions
   ✓ Add recent optimizations table
   ✓ Theme everything
@@ -238,10 +240,10 @@ Duration: 4h
 Agent: frontend-specialist
 Prompt: 08-optimize-flow-ui.md
 Tasks:
-  ✓ Style file upload with Aceternity
-  ✓ Create form steps with tracing beam
+  ✓ Style file upload with Kokonut UI attract-button
+  ✓ Create form steps with gradient-button
   ✓ Add processing animation
-  ✓ Build results page with match gauge
+  ✓ Build results page with animated text
   ✓ Mobile optimization
 Duration: 4h
 ```
@@ -269,8 +271,8 @@ Duration: 4h
 Agent: frontend-specialist
 Prompt: 09-theme-testing.md
 Tasks:
-  ✓ Test all pages in light theme
-  ✓ Test all pages in dark theme
+  ✓ Test all Kokonut UI components in light theme
+  ✓ Test all Kokonut UI components in dark theme
   ✓ Fix contrast issues
   ✓ Smooth transitions
   ✓ System preference detection
@@ -283,7 +285,7 @@ Duration: 2h
 Agent: frontend-specialist
 Prompt: 10-mobile-accessibility.md
 Tasks:
-  ✓ Test on 320px, 768px, 1920px
+  ✓ Test Kokonut UI components on 320px, 768px, 1920px
   ✓ Fix responsive issues
   ✓ Keyboard navigation
   ✓ Screen reader testing
@@ -376,12 +378,13 @@ Before marking complete, verify:
 # Set initial theme in ThemeProvider
 ```
 
-### Issue 3: Aceternity Components Breaking
+### Issue 3: Kokonut UI Components Breaking
 
 ```bash
 # Solution: Check peer dependencies
-# Verify Tailwind config includes Aceternity paths
+# Verify Tailwind config includes Kokonut UI paths
 # Update framer-motion if needed
+# If registry unavailable, use FALLBACK_STRATEGY.md
 ```
 
 ### Issue 4: CSS Variables Not Applying
@@ -411,7 +414,7 @@ Use this table to track completion:
 | 1.1 CSS & Theme   | ⬜     |            |          |        |       |
 | 1.2 Typography    | ⬜     |            |          |        |       |
 | 2.1 shadcn        | ⬜     |            |          |        |       |
-| 2.2 Aceternity    | ⬜     |            |          |        |       |
+| 2.2 Kokonut UI    | ⬜     |            |          |        |       |
 | 3.1 Hero          | ⬜     |            |          |        |       |
 | 3.2 Features      | ⬜     |            |          |        |       |
 | 4.1 Dashboard     | ⬜     |            |          |        |       |
@@ -471,11 +474,13 @@ When everything is complete:
 - [Design System](../../design-system/README.md)
 - [Components](../../design-system/components.md)
 - [Wireframes](../../design-system/wireframes.md)
+- [Anti-Hallucination Protocol](ANTI-HALLUCINATION-PROTOCOL.md)
+- [Fallback Strategy](FALLBACK_STRATEGY.md)
 
 ### Component Libraries
 
 - [shadcn/ui](https://ui.shadcn.com)
-- [Aceternity](https://ui.aceternity.com)
+- [Kokonut UI](https://kokonutui.com)
 - [Tailwind CSS](https://tailwindcss.com)
 
 ### Tools
@@ -492,4 +497,5 @@ When everything is complete:
 
 ---
 
-**Last Updated**: October 12, 2025
+**Last Updated**: October 20, 2025
+**Updated**: Migrated from Aceternity UI to Kokonut UI

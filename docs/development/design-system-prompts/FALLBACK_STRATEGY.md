@@ -1,7 +1,7 @@
 # 🔧 FALLBACK STRATEGY - Custom Component Implementations
 
 **Purpose:** Alternative implementations when external registries unavailable  
-**Use When:** Aceternity UI or other registries not found  
+**Use When:** Kokonut UI or other registries not found  
 **Status:** Production-ready custom components
 
 ---
@@ -13,10 +13,10 @@ Use this fallback strategy if:
 ```bash
 # Registry verification fails:
 $ bunx shadcn@latest registry list
-# Aceternity UI not listed ❌
+# Kokonut UI not listed ❌
 
 # OR component installation fails:
-$ bunx shadcn@latest add @aceternity-ui/hero-parallax
+$ bunx shadcn@latest add @kokonutui/shape-hero
 # Error: Registry not found ❌
 ```
 
@@ -45,13 +45,18 @@ bun run type-check
 
 ### **Location:** `frontend/components/custom/`
 
-Create these files to replace Aceternity UI components:
+Create these files to replace Kokonut UI components:
 
-1. `hero-parallax.tsx` - Hero section with parallax
+1. `shape-hero.tsx` - Hero section with parallax effects
 2. `bento-grid.tsx` - Feature grid layout
-3. `3d-card.tsx` - Interactive 3D cards
-4. `text-reveal.tsx` - Animated text
-5. `moving-border.tsx` - Animated borders
+3. `card-flip.tsx` - Interactive 3D cards
+4. `shimmer-text.tsx` - Animated text reveal
+5. `gradient-button.tsx` - Animated gradient buttons
+6. `particle-button.tsx` - Buttons with particle effects
+7. `dynamic-text.tsx` - Dynamic text animations
+8. `type-writer.tsx` - Typewriter effect
+9. `attract-button.tsx` - Magnetic button effect
+10. `beams-background.tsx` - Animated background beams
 
 ### **Implementation Note:**
 
@@ -60,6 +65,23 @@ Each component uses:
 - ✅ shadcn/ui components as foundation
 - ✅ Tailwind CSS for styling
 - ✅ TypeScript for type safety
+
+---
+
+## 🗂️ Component Mapping Reference
+
+| Kokonut UI Component | Custom Implementation | Purpose |
+|----------------------|----------------------|---------|
+| shape-hero | shape-hero.tsx | Landing hero section |
+| bento-grid | bento-grid.tsx | Feature grid layout |
+| card-flip | card-flip.tsx | Interactive cards |
+| gradient-button | gradient-button.tsx | Animated buttons |
+| particle-button | particle-button.tsx | Buttons with particles |
+| shimmer-text | shimmer-text.tsx | Text reveal animation |
+| dynamic-text | dynamic-text.tsx | Dynamic text effects |
+| type-writer | type-writer.tsx | Typewriter effect |
+| attract-button | attract-button.tsx | Magnetic button effect |
+| beams-background | beams-background.tsx | Background animation |
 
 ---
 
@@ -72,6 +94,8 @@ Custom components are successful when:
 - [ ] Animations are smooth (60fps)
 - [ ] Responsive design works (mobile/tablet/desktop)
 - [ ] Equivalent functionality to original plan
+- [ ] Components follow design system tokens
+- [ ] Accessibility standards met (WCAG AA)
 
 ---
 
@@ -81,10 +105,50 @@ After implementing custom components:
 
 1. Update implementation-log.md with fallback details
 2. Continue with prompt 05 using custom components
-3. Replace Aceternity references with custom imports
+3. Replace Kokonut UI references with custom imports
 4. Proceed with remaining prompts
+5. Test all animations and interactions
 
 ---
 
-**Last Updated:** October 16, 2025  
-**Status:** Production Ready
+## 🔧 Custom Component Templates
+
+### Basic Component Structure
+
+```typescript
+// Example: shape-hero.tsx
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { forwardRef } from 'react';
+
+interface ShapeHeroProps {
+  className?: string;
+  children: React.ReactNode;
+}
+
+const ShapeHero = forwardRef<HTMLDivElement, ShapeHeroProps>(
+  ({ className, children }, ref) => {
+    return (
+      <motion.div
+        ref={ref}
+        className={cn('relative overflow-hidden', className)}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+);
+
+ShapeHero.displayName = 'ShapeHero';
+
+export { ShapeHero };
+```
+
+---
+
+**Last Updated:** October 20, 2025  
+**Status:** Production Ready  
+**Updated:** Migrated from Aceternity UI to Kokonut UI

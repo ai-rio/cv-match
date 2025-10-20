@@ -69,6 +69,7 @@
 
   body {
     @apply antialiased;
+    font-family: var(--font-inter), system-ui, sans-serif;
   }
 }
 

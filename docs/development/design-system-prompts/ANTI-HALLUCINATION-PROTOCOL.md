@@ -3,7 +3,7 @@
 **Purpose:** Prevent AI agents from hallucinating during design system implementation  
 **Status:** CRITICAL - READ BEFORE EXECUTING ANY PROMPTS  
 **Version:** 1.0  
-**Last Updated:** October 16, 2025
+**Last Updated:** October 20, 2025
 
 ---
 
@@ -11,24 +11,24 @@
 
 ### **REALITY CHECK:**
 
-Before executing prompts 03-04 (Aceternity UI installation), you MUST understand:
+Before executing prompts 03-04 (Kokonut UI installation), you MUST understand:
 
 | Registry | Status | Action |
 |----------|--------|--------|
 | shadcn/ui (@shadcn) | ✅ **REAL** | Use directly as documented |
-| Aceternity UI | ❌ **UNVERIFIED** | Verify first, fallback to custom |
+| Kokonut UI | ❌ **UNVERIFIED** | Verify first, fallback to custom |
 | @kibo-ui | ❌ **HYPOTHETICAL** | Use custom implementations |
 | @ai-sdk | ❌ **HYPOTHETICAL** | Use standard libraries |
 
 ### **MANDATORY VERIFICATION BEFORE PROMPT 04:**
 
 ```bash
-# Before executing 04-aceternity-installation.md, run:
+# Before executing 04-kokonut-installation.md, run:
 bunx shadcn@latest registry list
 
 # Expected outcomes:
-# ✅ If Aceternity appears → Follow prompt as-is
-# ❌ If Aceternity NOT listed → Use FALLBACK_STRATEGY.md
+# ✅ If Kokonut UI appears → Follow prompt as-is
+# ❌ If Kokonut UI NOT listed → Use FALLBACK_STRATEGY.md
 ```
 
 ---
@@ -82,15 +82,15 @@ Component needed?
 4. Commit and proceed
 ```
 
-### **Enhanced Execution (Prompt 04 - Aceternity):**
+### **Enhanced Execution (Prompt 04 - Kokonut UI):**
 
 ```markdown
 1. Read prompt objective
 2. ⚠️ STOP - Run verification first:
    bunx shadcn@latest registry list
-3. If Aceternity found:
+3. If Kokonut UI found:
    → Execute prompt as documented
-4. If Aceternity NOT found:
+4. If Kokonut UI NOT found:
    → Read FALLBACK_STRATEGY.md
    → Execute custom implementation plan
 5. Document actual vs. planned approach
@@ -115,7 +115,7 @@ PHASE 1: Foundation (4h - PARALLEL)
   ↓
 PHASE 2: Component Library (6h - SEQUENTIAL)
   ├─→ 03-shadcn-installation.md ✅
-  └─→ 04-aceternity-installation.md ⚠️ VERIFY FIRST
+  └─→ 04-kokonut-installation.md ⚠️ VERIFY FIRST
       └─→ If fail → FALLBACK_STRATEGY.md
   ↓
 PHASE 3-5: Continue as documented
@@ -132,7 +132,7 @@ DONE ✅
 | 01-css-theme-setup | ✅ LOW | Standard CSS variables |
 | 02-typography-fonts | ✅ LOW | Google Fonts (verified) |
 | 03-shadcn-installation | ✅ LOW | Official registry |
-| 04-aceternity-installation | 🚨 **HIGH** | **Verify first, use fallback** |
+| 04-kokonut-installation | 🚨 **HIGH** | **Verify first, use fallback** |
 | 05-landing-hero | ⚠️ MEDIUM | Depends on 04 success |
 | 06-landing-features | ⚠️ MEDIUM | Depends on 04 success |
 | 07-dashboard-implementation | ✅ LOW | Uses shadcn only |
@@ -151,7 +151,7 @@ DONE ✅
    ```bash
    bunx shadcn@latest registry list
    ```
-3. ⚠️ If Aceternity not found → Read FALLBACK_STRATEGY.md
+3. ⚠️ If Kokonut UI not found → Read FALLBACK_STRATEGY.md
 4. ✅ Continue with remaining prompts
 
 ### **Documentation Actions:**
@@ -166,10 +166,10 @@ After each prompt, update implementation log:
 - Components installed: [list]
 - Issues: None
 
-## Prompt 04: Aceternity Installation
+## Prompt 04: Kokonut UI Installation
 - Status: ⚠️ Registry not found
 - Fallback used: Custom implementations with framer-motion
-- Components built: hero-parallax, bento-grid, 3d-card
+- Components built: shape-hero, bento-grid, card-flip
 - Issues: Original registry unavailable, custom solution working
 ```
 
@@ -179,7 +179,7 @@ After each prompt, update implementation log:
 
 ### **Signs of Hallucination:**
 
-- ❌ AI claims to have installed from @aceternity-ui without verification
+- ❌ AI claims to have installed from @kokonutui without verification
 - ❌ AI references non-existent component APIs
 - ❌ AI assumes registry exists without checking
 - ❌ Import statements for unavailable packages
@@ -199,7 +199,7 @@ After each prompt, update implementation log:
 
 Original prompts remain valid, but add:
 
-### **For Prompt 04 (Aceternity):**
+### **For Prompt 04 (Kokonut UI):**
 
 ```markdown
 Success Criteria:
@@ -229,10 +229,10 @@ cat docs/development/design-system-prompts/ANTI-HALLUCINATION-PROTOCOL.md
 # 2. Verify shadcn/ui works
 bunx shadcn@latest search
 
-# 3. Verify Aceternity availability
+# 3. Verify Kokonut UI availability
 bunx shadcn@latest registry list
 
-# 4. If Aceternity unavailable, read fallback
+# 4. If Kokonut UI unavailable, read fallback
 cat docs/development/design-system-prompts/FALLBACK_STRATEGY.md
 
 # 5. Start with prompt 01
@@ -276,6 +276,7 @@ If you encounter hallucinations or unclear instructions:
 
 ---
 
-**Last Updated:** October 16, 2025  
+**Last Updated:** October 20, 2025  
 **Maintained by:** CV-Match Design System Team  
 **Status:** Active Protection
+**Updated:** Migrated from Aceternity UI to Kokonut UI
