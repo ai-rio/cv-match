@@ -200,8 +200,8 @@ except Exception as e:
 ```bash
 # Test Sentry integration
 cd frontend
-npm run build  # Should include Sentry source maps
-npm run dev    # Should initialize Sentry
+bun run build  # Should include Sentry source maps
+bun run dev    # Should initialize Sentry
 ```
 
 ### Backend Testing

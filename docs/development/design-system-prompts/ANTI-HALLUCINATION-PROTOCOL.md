@@ -51,8 +51,8 @@ bunx shadcn@latest registry list
 # Verify shadcn component availability
 bunx shadcn@latest search [component-name]
 
-# Verify npm package existence
-npm view [package-name]
+# Verify bun package existence
+bun view [package-name]
 
 # Verify registry availability
 bunx shadcn@latest registry list
@@ -63,8 +63,8 @@ bunx shadcn@latest registry list
 ```
 Component needed?
 ├─→ Check if in shadcn/ui → Use it ✅
-├─→ NOT in shadcn/ui → Check npm registry
-│   ├─→ Package exists → Install from npm ✅
+├─→ NOT in shadcn/ui → Check bun registry
+│   ├─→ Package exists → Install from bun ✅
 │   └─→ Package doesn't exist → Build custom ⚠️
 └─→ Unknown → STOP and verify first 🚨
 ```

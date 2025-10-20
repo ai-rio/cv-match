@@ -12,7 +12,8 @@
         "view_items_in_registries",
         "search_items_in_registries",
         "get_item_examples_from_registries",
-        "get_add_command_for_items"
+        "get_add_command_for_items",
+        "search_items"
       ]
     },
     "context7": {
@@ -48,7 +49,10 @@
       ],
       "env": {
         "BRAVE_API_KEY": "BSAnvp-gWxQKFORwwgR_9MSr0VG3odR"
-      }
+      },
+      "alwaysAllow": [
+        "brave_web_search"
+      ]
     },
     "fetch": {
       "command": "bunx",
@@ -64,20 +68,28 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-puppeteer"
+      ],
+      "alwaysAllow": [
+        "puppeteer_evaluate"
       ]
     },
     "serena": {
-  "command": "uvx",
-  "args": [
-    "--from",
-    "git+https://github.com/oraios/serena",
-    "serena",
-    "start-mcp-server",
-    "--context",
-    "ide-assistant",
-    "--project",
-    "/home/carlos/projects"
-  ]
-   }
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "--context",
+        "ide-assistant",
+        "--project",
+        "/home/carlos/projects"
+      ],
+      "alwaysAllow": [
+        "get_symbols_overview",
+        "list_dir",
+        "find_referencing_symbols"
+      ]
+    }
   }
 }

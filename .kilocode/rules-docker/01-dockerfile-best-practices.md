@@ -28,7 +28,7 @@
 FROM node:18-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN bun ci --only=production && bun cache clean --force
 
 FROM node:18-alpine AS runtime
 RUN addgroup -g 1001 -S nodejs
@@ -58,5 +58,5 @@ RUN apt-get update && apt-get install -y git && \
     apt-get clean && rm -rf /var/lib/apt/lists/*  # Clean up
 USER node  # Non-root user
 COPY package*.json ./  # Only copy what's needed first
-RUN npm ci --only=production
+RUN bun ci --only=production
 COPY . .  # Then copy source code

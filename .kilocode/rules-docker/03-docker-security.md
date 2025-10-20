@@ -44,7 +44,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN bun ci --only=production && bun cache clean --force
 
 # Copy source code
 COPY --chown=nextjs:nodejs . .
