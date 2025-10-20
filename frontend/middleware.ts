@@ -9,7 +9,7 @@ const intlMiddleware = createMiddleware({
   // Used when no locale matches
   defaultLocale: 'pt-br',
 
-  // Always show the locale prefix for better SEO
+  // Always show locale prefix to avoid conflicts with root layout
   localePrefix: 'always',
 });
 
@@ -41,15 +41,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   // Match only internationalized pathnames
   matcher: [
-    // Enable a redirect to a matching locale at the root
-    '/',
-
-    // Set a cookie to remember the previous locale for
-    // all requests that have a locale prefix
-    '/(pt-br|en)/:path*',
-
-    // Enable redirects that add missing locales
-    // (e.g. `/pathnames` -> `/pt-br/pathnames`)
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    // Skip all internal paths (_next) and API routes
+    '/((?!_next|api|favicon.ico).*)',
   ],
 };

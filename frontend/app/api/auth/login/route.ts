@@ -16,10 +16,10 @@ export async function POST(request: NextRequest) {
           get(name: string) {
             return cookieStore.get(name)?.value;
           },
-          set(name: string, value: string, options: any) {
+          set(name: string, value: string, options: Record<string, unknown>) {
             cookieStore.set({ name, value, ...options });
           },
-          remove(name: string, options: any) {
+          remove(name: string, options: Record<string, unknown>) {
             cookieStore.set({ name, value: '', ...options });
           },
         },
@@ -56,8 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(data);
-  } catch (error) {
-    console.error('Login error:', error);
+  } catch {
     return NextResponse.json({ detail: 'Internal server error' }, { status: 500 });
   }
 }

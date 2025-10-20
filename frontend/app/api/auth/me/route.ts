@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -15,10 +15,10 @@ export async function GET() {
           get(name: string) {
             return cookieStore.get(name)?.value;
           },
-          set(name: string, value: string, options: any) {
+          set(name: string, value: string, options: Record<string, unknown>) {
             cookieStore.set({ name, value, ...options });
           },
-          remove(name: string, options: any) {
+          remove(name: string, options: Record<string, unknown>) {
             cookieStore.set({ name, value: '', ...options });
           },
         },
@@ -53,8 +53,7 @@ export async function GET() {
     }
 
     return NextResponse.json(data);
-  } catch (error) {
-    console.error('Auth me error:', error);
+  } catch {
     return NextResponse.json({ detail: 'Internal server error' }, { status: 500 });
   }
 }

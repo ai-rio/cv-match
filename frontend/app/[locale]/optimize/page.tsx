@@ -255,20 +255,6 @@ function OptimizePageContent() {
     [router, startOptimization]
   );
 
-  const handlePaymentSuccess = useCallback(async () => {
-    if (!resumeData || !jobDescription) {
-      setError('Missing resume or job description data');
-      return;
-    }
-
-    try {
-      setCurrentStep('processing');
-      await startOptimization();
-    } catch {
-      // Error is already handled in startOptimization
-    }
-  }, [resumeData, jobDescription, startOptimization]);
-
   const handleOptimizationComplete = useCallback(() => {
     setCurrentStep('results');
   }, []);
@@ -482,7 +468,7 @@ function OptimizePageContent() {
           {/* Payment Step */}
           {currentStep === 'payment' && (
             <div className="space-y-6">
-              <PaymentFlow tier={OPTIMIZATION_TIER} onSuccess={handlePaymentSuccess} />
+              <PaymentFlow tier={OPTIMIZATION_TIER} />
 
               {/* Summary */}
               <Card>
@@ -549,13 +535,7 @@ function LoadingFallback() {
   );
 }
 
-function PaymentFlow({
-  tier,
-  onSuccess,
-}: {
-  tier: typeof OPTIMIZATION_TIER;
-  onSuccess: () => void;
-}) {
+function PaymentFlow({ tier }: { tier: typeof OPTIMIZATION_TIER }) {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handlePayment = async () => {

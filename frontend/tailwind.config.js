@@ -85,46 +85,11 @@ module.exports = {
         sm: 'calc(var(--radius) - 4px)',
       },
 
-      // Typography system optimized for Brazilian Portuguese
+      // Typography system with Plus Jakarta Sans, Source Serif 4, and JetBrains Mono
       fontFamily: {
-        sans: [
-          'var(--font-inter)',
-          'Inter var',
-          'Inter',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          'Segoe UI',
-          'Roboto',
-          'Oxygen',
-          'Ubuntu',
-          'Cantarell',
-          'Fira Sans',
-          'Droid Sans',
-          'Helvetica Neue',
-          'Arial',
-          'sans-serif',
-        ],
-        mono: [
-          'JetBrains Mono',
-          'Fira Code',
-          'Consolas',
-          'Monaco',
-          'Cascadia Code',
-          'SF Mono',
-          'Ubuntu Mono',
-          'Roboto Mono',
-          'Courier New',
-          'monospace',
-        ],
-        display: [
-          'var(--font-inter)',
-          'Inter Display',
-          'Inter var',
-          'Inter',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          'sans-serif',
-        ],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-serif)', 'Georgia', 'serif'],
+        mono: ['var(--font-mono)', 'Menlo', 'monospace'],
       },
 
       // Brazilian market optimized spacing (4px grid)
@@ -136,13 +101,19 @@ module.exports = {
         168: '42rem', // 672px
       },
 
-      // Extended font sizes for Brazilian content
+      // Type Scale
       fontSize: {
-        '2xs': ['0.625rem', { lineHeight: '0.75rem' }], // 10px
+        xs: ['0.75rem', { lineHeight: '1rem' }], // 12px
+        sm: ['0.875rem', { lineHeight: '1.25rem' }], // 14px
+        base: ['1rem', { lineHeight: '1.5rem' }], // 16px
+        lg: ['1.125rem', { lineHeight: '1.75rem' }], // 18px
+        xl: ['1.25rem', { lineHeight: '1.75rem' }], // 20px
+        '2xl': ['1.5rem', { lineHeight: '2rem' }], // 24px
         '3xl': ['1.875rem', { lineHeight: '2.25rem' }], // 30px
         '4xl': ['2.25rem', { lineHeight: '2.5rem' }], // 36px
         '5xl': ['3rem', { lineHeight: '1' }], // 48px
         '6xl': ['3.75rem', { lineHeight: '1' }], // 60px
+        // Extended sizes
         '7xl': ['4.5rem', { lineHeight: '1' }], // 72px
         '8xl': ['6rem', { lineHeight: '1' }], // 96px
         '9xl': ['8rem', { lineHeight: '1' }], // 128px
@@ -236,21 +207,21 @@ module.exports = {
         '5xl': '2.5rem', // 40px
       },
 
-      // Line heights optimized for Brazilian Portuguese
-      lineHeight: {
-        tight: 1.2,
-        snug: 1.375,
-        relaxed: 1.625,
-        loose: 2,
+      // Font weights
+      fontWeight: {
+        normal: '400',
+        medium: '500',
+        semibold: '600',
+        bold: '700',
       },
 
-      // Letter spacing for Portuguese optimization
+      // Letter spacing
       letterSpacing: {
-        tighter: '-0.05em',
-        tight: '-0.025em',
-        wide: '0.025em',
-        wider: '0.05em',
-        widest: '0.1em',
+        tighter: '-0.02em',
+        tight: '-0.01em',
+        normal: '0em',
+        wide: '0.01em',
+        wider: '0.02em',
       },
 
       // Z-index for Brazilian market layering

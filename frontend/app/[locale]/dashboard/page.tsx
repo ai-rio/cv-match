@@ -99,7 +99,7 @@ function DashboardContent() {
           avg_match_score: 82,
           total_applications: 5,
         });
-      } catch (error) {
+      } catch {
         // TODO: Implement proper error logging service
 
         // Fallback to mock data

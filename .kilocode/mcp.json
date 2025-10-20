@@ -32,6 +32,10 @@
         "-y",
         "@modelcontextprotocol/server-filesystem",
         "/home/carlos/projects"
+      ],
+      "alwaysAllow": [
+        "read_text_file",
+        "list_directory"
       ]
     },
     "sequentialthinking": {

@@ -21,7 +21,6 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
 import React, { ButtonHTMLAttributes, forwardRef } from 'react';
 
-import { useTheme } from '@/contexts/theme-context';
 import { cn } from '@/lib/utils';
 
 /**

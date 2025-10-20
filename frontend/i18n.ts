@@ -41,6 +41,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
         ).default;
       } catch {
         // Final fallback - create empty object to prevent errors
+        // TODO: Add proper translation file logging service
         messages[namespace] = {};
       }
     }

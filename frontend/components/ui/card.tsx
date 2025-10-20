@@ -19,7 +19,6 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import React, { forwardRef, HTMLAttributes } from 'react';
 
-import { useTheme } from '@/contexts/theme-context';
 import { cn } from '@/lib/utils';
 
 /**

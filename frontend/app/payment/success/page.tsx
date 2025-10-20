@@ -35,7 +35,7 @@ export default function PaymentSuccess() {
           const data = await response.json();
           setCredits(data.credits || 0);
         }
-      } catch (error) {
+      } catch {
         // Log error silently in production
         // TODO: Add proper error logging service
       } finally {

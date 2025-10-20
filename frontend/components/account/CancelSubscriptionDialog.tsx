@@ -61,10 +61,10 @@ export function CancelSubscriptionDialog({ open, onOpenChange, subscription, onC
 
       onCancel();
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       // TODO: Add proper error logging service
       // TODO: Replace with proper toast notification when available
-      // alert(error instanceof Error ? error.message : 'Erro ao cancelar assinatura');
+      // alert('Erro ao cancelar assinatura');
     } finally {
       setLoading(false);
     }

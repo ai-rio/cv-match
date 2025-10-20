@@ -1,18 +1,17 @@
 FROM oven/bun:1-alpine
 
-# Install curl for health checks and create non-root user
-RUN apk add --no-cache curl && \
+# Install curl for health checks, npm for Next.js compatibility, and create non-root user
+RUN apk add --no-cache curl npm && \
     addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 WORKDIR /app
 
-# Copy package.json, bun.lock if exists, and packages directory
+# Copy package.json and bun.lock if exists
 COPY package.json bun.lock* ./
-COPY packages ./packages
 
-# Install dependencies
-RUN bun install
+# Install dependencies with SWC (Alpine uses musl)
+RUN bun install && npm install @next/swc-linux-x64-musl
 
 # Verify next-intl installation
 RUN test -d node_modules/next-intl || (echo "next-intl not found" && exit 1)
@@ -21,10 +20,11 @@ RUN test -d node_modules/next-intl || (echo "next-intl not found" && exit 1)
 # Note: In dev mode, we'll mount the source code as a volume
 
 # Change ownership of the app directory to the nextjs user
-RUN chown -R nextjs:nodejs /app
+# RUN chown -R nextjs:nodejs /app
 
-USER nextjs
+# USER nextjs # Commented out to run as root for volume mounts
 
 EXPOSE 3000
 
-CMD ["bun", "run", "dev"]
+# Use a more stable startup command with better error handling
+CMD ["sh", "-c", "bun run dev --hostname 0.0.0.0 --port 3000"]

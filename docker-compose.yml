@@ -12,7 +12,7 @@ services:
       - node_modules_volume:/app/node_modules
       - next_volume:/app/.next
       - ./frontend/.env.local:/app/.env.local
-    user: "1001:1001"
+    # user: "1001:1001" # Commented out to use host user ownership
     environment:
       - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://localhost:8000
@@ -33,11 +33,11 @@ services:
           memory: 512M
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      test: [ "CMD", "curl", "-f", "--max-time", "5", "http://localhost:3000/api/health" ]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
 
   backend:
     build:

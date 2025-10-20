@@ -87,7 +87,9 @@
       "Bash(tsc:*)",
       "Bash(npx typescript:*)",
       "Bash(node:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(mv:*)",
+      "mcp__chrome-devtools__new_page"
     ],
     "deny": [],
     "ask": [],

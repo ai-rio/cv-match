@@ -45,8 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userData = await response.json();
         setUser(userData);
       }
-    } catch (error) {
-      console.error('Auth check failed:', error);
+    } catch {
+      // TODO: Add proper error logging service
     } finally {
       setLoading(false);
     }
@@ -78,8 +78,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         method: 'POST',
         credentials: 'include',
       });
-    } catch (error) {
-      console.error('Logout error:', error);
+    } catch {
+      // TODO: Add proper error logging service
     } finally {
       setUser(null);
       router.push('/');
