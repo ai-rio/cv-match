@@ -46,9 +46,9 @@ Dockerfile*
 docker-compose*
 .dockerignore
 
-# Documentation
-README.md
+# Documentation (excluding README.md which is needed for build)
 *.md
+!README.md
 
 # Testing
 .coverage
